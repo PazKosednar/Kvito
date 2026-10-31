@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Kvita">
+  <!-- Temporary Kvita mark: a check mark whose long stroke is a key (bow top right, bit at the check's vertex). -->
+  <rect width="64" height="64" rx="14" fill="#1f7a72"/>
+  <g transform="translate(-2 3)" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13 33.5 L25.5 46 L42.5 25.5"/>
+    <circle cx="48" cy="18.5" r="6.5"/>
+    <path d="M29.6 41 L33.4 44.2 M33.6 36.2 L37.4 39.4"/>
+  </g>
+</svg>

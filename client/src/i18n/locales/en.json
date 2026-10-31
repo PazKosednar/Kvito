@@ -1,0 +1,87 @@
+{
+  "app": {
+    "name": "Kvita",
+    "tagline": "Renting, sorted. Everything in one place."
+  },
+  "common": {
+    "continue": "Continue",
+    "back": "Back",
+    "loading": "Loading …",
+    "retry": "Try again",
+    "close": "Close"
+  },
+  "auth": {
+    "title": "Sign in",
+    "emailLabel": "E-mail",
+    "emailPlaceholder": "name@example.com",
+    "emailHint": "We'll send you a code. No password needed.",
+    "sendCode": "Send code",
+    "codeTitle": "Enter the code",
+    "codeSentTo": "We sent a code to {{email}}.",
+    "codeLabel": "6-digit code",
+    "verify": "Sign in",
+    "resend": "Send a new code",
+    "changeEmail": "Use another e-mail",
+    "devHint": "Development: the code is printed in the server console.",
+    "logout": "Sign out",
+    "loggedOut": "Signed out. See you soon!"
+  },
+  "onboarding": {
+    "title": "Great to have you here!",
+    "subtitle": "What brings you to Kvita? You can change this any time.",
+    "landlord": "I rent out a property",
+    "landlordHint": "Rent, bills and talking to your tenants.",
+    "tenant": "I rent a home",
+    "tenantHint": "Payments, messages and repairs in one place."
+  },
+  "roles": {
+    "LANDLORD": "Landlord",
+    "TENANT": "Tenant",
+    "switchTo": "Switch to: {{role}}",
+    "switched": "You are now: {{role}}"
+  },
+  "home": {
+    "greeting": "Hi, {{name}}!",
+    "greetingNoName": "Hi!",
+    "landlordEmptyTitle": "Let's get started",
+    "landlordEmptyBody": "Soon you'll add your property here and invite your tenants.",
+    "tenantEmptyTitle": "No tenancy yet",
+    "tenantEmptyBody": "Once your landlord invites you, rent, bills and messages show up here.",
+    "kvita": "Kvita ✓",
+    "kvitaHint": "All settled."
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "Device"
+  },
+  "language": {
+    "label": "Language",
+    "sl": "Slovenščina",
+    "en": "English"
+  },
+  "install": {
+    "iosTitle": "Add Kvita to your Home Screen",
+    "iosBody": "That way we can send you reminders. In Safari tap “Share”, then “Add to Home Screen”.",
+    "updateAvailable": "A new version of Kvita is available.",
+    "update": "Update"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The link may be outdated. Head back to the start.",
+    "home": "Go home"
+  },
+  "errors": {
+    "generic": "Oops, something went wrong. Please try again.",
+    "network": "Can't reach the server. Check your connection.",
+    "VALIDATION_ERROR": "Please check what you entered.",
+    "OTP_INVALID": "The code is wrong or has expired.",
+    "OTP_TOO_MANY_ATTEMPTS": "Too many attempts. Request a new code.",
+    "OTP_RATE_LIMITED": "We've sent a lot of codes. Try again in an hour.",
+    "TOO_MANY_REQUESTS": "A bit slower, please. Try again in a few minutes.",
+    "ACCOUNT_DELETED": "This account has been deleted.",
+    "UNAUTHORIZED": "Please sign in again.",
+    "TOKEN_INVALID": "Please sign in again."
+  }
+}

@@ -1,0 +1,81 @@
+/*
+ * Kvita design tokens – the ONLY place where colors are defined.
+ * shadcn/ui and Tailwind read these variables (see index.css @theme).
+ * To rebrand: change the values below (and THEME_COLOR in vite.config.ts / BRAND in server e-mail templates).
+ * Primary: calm teal (#1f7a72) – trustworthy, not bank-blue.
+ */
+
+:root {
+  --radius: 0.875rem;
+
+  --background: oklch(0.974 0.003 174.5); /* #f4f7f6 */
+  --foreground: oklch(0.265 0.017 183.7); /* #1c2826 */
+
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.526 0.083 186.3); /* #1f7a72 */
+  --primary-foreground: oklch(0.99 0.005 180);
+
+  --secondary: oklch(0.94 0.018 183);
+  --secondary-foreground: oklch(0.32 0.04 185);
+
+  --muted: oklch(0.945 0.006 180);
+  --muted-foreground: oklch(0.513 0.02 183); /* #5b6b68 */
+
+  --accent: oklch(0.93 0.03 184);
+  --accent-foreground: oklch(0.3 0.05 186);
+
+  --destructive: oklch(0.56 0.19 27);
+  --destructive-foreground: oklch(0.99 0 0);
+
+  /* Status colors used for charge states and the "Kvita ✓" badge. */
+  --success: oklch(0.56 0.12 155);
+  --success-foreground: oklch(0.99 0.01 155);
+  --warning: oklch(0.78 0.14 75);
+  --warning-foreground: oklch(0.3 0.06 60);
+  --info: oklch(0.58 0.1 240);
+  --info-foreground: oklch(0.99 0 0);
+
+  --border: oklch(0.9 0.008 180);
+  --input: oklch(0.88 0.01 180);
+  --ring: oklch(0.6 0.09 186);
+}
+
+.dark {
+  --background: oklch(0.196 0.013 177.9); /* #0f1715 */
+  --foreground: oklch(0.95 0.008 180);
+
+  --card: oklch(0.235 0.015 180);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.235 0.015 180);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.704 0.095 185.5); /* #4fb3a8 */
+  --primary-foreground: oklch(0.2 0.03 186);
+
+  --secondary: oklch(0.29 0.025 184);
+  --secondary-foreground: oklch(0.93 0.02 183);
+
+  --muted: oklch(0.27 0.012 180);
+  --muted-foreground: oklch(0.72 0.02 182);
+
+  --accent: oklch(0.31 0.035 185);
+  --accent-foreground: oklch(0.95 0.02 183);
+
+  --destructive: oklch(0.66 0.17 25);
+  --destructive-foreground: oklch(0.15 0.02 25);
+
+  --success: oklch(0.7 0.13 155);
+  --success-foreground: oklch(0.18 0.03 155);
+  --warning: oklch(0.8 0.13 78);
+  --warning-foreground: oklch(0.22 0.05 60);
+  --info: oklch(0.7 0.1 240);
+  --info-foreground: oklch(0.15 0.02 240);
+
+  --border: oklch(1 0 0 / 11%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.65 0.09 186);
+}

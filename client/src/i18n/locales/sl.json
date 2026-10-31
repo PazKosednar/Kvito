@@ -1,0 +1,87 @@
+{
+  "app": {
+    "name": "Kvita",
+    "tagline": "Najem brez zapletov. Vse na enem mestu."
+  },
+  "common": {
+    "continue": "Naprej",
+    "back": "Nazaj",
+    "loading": "Nalagam …",
+    "retry": "Poskusi znova",
+    "close": "Zapri"
+  },
+  "auth": {
+    "title": "Prijava",
+    "emailLabel": "E-pošta",
+    "emailPlaceholder": "ime@primer.si",
+    "emailHint": "Poslali ti bomo kodo. Gesla ne potrebuješ.",
+    "sendCode": "Pošlji kodo",
+    "codeTitle": "Vpiši kodo",
+    "codeSentTo": "Kodo smo poslali na {{email}}.",
+    "codeLabel": "6-mestna koda",
+    "verify": "Prijava",
+    "resend": "Pošlji novo kodo",
+    "changeEmail": "Drug e-naslov",
+    "devHint": "Razvoj: koda je izpisana v konzoli strežnika.",
+    "logout": "Odjava",
+    "loggedOut": "Odjava je uspela. Se vidimo!"
+  },
+  "onboarding": {
+    "title": "Lepo, da si tu!",
+    "subtitle": "Kaj te pripelje v Kvito? To lahko kadar koli spremeniš.",
+    "landlord": "Oddajam nepremičnino",
+    "landlordHint": "Najemnine, položnice in komunikacija z najemniki.",
+    "tenant": "Najemam stanovanje",
+    "tenantHint": "Plačila, sporočila in okvare na enem mestu."
+  },
+  "roles": {
+    "LANDLORD": "Najemodajalec",
+    "TENANT": "Najemnik",
+    "switchTo": "Preklopi na: {{role}}",
+    "switched": "Zdaj si v vlogi: {{role}}"
+  },
+  "home": {
+    "greeting": "Živjo, {{name}}!",
+    "greetingNoName": "Živjo!",
+    "landlordEmptyTitle": "Začnimo z najemom",
+    "landlordEmptyBody": "Kmalu bo tu prostor za tvojo nepremičnino in povabila najemnikom.",
+    "tenantEmptyTitle": "Še nimaš najema",
+    "tenantEmptyBody": "Ko te najemodajalec povabi, se tu pokažejo najemnina, položnice in sporočila.",
+    "kvita": "Kvita ✓",
+    "kvitaHint": "Vse je poravnano."
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Svetla",
+    "dark": "Temna",
+    "system": "Kot naprava"
+  },
+  "language": {
+    "label": "Jezik",
+    "sl": "Slovenščina",
+    "en": "English"
+  },
+  "install": {
+    "iosTitle": "Dodaj Kvito na začetni zaslon",
+    "iosBody": "Tako ti bomo lahko pošiljali opomnike. V Safariju tapni »Deli« in nato »Dodaj na začetni zaslon«.",
+    "updateAvailable": "Na voljo je nova različica Kvite.",
+    "update": "Posodobi"
+  },
+  "notFound": {
+    "title": "Te strani ni",
+    "body": "Morda je povezava stara. Vrni se na začetek.",
+    "home": "Na začetek"
+  },
+  "errors": {
+    "generic": "Ups, nekaj je šlo narobe. Poskusi še enkrat.",
+    "network": "Ni povezave s strežnikom. Preveri internet.",
+    "VALIDATION_ERROR": "Preveri vnesene podatke.",
+    "OTP_INVALID": "Koda ni prava ali je potekla.",
+    "OTP_TOO_MANY_ATTEMPTS": "Preveč poskusov. Zahtevaj novo kodo.",
+    "OTP_RATE_LIMITED": "Poslali smo že veliko kod. Poskusi čez eno uro.",
+    "TOO_MANY_REQUESTS": "Malo počasneje, prosim. Poskusi čez nekaj minut.",
+    "ACCOUNT_DELETED": "Ta račun je izbrisan.",
+    "UNAUTHORIZED": "Prijavi se znova.",
+    "TOKEN_INVALID": "Prijavi se znova."
+  }
+}
