@@ -21,6 +21,11 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
     res.status(err.status).json({ error: { code: err.code, ...(err.details ? { details: err.details } : {}) } });
     return;
   }
+  // Prisma "record not found" (findUniqueOrThrow / findFirstOrThrow / update on missing row).
+  if (typeof err === "object" && err && "code" in err && err.code === "P2025") {
+    res.status(404).json({ error: { code: "NOT_FOUND" } });
+    return;
+  }
   // body-parser errors (malformed JSON, payload too large)
   if (typeof err === "object" && err && "status" in err && typeof err.status === "number" && err.status < 500) {
     res.status(err.status).json({ error: { code: "BAD_REQUEST" } });

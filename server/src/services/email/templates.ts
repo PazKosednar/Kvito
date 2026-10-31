@@ -22,6 +22,36 @@ function layout(title: string, bodyHtml: string): string {
 </body></html>`;
 }
 
+function button(url: string, label: string): string {
+  return `<a href="${escapeHtml(url)}" style="display:inline-block;margin:8px 0 16px;padding:14px 22px;background:${BRAND.primary};color:#ffffff;border-radius:12px;font-weight:700;text-decoration:none">${escapeHtml(label)}</a>`;
+}
+
+export function invitationEmail(
+  to: string,
+  p: { url: string; landlordName: string | null; place: string; days: number },
+): EmailMessage {
+  const who = p.landlordName ?? "Najemodajalec";
+  const subject = `${who} te vabi v Kvito`;
+  const text = [
+    "Živjo!",
+    "",
+    `${who} te vabi, da se pridružiš najemu: ${p.place}.`,
+    "Najemnina, položnice in sporočila bodo na enem mestu.",
+    "",
+    `Sprejmi povabilo: ${p.url}`,
+    `Povezava velja ${p.days} dni.`,
+  ].join("\n");
+  const html = layout(
+    subject,
+    `<p style="margin:0 0 12px">Živjo!</p>
+     <p style="margin:0 0 12px"><strong>${escapeHtml(who)}</strong> te vabi, da se pridružiš najemu: <strong>${escapeHtml(p.place)}</strong>.</p>
+     <p style="margin:0 0 4px">Najemnina, položnice in sporočila bodo na enem mestu.</p>
+     ${button(p.url, "Sprejmi povabilo")}
+     <p style="margin:0;color:${BRAND.muted}">Povezava velja ${p.days} dni. Aplikacije ni treba nameščati.</p>`,
+  );
+  return { to, subject, text, html };
+}
+
 export function loginCodeEmail(to: string, code: string, ttlMinutes: number): EmailMessage {
   const subject = `Tvoja koda za Kvito: ${code}`;
   const text = [

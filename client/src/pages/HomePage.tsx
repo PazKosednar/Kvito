@@ -1,57 +1,53 @@
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Home } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Navigate } from "react-router";
 import { IosInstallHint } from "@/components/IosInstallHint";
+import { ErrorState, List, ListRow, LoadingState } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
+import { LandlordHome } from "@/features/properties/LandlordHome";
 import { useAuth } from "@/hooks/useAuth";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useGreeting } from "@/hooks/useGreeting";
 import { useRole } from "@/hooks/useRole";
+import { useTenancies } from "@/hooks/useTenancies";
 
-/** Phase 0 home: honest about what exists, and tells each role exactly what happens next. */
 export function HomePage() {
   const greeting = useGreeting();
   const { activeRole } = useRole();
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <h1 className="text-title font-bold">{greeting}</h1>
       <IosInstallHint />
-      {activeRole === "LANDLORD" ? <LandlordStart /> : <TenantWaiting />}
+      {activeRole === "LANDLORD" ? <LandlordHome /> : <TenantHome />}
     </div>
   );
 }
 
-function LandlordStart() {
-  const { t } = useTranslation();
-  // A real sequence, so it is numbered.
-  const steps = (["property", "tenancy", "invite"] as const).map((key) => ({
-    title: t(`home.landlordSteps.${key}`),
-    hint: t(`home.landlordSteps.${key}Hint`),
-  }));
+/** Tenant home: one tenancy → go straight there (fewer taps to the payment data). */
+function TenantHome() {
+  const toMessage = useErrorMessage();
+  const { tenancies, loading, error, reload } = useTenancies("TENANT");
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={toMessage(error)} onRetry={() => void reload()} />;
+  const active = (tenancies ?? []).filter((x) => x.status === "ACTIVE");
+  if (active.length === 1) return <Navigate to={`/najemi/${active[0]!.id}`} replace />;
+  if (!tenancies?.length) return <TenantWaiting />;
 
   return (
-    <section aria-labelledby="landlord-start">
-      <h2 id="landlord-start" className="text-lg text-muted-foreground">
-        {t("home.landlordIntro")}
-      </h2>
-      <ol className="mt-5">
-        {steps.map((step, i) => (
-          <li key={step.title} className="relative flex gap-4 pb-7 last:pb-0">
-            {i < steps.length - 1 && (
-              <span aria-hidden="true" className="absolute top-10 bottom-1 left-[1.1875rem] w-px bg-border" />
-            )}
-            <span className="tabular flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-primary/25 text-sm font-bold text-primary">
-              {i + 1}
-            </span>
-            <div className="pt-1.5">
-              <p className="font-semibold">{step.title}</p>
-              <p className="mt-1 max-w-[46ch] text-muted-foreground">{step.hint}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
-      <p className="mt-8 text-sm text-muted-foreground">{t("home.comingSoon")}</p>
-    </section>
+    <List>
+      {tenancies.map((x) => (
+        <ListRow
+          key={x.id}
+          to={`/najemi/${x.id}`}
+          leading={<Home className="size-5 shrink-0 text-primary" aria-hidden="true" />}
+          title={x.unit.name}
+          subtitle={`${x.unit.property.street}, ${x.unit.property.city}`}
+        />
+      ))}
+    </List>
   );
 }
 
@@ -72,9 +68,7 @@ function TenantWaiting() {
       <div className="rounded-xl bg-slip p-4 text-slip-foreground">
         <p className="text-sm">{t("home.tenantEmailLabel")}</p>
         <div className="mt-2 flex items-center gap-3">
-          <p className="min-w-0 flex-1 truncate rounded-md bg-card px-3 py-2.5 font-semibold text-card-foreground select-all">
-            {user.email}
-          </p>
+          <p className="min-w-0 flex-1 truncate rounded-md bg-slip-field px-3 py-2.5 font-semibold select-all">{user.email}</p>
           <Button type="button" variant="secondary" className="h-11 shrink-0 px-4" onClick={() => void copy(user.email)}>
             {copied ? <Check /> : <Copy />}
             {copied ? t("common.copied") : t("common.copy")}

@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useAuthStore } from "@/auth/authStore";
 import { api, refreshAccessToken } from "@/lib/api";
 import type { CurrentUser } from "@/types/user";
+import { clearQueryCache } from "./useQuery";
 
 /** Restores the session from the refresh cookie on app start. */
 export async function bootstrapSession(): Promise<void> {
@@ -39,6 +40,7 @@ export function useAuth() {
       await api("/api/auth/logout", { method: "POST", auth: false });
     } finally {
       useAuthStore.getState().clear();
+      clearQueryCache();
     }
   }, []);
 

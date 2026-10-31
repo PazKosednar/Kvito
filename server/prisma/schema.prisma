@@ -96,15 +96,26 @@ model User {
   deletedAt      DateTime?
 
   refreshTokens       RefreshToken[]
-  properties          Property[]      @relation("PropertyOwner")
+  properties          Property[]         @relation("PropertyOwner")
   memberships         TenancyMember[]
-  invitationsSent     Invitation[]    @relation("InvitationInviter")
-  invitationsAccepted Invitation[]    @relation("InvitationAcceptedBy")
-  chargesCreated      Charge[]        @relation("ChargeCreatedBy")
-  sharesConfirmed     ChargeShare[]   @relation("ChargeShareConfirmedBy")
-  paymentReports      PaymentReport[] @relation("PaymentReportReporter")
-  paymentReviews      PaymentReport[] @relation("PaymentReportReviewer")
+  invitationsSent     Invitation[]       @relation("InvitationInviter")
+  invitationsAccepted Invitation[]       @relation("InvitationAcceptedBy")
+  chargesCreated      Charge[]           @relation("ChargeCreatedBy")
+  sharesConfirmed     ChargeShare[]      @relation("ChargeShareConfirmedBy")
+  paymentReports      PaymentReport[]    @relation("PaymentReportReporter")
+  paymentReviews      PaymentReport[]    @relation("PaymentReportReviewer")
   auditLogs           AuditLog[]
+  attachments         Attachment[]
+  messages            Message[]
+  conversationReads   ConversationRead[]
+  issuesReported      Issue[]
+  issueComments       IssueComment[]
+  documents           Document[]
+  meterReadings       MeterReading[]
+  handoversCreated    Handover[]         @relation("HandoverCreatedBy")
+  handoversConfirmed  Handover[]         @relation("HandoverTenantConfirmedBy")
+  notifications       Notification[]
+  pushSubscriptions   PushSubscription[]
 }
 
 /// One-time login code. Only an HMAC of the code is stored.
@@ -171,8 +182,10 @@ model Unit {
   updatedAt  DateTime  @updatedAt
   deletedAt  DateTime?
 
-  property  Property  @relation(fields: [propertyId], references: [id])
-  tenancies Tenancy[]
+  property      Property       @relation(fields: [propertyId], references: [id])
+  tenancies     Tenancy[]
+  meterReadings MeterReading[]
+  documents     Document[]
 
   @@index([propertyId])
 }
@@ -198,10 +211,17 @@ model Tenancy {
   updatedAt    DateTime      @updatedAt
   deletedAt    DateTime?
 
-  unit        Unit            @relation(fields: [unitId], references: [id])
-  members     TenancyMember[]
-  invitations Invitation[]
-  charges     Charge[]
+  unit              Unit               @relation(fields: [unitId], references: [id])
+  members           TenancyMember[]
+  invitations       Invitation[]
+  charges           Charge[]
+  messages          Message[]
+  conversationReads ConversationRead[]
+  issues            Issue[]
+  documents         Document[]
+  meterReadings     MeterReading[]
+  handovers         Handover[]
+  attachments       Attachment[]
 
   @@index([unitId])
 }
@@ -269,8 +289,10 @@ model Charge {
   payeeIban   String
   payeeStreet String?
   payeeCity   String?
-  /// Payment reference (sklic), e.g. "SI00 ..." or "RF..". Format defined in Phase 2 per the UPN QR standard.
+  /// Payee reference (sklic). For PayTo.SUPPLIER it is copied from the original bill;
+  /// for PayTo.LANDLORD each share gets its own RF reference (see ChargeShare.refNo, docs/UPN-QR.md).
   reference   String?
+  /// UPN purpose code (4 letters, official ZBS list), e.g. RENT, ELEC.
   purposeCode String?
   purpose     String?
   createdById String?
@@ -278,9 +300,11 @@ model Charge {
   updatedAt   DateTime     @updatedAt
   deletedAt   DateTime?
 
-  tenancy   Tenancy       @relation(fields: [tenancyId], references: [id])
-  createdBy User?         @relation("ChargeCreatedBy", fields: [createdById], references: [id])
-  shares    ChargeShare[]
+  tenancy     Tenancy       @relation(fields: [tenancyId], references: [id])
+  createdBy   User?         @relation("ChargeCreatedBy", fields: [createdById], references: [id])
+  shares      ChargeShare[]
+  attachments Attachment[]
+  messages    Message[]
 
   @@unique([tenancyId, rentPeriod])
   @@index([tenancyId, status])
@@ -290,6 +314,8 @@ model Charge {
 /// A member's part of a charge. Each share is paid, reported and confirmed separately.
 model ChargeShare {
   id            String       @id @default(cuid())
+  /// Sequential number used in the RF payment reference – allows matching bank statements later.
+  refNo         Int          @unique @default(autoincrement())
   chargeId      String
   memberId      String
   amountCents   Int
@@ -309,7 +335,7 @@ model ChargeShare {
   @@index([memberId, status])
 }
 
-/// Tenant's "I paid" report. Optional proof is linked once Attachment exists (Phase 3).
+/// Tenant's "I paid" report, optionally with a proof attachment.
 model PaymentReport {
   id            String              @id @default(cuid())
   chargeShareId String
@@ -325,9 +351,10 @@ model PaymentReport {
   updatedAt     DateTime            @updatedAt
   deletedAt     DateTime?
 
-  chargeShare ChargeShare @relation(fields: [chargeShareId], references: [id])
-  reportedBy  User        @relation("PaymentReportReporter", fields: [reportedById], references: [id])
-  reviewedBy  User?       @relation("PaymentReportReviewer", fields: [reviewedById], references: [id])
+  chargeShare ChargeShare  @relation(fields: [chargeShareId], references: [id])
+  reportedBy  User         @relation("PaymentReportReporter", fields: [reportedById], references: [id])
+  reviewedBy  User?        @relation("PaymentReportReviewer", fields: [reviewedById], references: [id])
+  attachments Attachment[]
 
   @@index([chargeShareId])
 }
@@ -350,4 +377,337 @@ model AuditLog {
 
   @@index([entityType, entityId])
   @@index([actorId])
+}
+
+// ---------- Files ----------
+
+enum AttachmentKind {
+  BILL
+  PAYMENT_PROOF
+  MESSAGE
+  ISSUE
+  METER
+  HANDOVER
+  DOCUMENT
+}
+
+/// A stored file (local disk in development, S3-compatible EU storage in production). Served only via signed URLs.
+model Attachment {
+  id           String         @id @default(cuid())
+  kind         AttachmentKind
+  tenancyId    String?
+  uploadedById String
+  storageKey   String         @unique
+  fileName     String
+  mimeType     String
+  sizeBytes    Int
+  createdAt    DateTime       @default(now())
+  deletedAt    DateTime?
+
+  chargeId        String?
+  paymentReportId String?
+  messageId       String?
+  issueId         String?
+  issueCommentId  String?
+  meterReadingId  String?
+  handoverItemId  String?
+  documentId      String?
+
+  tenancy       Tenancy?       @relation(fields: [tenancyId], references: [id])
+  uploadedBy    User           @relation(fields: [uploadedById], references: [id])
+  charge        Charge?        @relation(fields: [chargeId], references: [id])
+  paymentReport PaymentReport? @relation(fields: [paymentReportId], references: [id])
+  message       Message?       @relation(fields: [messageId], references: [id])
+  issue         Issue?         @relation(fields: [issueId], references: [id])
+  issueComment  IssueComment?  @relation(fields: [issueCommentId], references: [id])
+  meterReading  MeterReading?  @relation(fields: [meterReadingId], references: [id])
+  handoverItem  HandoverItem?  @relation(fields: [handoverItemId], references: [id])
+  document      Document?      @relation(fields: [documentId], references: [id])
+
+  @@index([tenancyId])
+  @@index([uploadedById])
+}
+
+// ---------- Messages ----------
+
+enum MessageKind {
+  USER
+  SYSTEM
+}
+
+/// One conversation per tenancy. A message can refer to a charge or an issue.
+model Message {
+  id          String      @id @default(cuid())
+  tenancyId   String
+  kind        MessageKind @default(USER)
+  authorId    String?
+  body        String
+  /// For SYSTEM messages: event code (translated on the client) + parameters.
+  systemEvent String?
+  systemData  Json?
+  chargeId    String?
+  issueId     String?
+  createdAt   DateTime    @default(now())
+  deletedAt   DateTime?
+
+  tenancy     Tenancy      @relation(fields: [tenancyId], references: [id])
+  author      User?        @relation(fields: [authorId], references: [id])
+  charge      Charge?      @relation(fields: [chargeId], references: [id])
+  issue       Issue?       @relation(fields: [issueId], references: [id])
+  attachments Attachment[]
+
+  @@index([tenancyId, createdAt])
+}
+
+/// Read marker per person and conversation ("prebrano").
+model ConversationRead {
+  tenancyId  String
+  userId     String
+  lastReadAt DateTime
+
+  tenancy Tenancy @relation(fields: [tenancyId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@id([tenancyId, userId])
+}
+
+// ---------- Issues ----------
+
+enum IssueCategory {
+  PLUMBING
+  ELECTRICAL
+  HEATING
+  APPLIANCE
+  WINDOWS_DOORS
+  STRUCTURE
+  PESTS
+  OTHER
+}
+
+enum IssueUrgency {
+  LOW
+  NORMAL
+  URGENT
+}
+
+enum IssueStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+}
+
+model Issue {
+  id          String        @id @default(cuid())
+  tenancyId   String
+  reporterId  String
+  category    IssueCategory
+  title       String
+  description String
+  urgency     IssueUrgency  @default(NORMAL)
+  status      IssueStatus   @default(NEW)
+  resolvedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+
+  tenancy     Tenancy        @relation(fields: [tenancyId], references: [id])
+  reporter    User           @relation(fields: [reporterId], references: [id])
+  comments    IssueComment[]
+  attachments Attachment[]
+  messages    Message[]
+
+  @@index([tenancyId, status])
+}
+
+model IssueComment {
+  id        String    @id @default(cuid())
+  issueId   String
+  authorId  String
+  body      String
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  issue       Issue        @relation(fields: [issueId], references: [id])
+  author      User         @relation(fields: [authorId], references: [id])
+  attachments Attachment[]
+
+  @@index([issueId])
+}
+
+// ---------- Documents ----------
+
+enum DocumentCategory {
+  CONTRACT
+  ANNEX
+  HOUSE_RULES
+  MANUAL
+  OTHER
+}
+
+enum DocumentVisibility {
+  LANDLORD_ONLY
+  TENANTS
+}
+
+/// Contract, annexes, house rules, appliance manuals. Belongs to a tenancy or to a unit (manuals outlive tenancies).
+model Document {
+  id           String             @id @default(cuid())
+  tenancyId    String?
+  unitId       String?
+  category     DocumentCategory
+  title        String
+  visibility   DocumentVisibility @default(TENANTS)
+  uploadedById String
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  deletedAt    DateTime?
+
+  tenancy     Tenancy?     @relation(fields: [tenancyId], references: [id])
+  unit        Unit?        @relation(fields: [unitId], references: [id])
+  uploadedBy  User         @relation(fields: [uploadedById], references: [id])
+  attachments Attachment[]
+
+  @@index([tenancyId])
+  @@index([unitId])
+}
+
+// ---------- Meters ----------
+
+enum MeterType {
+  ELECTRICITY
+  WATER
+  GAS
+  HEAT
+}
+
+/// Meter reading. The value is stored in thousandths of the meter unit (kWh, m³) to avoid floating point.
+model MeterReading {
+  id           String    @id @default(cuid())
+  unitId       String
+  tenancyId    String?
+  handoverId   String?
+  meterType    MeterType
+  meterLabel   String?
+  valueMilli   BigInt
+  readOn       DateTime  @db.Date
+  note         String?
+  recordedById String
+  createdAt    DateTime  @default(now())
+  deletedAt    DateTime?
+
+  unit        Unit         @relation(fields: [unitId], references: [id])
+  tenancy     Tenancy?     @relation(fields: [tenancyId], references: [id])
+  handover    Handover?    @relation(fields: [handoverId], references: [id])
+  recordedBy  User         @relation(fields: [recordedById], references: [id])
+  attachments Attachment[]
+
+  @@index([unitId, meterType, readOn])
+}
+
+// ---------- Handover (move-in / move-out record) ----------
+
+enum HandoverKind {
+  MOVE_IN
+  MOVE_OUT
+}
+
+enum HandoverStatus {
+  DRAFT
+  AWAITING_CONFIRMATION
+  CONFIRMED
+}
+
+enum ItemCondition {
+  GOOD
+  WORN
+  DAMAGED
+  MISSING
+}
+
+model Handover {
+  id                  String         @id @default(cuid())
+  tenancyId           String
+  kind                HandoverKind
+  status              HandoverStatus @default(DRAFT)
+  handoverOn          DateTime       @db.Date
+  keysCount           Int?
+  keysNote            String?
+  notes               String?
+  createdById         String
+  landlordConfirmedAt DateTime?
+  tenantConfirmedAt   DateTime?
+  tenantConfirmedById String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  deletedAt           DateTime?
+
+  tenancy           Tenancy        @relation(fields: [tenancyId], references: [id])
+  createdBy         User           @relation("HandoverCreatedBy", fields: [createdById], references: [id])
+  tenantConfirmedBy User?          @relation("HandoverTenantConfirmedBy", fields: [tenantConfirmedById], references: [id])
+  items             HandoverItem[]
+  meterReadings     MeterReading[]
+
+  @@index([tenancyId])
+}
+
+model HandoverItem {
+  id         String        @id @default(cuid())
+  handoverId String
+  room       String
+  name       String
+  condition  ItemCondition @default(GOOD)
+  note       String?
+  sortOrder  Int           @default(0)
+  createdAt  DateTime      @default(now())
+  deletedAt  DateTime?
+
+  handover    Handover     @relation(fields: [handoverId], references: [id])
+  attachments Attachment[]
+
+  @@index([handoverId])
+}
+
+// ---------- Notifications ----------
+
+/// In-app notification; also the idempotency record for reminders (dedupeKey).
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  url       String?
+  data      Json?
+  dedupeKey String?   @unique
+  pushedAt  DateTime?
+  emailedAt DateTime?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+enum PushProvider {
+  WEB_PUSH
+  FCM
+  APNS
+}
+
+/// Push target. WEB_PUSH now; FCM/APNs once the app is wrapped with Capacitor.
+model PushSubscription {
+  id         String       @id @default(cuid())
+  userId     String
+  provider   PushProvider @default(WEB_PUSH)
+  endpoint   String       @unique
+  p256dh     String?
+  auth       String?
+  userAgent  String?
+  createdAt  DateTime     @default(now())
+  lastUsedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
