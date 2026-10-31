@@ -4,6 +4,8 @@ import { NavLink, Outlet, useParams } from "react-router";
 import { Eyebrow } from "@/components/brand";
 import { ErrorState, LoadingState } from "@/components/layout-parts";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
+import { useUnread } from "@/hooks/useMessages";
+import { useRealtime } from "@/hooks/useRealtime";
 import { useTenancy } from "@/hooks/useTenancies";
 import { cn } from "@/lib/utils";
 import { TENANCY_TABS } from "./tabs";
@@ -25,6 +27,8 @@ export function TenancyLayout() {
   const { t } = useTranslation();
   const toMessage = useErrorMessage();
   const q = useTenancy(id);
+  useRealtime(q.tenancy?.id);
+  const unread = useUnread();
 
   if (q.loading) return <LoadingState />;
   if (q.error || !q.tenancy) return <ErrorState message={toMessage(q.error)} onRetry={() => void q.reload()} />;
@@ -63,6 +67,7 @@ export function TenancyLayout() {
               }
             >
               {t(tab.label)}
+              {tab.badge === "unread" && (unread[tenancy.id] ?? 0) > 0 && <UnreadDot count={unread[tenancy.id]!} />}
             </NavLink>
           ))}
         </nav>
@@ -83,6 +88,7 @@ export function TenancyLayout() {
             >
               <span className="tabular opacity-50">{String(i + 1).padStart(2, "0")}</span>
               {t(tab.label)}
+              {tab.badge === "unread" && (unread[tenancy.id] ?? 0) > 0 && <UnreadDot count={unread[tenancy.id]!} className="ml-auto" />}
             </NavLink>
           ))}
         </nav>
@@ -92,5 +98,18 @@ export function TenancyLayout() {
         </div>
       </div>
     </Ctx.Provider>
+  );
+}
+
+/** Unread count (CGP: pill shapes only for status dots and toggles). */
+function UnreadDot({ count, className }: { count: number; className?: string }) {
+  const { t } = useTranslation();
+  return (
+    <span
+      aria-label={t("messages.unread", { count })}
+      className={cn("ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 font-mono text-[10px] font-medium text-primary-foreground", className)}
+    >
+      {count > 9 ? "9+" : count}
+    </span>
   );
 }

@@ -7,6 +7,10 @@ import { ChargePage } from "@/features/charges/ChargePage";
 import { ChargesTab } from "@/features/charges/ChargesTab";
 import { UpnTestPage } from "@/features/charges/UpnTestPage";
 import { AcceptInvitePage } from "@/features/invitations/AcceptInvitePage";
+import { IssueFormPage } from "@/features/issues/IssueFormPage";
+import { IssuePage } from "@/features/issues/IssuePage";
+import { IssuesTab } from "@/features/issues/IssuesTab";
+import { MessagesTab } from "@/features/messages/MessagesTab";
 import { PropertyFormPage } from "@/features/properties/PropertyFormPage";
 import { PropertyPage } from "@/features/properties/PropertyPage";
 import { InvitePage } from "@/features/tenancies/InvitePage";
@@ -45,6 +49,10 @@ export const router = createBrowserRouter([
               { index: true, element: <ChargesTab /> },
               { path: "obveznosti/nova", element: <ChargeFormPage /> },
               { path: "obveznosti/:chargeId", element: <ChargePage /> },
+              { path: "sporocila", element: <MessagesTab /> },
+              { path: "okvare", element: <IssuesTab /> },
+              { path: "okvare/nova", element: <IssueFormPage /> },
+              { path: "okvare/:issueId", element: <IssuePage /> },
               { path: "podatki", element: <TenancyDetailsTab /> },
             ],
           },

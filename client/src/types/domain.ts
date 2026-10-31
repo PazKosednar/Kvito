@@ -213,3 +213,56 @@ export interface PaymentData {
   qrSvg: string | null;
   qrUnavailable: string | null;
 }
+// ---------- Messages & issues (Phase 3) ----------
+
+export interface Message {
+  id: string;
+  tenancyId: string;
+  kind: "USER" | "SYSTEM";
+  body: string;
+  systemEvent: string | null;
+  systemData: Record<string, string | number | null> | null;
+  createdAt: string;
+  author: PersonRef | null;
+  charge: { id: string; title: string } | null;
+  issue: { id: string; title: string } | null;
+  attachments: Attachment[];
+}
+
+export interface ConversationRead {
+  userId: string;
+  lastReadAt: string;
+}
+
+export type IssueCategory = "PLUMBING" | "ELECTRICAL" | "HEATING" | "APPLIANCE" | "WINDOWS_DOORS" | "STRUCTURE" | "PESTS" | "OTHER";
+export const ISSUE_CATEGORIES: IssueCategory[] = ["PLUMBING", "ELECTRICAL", "HEATING", "APPLIANCE", "WINDOWS_DOORS", "STRUCTURE", "PESTS", "OTHER"];
+export type IssueUrgency = "LOW" | "NORMAL" | "URGENT";
+export type IssueStatus = "NEW" | "IN_PROGRESS" | "RESOLVED";
+
+export interface IssueSummary {
+  id: string;
+  tenancyId: string;
+  category: IssueCategory;
+  title: string;
+  urgency: IssueUrgency;
+  status: IssueStatus;
+  createdAt: string;
+  resolvedAt: string | null;
+  reporter: PersonRef;
+  _count: { comments: number; attachments: number };
+}
+
+export interface IssueComment {
+  id: string;
+  body: string;
+  createdAt: string;
+  author: PersonRef;
+  attachments: Attachment[];
+}
+
+export interface Issue extends Omit<IssueSummary, "_count"> {
+  description: string;
+  reporterId: string;
+  attachments: Attachment[];
+  comments: IssueComment[];
+}

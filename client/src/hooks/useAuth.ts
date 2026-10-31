@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useAuthStore } from "@/auth/authStore";
 import { api, refreshAccessToken } from "@/lib/api";
 import type { CurrentUser } from "@/types/user";
+import { closeSocket } from "@/lib/realtime";
 import { clearQueryCache } from "./useQuery";
 
 /** Restores the session from the refresh cookie on app start. */
@@ -41,6 +42,7 @@ export function useAuth() {
     } finally {
       useAuthStore.getState().clear();
       clearQueryCache();
+      closeSocket();
     }
   }, []);
 

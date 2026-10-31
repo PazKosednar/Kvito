@@ -43,6 +43,10 @@ export default defineConfig({
     port: 5180,
     strictPort: true,
     // Same-origin API in development so the httpOnly refresh cookie just works.
-    proxy: { "/api": { target: "http://localhost:4180", changeOrigin: false } },
+    proxy: {
+      "/api": { target: "http://localhost:4180", changeOrigin: false },
+      // Realtime messages (Socket.IO over WebSocket).
+      "/socket.io": { target: "http://localhost:4180", ws: true, changeOrigin: false },
+    },
   },
 });

@@ -142,7 +142,9 @@
     "FILE_EMPTY": "The file is empty.",
     "ATTACHMENT_INVALID": "The attachment can't be used. Upload it again.",
     "SUPPLIER_PAYEE_REQUIRED": "Enter the supplier's name and IBAN.",
-    "FILE_LINK_EXPIRED": "The file link expired. Refresh the page."
+    "FILE_LINK_EXPIRED": "The file link expired. Refresh the page.",
+    "EMPTY_MESSAGE": "The message is empty.",
+    "LINK_INVALID": "The link to a charge or repair is not valid."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -155,11 +157,14 @@
     "END_BEFORE_START": "The end must be after the start.",
     "INVALID_REFERENCE": "The reference must look like SI00 … or RF.. (with valid check digits).",
     "INVALID_PURPOSE_CODE": "The purpose code has 4 capital letters.",
-    "SUPPLIER_PAYEE_REQUIRED": "Enter the supplier's name and IBAN."
+    "SUPPLIER_PAYEE_REQUIRED": "Enter the supplier's name and IBAN.",
+    "EMPTY_MESSAGE": "Write a message or attach a file."
   },
   "tabs": {
     "details": "Details",
-    "charges": "Charges"
+    "charges": "Charges",
+    "messages": "Messages",
+    "issues": "Repairs"
   },
   "properties": {
     "add": "Add a property",
@@ -483,5 +488,82 @@
   "settled": {
     "thisMonth": "This month",
     "body": "All obligations are settled."
+  },
+  "messages": {
+    "emptyTitle": "No messages yet",
+    "emptyBody": "This is where landlord and tenants talk. You can also send a photo or a PDF.",
+    "placeholder": "Write a message …",
+    "attach": "Attach a file",
+    "send": "Send",
+    "read": "Read",
+    "unread_one": "{{count}} unread message",
+    "unread_other": "{{count}} unread messages"
+  },
+  "systemEvents": {
+    "MEMBER_JOINED": "New tenant: {{name}}.",
+    "CHARGE_CREATED": "New charge: {{title}} ({{amount}}).",
+    "PAYMENT_REPORTED": "Payment reported: {{title}}, {{name}}.",
+    "PAYMENT_CONFIRMED": "Payment confirmed: {{title}}.",
+    "PAYMENT_REJECTED": "Payment not confirmed: {{title}}.",
+    "CHARGE_DISPUTED": "Charge disputed: {{title}}.",
+    "ISSUE_CREATED": "New repair: {{title}}.",
+    "ISSUE_STATUS": "Repair “{{title}}”: {{status}}.",
+    "HANDOVER_READY": "The handover record awaits confirmation.",
+    "HANDOVER_CONFIRMED": "The handover record is confirmed.",
+    "DOCUMENT_ADDED": "New document: {{title}}.",
+    "UNKNOWN": "Something changed in the tenancy."
+  },
+  "issueStatus": {
+    "NEW": "New",
+    "IN_PROGRESS": "In progress",
+    "RESOLVED": "Resolved"
+  },
+  "urgency": {
+    "LOW": "Can wait",
+    "NORMAL": "Normal",
+    "URGENT": "Urgent"
+  },
+  "issueCategory": {
+    "PLUMBING": "Water and drains",
+    "ELECTRICAL": "Electricity",
+    "HEATING": "Heating",
+    "APPLIANCE": "Appliances",
+    "WINDOWS_DOORS": "Windows and doors",
+    "STRUCTURE": "Walls, floors, ceiling",
+    "PESTS": "Pests",
+    "OTHER": "Other"
+  },
+  "issues": {
+    "report": "Report a repair",
+    "open": "Open",
+    "resolved": "Resolved",
+    "emptyTitle": "No repairs reported",
+    "emptyBody": "If something breaks, report it with a photo. Your landlord sees what's wrong and how urgent it is.",
+    "newTitle": "Report a repair",
+    "newSubtitle": "Describe what's wrong. A photo says more than a long description.",
+    "category": "What's broken",
+    "title": "Short title",
+    "titleHint": "For example “Bathroom tap is dripping”.",
+    "description": "Description",
+    "descriptionHint": "Where, since when, and what you've already tried.",
+    "urgency": "Urgency",
+    "urgencyHint": {
+      "LOW": "Doesn't affect daily life.",
+      "NORMAL": "Needs fixing within a few days.",
+      "URGENT": "Water leaking, no power or heating, danger."
+    },
+    "photos": "Photos",
+    "addPhotos": "Add photos",
+    "submit": "Send report",
+    "reported": "Repair reported.",
+    "reportedBy": "Reported by {{name}}",
+    "status": "Status",
+    "statusChanged": "Repair status: {{status}}.",
+    "markResolved": "Mark as resolved",
+    "reopen": "Reopen",
+    "comments": "Comments",
+    "noComments": "No comments yet.",
+    "commentPlaceholder": "Write a comment …",
+    "addComment": "Comment"
   }
 }

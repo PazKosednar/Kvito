@@ -142,7 +142,9 @@
     "FILE_EMPTY": "Datoteka je prazna.",
     "ATTACHMENT_INVALID": "Priloge ni mogoče uporabiti. Naloži jo znova.",
     "SUPPLIER_PAYEE_REQUIRED": "Vpiši prejemnika in IBAN dobavitelja.",
-    "FILE_LINK_EXPIRED": "Povezava do datoteke je potekla. Osveži stran."
+    "FILE_LINK_EXPIRED": "Povezava do datoteke je potekla. Osveži stran.",
+    "EMPTY_MESSAGE": "Sporočilo je prazno.",
+    "LINK_INVALID": "Povezava na obveznost ali okvaro ni veljavna."
   },
   "validation": {
     "invalid": "Vrednost ni pravilna.",
@@ -155,11 +157,14 @@
     "END_BEFORE_START": "Konec mora biti po začetku.",
     "INVALID_REFERENCE": "Sklic mora biti v obliki SI00 … ali RF.. (s pravilno kontrolno števko).",
     "INVALID_PURPOSE_CODE": "Koda namena ima 4 velike črke.",
-    "SUPPLIER_PAYEE_REQUIRED": "Vpiši prejemnika in IBAN dobavitelja."
+    "SUPPLIER_PAYEE_REQUIRED": "Vpiši prejemnika in IBAN dobavitelja.",
+    "EMPTY_MESSAGE": "Napiši sporočilo ali priloži datoteko."
   },
   "tabs": {
     "details": "Podatki",
-    "charges": "Obveznosti"
+    "charges": "Obveznosti",
+    "messages": "Sporočila",
+    "issues": "Okvare"
   },
   "properties": {
     "add": "Dodaj nepremičnino",
@@ -491,5 +496,84 @@
   "settled": {
     "thisMonth": "Ta mesec",
     "body": "Vse obveznosti so poravnane."
+  },
+  "messages": {
+    "emptyTitle": "Še ni sporočil",
+    "emptyBody": "Tu se dogovarjata najemodajalec in najemniki. Pošlješ lahko tudi fotografijo ali PDF.",
+    "placeholder": "Napiši sporočilo …",
+    "attach": "Priloži datoteko",
+    "send": "Pošlji",
+    "read": "Prebrano",
+    "unread_one": "{{count}} neprebrano sporočilo",
+    "unread_two": "{{count}} neprebrani sporočili",
+    "unread_few": "{{count}} neprebrana sporočila",
+    "unread_other": "{{count}} neprebranih sporočil"
+  },
+  "systemEvents": {
+    "MEMBER_JOINED": "Nov najemnik: {{name}}.",
+    "CHARGE_CREATED": "Nova obveznost: {{title}} ({{amount}}).",
+    "PAYMENT_REPORTED": "Javljeno plačilo: {{title}}, {{name}}.",
+    "PAYMENT_CONFIRMED": "Plačilo je potrjeno: {{title}}.",
+    "PAYMENT_REJECTED": "Plačilo ni potrjeno: {{title}}.",
+    "CHARGE_DISPUTED": "Obveznost je sporna: {{title}}.",
+    "ISSUE_CREATED": "Nova okvara: {{title}}.",
+    "ISSUE_STATUS": "Okvara »{{title}}«: {{status}}.",
+    "HANDOVER_READY": "Zapisnik primopredaje čaka potrditev.",
+    "HANDOVER_CONFIRMED": "Zapisnik primopredaje je potrjen.",
+    "DOCUMENT_ADDED": "Nov dokument: {{title}}.",
+    "UNKNOWN": "Sprememba v najemu."
+  },
+  "issueStatus": {
+    "NEW": "Nova",
+    "IN_PROGRESS": "V delu",
+    "RESOLVED": "Rešena"
+  },
+  "urgency": {
+    "LOW": "Lahko počaka",
+    "NORMAL": "Običajno",
+    "URGENT": "Nujno"
+  },
+  "issueCategory": {
+    "PLUMBING": "Voda in odtoki",
+    "ELECTRICAL": "Elektrika",
+    "HEATING": "Ogrevanje",
+    "APPLIANCE": "Naprave",
+    "WINDOWS_DOORS": "Okna in vrata",
+    "STRUCTURE": "Stene, tla, strop",
+    "PESTS": "Mrčes",
+    "OTHER": "Drugo"
+  },
+  "issues": {
+    "report": "Prijavi okvaro",
+    "open": "Odprte",
+    "resolved": "Rešene",
+    "emptyTitle": "Ni prijavljenih okvar",
+    "emptyBody": "Če se kaj pokvari, prijavi okvaro s fotografijo. Najemodajalec vidi, kaj je narobe in kako nujno je.",
+    "newTitle": "Prijavi okvaro",
+    "newSubtitle": "Opiši, kaj je narobe. Fotografija pove več kot dolg opis.",
+    "category": "Kaj je pokvarjeno",
+    "title": "Kratek naslov",
+    "titleHint": "Na primer »Kaplja pipa v kopalnici«.",
+    "description": "Opis",
+    "descriptionHint": "Kje, od kdaj in kaj je že bilo poskušeno.",
+    "urgency": "Nujnost",
+    "urgencyHint": {
+      "LOW": "Ne moti vsakdanjega življenja.",
+      "NORMAL": "Treba je urediti v nekaj dneh.",
+      "URGENT": "Voda teče, ni elektrike ali ogrevanja, nevarnost."
+    },
+    "photos": "Fotografije",
+    "addPhotos": "Dodaj fotografije",
+    "submit": "Pošlji prijavo",
+    "reported": "Okvara je prijavljena.",
+    "reportedBy": "Prijava: {{name}}",
+    "status": "Stanje",
+    "statusChanged": "Stanje okvare: {{status}}.",
+    "markResolved": "Označi kot rešeno",
+    "reopen": "Ponovno odpri",
+    "comments": "Komentarji",
+    "noComments": "Še ni komentarjev.",
+    "commentPlaceholder": "Napiši komentar …",
+    "addComment": "Komentiraj"
   }
 }

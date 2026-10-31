@@ -5,6 +5,7 @@ import { env } from "./config/env.js";
 import { logger } from "./lib/logger.js";
 import { prisma } from "./lib/prisma.js";
 import { ConsoleEmailSender } from "./services/email/ConsoleEmailSender.js";
+import { attachRealtime } from "./services/realtime.js";
 import { generateMonthlyRent, markOverdue } from "./services/jobs/rent.js";
 import { startScheduler } from "./services/jobs/scheduler.js";
 import { LocalDiskStorage } from "./services/storage/Storage.js";
@@ -22,6 +23,7 @@ async function main() {
   const server = app.listen(env.PORT, () => {
     logger.info(`Kvita API posluša na http://localhost:${env.PORT} (uploads: ${uploadDir})`);
   });
+  const io = attachRealtime(server);
   server.on("error", (err: NodeJS.ErrnoException) => {
     // console.error is synchronous, so the message is visible even though we exit immediately.
     console.error(
@@ -40,6 +42,7 @@ async function main() {
   const shutdown = (signal: string) => {
     logger.info(`${signal} – zapiram strežnik`);
     stopJobs();
+    void io.close();
     server.close(() => {
       void prisma.$disconnect().finally(() => process.exit(0));
     });
