@@ -24,6 +24,9 @@ describe("money", () => {
   it("formats and round-trips", () => {
     expect(formatCents(65000).replace(/\s/g, " ")).toBe("650,00 €");
     expect(centsToInput(4873)).toBe("48,73");
+    // CGP number format: thousands with a dot, decimals with a comma, € after the amount.
+    expect(formatCents(125000).replace(/\s/g, " ")).toBe("1.250,00 €");
+    expect(formatCents(134873).replace(/\s/g, " ")).toBe("1.348,73 €");
     expect(parseAmountToCents(centsToInput(123456))).toBe(123456);
   });
 });

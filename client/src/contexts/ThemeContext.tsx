@@ -16,8 +16,8 @@ const media = () => window.matchMedia("(prefers-color-scheme: dark)");
 
 function readPreference(): ThemePreference {
   const saved = storage.get(STORAGE_KEYS.theme);
-  // Dark is the brand default; "system" only when the person chose it.
-  return saved === "light" || saved === "system" ? saved : "dark";
+  // CGP: Kamen (light) is the default theme; Grafit (dark) or "system" only when chosen.
+  return saved === "dark" || saved === "system" ? saved : "light";
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

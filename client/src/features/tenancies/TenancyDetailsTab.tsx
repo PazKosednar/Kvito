@@ -52,7 +52,7 @@ export function TenancyDetailsTab() {
         }
       >
         {tenancy.members.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-5">
+          <div className="rounded-md border border-dashed p-5">
             <p className="font-semibold">{t("tenancies.noTenantsTitle")}</p>
             <p className="mt-1 text-muted-foreground">{t("tenancies.noTenantsBody")}</p>
             {isLandlord && (
@@ -197,7 +197,7 @@ function SharesEditor() {
   };
 
   return (
-    <div className="mt-4 rounded-xl border bg-card p-4">
+    <div className="mt-4 rounded-md border bg-card p-4">
       <p className="font-semibold">{isPct ? t("tenancies.sharesPct") : t("tenancies.sharesPersons")}</p>
       <div className="mt-3 flex flex-col gap-3">
         {tenancy.members.map((m) => (
@@ -216,7 +216,7 @@ function SharesEditor() {
         ))}
       </div>
       {isPct && total !== 10_000 && (
-        <p className="mt-3 text-sm text-destructive">{t("tenancies.sharesMustTotal", { total: total / 100 })}</p>
+        <p className="mt-3 text-sm text-danger">{t("tenancies.sharesMustTotal", { total: total / 100 })}</p>
       )}
     </div>
   );

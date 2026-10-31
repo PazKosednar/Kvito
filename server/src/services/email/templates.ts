@@ -1,7 +1,7 @@
 import type { EmailMessage } from "./EmailSender.js";
 
 // Brand colors mirror client/src/styles/tokens.css (e-mail clients do not support CSS variables).
-const BRAND = { primary: "#2f48ff", text: "#0e0e0e", muted: "#66655f", bg: "#eceae5", card: "#ffffff", slip: "#f1f0ec" };
+const BRAND = { primary: "#0a7a45", text: "#121212", muted: "#55514a", bg: "#eeece7", card: "#f8f7f4", slip: "#e4e1da" };
 
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
@@ -27,7 +27,7 @@ function button(url: string, label: string): string {
 }
 
 const eur = (cents: number) =>
-  new Intl.NumberFormat("sl-SI", { style: "currency", currency: "EUR" }).format(cents / 100);
+  new Intl.NumberFormat("sl-SI", { style: "currency", currency: "EUR", useGrouping: "always" }).format(cents / 100);
 const day = (d: Date) => new Intl.DateTimeFormat("sl-SI", { timeZone: "UTC" }).format(d);
 
 /** Payment data + UPN QR (as an attached image), for paying from another device. */

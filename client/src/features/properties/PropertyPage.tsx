@@ -61,7 +61,7 @@ export function PropertyPage() {
         }
       >
         {property.units.length === 0 && !adding && (
-          <div className="rounded-xl border border-dashed p-5">
+          <div className="rounded-md border border-dashed p-5">
             <p className="font-semibold">{t("units.emptyTitle")}</p>
             <p className="mt-1 text-muted-foreground">{t("units.emptyBody")}</p>
             <Button className="mt-4" onClick={() => setAdding(true)}>
@@ -81,7 +81,7 @@ export function PropertyPage() {
       </Section>
 
       <Section>
-        <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => void removeProperty()}>
+        <Button variant="ghost" className="text-danger hover:text-destructive" onClick={() => void removeProperty()}>
           <Trash2 />
           {t("properties.delete")}
         </Button>
@@ -144,7 +144,7 @@ function AddUnitForm({ onAdd, onDone }: { onAdd: (i: { name: string; floor: stri
   });
   return (
     <form
-      className="flex flex-col gap-4 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-4 rounded-md border bg-card p-4"
       onSubmit={(e) => {
         e.preventDefault();
         void save.run();

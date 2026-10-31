@@ -57,7 +57,7 @@ export function ChargeFormPage() {
       <PageHeader back={`/najemi/${tenancy.id}`} title={t("charges.newTitle")} subtitle={t("charges.newSubtitle")} />
 
       {/* Step 1: the bill itself – optional, but it saves typing. */}
-      <div className="rounded-xl border border-dashed p-4">
+      <div className="rounded-md border border-dashed p-4">
         {file ? (
           <div className="flex items-center gap-3">
             <FileText className="size-5 shrink-0 text-primary" aria-hidden="true" />

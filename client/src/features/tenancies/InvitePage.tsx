@@ -100,7 +100,7 @@ function InviteLink({ url, onAnother, sentTo }: { url: string; onAnother: () => 
       <p className="text-muted-foreground">{sentTo ? t("invite.sent", { email: sentTo }) : t("invite.showOrSend")}</p>
       {/* Black on white so every phone camera reads it, in both themes. */}
       <div
-        className="mx-auto w-full max-w-64 rounded-xl bg-white p-3 [&_svg]:h-auto [&_svg]:w-full"
+        className="mx-auto w-full max-w-64 rounded-md bg-white p-3 [&_svg]:h-auto [&_svg]:w-full"
         role="img"
         aria-label={t("invite.qrLabel")}
         dangerouslySetInnerHTML={{ __html: svg }}

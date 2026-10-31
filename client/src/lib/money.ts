@@ -5,7 +5,8 @@ const formatters = new Map<string, Intl.NumberFormat>();
 export function formatCents(cents: number, locale = "sl-SI"): string {
   let f = formatters.get(locale);
   if (!f) {
-    f = new Intl.NumberFormat(locale, { style: "currency", currency: "EUR" });
+    // CGP: "1.250,00 €" – Slovenian Intl skips grouping for 4-digit numbers unless forced.
+    f = new Intl.NumberFormat(locale, { style: "currency", currency: "EUR", useGrouping: "always" });
     formatters.set(locale, f);
   }
   return f.format(cents / 100);

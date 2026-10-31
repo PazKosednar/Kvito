@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "Kvita",
-    "headline": "All settled.\nEvery month.",
+    "headline": "Rent is\nsettled.",
     "lead": "Rent, bills and messages between landlord and tenant in one place."
   },
   "slip": {
@@ -43,8 +43,8 @@
     "devHint": "Development: the code is in the server terminal, in the latest “E-mail za {{email}}” block.",
     "logout": "Sign out",
     "loggedOut": "Signed out.",
-    "stepEmail": "Step 1 / 2",
-    "stepCode": "Step 2 / 2"
+    "stepEmail": "Sign in",
+    "stepCode": "Code"
   },
   "onboarding": {
     "title": "What brings you to Kvita?",
@@ -56,7 +56,8 @@
     "step": "Start",
     "eyebrow": "00 / Role",
     "landlordLabel": "A / Landlord",
-    "tenantLabel": "B / Tenant"
+    "tenantLabel": "B / Tenant",
+    "eyebrowText": "Role"
   },
   "roles": {
     "LANDLORD": "Landlord",
@@ -316,24 +317,24 @@
     "OPEN": "Open",
     "OVERDUE": "Overdue",
     "REPORTED_PAID": "Awaiting confirmation",
-    "CONFIRMED": "Paid",
+    "CONFIRMED": "Settled",
     "DISPUTED": "Disputed"
   },
   "charges": {
     "dueOn": "due {{date}}",
-    "dueToday": "due today",
-    "dueIn_one": "due in {{count}} day",
-    "dueIn_other": "due in {{count}} days",
-    "lateBy_one": "{{count}} day late",
-    "lateBy_other": "{{count}} days late",
-    "kvitaTitle": "All settled",
+    "dueToday": "Due today.",
+    "dueIn_one": "Due in {{count}} day.",
+    "dueIn_other": "Due in {{count}} days.",
+    "lateBy_one": "The due date passed {{count}} day ago.",
+    "lateBy_other": "The due date passed {{count}} days ago.",
+    "kvitaTitle": "Kvita ✓",
     "kvitaBody": "Your landlord has confirmed all your payments.",
     "emptyTenantTitle": "No charges yet",
     "emptyTenantBody": "When your landlord posts rent or a bill, it shows up here with the payment details.",
     "toPay": "To pay",
     "waiting": "Awaiting confirmation",
     "waitingHint": "You reported the payment. Your landlord still needs to confirm it.",
-    "settled": "Paid",
+    "settled": "Settled",
     "showAll": "Show all ({{count}})",
     "landlordAllSettled": "All settled.",
     "landlordSummary": "Open: {{open}}.",
@@ -358,7 +359,7 @@
     "disputedNote": "This charge is marked as disputed. Sort it out in messages.",
     "rejectedNote": "Your landlord can't see the payment yet: {{reason}}",
     "noReason": "no explanation",
-    "reportPaid": "Paid – tell my landlord",
+    "reportPaid": "Paid",
     "reportTitle": "Report payment of {{amount}}",
     "paidOn": "Payment date",
     "note": "Message",
@@ -416,7 +417,11 @@
     "overviewLabel": "Tenancy status",
     "statOpen": "Open",
     "statLate": "Overdue",
-    "statWaiting": "Awaiting confirmation"
+    "statWaiting": "Awaiting confirmation",
+    "dueShort": "Due: {{date}}",
+    "paidOnShort": "Paid: {{date}}",
+    "yourShare": "Your share ({{total}} in total)",
+    "reportHint": "Pay in your bank, then tap Paid."
   },
   "pay": {
     "payee": "Payee",
@@ -439,7 +444,9 @@
       "PAYEE_ADDRESS_MISSING": "No QR code: the payee has no address. Use the Copy buttons.",
       "OTHER": "No QR code for this payment. Use the Copy buttons."
     },
-    "panelLabel": "Payment details"
+    "panelLabel": "Payment details",
+    "dueShort": "Due: {{date}}",
+    "copyHint": "Copy the details into your banking app."
   },
   "upnTest": {
     "title": "UPN QR test",
@@ -469,5 +476,12 @@
       "enote": "01 / Units",
       "povabilo": "Invitation"
     }
+  },
+  "login": {
+    "eyebrow": "Renting, settled"
+  },
+  "settled": {
+    "thisMonth": "This month",
+    "body": "All obligations are settled."
   }
 }

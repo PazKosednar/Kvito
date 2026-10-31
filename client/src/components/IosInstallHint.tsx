@@ -8,7 +8,7 @@ export function IosInstallHint() {
   if (!visible) return null;
 
   return (
-    <aside className="relative rounded-xl border bg-card p-4 pr-12">
+    <aside className="relative rounded-md border bg-card p-4 pr-12">
       <p className="flex items-center gap-2 font-semibold">
         <Share className="size-4 text-primary" aria-hidden="true" />
         {t("install.iosTitle")}

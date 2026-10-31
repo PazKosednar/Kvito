@@ -1,0 +1,12 @@
+<!-- @dsCard group="Obrazci" height=260 -->
+<!doctype html>
+<html lang="sl">
+<head><meta charset="utf-8"><title>Field — predogled</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"></head>
+<body>
+<div id="root" class="kv-stack"></div>
+<script>
+  var K = window.Kvita, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-6)' } }, h(K.Field, { label: 'Mesečna najemnina', placeholder: '520,00', hint: 'Znesek v evrih, brez stroškov.' }), h(K.Field, { label: 'IBAN prejemnika', mono: true, defaultValue: 'SI56 0110 0100 0123 456', error: 'IBAN mora imeti 19 znakov (SI).' })));
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<!-- @dsCard group="Stanja" height=72 -->
+<!doctype html>
+<html lang="sl">
+<head><meta charset="utf-8"><title>StatusBadge — predogled</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"></head>
+<body>
+<div id="root" class="kv-row"></div>
+<script>
+  var K = window.Kvita, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null, h(K.StatusBadge, { status: 'open' }), h(K.StatusBadge, { status: 'reported' }), h(K.StatusBadge, { status: 'confirmed' }), h(K.StatusBadge, { status: 'overdue' }), h(K.StatusBadge, { status: 'disputed' })));
+</script>
+</body>
+</html>

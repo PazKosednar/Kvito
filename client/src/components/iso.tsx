@@ -42,9 +42,9 @@ export function IsoBox({
   const f = boxFaces(ox, oy, w, d, h);
   return (
     <g className={cn("transition-colors duration-500", className)} strokeLinejoin="round">
-      <path d={f.left} className={accent ? "fill-[color-mix(in_oklab,var(--primary)_75%,black)] stroke-none" : "fill-background stroke-current"} strokeWidth="1" />
-      <path d={f.right} className={accent ? "fill-[color-mix(in_oklab,var(--primary)_55%,black)] stroke-none" : "fill-background stroke-current"} strokeWidth="1" />
-      <path d={f.top} className={accent ? "fill-primary stroke-none" : "fill-background stroke-current"} strokeWidth="1" />
+      <path d={f.left} className={accent ? "fill-[var(--iso-left)] stroke-signal" : "fill-surface stroke-line-strong"} strokeWidth="1" />
+      <path d={f.right} className={accent ? "fill-[var(--iso-right)] stroke-signal" : "fill-surface stroke-line-strong"} strokeWidth="1" />
+      <path d={f.top} className={accent ? "fill-signal stroke-signal" : "fill-surface stroke-line-strong"} strokeWidth="1" />
     </g>
   );
 }
@@ -71,7 +71,7 @@ export function IsoCube({ x, y, a, filled = false, className }: { x: number; y: 
 /** Faint isometric diamond lattice behind an illustration. */
 function Lattice() {
   return (
-    <g stroke="currentColor" strokeOpacity="0.12" strokeWidth="1">
+    <g className="stroke-grid" strokeWidth="1">
       {Array.from({ length: 9 }, (_, i) => (
         <g key={i}>
           <line x1={-60 + i * 40} y1={0} x2={60 + i * 40 + 120} y2={140} />
@@ -102,7 +102,7 @@ export function IsoGlyph({ name, lit = false, className }: { name: GlyphName; li
               const p = P(104, 64);
               const [x1, y1] = p(30, 5, z);
               const [x2, y2] = p(30, 25, z);
-              return <line key={z} x1={x1} y1={y1} x2={x2} y2={y2} className={lit ? "stroke-primary-foreground" : undefined} />;
+              return <line key={z} x1={x1} y1={y1} x2={x2} y2={y2} className={lit ? "stroke-panel" : undefined} />;
             })}
           </g>
         </>
@@ -119,8 +119,8 @@ export function IsoGlyph({ name, lit = false, className }: { name: GlyphName; li
             const [kx, ky] = p(48, 28, 15);
             return (
               <>
-                <path d={`M${pts} Z`} className={lit ? "fill-primary stroke-none" : "fill-none stroke-current"} strokeWidth="1" />
-                <circle cx={kx} cy={ky} r="1.6" className={lit ? "fill-primary-foreground" : "fill-current"} />
+                <path d={`M${pts} Z`} className={lit ? "fill-signal stroke-none" : "fill-none stroke-current"} strokeWidth="1" />
+                <circle cx={kx} cy={ky} r="1.6" className={lit ? "fill-panel" : "fill-current"} />
               </>
             );
           })()}
@@ -159,7 +159,7 @@ export function IsoGlyph({ name, lit = false, className }: { name: GlyphName; li
       body = (
         <>
           <ellipse cx="74" cy="70" rx="20" ry="11" fill="none" stroke="currentColor" />
-          <ellipse cx="74" cy="66" rx="20" ry="11" className={lit ? "fill-primary" : "fill-background stroke-current"} strokeWidth="1" />
+          <ellipse cx="74" cy="66" rx="20" ry="11" className={lit ? "fill-signal" : "fill-surface stroke-current"} strokeWidth="1" />
           <path d="M92,72 L150,101 M132,92 l0,9 M142,97 l0,9" fill="none" stroke="currentColor" strokeWidth="2" />
         </>
       );
@@ -168,7 +168,7 @@ export function IsoGlyph({ name, lit = false, className }: { name: GlyphName; li
       body = (
         <>
           <IsoBox ox={100} oy={44} w={40} d={40} h={46} />
-          <ellipse cx="117" cy="88" rx="11" ry="7" className={lit ? "fill-primary" : "fill-none stroke-current"} strokeWidth="1" />
+          <ellipse cx="117" cy="88" rx="11" ry="7" className={lit ? "fill-signal" : "fill-none stroke-current"} strokeWidth="1" />
         </>
       );
       break;
@@ -176,60 +176,16 @@ export function IsoGlyph({ name, lit = false, className }: { name: GlyphName; li
       body = (
         <>
           <IsoBox ox={100} oy={78} w={60} d={34} h={10} />
-          <path d="M78,58 l50,26" stroke="currentColor" strokeWidth="5" strokeLinecap="round" className={lit ? "stroke-primary" : undefined} />
+          <path d="M78,58 l50,26" stroke="currentColor" strokeWidth="5" strokeLinecap="round" className={lit ? "stroke-signal" : undefined} />
           <circle cx="74" cy="56" r="8" fill="none" stroke="currentColor" strokeWidth="2" />
         </>
       );
       break;
   }
   return (
-    <svg viewBox="0 0 200 140" aria-hidden="true" className={cn("text-muted-foreground", className)}>
+    <svg viewBox="0 0 200 140" aria-hidden="true" className={cn("text-line-strong", className)}>
       <Lattice />
       {body}
     </svg>
-  );
-}
-
-/** Hero scene: an orbit of open obligations around the settled one, with small mono callouts. */
-export function IsoScene({ className, labels, allSettled = false }: { className?: string; labels: [string, string, string]; allSettled?: boolean }) {
-  return (
-    <svg viewBox="0 0 420 320" className={cn("text-muted-foreground", className)} role="img" aria-hidden="true">
-      <ellipse cx="210" cy="178" rx="170" ry="78" fill="none" stroke="currentColor" strokeOpacity="0.5" strokeDasharray="3 5" className="animate-dash" />
-      <ellipse cx="210" cy="178" rx="96" ry="44" fill="none" stroke="currentColor" strokeOpacity="0.25" />
-      <line x1="210" y1="40" x2="210" y2="300" stroke="currentColor" strokeOpacity="0.25" />
-
-      <IsoCube x={92} y={150} a={34} filled={allSettled} />
-      <IsoCube x={330} y={128} a={30} filled={allSettled} />
-      <IsoCube x={300} y={232} a={36} filled={allSettled} />
-      <IsoCube x={128} y={244} a={24} filled={allSettled} />
-
-      <g className="animate-float">
-        <IsoCube x={210} y={150} a={52} filled />
-      </g>
-
-      <g fontFamily="var(--font-mono)" fontSize="9" letterSpacing="0.6" fill="currentColor">
-        <line x1="92" y1="116" x2="92" y2="84" stroke="currentColor" strokeOpacity="0.6" />
-        <rect x="64" y="70" width="80" height="14" fill="var(--foreground)" />
-        <text x="68" y="80" fill="var(--background)">{labels[0]}</text>
-        <line x1="330" y1="98" x2="330" y2="66" stroke="currentColor" strokeOpacity="0.6" />
-        <rect x="300" y="52" width="86" height="14" fill="var(--foreground)" />
-        <text x="304" y="62" fill="var(--background)">{labels[1]}</text>
-        <line x1="300" y1="268" x2="300" y2="292" stroke="currentColor" strokeOpacity="0.6" />
-        <rect x="270" y="292" width="92" height="14" fill="var(--primary)" />
-        <text x="274" y="302" fill="var(--primary-foreground)">{labels[2]}</text>
-      </g>
-    </svg>
-  );
-}
-
-/** Greyscale pixel mosaic used as quiet decoration at the edge of a frame. */
-export function Mosaic({ className, cols = 8 }: { className?: string; cols?: number }) {
-  const cells = [0, 2, 0, 0, 3, 0, 1, 4, 2, 0, 0, 1, 2, 5, 3, 1, 0, 2, 4, 6, 5, 2, 1, 3, 1, 3, 6, 4, 2, 5, 3, 0];
-  return (
-    <div aria-hidden="true" className={cn("grid", className)} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
-      {cells.slice(0, cols * Math.floor(cells.length / cols)).map((v, i) => (
-        <span key={i} className="aspect-square bg-foreground" style={{ opacity: v * 0.06 }} />
-      ))}
-    </div>
   );
 }

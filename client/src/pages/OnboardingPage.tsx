@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router";
 import { toast } from "sonner";
+import { Eyebrow } from "@/components/brand";
 import { ModuleTile } from "@/components/frame";
 import type { GlyphName } from "@/components/iso";
 import { KvitaLogo } from "@/components/KvitaLogo";
@@ -36,15 +37,15 @@ export function OnboardingPage() {
   };
 
   return (
-    <div className="app-backdrop flex min-h-dvh flex-col">
-      <header className="grid grid-cols-[auto_1fr_auto] items-center gap-6 border-b px-5 pt-[calc(1rem+env(safe-area-inset-top))] pb-4 sm:px-8">
+    <div className="flex min-h-dvh flex-col">
+      <header className="grid grid-cols-[auto_1fr_auto] items-center gap-6 border-b border-line px-4 pt-[calc(1rem+env(safe-area-inset-top))] pb-4 sm:px-8">
         <KvitaLogo withWordmark size="sm" />
         <span />
         <p className="label-mono">{t("onboarding.step")}</p>
       </header>
-      <main className="mx-auto w-full max-w-3xl flex-1 border-x bg-background px-5 py-12 sm:px-8">
-        <p className="label-mono">{t("onboarding.eyebrow")}</p>
-        <h1 className="mt-3 text-title font-medium text-balance">{t("onboarding.title")}</h1>
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-12 sm:px-6">
+        <Eyebrow index="00">{t("onboarding.eyebrowText")}</Eyebrow>
+        <h1 className="mt-3 text-title font-semibold text-balance">{t("onboarding.title")}</h1>
         <p className="mt-3 max-w-[50ch] text-muted-foreground">{t("onboarding.subtitle")}</p>
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
           {OPTIONS.map((o) => (

@@ -70,7 +70,7 @@ export function AccountMenu() {
       >
         {initials(user.name, user.email)}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={8} className="w-72 rounded-xl p-1.5">
+      <DropdownMenuContent align="end" sideOffset={8} className="w-72 rounded-md p-1.5">
         <div className="px-2 pt-2 pb-3">
           {user.name && <p className="font-semibold">{user.name}</p>}
           <p className="truncate text-sm text-muted-foreground">{user.email}</p>

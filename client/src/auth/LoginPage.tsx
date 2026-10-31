@@ -2,8 +2,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useLocation, useNavigate } from "react-router";
-import { IsoScene, Mosaic } from "@/components/iso";
-import { KvitaLogo } from "@/components/KvitaLogo";
+import { Eyebrow, KvitaLockup, UnitsIllustration } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
@@ -28,154 +27,142 @@ export function LoginPage() {
   const sentTime = flow.sentAt?.toLocaleTimeString(i18n.language, { hour: "2-digit", minute: "2-digit", timeZone: DISPLAY_TIME_ZONE });
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      {/* Frame: corner labels like a technical drawing. */}
-      <header className="grid grid-cols-[auto_1fr_auto] items-start gap-6 border-b px-5 pt-[calc(1rem+env(safe-area-inset-top))] pb-4 sm:px-8">
-        <KvitaLogo withWordmark size="sm" />
-        <div className="hidden pt-1 sm:block">
-          <p className="label-mono">{t("frame.line1")}</p>
-          <p className="label-mono">{t("frame.line2")}</p>
-        </div>
-        <p className="label-mono justify-self-end pt-1">{t("frame.region")}</p>
-      </header>
-
-      <div className="grid flex-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-        {/* Story */}
-        <section className="relative flex flex-col overflow-hidden px-5 pt-8 pb-6 sm:px-8 lg:border-r lg:pt-16">
-          <p className="label-mono">{t("frame.section")}</p>
-          <h1 className="mt-4 text-[2.6rem] whitespace-pre-line leading-[0.98] font-medium tracking-[-0.05em] sm:text-display lg:text-[4.25rem]">
+    <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+      {/* Hero on the always-dark panel (CGP). */}
+      <section className="on-panel kv-grid-panel flex flex-col px-4 pt-[calc(1.25rem+env(safe-area-inset-top))] pb-8 sm:px-8 lg:px-12 lg:py-10">
+        <KvitaLockup className="h-6 w-auto self-start lg:h-7" />
+        <div className="mt-8 lg:mt-auto">
+          <Eyebrow onPanel index="01">{t("login.eyebrow")}</Eyebrow>
+          <h1 className="mt-3 max-w-[13ch] text-[2.5rem] leading-[2.75rem] font-semibold tracking-[-0.02em] whitespace-pre-line lg:text-display">
             {t("app.headline")}
           </h1>
-          <p className="mt-5 max-w-[40ch] text-muted-foreground">{t("app.lead")}</p>
-          <IsoScene
-            className="animate-settle mt-6 w-full max-w-[17rem] self-center sm:max-w-md lg:mt-auto lg:max-w-lg"
-            labels={[t("frame.cube1"), t("frame.cube2"), t("frame.cube3")]}
-          />
-          <Mosaic className="pointer-events-none absolute bottom-0 left-0 hidden w-48 lg:grid" />
-        </section>
+          <p className="mt-4 max-w-[40ch] text-lg leading-7 text-ink-on-panel-muted">{t("app.lead")}</p>
+        </div>
+        <UnitsIllustration onPanel className="mt-6 max-w-[22rem] self-center lg:mt-auto lg:max-w-[30rem]" />
+      </section>
 
-        {/* Form cell */}
-        <section className="flex border-t px-5 pt-8 pb-[calc(2rem+env(safe-area-inset-bottom))] sm:px-8 lg:items-center lg:border-t-0">
-          <div className="mx-auto w-full max-w-sm">
-            {flow.step === "email" ? (
-              <form
-                className="flex flex-col"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void flow.submitEmail();
-                }}
-              >
-                <p className="label-mono">{t("auth.stepEmail")}</p>
-                <h2 className="mt-3 text-title font-medium">{t("auth.title")}</h2>
-                <p className="mt-2 text-muted-foreground">{t("auth.emailHint")}</p>
+      {/* Form on stone. */}
+      <section className="flex px-4 pt-8 pb-[calc(2rem+env(safe-area-inset-bottom))] sm:px-8 lg:items-center lg:px-12">
+        <div className="mx-auto w-full max-w-sm">
+          {flow.step === "email" ? (
+            <form
+              className="flex flex-col"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void flow.submitEmail();
+              }}
+            >
+              <Eyebrow index="01">{t("auth.stepEmail")}</Eyebrow>
+              <h2 className="mt-2 text-title font-semibold">{t("auth.title")}</h2>
+              <p className="mt-2 text-ink-muted">{t("auth.emailHint")}</p>
 
-                <Label htmlFor="email" className="label-mono mt-8 text-[0.6875rem]">
-                  {t("auth.emailLabel")}
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  inputMode="email"
-                  autoComplete="email"
-                  autoCapitalize="none"
-                  spellCheck={false}
-                  autoFocus
-                  required
-                  placeholder={t("auth.emailPlaceholder")}
-                  value={flow.email}
-                  onChange={(e) => flow.setEmail(e.target.value)}
-                  aria-invalid={flow.error ? true : undefined}
-                  aria-describedby={flow.error ? "login-error" : undefined}
-                  className="mt-2 h-13 bg-card px-4 text-base"
-                />
-                {flow.error && (
-                  <p id="login-error" role="alert" className="mt-3 text-sm text-destructive">
-                    {flow.error}
-                  </p>
-                )}
-                <Button type="submit" size="xl" className="group mt-5 justify-between" disabled={flow.pending || !email}>
-                  {t("auth.sendCode")}
-                  {flow.pending ? <Loader2 className="animate-spin" /> : <ArrowRight className="transition-transform group-hover:translate-x-0.5" />}
-                </Button>
-              </form>
-            ) : (
-              <form
-                className="flex flex-col"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void flow.submitCode();
-                }}
-              >
-                <p className="label-mono">{t("auth.stepCode")}</p>
-                <h2 className="mt-3 text-title font-medium">{t("auth.codeTitle")}</h2>
-                <p className="mt-2 text-muted-foreground">
-                  {sentTime ? t("auth.codeSentTo", { email, time: sentTime }) : t("auth.codeSentToNoTime", { email })}
+              <Label htmlFor="email" className="mt-8 text-sm font-medium text-ink">
+                {t("auth.emailLabel")}
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                autoCapitalize="none"
+                spellCheck={false}
+                autoFocus
+                required
+                placeholder={t("auth.emailPlaceholder")}
+                value={flow.email}
+                onChange={(e) => flow.setEmail(e.target.value)}
+                aria-invalid={flow.error ? true : undefined}
+                aria-describedby={flow.error ? "login-error" : undefined}
+                className="mt-2"
+              />
+              {flow.error && (
+                <p id="login-error" role="alert" className="mt-2 text-sm text-danger">
+                  {flow.error}
                 </p>
+              )}
+              <Button type="submit" size="xl" className="mt-6" disabled={flow.pending || !email}>
+                {flow.pending ? <Loader2 className="animate-spin" /> : null}
+                {t("auth.sendCode")}
+                {!flow.pending && <ArrowRight />}
+              </Button>
+            </form>
+          ) : (
+            <form
+              className="flex flex-col"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void flow.submitCode();
+              }}
+            >
+              <Eyebrow index="02">{t("auth.stepCode")}</Eyebrow>
+              <h2 className="mt-2 text-title font-semibold">{t("auth.codeTitle")}</h2>
+              <p className="mt-2 text-ink-muted">
+                {sentTime ? t("auth.codeSentTo", { email, time: sentTime }) : t("auth.codeSentToNoTime", { email })}
+              </p>
 
-                <Label htmlFor="otp" className="label-mono mt-8 mb-2 text-[0.6875rem]">
-                  {t("auth.codeLabel")}
-                </Label>
-                <InputOTP
-                  id="otp"
-                  maxLength={OTP_LENGTH}
-                  inputMode="numeric"
-                  pattern="^\d+$"
-                  autoComplete="one-time-code"
-                  autoFocus
-                  value={flow.code}
-                  onChange={flow.setCode}
-                  onComplete={(value: string) => void flow.submitCode(value)}
-                  disabled={flow.pending}
-                  aria-invalid={flow.error ? true : undefined}
-                  aria-describedby="otp-help"
-                  containerClassName="w-full"
-                >
-                  <InputOTPGroup className="grid w-full grid-cols-6 border-y border-l">
-                    {Array.from({ length: OTP_LENGTH }, (_, i) => (
-                      <InputOTPSlot
-                        key={i}
-                        index={i}
-                        className="h-16 w-full rounded-none border-0 border-r bg-card font-mono text-2xl shadow-none first:rounded-none last:rounded-none data-[active=true]:ring-2 data-[active=true]:ring-primary dark:bg-card"
-                      />
-                    ))}
-                  </InputOTPGroup>
-                </InputOTP>
+              <Label htmlFor="otp" className="mt-8 mb-2 text-sm font-medium text-ink">
+                {t("auth.codeLabel")}
+              </Label>
+              <InputOTP
+                id="otp"
+                maxLength={OTP_LENGTH}
+                inputMode="numeric"
+                pattern="^\d+$"
+                autoComplete="one-time-code"
+                autoFocus
+                value={flow.code}
+                onChange={flow.setCode}
+                onComplete={(value: string) => void flow.submitCode(value)}
+                disabled={flow.pending}
+                aria-invalid={flow.error ? true : undefined}
+                aria-describedby="otp-help"
+                containerClassName="w-full"
+              >
+                <InputOTPGroup className="grid w-full grid-cols-6 gap-2">
+                  {Array.from({ length: OTP_LENGTH }, (_, i) => (
+                    <InputOTPSlot
+                      key={i}
+                      index={i}
+                      className="h-14 w-full rounded-sm border border-line-strong bg-surface-raised font-mono text-2xl shadow-none first:rounded-sm first:border-l last:rounded-sm data-[active=true]:z-10 data-[active=true]:border-ink data-[active=true]:ring-2 data-[active=true]:ring-[var(--focus)] data-[active=true]:ring-offset-2 data-[active=true]:ring-offset-surface dark:bg-surface-raised"
+                    />
+                  ))}
+                </InputOTPGroup>
+              </InputOTP>
 
-                <p id="otp-help" className="mt-3 text-sm text-muted-foreground">
-                  {t("auth.codeValidity")}
+              <p id="otp-help" className="mt-2 text-sm text-ink-muted">
+                {t("auth.codeValidity")}
+              </p>
+              {flow.error && (
+                <p role="alert" className="mt-2 text-sm font-medium text-danger">
+                  {flow.error}
                 </p>
-                {flow.error && (
-                  <p role="alert" className="mt-3 text-sm font-medium text-destructive">
-                    {flow.error}
+              )}
+
+              <Button type="submit" size="xl" className="mt-6" disabled={flow.pending || flow.code.length !== OTP_LENGTH}>
+                {flow.pending && <Loader2 className="animate-spin" />}
+                {t("auth.verify")}
+              </Button>
+
+              <div className="mt-4 flex flex-col items-start border-t border-line pt-2 text-sm">
+                {flow.cooldown > 0 ? (
+                  <p className="mono py-2 text-ink-faint" aria-live="polite">
+                    {t("auth.resendIn", { seconds: flow.cooldown })}
                   </p>
+                ) : (
+                  <Button type="button" variant="ghost" className="-ml-4 text-primary" onClick={() => void flow.resend()} disabled={flow.pending}>
+                    {t("auth.resend")}
+                  </Button>
                 )}
-
-                <Button type="submit" size="xl" className="mt-6 justify-between" disabled={flow.pending || flow.code.length !== OTP_LENGTH}>
-                  {t("auth.verify")}
-                  {flow.pending ? <Loader2 className="animate-spin" /> : <ArrowRight />}
+                <Button type="button" variant="ghost" className="-ml-4 text-ink-muted" onClick={flow.changeEmail} disabled={flow.pending}>
+                  {t("auth.changeEmail")}
                 </Button>
+              </div>
 
-                <div className="mt-4 flex flex-col items-start border-t pt-2 text-sm">
-                  {flow.cooldown > 0 ? (
-                    <p className="tabular py-2 font-mono text-xs text-muted-foreground" aria-live="polite">
-                      {t("auth.resendIn", { seconds: flow.cooldown })}
-                    </p>
-                  ) : (
-                    <button type="button" onClick={() => void flow.resend()} disabled={flow.pending} className="py-2 font-medium text-primary hover:underline disabled:opacity-50">
-                      {t("auth.resend")}
-                    </button>
-                  )}
-                  <button type="button" onClick={flow.changeEmail} disabled={flow.pending} className="py-2 text-muted-foreground hover:text-foreground disabled:opacity-50">
-                    {t("auth.changeEmail")}
-                  </button>
-                </div>
-
-                {import.meta.env.DEV && <p className="mt-6 border-l-2 border-primary pl-3 font-mono text-xs text-muted-foreground">{t("auth.devHint", { email })}</p>}
-              </form>
-            )}
-          </div>
-        </section>
-      </div>
+              {import.meta.env.DEV && <p className="mono mt-6 border-l-2 border-line-strong pl-3 text-ink-faint">{t("auth.devHint", { email })}</p>}
+            </form>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

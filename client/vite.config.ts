@@ -5,7 +5,7 @@ import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 // Brand primary for browser UI chrome; keep in sync with --background in src/styles/tokens.css.
-const THEME_COLOR = "#0b0b0b";
+const THEME_COLOR = "#eeece7";
 
 export default defineConfig({
   plugins: [
@@ -25,7 +25,7 @@ export default defineConfig({
         display: "standalone",
         orientation: "portrait",
         theme_color: THEME_COLOR,
-        background_color: "#0b0b0b",
+        background_color: "#eeece7",
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],

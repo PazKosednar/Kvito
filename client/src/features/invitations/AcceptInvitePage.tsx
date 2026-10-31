@@ -56,7 +56,7 @@ export function AcceptInvitePage() {
           {t("acceptInvite.from", { name: preview.landlordName ?? t("acceptInvite.yourLandlord") })}
         </p>
         <h1 className="mt-2 text-title font-medium text-balance">{t("acceptInvite.title")}</h1>
-        <div className="mt-6 rounded-xl bg-slip p-5 text-slip-foreground">
+        <div className="mt-6 rounded-md bg-slip p-5 text-slip-foreground">
           <p className="text-lg font-bold">{preview.unitName}</p>
           <p className="mt-1">{preview.propertyName}</p>
           <p className="opacity-80">
@@ -67,7 +67,7 @@ export function AcceptInvitePage() {
           {t("acceptInvite.validUntil", { date: formatDate(preview.expiresAt) })}
         </p>
         {mismatch && (
-          <p role="alert" className="mt-4 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <p role="alert" className="mt-4 rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">
             {t("acceptInvite.emailMismatch", { email: preview.email })}
           </p>
         )}

@@ -1,19 +1,21 @@
-import { Check, Copy, Download, Loader2, Mail } from "lucide-react";
+import { Download, Loader2, Mail } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { Card } from "@/components/brand";
+import { LoadingState } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
+import { usePayment } from "@/hooks/useCharges";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
-import { usePayment } from "@/hooks/useCharges";
 import { formatDate } from "@/lib/dates";
 import { formatCents } from "@/lib/money";
 import { formatReference } from "@/lib/upn";
-import { LoadingState } from "@/components/layout-parts";
 
 /**
- * Payment data as a UPN-style slip. A QR code can't be scanned from the same phone, so every value has a
- * copy button, and the QR can be saved as an image or sent by e-mail to scan from another screen.
+ * CGP PaymentPanel with the real UPN QR. A QR can't be scanned from the same phone, so every value has a
+ * "Kopiraj" button; the QR can also be saved as an image or e-mailed. The QR keeps a pure white quiet zone
+ * (the only exception to the tokens).
  */
 export function PaySlip({ chargeId, shareId }: { chargeId: string; shareId: string }) {
   const { t } = useTranslation();
@@ -35,82 +37,55 @@ export function PaySlip({ chargeId, shareId }: { chargeId: string; shareId: stri
     }
   };
 
-  const amount = (payment.amountCents / 100).toFixed(2).replace(".", ",");
   const rows: { label: string; display: string; copy: string }[] = [
+    { label: t("pay.payee"), display: payment.payeeName, copy: payment.payeeName },
     { label: t("pay.iban"), display: payment.payeeIban, copy: payment.payeeIban.replace(/\s+/g, "") },
-    { label: t("pay.amount"), display: formatCents(payment.amountCents), copy: amount },
-    ...(payment.reference
-      ? [{ label: t("pay.reference"), display: formatReference(payment.reference), copy: payment.reference.replace(/\s+/g, "") }]
-      : []),
+    { label: t("pay.amount"), display: formatCents(payment.amountCents), copy: (payment.amountCents / 100).toFixed(2).replace(".", ",") },
+    ...(payment.reference ? [{ label: t("pay.reference"), display: formatReference(payment.reference), copy: payment.reference.replace(/\s+/g, "") }] : []),
     { label: t("pay.purpose"), display: payment.purpose, copy: payment.purpose },
   ];
 
   return (
-    <div>
-      <div className="rounded-md bg-slip px-4 pt-3 pb-5 text-slip-foreground">
-        <div className="mb-4 flex items-center justify-between border-b border-slip-line pb-3 font-mono text-[11px] tracking-[0.06em] uppercase opacity-70">
-          <span>{t("pay.panelLabel")}</span>
-          <span>UPN QR</span>
+    <div className="flex flex-col gap-3">
+      <Card as="section" className="grid gap-6 p-5 sm:grid-cols-[168px_1fr] sm:p-6">
+        <div className="flex flex-col items-center gap-4 sm:items-start">
+          {payment.qrSvg ? (
+            <div className="relative w-full max-w-[220px] rounded-sm border border-line-strong bg-white p-3 sm:max-w-[168px]">
+              <div className="[&_svg]:block [&_svg]:h-auto [&_svg]:w-full" role="img" aria-label={t("pay.qrLabel")} dangerouslySetInnerHTML={{ __html: payment.qrSvg }} />
+              <span className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 rounded-xs bg-panel px-1.5 py-0.5 font-mono text-[10px] leading-4 tracking-[0.08em] text-ink-on-panel uppercase">
+                UPN QR
+              </span>
+            </div>
+          ) : (
+            <p className="rounded-sm bg-surface-sunken p-3 text-sm text-ink-muted">
+              {t(`pay.qrUnavailable.${payment.qrUnavailable ?? "OTHER"}`, { defaultValue: t("pay.qrUnavailable.OTHER") })}
+            </p>
+          )}
+          <p className="mono text-ink-muted sm:mt-2">{t("pay.dueShort", { date: formatDate(payment.dueDate) })}</p>
         </div>
-        <div className="flex items-baseline justify-between gap-3">
-          <div className="min-w-0">
-            <p className="font-mono text-[11px] tracking-[0.06em] uppercase opacity-70">{t("pay.payee")}</p>
-            <p className="truncate font-semibold">{payment.payeeName}</p>
-            {payment.payeeAddress && <p className="truncate text-sm opacity-80">{payment.payeeAddress}</p>}
-          </div>
-          <p className="shrink-0 text-2xl font-bold tracking-tight">{formatCents(payment.amountCents)}</p>
-        </div>
-        <p className="mt-1 text-sm opacity-80">{t("pay.dueBy", { date: formatDate(payment.dueDate) })}</p>
 
-        <ul className="mt-4 flex flex-col gap-2">
+        <div className="flex min-w-0 flex-col">
           {rows.map((r) => (
             <CopyRow key={r.label} label={r.label} display={r.display} value={r.copy} />
           ))}
-        </ul>
+        </div>
 
-        {payment.qrSvg ? (
-          <div className="mt-5 flex flex-col items-center gap-3">
-            {/* Black on white, generous quiet zone – bank apps read it reliably. Scanner brackets are outside the code. */}
-            <div className="relative w-full max-w-64 p-3">
-              <span aria-hidden="true" className="absolute top-0 left-0 size-6 border-t-2 border-l-2 border-primary" />
-              <span aria-hidden="true" className="absolute top-0 right-0 size-6 border-t-2 border-r-2 border-primary" />
-              <span aria-hidden="true" className="absolute bottom-0 left-0 size-6 border-b-2 border-l-2 border-primary" />
-              <span aria-hidden="true" className="absolute right-0 bottom-0 size-6 border-r-2 border-b-2 border-primary" />
-              <div className="relative overflow-hidden">
-                <div
-                  className="bg-white p-2 [&_svg]:h-auto [&_svg]:w-full"
-                  role="img"
-                  aria-label={t("pay.qrLabel")}
-                  dangerouslySetInnerHTML={{ __html: payment.qrSvg }}
-                />
-                <span
-                  aria-hidden="true"
-                  className="animate-scan pointer-events-none absolute inset-x-0 top-0 h-px bg-primary shadow-[0_0_12px_2px_var(--primary)] [--scan-distance:14rem]"
-                />
-              </div>
-            </div>
-            <p className="text-center text-sm opacity-80">{t("pay.qrHint")}</p>
-          </div>
-        ) : (
-          <p className="mt-4 rounded-md bg-slip-field px-3 py-2 text-sm">{t(`pay.qrUnavailable.${payment.qrUnavailable ?? "OTHER"}`, { defaultValue: t("pay.qrUnavailable.OTHER") })}</p>
-        )}
-      </div>
+        <p className="text-sm text-ink-muted sm:col-span-2">{payment.qrSvg ? t("pay.qrHint") : t("pay.copyHint")}</p>
+      </Card>
 
       {payment.qrSvg && (
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <Button variant="secondary" className="h-12" disabled={busy !== null} onClick={() => void run("save")}>
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="secondary" size="lg" disabled={busy !== null} onClick={() => void run("save")}>
             {busy === "save" ? <Loader2 className="animate-spin" /> : <Download />}
             {t("pay.saveQr")}
           </Button>
-          <Button variant="secondary" className="h-12" disabled={busy !== null} onClick={() => void run("mail")}>
+          <Button variant="secondary" size="lg" disabled={busy !== null} onClick={() => void run("mail")}>
             {busy === "mail" ? <Loader2 className="animate-spin" /> : <Mail />}
             {t("pay.emailQr")}
           </Button>
         </div>
       )}
-      <p className="mt-3 text-sm text-muted-foreground">
-        {payment.payTo === "SUPPLIER" ? t("pay.supplierNote") : t("pay.noMoneyNote")}
-      </p>
+      <p className="text-sm text-ink-muted">{payment.payTo === "SUPPLIER" ? t("pay.supplierNote") : t("pay.noMoneyNote")}</p>
     </div>
   );
 }
@@ -119,20 +94,14 @@ function CopyRow({ label, display, value }: { label: string; display: string; va
   const { t } = useTranslation();
   const { copied, copy } = useCopyToClipboard(1500);
   return (
-    <li className="flex items-center gap-2 rounded-sm border border-slip-line bg-slip-field pl-3">
-      <span className="min-w-0 flex-1 py-2">
-        <span className="block font-mono text-[10px] tracking-[0.06em] uppercase opacity-60">{label}</span>
-        <span className="block truncate font-semibold">{display}</span>
-      </span>
-      <button
-        type="button"
-        onClick={() => void copy(value)}
-        aria-label={t("pay.copyLabel", { label })}
-        className="flex h-12 shrink-0 items-center gap-1.5 rounded-r-md px-3 text-sm font-semibold hover:bg-black/5"
-      >
-        {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+    <div className="grid grid-cols-[1fr_auto] items-center gap-3 border-b border-line py-2 last:border-b-0">
+      <div className="min-w-0">
+        <span className="block font-mono text-[11px] leading-4 font-medium tracking-[0.08em] text-ink-faint uppercase">{label}</span>
+        <span className="block font-mono text-sm leading-5 [overflow-wrap:anywhere] text-ink">{display}</span>
+      </div>
+      <Button variant="secondary" size="sm" onClick={() => void copy(value)} aria-label={t("pay.copyLabel", { label })}>
         {copied ? t("common.copied") : t("common.copy")}
-      </button>
-    </li>
+      </Button>
+    </div>
   );
 }

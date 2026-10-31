@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { Field, Textarea, TextInput } from "@/components/form";
-import { KvitaStamp } from "@/components/KvitaStamp";
+import { StatusBadge } from "@/components/brand";
 import { ErrorState, FormError, List, LoadingState, Section } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
@@ -47,7 +47,7 @@ export function ChargePage() {
     <>
       <div className="mb-6">
         <div className="flex items-start justify-between gap-3">
-          <h2 className="text-xl font-medium tracking-tight">{charge.title}</h2>
+          <h2 className="text-title font-semibold">{charge.title}</h2>
           <ChargeStatusPill status={shown.status} />
         </div>
         <p className="mt-1 text-muted-foreground">
@@ -63,7 +63,7 @@ export function ChargePage() {
 
       {isLandlord && !charge.shares.some((s) => s.status === "CONFIRMED") && (
         <Section>
-          <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => void remove()}>
+          <Button variant="ghost" className="text-danger hover:text-destructive" onClick={() => void remove()}>
             <Trash2 />
             {t("charges.delete")}
           </Button>
@@ -85,9 +85,9 @@ function TenantShare({ charge, share, q }: { charge: Charge; share: ChargeShare;
 
   if (share.status === "CONFIRMED") {
     return (
-      <div className="flex items-center gap-4 rounded-xl border bg-card p-5">
-        <KvitaStamp className="shrink-0" />
-        <p className="text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-3 rounded-md border border-line bg-surface-raised p-5">
+        <StatusBadge status="CONFIRMED" />
+        <p className="text-ink-muted">
           {t("charges.confirmedOn", { date: share.confirmedAt ? formatDate(share.confirmedAt) : "" })}
         </p>
       </div>
@@ -96,7 +96,7 @@ function TenantShare({ charge, share, q }: { charge: Charge; share: ChargeShare;
 
   if (share.status === "REPORTED_PAID") {
     return (
-      <div className="rounded-xl border bg-card p-5">
+      <div className="rounded-md border bg-card p-5">
         <p className="font-semibold">{t("charges.reportedTitle")}</p>
         <p className="mt-1 text-muted-foreground">{t("charges.reportedBody")}</p>
         {lastReport && <ReportLine report={lastReport} />}
@@ -107,10 +107,10 @@ function TenantShare({ charge, share, q }: { charge: Charge; share: ChargeShare;
   return (
     <>
       {share.status === "DISPUTED" && (
-        <p className="mb-4 rounded-lg bg-info/10 px-4 py-3 text-sm">{t("charges.disputedNote")}</p>
+        <p className="mb-4 rounded-sm bg-danger-soft px-4 py-3 text-sm text-danger">{t("charges.disputedNote")}</p>
       )}
       {lastReport?.status === "REJECTED" && (
-        <p className="mb-4 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <p className="mb-4 rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">
           {t("charges.rejectedNote", { reason: lastReport.rejectReason ?? t("charges.noReason") })}
         </p>
       )}
@@ -120,10 +120,13 @@ function TenantShare({ charge, share, q }: { charge: Charge; share: ChargeShare;
         {reporting ? (
           <ReportForm charge={charge} share={share} q={q} onDone={() => setReporting(false)} />
         ) : (
-          <Button size="xl" className="w-full" onClick={() => setReporting(true)}>
-            <CheckCheck />
-            {t("charges.reportPaid")}
-          </Button>
+          <>
+            <p className="mb-3 text-sm text-ink-muted">{t("charges.reportHint")}</p>
+            <Button size="xl" className="w-full" onClick={() => setReporting(true)}>
+              <CheckCheck />
+              {t("charges.reportPaid")}
+            </Button>
+          </>
         )}
         {!reporting && share.status !== "DISPUTED" && (
           disputing ? (
@@ -173,7 +176,7 @@ function ReportForm({ charge, share, q, onDone }: { charge: Charge; share: Charg
 
   return (
     <form
-      className="flex flex-col gap-4 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-4 rounded-md border bg-card p-4"
       onSubmit={(e) => {
         e.preventDefault();
         void save.run();
@@ -229,7 +232,7 @@ function LandlordShares({ charge, q }: { charge: Charge; q: Q }) {
         </List>
       </Section>
       <Section title={t("charges.paymentData")}>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 rounded-xl border bg-card px-4 py-3 text-sm">
+        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 rounded-md border bg-card px-4 py-3 text-sm">
           <dt className="text-muted-foreground">{t("pay.payee")}</dt>
           <dd className="text-right font-medium">{charge.payeeName}</dd>
           <dt className="text-muted-foreground">{t("pay.purposeCode")}</dt>
@@ -336,7 +339,7 @@ function ReportLine({ report }: { report: ChargeShare["paymentReports"][number] 
         })}
       </p>
       {report.note && <p className="mt-1 text-muted-foreground">»{report.note}«</p>}
-      {report.rejectReason && <p className="mt-1 text-destructive">{report.rejectReason}</p>}
+      {report.rejectReason && <p className="mt-1 text-danger">{report.rejectReason}</p>}
       <Files files={report.attachments} />
     </div>
   );
@@ -384,7 +387,7 @@ function ReasonForm({
   });
   return (
     <form
-      className={`flex flex-col gap-3 rounded-xl border bg-card p-4 ${className ?? ""}`}
+      className={`flex flex-col gap-3 rounded-md border bg-card p-4 ${className ?? ""}`}
       onSubmit={(e) => {
         e.preventDefault();
         void save.run();

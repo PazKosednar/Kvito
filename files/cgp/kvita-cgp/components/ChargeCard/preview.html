@@ -1,0 +1,12 @@
+<!-- @dsCard group="Obveznosti" height=420 -->
+<!doctype html>
+<html lang="sl">
+<head><meta charset="utf-8"><title>ChargeCard — predogled</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"></head>
+<body>
+<div id="root" class="kv-stack"></div>
+<script>
+  var K = window.Kvita, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null, h(K.ChargeCard, { index: '01', kind: 'Najemnina · nov 2026', title: 'Stanovanje Lendavska 2B', meta: 'Za: Ana Novak, Luka Horvat', amountCents: 52000, due: '15. 11. 2026', status: 'open', actionLabel: 'Plačaj' }), h(K.ChargeCard, { index: '02', kind: 'Elektrika · okt 2026', title: 'Položnica Elektro', meta: 'Deljeno: 50 % / 50 %', amountCents: 6418, due: '28. 10. 2026', status: 'overdue', actionLabel: 'Plačaj' })));
+</script>
+</body>
+</html>

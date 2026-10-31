@@ -29,7 +29,7 @@ export function Field({
       </Label>
       {children({ id, ...(error ? { "aria-invalid": true } : {}), ...(describedBy ? { "aria-describedby": describedBy } : {}) })}
       {errorText ? (
-        <p id={`${id}-error`} className="text-sm text-destructive">
+        <p id={`${id}-error`} className="text-sm text-danger">
           {errorText}
         </p>
       ) : hint ? (

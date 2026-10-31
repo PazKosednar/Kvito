@@ -65,7 +65,7 @@ function TenantWaiting() {
         </h2>
         <p className="mt-2 max-w-[46ch] text-muted-foreground">{t("home.tenantBody")}</p>
       </div>
-      <div className="rounded-xl bg-slip p-4 text-slip-foreground">
+      <div className="rounded-md bg-slip p-4 text-slip-foreground">
         <p className="text-sm">{t("home.tenantEmailLabel")}</p>
         <div className="mt-2 flex items-center gap-3">
           <p className="min-w-0 flex-1 truncate rounded-md bg-slip-field px-3 py-2.5 font-semibold select-all">{user.email}</p>

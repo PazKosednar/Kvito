@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content="Kvita – najemnina, položnice in sporočila med najemodajalcem in najemnikom na enem mestu." />
-    <meta name="theme-color" content="#0b0b0b" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0b0b0b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#eeece7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0c0c0d" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Kvita" />
     <title>Kvita</title>
@@ -14,7 +14,7 @@
       (function () {
         try {
           var t = localStorage.getItem("kvita-theme");
-          var dark = !t || t === "dark" || (t === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+          var dark = t === "dark" || (t === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
           if (dark) document.documentElement.classList.add("dark");
         } catch (e) {}
       })();

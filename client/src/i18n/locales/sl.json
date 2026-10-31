@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "Kvita",
-    "headline": "Vse poravnano.\nVsak mesec.",
+    "headline": "Najemnina je\nporavnana.",
     "lead": "Najemnina, položnice in sporočila med najemodajalcem in najemnikom na enem mestu."
   },
   "slip": {
@@ -43,8 +43,8 @@
     "devHint": "Razvoj: kodo najdeš v terminalu strežnika, v zadnjem bloku »E-mail za {{email}}«.",
     "logout": "Odjava",
     "loggedOut": "Odjava uspela.",
-    "stepEmail": "Korak 1 / 2",
-    "stepCode": "Korak 2 / 2"
+    "stepEmail": "Prijava",
+    "stepCode": "Koda"
   },
   "onboarding": {
     "title": "Kaj te pripelje v Kvito?",
@@ -56,7 +56,8 @@
     "step": "Začetek",
     "eyebrow": "00 / Vloga",
     "landlordLabel": "A / Najemodajalec",
-    "tenantLabel": "B / Najemnik"
+    "tenantLabel": "B / Najemnik",
+    "eyebrowText": "Vloga"
   },
   "roles": {
     "LANDLORD": "Najemodajalec",
@@ -318,30 +319,30 @@
   },
   "chargeStatus": {
     "OPEN": "Odprto",
-    "OVERDUE": "Zamuja",
+    "OVERDUE": "Zamuda",
     "REPORTED_PAID": "Čaka potrditev",
-    "CONFIRMED": "Plačano",
-    "DISPUTED": "Sporno"
+    "CONFIRMED": "Poravnano",
+    "DISPUTED": "Spor"
   },
   "charges": {
     "dueOn": "rok {{date}}",
-    "dueToday": "rok je danes",
-    "dueIn_one": "rok čez {{count}} dan",
-    "dueIn_two": "rok čez {{count}} dneva",
-    "dueIn_few": "rok čez {{count}} dni",
-    "dueIn_other": "rok čez {{count}} dni",
-    "lateBy_one": "zamuja {{count}} dan",
-    "lateBy_two": "zamuja {{count}} dneva",
-    "lateBy_few": "zamuja {{count}} dni",
-    "lateBy_other": "zamuja {{count}} dni",
-    "kvitaTitle": "Vse je poravnano",
+    "dueToday": "Rok je danes.",
+    "dueIn_one": "Rok je čez {{count}} dan.",
+    "dueIn_two": "Rok je čez {{count}} dneva.",
+    "dueIn_few": "Rok je čez {{count}} dni.",
+    "dueIn_other": "Rok je čez {{count}} dni.",
+    "lateBy_one": "Rok je potekel pred {{count}} dnem.",
+    "lateBy_two": "Rok je potekel pred {{count}} dnevoma.",
+    "lateBy_few": "Rok je potekel pred {{count}} dnevi.",
+    "lateBy_other": "Rok je potekel pred {{count}} dnevi.",
+    "kvitaTitle": "Kvita ✓",
     "kvitaBody": "Najemodajalec je potrdil vsa tvoja plačila.",
     "emptyTenantTitle": "Še ni obveznosti",
     "emptyTenantBody": "Ko najemodajalec objavi najemnino ali položnico, jo vidiš tukaj skupaj s podatki za plačilo.",
     "toPay": "Za plačilo",
     "waiting": "Čaka potrditev",
     "waitingHint": "Plačilo je javljeno. Najemodajalec ga mora še potrditi.",
-    "settled": "Plačano",
+    "settled": "Poravnano",
     "showAll": "Pokaži vse ({{count}})",
     "landlordAllSettled": "Vse je poravnano.",
     "landlordSummary": "Odprto: {{open}}.",
@@ -366,7 +367,7 @@
     "disputedNote": "Ta obveznost je označena kot sporna. Dogovorita se v sporočilih.",
     "rejectedNote": "Najemodajalec plačila še ne vidi: {{reason}}",
     "noReason": "brez pojasnila",
-    "reportPaid": "Plačano, javi najemodajalcu",
+    "reportPaid": "Plačano",
     "reportTitle": "Javi plačilo {{amount}}",
     "paidOn": "Datum plačila",
     "note": "Sporočilo",
@@ -424,7 +425,11 @@
     "overviewLabel": "Stanje najema",
     "statOpen": "Odprto",
     "statLate": "Zamuja",
-    "statWaiting": "Čaka potrditev"
+    "statWaiting": "Čaka potrditev",
+    "dueShort": "Rok: {{date}}",
+    "paidOnShort": "Plačano: {{date}}",
+    "yourShare": "Tvoj delež (skupaj {{total}})",
+    "reportHint": "Plačaj v svoji banki, nato tapni Plačano."
   },
   "pay": {
     "payee": "Prejemnik",
@@ -447,7 +452,9 @@
       "PAYEE_ADDRESS_MISSING": "Koda QR ni na voljo, ker prejemnik nima vpisanega naslova. Uporabi gumbe Kopiraj.",
       "OTHER": "Koda QR za to plačilo ni na voljo. Uporabi gumbe Kopiraj."
     },
-    "panelLabel": "Podatki za plačilo"
+    "panelLabel": "Podatki za plačilo",
+    "dueShort": "Rok: {{date}}",
+    "copyHint": "Kopiraj podatke v svojo bančno aplikacijo."
   },
   "upnTest": {
     "title": "Preizkus kod UPN QR",
@@ -477,5 +484,12 @@
       "enote": "01 / Enote",
       "povabilo": "Povabilo"
     }
+  },
+  "login": {
+    "eyebrow": "Najem, poravnan"
+  },
+  "settled": {
+    "thisMonth": "Ta mesec",
+    "body": "Vse obveznosti so poravnane."
   }
 }

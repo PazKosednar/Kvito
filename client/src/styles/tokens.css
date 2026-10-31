@@ -1,109 +1,113 @@
 /*
- * Kvita design tokens – the ONLY place where colors are defined.
- * shadcn/ui and Tailwind read these variables (see index.css @theme).
+ * Kvita design tokens – from the official CGP (files/cgp/kvita-cgp/tokens.json, v1).
+ * "Inženirski mir": graphite and warm stone, thin lines and grids, mono eyebrows and ONE green that means "settled".
+ * This is the ONLY place colors are defined. The CGP names are kept 1:1 (--surface, --ink, --accent …);
+ * the shadcn/Tailwind names below are aliases so components keep working.
  *
- * Visual language (owner's brief, Nov 2026): off-black surfaces locked to a strict grid, hairline borders
- * instead of shadows, small monospace labels, one electric-blue accent used sparingly.
- * Dark is the default; the light variant uses warm grey paper.
- *
- *   ink-0   #0B0B0B  background (dark)
- *   ink-1   #131313  surfaces
- *   bone    #ECEAE5  background (light) / payment panels in dark mode
- *   volt    #2F48FF  the single accent (primary actions, "Kvita ✓")
- *
- * To rebrand: change the values below (and THEME_COLOR in vite.config.ts, theme-color in index.html,
- * the logo color in public/logo.svg + pwa-assets.config.ts, BRAND in server e-mail templates).
+ * Themes: Kamen (light, default) on :root, Grafit (dark) on .dark.
  */
 
 :root {
-  --radius: 0.25rem;
+  /* ---- CGP: Kamen ---- */
+  --surface: #eeece7;
+  --surface-raised: #f8f7f4;
+  --surface-sunken: #e4e1da;
+  --panel: #0c0c0d;
+  --grid: #dcd9d2;
+  --line: #d6d2ca;
+  --line-strong: #8a857b;
+  --ink: #121212;
+  --ink-muted: #55514a;
+  --ink-faint: #66625a;
+  --ink-on-panel: #f2f1ec;
+  --ink-on-panel-muted: #a8a69f;
+  --accent: #0a7a45;
+  --on-accent: #ffffff;
+  --accent-soft: #e0f3e7;
+  --signal: #38e08c;
+  --warn: #8f4500;
+  --warn-soft: #f7e4cd;
+  --danger: #b0261d;
+  --danger-soft: #f7dad6;
+  --focus: var(--accent);
+  --link: var(--accent);
+  --shadow-overlay: 0 12px 32px rgba(18, 18, 18, 0.14), 0 0 0 1px rgba(18, 18, 18, 0.06);
 
-  --background: #eceae5;
-  --foreground: #0e0e0e;
+  /* Logo colors (see assets/Logos/README.md): ink sheet + signal check on light surfaces. */
+  --logo-sheet: #121212;
+  --logo-check: #38e08c;
+  --logo-word: #121212;
+  /* Overdue amounts on the always-dark panel (CGP warn, dark value). */
+  --warn-on-panel: #f5a524;
+  /* Isometric illustration accent faces (as in assets/Ilustracije). */
+  --iso-left: #0a7a45;
+  --iso-right: #0b6b3d;
 
-  --card: #f5f4f0;
-  --card-foreground: var(--foreground);
-  --popover: #fafaf8;
-  --popover-foreground: var(--foreground);
-
-  --primary: #2337f0;
-  --primary-foreground: #ffffff;
-
-  --secondary: #e0ded8;
-  --secondary-foreground: #0e0e0e;
-
-  --muted: #e4e2dc;
-  --muted-foreground: #66655f;
-
-  --accent: #dfddd6;
-  --accent-foreground: #0e0e0e;
-
-  --destructive: #d8361f;
+  /* ---- Aliases used by shadcn/Tailwind utilities ---- */
+  --radius: 6px;
+  --background: var(--surface);
+  --foreground: var(--ink);
+  --card: var(--surface-raised);
+  --card-foreground: var(--ink);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--ink);
+  --primary: var(--accent);
+  --primary-foreground: var(--on-accent);
+  --secondary: var(--surface-raised);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-sunken);
+  --muted-foreground: var(--ink-muted);
+  --accent-bg: var(--surface-sunken);
+  --destructive: var(--danger);
   --destructive-foreground: #ffffff;
-
-  /* Payment panels (UPN data): a light inset sheet. */
-  --slip: #ffffff;
-  --slip-foreground: #0e0e0e;
-  --slip-line: rgb(0 0 0 / 0.16);
-  --slip-field: #f1f0ec;
-
-  --success: #13814a;
-  --success-foreground: #ffffff;
-  --warning: #b77900;
+  --success: var(--accent);
+  --success-foreground: var(--on-accent);
+  --warning: var(--warn);
   --warning-foreground: #ffffff;
-  --info: #2337f0;
-  --info-foreground: #ffffff;
-  --stamp: #2337f0;
-
-  --border: rgb(0 0 0 / 0.1);
-  --input: rgb(0 0 0 / 0.16);
-  --ring: #2337f0;
-
-  /* Structural grid lines (decorative frame). */
-  --grid: rgb(0 0 0 / 0.07);
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--focus);
+  /* Payment panel = a raised card (CGP PaymentPanel). */
+  --slip: var(--surface-raised);
+  --slip-foreground: var(--ink);
+  --slip-line: var(--line);
+  --slip-field: var(--surface-sunken);
 }
 
 .dark {
-  --background: #0b0b0b;
-  --foreground: #ededea;
+  /* ---- CGP: Grafit ---- */
+  --surface: #0c0c0d;
+  --surface-raised: #161618;
+  --surface-sunken: #08080a;
+  --panel: #111113;
+  --grid: #1a1a1d;
+  --line: #232327;
+  --line-strong: #6a6a71;
+  --ink: #f2f1ec;
+  --ink-muted: #a8a69f;
+  --ink-faint: #8e8c85;
+  --accent: #38e08c;
+  --on-accent: #0c0c0d;
+  --accent-soft: #0f2a1c;
+  --warn: #f5a524;
+  --warn-soft: #2e1f07;
+  --danger: #ff7b71;
+  --danger-soft: #34120f;
+  --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
 
-  --card: #131313;
-  --card-foreground: var(--foreground);
-  --popover: #181818;
-  --popover-foreground: var(--foreground);
+  --logo-sheet: #38e08c;
+  --logo-check: #0c0c0d;
+  --logo-word: #f2f1ec;
+  --iso-left: #1f7a4d;
+  --iso-right: #1f7a4d;
 
-  --primary: #2f48ff;
-  --primary-foreground: #ffffff;
+  --destructive-foreground: #0c0c0d;
+  --warning-foreground: #0c0c0d;
+}
 
-  --secondary: #1e1e1e;
-  --secondary-foreground: #ededea;
-
-  --muted: #161616;
-  --muted-foreground: #8b8b86;
-
-  --accent: #1c1c1c;
-  --accent-foreground: #ffffff;
-
-  --destructive: #ff5a44;
-  --destructive-foreground: #0b0b0b;
-
-  /* In the dark UI the payment panel is a bone-coloured sheet – the one light surface on screen. */
-  --slip: #e6e4df;
-  --slip-foreground: #0e0e0e;
-  --slip-line: rgb(0 0 0 / 0.18);
-  --slip-field: #f3f2ee;
-
-  --success: #5bd38a;
-  --success-foreground: #0b0b0b;
-  --warning: #f2c94c;
-  --warning-foreground: #0b0b0b;
-  --info: #8c9bff;
-  --info-foreground: #0b0b0b;
-  --stamp: #2f48ff;
-
-  --border: rgb(255 255 255 / 0.09);
-  --input: rgb(255 255 255 / 0.14);
-  --ring: #2f48ff;
-
-  --grid: rgb(255 255 255 / 0.06);
+/* The panel is dark in both themes; logo inside it uses the dark lockup. */
+.on-panel {
+  --logo-sheet: #38e08c;
+  --logo-check: #0c0c0d;
+  --logo-word: #f2f1ec;
 }

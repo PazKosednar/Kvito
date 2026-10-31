@@ -1,7 +1,8 @@
 import { ArrowUpRight, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { FrameCorners, ModuleTile } from "@/components/frame";
+import { Eyebrow } from "@/components/brand";
+import { ModuleTile } from "@/components/frame";
 import { IsoGlyph } from "@/components/iso";
 import { ErrorState, List, ListRow, LoadingState } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
@@ -44,16 +45,13 @@ function PropertyBlock({ property: p, index }: { property: Property; index: numb
   const { t } = useTranslation();
   const occupied = p.units.filter((u) => u.tenancies.some((x) => x.status === "ACTIVE")).length;
   return (
-    <section className="relative border bg-card">
-      <FrameCorners />
-      <Link to={`/nepremicnine/${p.id}`} className="group grid grid-cols-[1fr_auto] items-end gap-4 border-b p-4 hover:bg-accent">
+    <section className="rounded-md border border-line bg-surface-raised">
+      <Link to={`/nepremicnine/${p.id}`} className="group grid grid-cols-[1fr_auto] items-end gap-4 rounded-t-md border-b border-line p-5 transition-colors hover:bg-surface-sunken">
         <div className="min-w-0">
-          <p className="label-mono">
-            {String(index + 1).padStart(2, "0")} / {p.city}
-          </p>
-          <h2 className="mt-2 flex items-center gap-2 text-xl font-medium tracking-[-0.02em]">
+          <Eyebrow index={String(index + 1).padStart(2, "0")}>{p.city}</Eyebrow>
+          <h2 className="mt-2 flex items-center gap-2 text-h3 font-semibold">
             <span className="truncate">{p.name}</span>
-            <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+            <ArrowUpRight className="size-4 shrink-0 text-ink-faint transition-colors group-hover:text-primary" />
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {p.street}, {p.postalCode} {p.city}
@@ -105,14 +103,15 @@ function LandlordStart() {
           <ModuleTile
             key={s.key}
             glyph={s.glyph}
-            label={`${String(i + 1).padStart(2, "0")} / ${t(`home.landlordSteps.${s.key}`)}`}
+            index={String(i + 1).padStart(2, "0")}
+            label={t(`home.landlordSteps.${s.key}`)}
             body={t(`home.landlordSteps.${s.key}Hint`)}
             {...(i === 0 ? { to: "/nepremicnine/nova" } : {})}
-            className={i === 0 ? "border-primary" : "opacity-70"}
+            className={i === 0 ? "border-line-strong" : undefined}
           />
         ))}
       </div>
-      <Button asChild size="xl" className="mt-8 w-full justify-between sm:w-auto">
+      <Button asChild size="xl" className="mt-8 w-full sm:w-auto">
         <Link to="/nepremicnine/nova">
           {t("properties.addFirst")}
           <Plus />
