@@ -9,9 +9,8 @@ Komunikacija z lastnikom projekta: slovenščina. Koda, imena v bazi in komentar
 ## Znamka
 - Ime: **Kvita** (iz »biti kvit« = vse je poravnano). Ime se v kodi in vmesniku piše vedno točno tako.
 - Ton: topel, preprost, brez pravniškega jezika. Kratki stavki, tikanje.
-- Barve (odločitev lastnika, okt. 2026 – zamenjala prvotno modrozeleno): vijolično črnilo žiga `#4E40A0` kot primarna barva, papirnato bela ozadja, lososova barva položnice UPN (`--slip`) za vse, kar je povezano s plačilom, opečnata za zamude, mahovno zelena za potrjeno. Vse barve so design tokens na enem mestu ([client/src/styles/tokens.css](client/src/styles/tokens.css)). Podpri svetlo in temno temo; plačilni listek in žig ostaneta svetla v obeh.
-- Vizualni jezik: »Kvita ✓« je žig (`KvitaStamp`), plačilni podatki so listek z okenci kot na UPN. Pisava Schibsted Grotesk (self-hosted). Brez napisov z velikimi črkami, brez enakih kartic za vse, brez dekorativnih gradientov; animacija samo ena (žig).
-- Logotip: začasen SVG (kljukica + ključ); iz njega generiraj PWA ikone in favicon.
+- Vizualni jezik (odločitev lastnika, nov. 2026, po referenci »Web Design for an Enterprise ERP Platform« – Zajno/DOSS; prevzet je SLOG, ne vsebina ali znamka): skoraj črne površine (temna tema privzeta), stroga mreža s tankimi obrobami namesto senc, ostri robovi, majhni napisi v monospace z velikimi črkami (`label-mono`), en sam električno moder poudarek `#2F48FF`, izometrične ilustracije iz črt (`components/iso.tsx`), svetla »kost« plošča za plačilne podatke. Pisavi Geist + Geist Mono (self-hosted). Svetla varianta: topel siv papir `#ECEAE5`.
+- Vse barve so design tokens na enem mestu ([client/src/styles/tokens.css](client/src/styles/tokens.css)). Podpri svetlo in temno temo.- Logotip: začasen SVG (kljukica + ključ); iz njega generiraj PWA ikone in favicon.
 - Mikrobesedila: ko ima najemno razmerje vse obveznosti potrjene, prikaži stanje »Kvita ✓«. Prazna stanja in obvestila naj bodo prijazna, ne birokratska.
 - PWA manifest: `name` in `short_name` = »Kvita«, `lang` = »sl«.
 - Bundle ID za kasnejši Capacitor: `TODO(preveri)` – predlog `si.kvita.app`, potrdim, ko bo domena urejena.

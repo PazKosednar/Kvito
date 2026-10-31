@@ -38,7 +38,7 @@ export function OnboardingPage() {
     <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col px-6 pt-[calc(1.5rem+env(safe-area-inset-top))] pb-10">
       <KvitaLogo withWordmark size="sm" />
       <div className="mt-14">
-        <h1 className="text-title font-bold text-balance">{t("onboarding.title")}</h1>
+        <h1 className="text-title font-medium text-balance">{t("onboarding.title")}</h1>
         <p className="mt-3 text-muted-foreground">{t("onboarding.subtitle")}</p>
       </div>
       <div className="mt-8 flex flex-col gap-3">

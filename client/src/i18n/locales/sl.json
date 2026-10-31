@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "Kvita",
-    "headline": "Vse poravnano. Vsak mesec.",
+    "headline": "Vse poravnano.\nVsak mesec.",
     "lead": "Najemnina, položnice in sporočila med najemodajalcem in najemnikom na enem mestu."
   },
   "slip": {
@@ -41,7 +41,9 @@
     "changeEmail": "Uporabi drug e-naslov",
     "devHint": "Razvoj: kodo najdeš v terminalu strežnika, v zadnjem bloku »E-mail za {{email}}«.",
     "logout": "Odjava",
-    "loggedOut": "Odjava uspela."
+    "loggedOut": "Odjava uspela.",
+    "stepEmail": "Korak 1 / 2",
+    "stepCode": "Korak 2 / 2"
   },
   "onboarding": {
     "title": "Kaj te pripelje v Kvito?",
@@ -426,7 +428,8 @@
     "qrUnavailable": {
       "PAYEE_ADDRESS_MISSING": "Koda QR ni na voljo, ker prejemnik nima vpisanega naslova. Uporabi gumbe Kopiraj.",
       "OTHER": "Koda QR za to plačilo ni na voljo. Uporabi gumbe Kopiraj."
-    }
+    },
+    "panelLabel": "Podatki za plačilo"
   },
   "upnTest": {
     "title": "Preizkus kod UPN QR",
@@ -436,5 +439,18 @@
     "step2": "V bančni aplikaciji izberi »Plačaj z UPN QR« in skeniraj kodo.",
     "step3": "Primerjaj podatke z opisom pod kodo in zapiši, katera banka kaj prikaže.",
     "payload": "Vsebina kode (20 polj)"
+  },
+  "frame": {
+    "line1": "Najem, poravnan",
+    "line2": "Najemnine, položnice, sporočila",
+    "region": "SI",
+    "section": "01 / Prijava",
+    "cube1": "01 NAJEMNINA",
+    "cube2": "02 POLOŽNICE",
+    "cube3": "03 KVITA ✓",
+    "role": {
+      "LANDLORD": "Pregled najemodajalca",
+      "TENANT": "Moj najem"
+    }
   }
 }

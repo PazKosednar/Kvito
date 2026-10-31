@@ -65,7 +65,7 @@ export function AccountMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="flex size-11 items-center justify-center rounded-full bg-secondary text-sm font-bold text-secondary-foreground transition-colors hover:bg-accent focus-visible:outline-2"
+        className="flex size-11 items-center justify-center rounded-sm bg-secondary text-sm font-bold text-secondary-foreground transition-colors hover:bg-accent focus-visible:outline-2"
         aria-label={user.email}
       >
         {initials(user.name, user.email)}

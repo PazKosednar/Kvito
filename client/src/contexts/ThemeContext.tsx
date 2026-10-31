@@ -16,7 +16,8 @@ const media = () => window.matchMedia("(prefers-color-scheme: dark)");
 
 function readPreference(): ThemePreference {
   const saved = storage.get(STORAGE_KEYS.theme);
-  return saved === "light" || saved === "dark" ? saved : "system";
+  // Dark is the brand default; "system" only when the person chose it.
+  return saved === "light" || saved === "system" ? saved : "dark";
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

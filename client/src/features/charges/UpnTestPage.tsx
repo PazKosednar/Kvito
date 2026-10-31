@@ -24,7 +24,7 @@ export function UpnTestPage() {
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-8">
       <KvitaLogo withWordmark size="sm" />
-      <h1 className="mt-8 text-title font-bold">{t("upnTest.title")}</h1>
+      <h1 className="mt-8 text-title font-medium">{t("upnTest.title")}</h1>
       <div className="mt-3 max-w-[65ch] space-y-2 text-muted-foreground">
         <p>{t("upnTest.intro")}</p>
         <p className="font-medium text-destructive">{t("upnTest.warning")}</p>

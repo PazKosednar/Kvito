@@ -14,7 +14,7 @@ const STYLE: Record<ChargeStatus, string> = {
 export function ChargeStatusPill({ status, className }: { status: ChargeStatus; className?: string }) {
   const { t } = useTranslation();
   return (
-    <span className={cn("shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap", STYLE[status], className)}>
+    <span className={cn("shrink-0 rounded-sm px-2 py-1 font-mono text-[10px] font-medium tracking-[0.06em] uppercase whitespace-nowrap", STYLE[status], className)}>
       {t(`chargeStatus.${status}`)}
     </span>
   );

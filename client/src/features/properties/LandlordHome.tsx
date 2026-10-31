@@ -87,8 +87,8 @@ function LandlordStart() {
             <span
               className={
                 i === 0
-                  ? "tabular flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground"
-                  : "tabular flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-primary/25 text-sm font-bold text-primary"
+                  ? "tabular flex size-10 shrink-0 items-center justify-center rounded-sm bg-primary text-sm font-bold text-primary-foreground"
+                  : "tabular flex size-10 shrink-0 items-center justify-center rounded-sm border-2 border-primary/25 text-sm font-bold text-primary"
               }
             >
               {i + 1}

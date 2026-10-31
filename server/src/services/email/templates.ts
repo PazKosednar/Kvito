@@ -1,7 +1,7 @@
 import type { EmailMessage } from "./EmailSender.js";
 
 // Brand colors mirror client/src/styles/tokens.css (e-mail clients do not support CSS variables).
-const BRAND = { primary: "#4e40a0", text: "#1e1c2c", muted: "#63626e", bg: "#f9f7f4", card: "#ffffff", slip: "#fad1bb" };
+const BRAND = { primary: "#2f48ff", text: "#0e0e0e", muted: "#66655f", bg: "#eceae5", card: "#ffffff", slip: "#f1f0ec" };
 
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);

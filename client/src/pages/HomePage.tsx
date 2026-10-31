@@ -18,7 +18,7 @@ export function HomePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-title font-bold">{greeting}</h1>
+      <h1 className="text-title font-medium">{greeting}</h1>
       <IosInstallHint />
       {activeRole === "LANDLORD" ? <LandlordHome /> : <TenantHome />}
     </div>

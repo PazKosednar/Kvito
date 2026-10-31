@@ -47,7 +47,7 @@ export function ChargePage() {
     <>
       <div className="mb-6">
         <div className="flex items-start justify-between gap-3">
-          <h2 className="text-xl font-bold">{charge.title}</h2>
+          <h2 className="text-xl font-medium tracking-tight">{charge.title}</h2>
           <ChargeStatusPill status={shown.status} />
         </div>
         <p className="mt-1 text-muted-foreground">
@@ -86,7 +86,7 @@ function TenantShare({ charge, share, q }: { charge: Charge; share: ChargeShare;
   if (share.status === "CONFIRMED") {
     return (
       <div className="flex items-center gap-4 rounded-xl border bg-card p-5">
-        <KvitaStamp className="w-28 shrink-0" />
+        <KvitaStamp className="shrink-0" />
         <p className="text-muted-foreground">
           {t("charges.confirmedOn", { date: share.confirmedAt ? formatDate(share.confirmedAt) : "" })}
         </p>

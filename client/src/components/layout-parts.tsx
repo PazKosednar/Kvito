@@ -31,7 +31,7 @@ export function PageHeader({
       )}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-title font-bold text-balance">{title}</h1>
+          <h1 className="text-title font-medium text-balance">{title}</h1>
           {subtitle && <p className="mt-1 text-muted-foreground">{subtitle}</p>}
         </div>
         {action && <div className="shrink-0">{action}</div>}
@@ -53,10 +53,10 @@ export function Section({
   className?: string;
 }) {
   return (
-    <section className={cn("mt-8 first:mt-0", className)}>
+    <section className={cn("mt-10 first:mt-0", className)}>
       {(title || action) && (
         <div className="mb-3 flex items-center justify-between gap-3">
-          {title && <h2 className="text-lg font-semibold">{title}</h2>}
+          {title && <h2 className="label-mono">{title}</h2>}
           {action}
         </div>
       )}

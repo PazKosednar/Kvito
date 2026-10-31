@@ -105,7 +105,7 @@ export function ChipGroup<T extends string>({
             aria-pressed={on}
             onClick={() => onChange(on ? value.filter((v) => v !== o.value) : [...value, o.value])}
             className={cn(
-              "h-10 rounded-full border px-4 text-sm font-medium transition-colors",
+              "h-10 rounded-sm border px-4 text-sm font-medium transition-colors",
               on ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:border-primary/50",
             )}
           >

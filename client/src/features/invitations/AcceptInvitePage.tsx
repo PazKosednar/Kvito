@@ -35,7 +35,7 @@ export function AcceptInvitePage() {
   if (loadError) {
     body = (
       <>
-        <h1 className="text-title font-bold">{t("acceptInvite.notFoundTitle")}</h1>
+        <h1 className="text-title font-medium">{t("acceptInvite.notFoundTitle")}</h1>
         <p className="mt-3 text-muted-foreground">{t("acceptInvite.notFoundBody")}</p>
       </>
     );
@@ -44,7 +44,7 @@ export function AcceptInvitePage() {
   } else if (preview.state !== "PENDING") {
     body = (
       <>
-        <h1 className="text-title font-bold">{t(`acceptInvite.state.${preview.state}`)}</h1>
+        <h1 className="text-title font-medium">{t(`acceptInvite.state.${preview.state}`)}</h1>
         <p className="mt-3 text-muted-foreground">{t("acceptInvite.askNew")}</p>
       </>
     );
@@ -55,7 +55,7 @@ export function AcceptInvitePage() {
         <p className="text-muted-foreground">
           {t("acceptInvite.from", { name: preview.landlordName ?? t("acceptInvite.yourLandlord") })}
         </p>
-        <h1 className="mt-2 text-title font-bold text-balance">{t("acceptInvite.title")}</h1>
+        <h1 className="mt-2 text-title font-medium text-balance">{t("acceptInvite.title")}</h1>
         <div className="mt-6 rounded-xl bg-slip p-5 text-slip-foreground">
           <p className="text-lg font-bold">{preview.unitName}</p>
           <p className="mt-1">{preview.propertyName}</p>

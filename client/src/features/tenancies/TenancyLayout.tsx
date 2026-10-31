@@ -35,7 +35,7 @@ export function TenancyLayout() {
         <p className="text-sm text-muted-foreground">
           {tenancy.unit.property.name}, {tenancy.unit.property.street}, {tenancy.unit.property.city}
         </p>
-        <h1 className="mt-1 text-title font-bold">{tenancy.unit.name}</h1>
+        <h1 className="mt-1 text-title font-medium">{tenancy.unit.name}</h1>
       </div>
       <nav
         aria-label={t("tenancies.sections")}

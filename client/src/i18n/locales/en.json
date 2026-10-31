@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "Kvita",
-    "headline": "All settled. Every month.",
+    "headline": "All settled.\nEvery month.",
     "lead": "Rent, bills and messages between landlord and tenant in one place."
   },
   "slip": {
@@ -41,7 +41,9 @@
     "changeEmail": "Use another e-mail",
     "devHint": "Development: the code is in the server terminal, in the latest “E-mail za {{email}}” block.",
     "logout": "Sign out",
-    "loggedOut": "Signed out."
+    "loggedOut": "Signed out.",
+    "stepEmail": "Step 1 / 2",
+    "stepCode": "Step 2 / 2"
   },
   "onboarding": {
     "title": "What brings you to Kvita?",
@@ -420,7 +422,8 @@
     "qrUnavailable": {
       "PAYEE_ADDRESS_MISSING": "No QR code: the payee has no address. Use the Copy buttons.",
       "OTHER": "No QR code for this payment. Use the Copy buttons."
-    }
+    },
+    "panelLabel": "Payment details"
   },
   "upnTest": {
     "title": "UPN QR test",
@@ -430,5 +433,18 @@
     "step2": "In your banking app choose “Pay with UPN QR” and scan the code.",
     "step3": "Compare the details with the description and note what each bank shows.",
     "payload": "Code content (20 fields)"
+  },
+  "frame": {
+    "line1": "Renting, settled",
+    "line2": "Rent, bills, messages",
+    "region": "SI",
+    "section": "01 / Sign in",
+    "cube1": "01 RENT",
+    "cube2": "02 BILLS",
+    "cube3": "03 KVITA ✓",
+    "role": {
+      "LANDLORD": "Landlord overview",
+      "TENANT": "My tenancy"
+    }
   }
 }

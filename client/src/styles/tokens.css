@@ -2,105 +2,108 @@
  * Kvita design tokens – the ONLY place where colors are defined.
  * shadcn/ui and Tailwind read these variables (see index.css @theme).
  *
- * Palette idea: a violet rubber-stamp ink ("žig") on clean paper, with the salmon tint
- * of the Slovenian UPN payment slip for anything that is about paying.
- *   stamp   #4F3FA3  primary actions, the "Kvita ✓" stamp
- *   ink     #1C1A2B  text
- *   paper   #F8F7F4  app background
- *   slip    #F6D3BF  payment slips / payment data
- *   brick   #B8432F  overdue, destructive
- *   moss    #2E7451  confirmed / settled
+ * Visual language (owner's brief, Nov 2026): off-black surfaces locked to a strict grid, hairline borders
+ * instead of shadows, small monospace labels, one electric-blue accent used sparingly.
+ * Dark is the default; the light variant uses warm grey paper.
  *
- * To rebrand: change the values below (and THEME_COLOR in vite.config.ts, the theme-color
- * meta tags in index.html and BRAND in server e-mail templates).
+ *   ink-0   #0B0B0B  background (dark)
+ *   ink-1   #131313  surfaces
+ *   bone    #ECEAE5  background (light) / payment panels in dark mode
+ *   volt    #2F48FF  the single accent (primary actions, "Kvita ✓")
+ *
+ * To rebrand: change the values below (and THEME_COLOR in vite.config.ts, theme-color in index.html,
+ * the logo color in public/logo.svg + pwa-assets.config.ts, BRAND in server e-mail templates).
  */
 
 :root {
-  --radius: 0.75rem;
+  --radius: 0.25rem;
 
-  --background: oklch(0.977 0.004 85); /* paper #F8F7F4 */
-  --foreground: oklch(0.236 0.03 290); /* ink #1C1A2B */
+  --background: #eceae5;
+  --foreground: #0e0e0e;
 
-  --card: oklch(1 0 0);
+  --card: #f5f4f0;
   --card-foreground: var(--foreground);
-  --popover: oklch(1 0 0);
+  --popover: #fafaf8;
   --popover-foreground: var(--foreground);
 
-  --primary: oklch(0.44 0.15 285); /* stamp #4F3FA3 */
-  --primary-foreground: oklch(0.985 0.005 290);
+  --primary: #2337f0;
+  --primary-foreground: #ffffff;
 
-  --secondary: oklch(0.945 0.012 290);
-  --secondary-foreground: oklch(0.33 0.08 285);
+  --secondary: #e0ded8;
+  --secondary-foreground: #0e0e0e;
 
-  --muted: oklch(0.948 0.005 85);
-  --muted-foreground: oklch(0.5 0.02 290);
+  --muted: #e4e2dc;
+  --muted-foreground: #66655f;
 
-  --accent: oklch(0.94 0.02 290);
-  --accent-foreground: oklch(0.3 0.09 285);
+  --accent: #dfddd6;
+  --accent-foreground: #0e0e0e;
 
-  --destructive: oklch(0.53 0.15 35); /* brick #B8432F */
-  --destructive-foreground: oklch(0.985 0.005 40);
+  --destructive: #d8361f;
+  --destructive-foreground: #ffffff;
 
-  /* Payment slip (UPN salmon). */
-  --slip: oklch(0.89 0.055 50); /* #F6D3BF */
-  --slip-foreground: oklch(0.3 0.05 40);
-  --slip-line: oklch(0.72 0.08 45);
-  --slip-field: oklch(1 0 0 / 0.75);
+  /* Payment panels (UPN data): a light inset sheet. */
+  --slip: #ffffff;
+  --slip-foreground: #0e0e0e;
+  --slip-line: rgb(0 0 0 / 0.16);
+  --slip-field: #f1f0ec;
 
-  /* Charge states and the "Kvita ✓" stamp. */
-  --success: oklch(0.5 0.09 155); /* moss #2E7451 */
-  --success-foreground: oklch(0.985 0.01 155);
-  --warning: oklch(0.8 0.13 80);
-  --warning-foreground: oklch(0.32 0.06 60);
-  --info: oklch(0.55 0.09 250);
-  --info-foreground: oklch(0.985 0 0);
-  --stamp: var(--primary);
+  --success: #13814a;
+  --success-foreground: #ffffff;
+  --warning: #b77900;
+  --warning-foreground: #ffffff;
+  --info: #2337f0;
+  --info-foreground: #ffffff;
+  --stamp: #2337f0;
 
-  --border: oklch(0.9 0.008 290);
-  --input: oklch(0.86 0.012 290);
-  --ring: oklch(0.55 0.15 285);
+  --border: rgb(0 0 0 / 0.1);
+  --input: rgb(0 0 0 / 0.16);
+  --ring: #2337f0;
+
+  /* Structural grid lines (decorative frame). */
+  --grid: rgb(0 0 0 / 0.07);
 }
 
 .dark {
-  --background: oklch(0.19 0.02 290);
-  --foreground: oklch(0.94 0.008 290);
+  --background: #0b0b0b;
+  --foreground: #ededea;
 
-  --card: oklch(0.235 0.024 290);
+  --card: #131313;
   --card-foreground: var(--foreground);
-  --popover: oklch(0.25 0.026 290);
+  --popover: #181818;
   --popover-foreground: var(--foreground);
 
-  --primary: oklch(0.74 0.12 285);
-  --primary-foreground: oklch(0.2 0.04 285);
+  --primary: #2f48ff;
+  --primary-foreground: #ffffff;
 
-  --secondary: oklch(0.29 0.03 290);
-  --secondary-foreground: oklch(0.92 0.02 290);
+  --secondary: #1e1e1e;
+  --secondary-foreground: #ededea;
 
-  --muted: oklch(0.255 0.02 290);
-  --muted-foreground: oklch(0.72 0.02 290);
+  --muted: #161616;
+  --muted-foreground: #8b8b86;
 
-  --accent: oklch(0.3 0.04 288);
-  --accent-foreground: oklch(0.94 0.02 290);
+  --accent: #1c1c1c;
+  --accent-foreground: #ffffff;
 
-  --destructive: oklch(0.68 0.15 35);
-  --destructive-foreground: oklch(0.18 0.03 35);
+  --destructive: #ff5a44;
+  --destructive-foreground: #0b0b0b;
 
-  /* The slip is a physical object: it stays light paper in dark mode too. */
-  --slip: oklch(0.83 0.06 48);
-  --slip-foreground: oklch(0.28 0.05 40);
-  --slip-line: oklch(0.62 0.08 45);
-  --slip-field: oklch(0.97 0.012 60 / 0.85);
+  /* In the dark UI the payment panel is a bone-coloured sheet – the one light surface on screen. */
+  --slip: #e6e4df;
+  --slip-foreground: #0e0e0e;
+  --slip-line: rgb(0 0 0 / 0.18);
+  --slip-field: #f3f2ee;
 
-  --success: oklch(0.72 0.11 155);
-  --success-foreground: oklch(0.2 0.03 155);
-  --warning: oklch(0.82 0.12 80);
-  --warning-foreground: oklch(0.24 0.05 60);
-  --info: oklch(0.72 0.09 250);
-  --info-foreground: oklch(0.16 0.02 250);
-  /* Stamp ink is pressed onto the (light) slip, so it keeps its light-mode color. */
-  --stamp: oklch(0.44 0.15 285);
+  --success: #5bd38a;
+  --success-foreground: #0b0b0b;
+  --warning: #f2c94c;
+  --warning-foreground: #0b0b0b;
+  --info: #8c9bff;
+  --info-foreground: #0b0b0b;
+  --stamp: #2f48ff;
 
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.7 0.12 285);
+  --border: rgb(255 255 255 / 0.09);
+  --input: rgb(255 255 255 / 0.14);
+  --ring: #2f48ff;
+
+  --grid: rgb(255 255 255 / 0.06);
 }

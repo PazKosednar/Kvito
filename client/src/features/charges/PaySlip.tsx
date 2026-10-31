@@ -47,11 +47,14 @@ export function PaySlip({ chargeId, shareId }: { chargeId: string; shareId: stri
 
   return (
     <div>
-      <div className="slip-perforation h-2 bg-slip" />
-      <div className="rounded-b-xl bg-slip px-4 pt-4 pb-5 text-slip-foreground">
+      <div className="rounded-md bg-slip px-4 pt-3 pb-5 text-slip-foreground">
+        <div className="mb-4 flex items-center justify-between border-b border-slip-line pb-3 font-mono text-[11px] tracking-[0.06em] uppercase opacity-70">
+          <span>{t("pay.panelLabel")}</span>
+          <span>UPN QR</span>
+        </div>
         <div className="flex items-baseline justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm opacity-80">{t("pay.payee")}</p>
+            <p className="font-mono text-[11px] tracking-[0.06em] uppercase opacity-70">{t("pay.payee")}</p>
             <p className="truncate font-semibold">{payment.payeeName}</p>
             {payment.payeeAddress && <p className="truncate text-sm opacity-80">{payment.payeeAddress}</p>}
           </div>
@@ -104,9 +107,9 @@ function CopyRow({ label, display, value }: { label: string; display: string; va
   const { t } = useTranslation();
   const { copied, copy } = useCopyToClipboard(1500);
   return (
-    <li className="flex items-center gap-2 rounded-md bg-slip-field pl-3">
+    <li className="flex items-center gap-2 rounded-sm border border-slip-line bg-slip-field pl-3">
       <span className="min-w-0 flex-1 py-2">
-        <span className="block text-xs opacity-75">{label}</span>
+        <span className="block font-mono text-[10px] tracking-[0.06em] uppercase opacity-60">{label}</span>
         <span className="block truncate font-semibold">{display}</span>
       </span>
       <button

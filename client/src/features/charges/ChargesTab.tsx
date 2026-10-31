@@ -56,7 +56,7 @@ function TenantCharges({ charges, memberId, kvita }: { charges: Charge[]; member
     <>
       {kvita && toPay.length === 0 && waiting.length === 0 && (
         <div className="mb-8 flex items-center gap-4 rounded-xl border bg-card p-5">
-          <KvitaStamp className="w-32 shrink-0" />
+          <KvitaStamp className="shrink-0" />
           <div>
             <p className="font-semibold">{t("charges.kvitaTitle")}</p>
             <p className="text-sm text-muted-foreground">{t("charges.kvitaBody")}</p>

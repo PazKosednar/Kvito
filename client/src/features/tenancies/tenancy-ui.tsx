@@ -11,7 +11,7 @@ export function TenancyStatusLabel({ status }: { status: TenancyStatus }) {
   return (
     <span
       className={cn(
-        "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold",
+        "shrink-0 rounded-sm px-2 py-1 font-mono text-[10px] font-medium tracking-[0.06em] uppercase",
         status === "ACTIVE" && "bg-success/12 text-success",
         status === "ENDED" && "bg-muted text-muted-foreground",
         status === "DRAFT" && "bg-warning/20 text-warning-foreground",
