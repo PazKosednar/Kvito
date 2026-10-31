@@ -49,6 +49,14 @@ describe("api client", () => {
     expect(useAuthStore.getState().status).toBe("anonymous");
   });
 
+  it("keeps the session when the server is unreachable during refresh", async () => {
+    fetchMock
+      .mockResolvedValueOnce(json(401, { error: { code: "TOKEN_INVALID" } }))
+      .mockResolvedValueOnce(json(502, { error: { code: "BAD_GATEWAY" } }));
+    await expect(api("/api/me")).rejects.toMatchObject({ code: "NETWORK" });
+    expect(useAuthStore.getState().status).toBe("authenticated");
+  });
+
   it("shares a single refresh request between concurrent callers", async () => {
     let resolve!: (r: Response) => void;
     fetchMock.mockReturnValueOnce(new Promise<Response>((r) => (resolve = r)));

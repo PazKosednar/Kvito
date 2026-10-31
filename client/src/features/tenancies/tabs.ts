@@ -3,5 +3,8 @@ export const TENANCY_TABS: { path: string; label: string; landlordOnly?: boolean
   { path: "", label: "tabs.charges" },
   { path: "sporocila", label: "tabs.messages", badge: "unread" },
   { path: "okvare", label: "tabs.issues" },
+  { path: "stevci", label: "tabs.meters" },
+  { path: "dokumenti", label: "tabs.documents" },
+  { path: "primopredaja", label: "tabs.handover" },
   { path: "podatki", label: "tabs.details" },
 ];

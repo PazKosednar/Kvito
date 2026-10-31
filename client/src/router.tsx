@@ -11,6 +11,10 @@ import { IssueFormPage } from "@/features/issues/IssueFormPage";
 import { IssuePage } from "@/features/issues/IssuePage";
 import { IssuesTab } from "@/features/issues/IssuesTab";
 import { MessagesTab } from "@/features/messages/MessagesTab";
+import { DocumentsTab } from "@/features/documents/DocumentsTab";
+import { HandoverPage } from "@/features/handover/HandoverPage";
+import { HandoverTab } from "@/features/handover/HandoverTab";
+import { MetersTab } from "@/features/meters/MetersTab";
 import { PropertyFormPage } from "@/features/properties/PropertyFormPage";
 import { PropertyPage } from "@/features/properties/PropertyPage";
 import { InvitePage } from "@/features/tenancies/InvitePage";
@@ -53,6 +57,10 @@ export const router = createBrowserRouter([
               { path: "okvare", element: <IssuesTab /> },
               { path: "okvare/nova", element: <IssueFormPage /> },
               { path: "okvare/:issueId", element: <IssuePage /> },
+              { path: "stevci", element: <MetersTab /> },
+              { path: "dokumenti", element: <DocumentsTab /> },
+              { path: "primopredaja", element: <HandoverTab /> },
+              { path: "primopredaja/:handoverId", element: <HandoverPage /> },
               { path: "podatki", element: <TenancyDetailsTab /> },
             ],
           },

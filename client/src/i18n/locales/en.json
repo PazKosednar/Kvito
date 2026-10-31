@@ -23,7 +23,8 @@
     "you": "you",
     "retry": "Try again",
     "remove": "Remove",
-    "errorLabel": "Error"
+    "errorLabel": "Error",
+    "saved": "Saved."
   },
   "auth": {
     "title": "Sign in",
@@ -144,7 +145,11 @@
     "SUPPLIER_PAYEE_REQUIRED": "Enter the supplier's name and IBAN.",
     "FILE_LINK_EXPIRED": "The file link expired. Refresh the page.",
     "EMPTY_MESSAGE": "The message is empty.",
-    "LINK_INVALID": "The link to a charge or repair is not valid."
+    "LINK_INVALID": "The link to a charge or repair is not valid.",
+    "INVALID_METER_VALUE": "The meter reading is not valid.",
+    "PART_OF_HANDOVER": "This reading is part of a handover record.",
+    "HANDOVER_LOCKED": "The record is awaiting confirmation or confirmed, so it can't be changed.",
+    "HANDOVER_EMPTY": "The record is empty. Add at least one item."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -158,13 +163,17 @@
     "INVALID_REFERENCE": "The reference must look like SI00 … or RF.. (with valid check digits).",
     "INVALID_PURPOSE_CODE": "The purpose code has 4 capital letters.",
     "SUPPLIER_PAYEE_REQUIRED": "Enter the supplier's name and IBAN.",
-    "EMPTY_MESSAGE": "Write a message or attach a file."
+    "EMPTY_MESSAGE": "Write a message or attach a file.",
+    "INVALID_METER_VALUE": "Enter a reading, e.g. 12345 or 12345.6."
   },
   "tabs": {
     "details": "Details",
     "charges": "Charges",
     "messages": "Messages",
-    "issues": "Repairs"
+    "issues": "Repairs",
+    "meters": "Meters",
+    "documents": "Documents",
+    "handover": "Handover"
   },
   "properties": {
     "add": "Add a property",
@@ -565,5 +574,148 @@
     "noComments": "No comments yet.",
     "commentPlaceholder": "Write a comment …",
     "addComment": "Comment"
+  },
+  "meterType": {
+    "ELECTRICITY": "Electricity",
+    "WATER": "Water",
+    "GAS": "Gas",
+    "HEAT": "Heat"
+  },
+  "meters": {
+    "add": "Add reading",
+    "type": "Meter",
+    "value": "Reading ({{unit}})",
+    "date": "Reading date",
+    "label": "Meter label",
+    "labelHint": "Optional, e.g. “hot water” or the meter number.",
+    "photo": "Photo of the meter",
+    "save": "Save reading",
+    "saved": "Reading saved.",
+    "lowerWarning": "This reading is lower than the previous one. Check the digits, or add a note if the meter was replaced.",
+    "emptyTitle": "No readings yet",
+    "emptyBody": "Enter electricity, water, gas or heat readings. A photo of the meter avoids doubts.",
+    "lowerThanBefore": "Lower than the previous reading.",
+    "usedSince": "Used since {{date}}: {{amount}}",
+    "history": "History ({{count}})",
+    "footnote": "Readings stay with the unit, even when tenants change."
+  },
+  "documentCategory": {
+    "CONTRACT": "Contract",
+    "ANNEX": "Annexes",
+    "HOUSE_RULES": "House rules",
+    "MANUAL": "Appliance manuals",
+    "OTHER": "Other"
+  },
+  "documentVisibility": {
+    "TENANTS": "Visible to tenants",
+    "LANDLORD_ONLY": "Only me"
+  },
+  "documents": {
+    "add": "Add document",
+    "emptyTitle": "No documents yet",
+    "emptyLandlord": "Add the contract, house rules or appliance manuals. You choose what tenants see.",
+    "emptyTenant": "When your landlord adds the contract or manuals, they show up here.",
+    "category": "Type",
+    "title": "Title",
+    "visibility": "Visibility",
+    "visibilityHint": {
+      "TENANTS": "Tenants can see and download it.",
+      "LANDLORD_ONLY": "Only you can see it."
+    },
+    "scope": "Applies to",
+    "scopeOption": {
+      "TENANCY": "This tenancy",
+      "UNIT": "The unit"
+    },
+    "scopeHint": {
+      "TENANCY": "For example the contract or an annex.",
+      "UNIT": "Stays with the flat for future tenants, e.g. appliance manuals."
+    },
+    "chooseFile": "Choose file",
+    "save": "Save document",
+    "added": "Document added.",
+    "forUnit": "for the unit",
+    "toggleVisibility": "Change visibility",
+    "delete": "Delete document",
+    "confirmDelete": "Delete “{{title}}”?"
+  },
+  "handoverKind": {
+    "MOVE_IN": "Move-in",
+    "MOVE_OUT": "Move-out"
+  },
+  "handoverStatus": {
+    "DRAFT": "Draft",
+    "AWAITING_CONFIRMATION": "Awaiting confirmation",
+    "CONFIRMED": "Confirmed"
+  },
+  "condition": {
+    "GOOD": "Good",
+    "WORN": "Worn",
+    "DAMAGED": "Damaged",
+    "MISSING": "Missing"
+  },
+  "handover": {
+    "new": "New record",
+    "kind": "Type",
+    "date": "Handover date",
+    "start": "Start record",
+    "emptyTitle": "No record yet",
+    "emptyLandlord": "At move-in and move-out, record rooms, appliances, meters and keys together. Both confirm, both keep the PDF.",
+    "emptyTenant": "When your landlord prepares the move-in record, you review and confirm it here.",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items",
+    "record": "Record",
+    "confirmations": "Confirmations",
+    "confirmedAt": "Confirmed {{at}}",
+    "pending": "Not confirmed yet",
+    "next": {
+      "LANDLORD": {
+        "DRAFT": "Enter keys, meters and the state of the rooms, then send the record to your tenant for confirmation.",
+        "AWAITING_CONFIRMATION": "Waiting for your tenant to confirm the record.",
+        "CONFIRMED": "Both sides confirmed. The record can no longer be changed."
+      },
+      "TENANT": {
+        "DRAFT": "Your landlord is still preparing the record.",
+        "AWAITING_CONFIRMATION": "Review the record. Confirm it if you agree, or send it back if something is off.",
+        "CONFIRMED": "Both sides confirmed. You can download the record as a PDF."
+      }
+    },
+    "submit": "Send for confirmation",
+    "submitted": "Record sent for confirmation.",
+    "confirm": "I confirm the record",
+    "confirmPrompt": "Confirm the record? It can't be changed afterwards.",
+    "confirmedToast": "Record confirmed.",
+    "edit": "Keep editing",
+    "requestChanges": "Send back for changes",
+    "reopened": "The record is a draft again.",
+    "pdf": "Download PDF",
+    "keys": "Keys",
+    "keysCount": "Number of keys: {{count}}",
+    "keysMissing": "Number of keys not entered.",
+    "keysCountLabel": "Number",
+    "keysNoteLabel": "Description",
+    "meters": "Meters",
+    "noMeters": "No readings entered.",
+    "items": "Rooms and appliances",
+    "noItems": "No items yet. Add a room and its appliances below.",
+    "addItem": "New item",
+    "room": "Room",
+    "itemName": "Appliance or part of the room",
+    "itemPlaceholder": "For example “Cooker” or “Walls”",
+    "condition": "Condition",
+    "itemNote": "Note",
+    "addItemButton": "Add item",
+    "notes": "Notes",
+    "notesPlaceholder": "General notes …",
+    "roomSuggestions": [
+      "Hallway",
+      "Kitchen",
+      "Living room",
+      "Bedroom",
+      "Bathroom",
+      "Toilet",
+      "Balcony",
+      "Cellar"
+    ]
   }
 }

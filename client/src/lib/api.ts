@@ -17,17 +17,25 @@ interface RequestOptions {
 
 let refreshInFlight: Promise<string | null> | null = null;
 
-/** Exchanges the httpOnly refresh cookie for a new access token. Concurrent callers share one request. */
+/**
+ * Exchanges the httpOnly refresh cookie for a new access token. Concurrent callers share one request.
+ * Returns null only when the server REJECTS the session (401/403). A network error or a server that is
+ * restarting (5xx) throws ApiError("NETWORK") – that must never sign the person out.
+ */
 export function refreshAccessToken(): Promise<string | null> {
   refreshInFlight ??= (async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/auth/refresh`, { method: "POST", credentials: "include" });
-      if (!res.ok) return null;
+      let res: Response;
+      try {
+        res = await fetch(`${API_BASE_URL}/api/auth/refresh`, { method: "POST", credentials: "include" });
+      } catch {
+        throw new ApiError(0, "NETWORK");
+      }
+      if (res.status === 401 || res.status === 403) return null;
+      if (!res.ok) throw new ApiError(res.status, "NETWORK");
       const { accessToken } = (await res.json()) as { accessToken: string };
       useAuthStore.getState().setAccessToken(accessToken);
       return accessToken;
-    } catch {
-      return null;
     } finally {
       refreshInFlight = null;
     }
@@ -65,6 +73,7 @@ async function request(path: string, options: RequestOptions): Promise<Response>
     }
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") throw err;
+    if (err instanceof ApiError) throw err;
     throw new ApiError(0, "NETWORK");
   }
 

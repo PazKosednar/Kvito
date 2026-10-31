@@ -23,7 +23,8 @@
     "you": "ti",
     "retry": "Poskusi znova",
     "remove": "Odstrani",
-    "errorLabel": "Napaka"
+    "errorLabel": "Napaka",
+    "saved": "Shranjeno."
   },
   "auth": {
     "title": "Prijava",
@@ -144,7 +145,11 @@
     "SUPPLIER_PAYEE_REQUIRED": "Vpiši prejemnika in IBAN dobavitelja.",
     "FILE_LINK_EXPIRED": "Povezava do datoteke je potekla. Osveži stran.",
     "EMPTY_MESSAGE": "Sporočilo je prazno.",
-    "LINK_INVALID": "Povezava na obveznost ali okvaro ni veljavna."
+    "LINK_INVALID": "Povezava na obveznost ali okvaro ni veljavna.",
+    "INVALID_METER_VALUE": "Stanje števca ni pravilno.",
+    "PART_OF_HANDOVER": "Odčitek je del zapisnika primopredaje.",
+    "HANDOVER_LOCKED": "Zapisnik čaka potrditev ali je potrjen, zato ga ni mogoče spreminjati.",
+    "HANDOVER_EMPTY": "Zapisnik je prazen. Dodaj vsaj eno postavko."
   },
   "validation": {
     "invalid": "Vrednost ni pravilna.",
@@ -158,13 +163,17 @@
     "INVALID_REFERENCE": "Sklic mora biti v obliki SI00 … ali RF.. (s pravilno kontrolno števko).",
     "INVALID_PURPOSE_CODE": "Koda namena ima 4 velike črke.",
     "SUPPLIER_PAYEE_REQUIRED": "Vpiši prejemnika in IBAN dobavitelja.",
-    "EMPTY_MESSAGE": "Napiši sporočilo ali priloži datoteko."
+    "EMPTY_MESSAGE": "Napiši sporočilo ali priloži datoteko.",
+    "INVALID_METER_VALUE": "Vpiši stanje, na primer 12345 ali 12345,6."
   },
   "tabs": {
     "details": "Podatki",
     "charges": "Obveznosti",
     "messages": "Sporočila",
-    "issues": "Okvare"
+    "issues": "Okvare",
+    "meters": "Števci",
+    "documents": "Dokumenti",
+    "handover": "Primopredaja"
   },
   "properties": {
     "add": "Dodaj nepremičnino",
@@ -575,5 +584,150 @@
     "noComments": "Še ni komentarjev.",
     "commentPlaceholder": "Napiši komentar …",
     "addComment": "Komentiraj"
+  },
+  "meterType": {
+    "ELECTRICITY": "Elektrika",
+    "WATER": "Voda",
+    "GAS": "Plin",
+    "HEAT": "Toplota"
+  },
+  "meters": {
+    "add": "Vnesi odčitek",
+    "type": "Števec",
+    "value": "Stanje ({{unit}})",
+    "date": "Datum odčitka",
+    "label": "Oznaka števca",
+    "labelHint": "Neobvezno, na primer »topla voda« ali številka števca.",
+    "photo": "Fotografija števca",
+    "save": "Shrani odčitek",
+    "saved": "Odčitek je shranjen.",
+    "lowerWarning": "Odčitek je nižji od prejšnjega. Preveri številke ali dodaj opombo, če je bil števec zamenjan.",
+    "emptyTitle": "Še ni odčitkov",
+    "emptyBody": "Vnesi stanje elektrike, vode, plina ali toplote. Fotografija števca prepreči dvome.",
+    "lowerThanBefore": "Nižje kot pri prejšnjem odčitku.",
+    "usedSince": "Poraba od {{date}}: {{amount}}",
+    "history": "Zgodovina ({{count}})",
+    "footnote": "Odčitki ostanejo pri enoti, tudi ko se najemniki zamenjajo."
+  },
+  "documentCategory": {
+    "CONTRACT": "Pogodba",
+    "ANNEX": "Aneksi",
+    "HOUSE_RULES": "Hišni red",
+    "MANUAL": "Navodila naprav",
+    "OTHER": "Drugo"
+  },
+  "documentVisibility": {
+    "TENANTS": "Vidno najemnikom",
+    "LANDLORD_ONLY": "Samo zame"
+  },
+  "documents": {
+    "add": "Dodaj dokument",
+    "emptyTitle": "Še ni dokumentov",
+    "emptyLandlord": "Dodaj pogodbo, hišni red ali navodila naprav. Sam izbereš, kaj vidijo najemniki.",
+    "emptyTenant": "Ko najemodajalec doda pogodbo ali navodila, so tukaj.",
+    "category": "Vrsta",
+    "title": "Naziv",
+    "visibility": "Vidnost",
+    "visibilityHint": {
+      "TENANTS": "Najemniki vidijo in prenesejo dokument.",
+      "LANDLORD_ONLY": "Vidiš ga samo ti."
+    },
+    "scope": "Velja za",
+    "scopeOption": {
+      "TENANCY": "Ta najem",
+      "UNIT": "Enoto"
+    },
+    "scopeHint": {
+      "TENANCY": "Na primer pogodba ali aneks.",
+      "UNIT": "Ostane pri stanovanju tudi za naslednje najemnike, na primer navodila naprav."
+    },
+    "chooseFile": "Izberi datoteko",
+    "save": "Shrani dokument",
+    "added": "Dokument je dodan.",
+    "forUnit": "za enoto",
+    "toggleVisibility": "Spremeni vidnost",
+    "delete": "Izbriši dokument",
+    "confirmDelete": "Izbrišem dokument »{{title}}«?"
+  },
+  "handoverKind": {
+    "MOVE_IN": "Vselitev",
+    "MOVE_OUT": "Izselitev"
+  },
+  "handoverStatus": {
+    "DRAFT": "V pripravi",
+    "AWAITING_CONFIRMATION": "Čaka potrditev",
+    "CONFIRMED": "Potrjeno"
+  },
+  "condition": {
+    "GOOD": "Brezhibno",
+    "WORN": "Obrabljeno",
+    "DAMAGED": "Poškodovano",
+    "MISSING": "Manjka"
+  },
+  "handover": {
+    "new": "Nov zapisnik",
+    "kind": "Vrsta",
+    "date": "Datum primopredaje",
+    "start": "Začni zapisnik",
+    "emptyTitle": "Še ni zapisnika",
+    "emptyLandlord": "Ob vselitvi in izselitvi skupaj zapišita stanje prostorov, opreme, števcev in ključev. Oba potrdita, PDF ostane obema.",
+    "emptyTenant": "Ko najemodajalec pripravi zapisnik o vselitvi, ga tu pregledaš in potrdiš.",
+    "itemsCount_one": "{{count}} postavka",
+    "itemsCount_two": "{{count}} postavki",
+    "itemsCount_few": "{{count}} postavke",
+    "itemsCount_other": "{{count}} postavk",
+    "record": "Zapisnik",
+    "confirmations": "Potrditve",
+    "confirmedAt": "Potrjeno {{at}}",
+    "pending": "Še ni potrjeno",
+    "next": {
+      "LANDLORD": {
+        "DRAFT": "Vpiši ključe, števce in stanje prostorov, nato zapisnik pošlji najemniku v potrditev.",
+        "AWAITING_CONFIRMATION": "Zapisnik čaka, da ga najemnik potrdi.",
+        "CONFIRMED": "Obe strani sta potrdili. Zapisnika ni več mogoče spreminjati."
+      },
+      "TENANT": {
+        "DRAFT": "Najemodajalec še pripravlja zapisnik.",
+        "AWAITING_CONFIRMATION": "Preglej zapisnik. Če se strinjaš, ga potrdi. Če kaj ni prav, ga vrni v popravek.",
+        "CONFIRMED": "Obe strani sta potrdili. Zapisnik lahko preneseš kot PDF."
+      }
+    },
+    "submit": "Pošlji v potrditev",
+    "submitted": "Zapisnik je poslan v potrditev.",
+    "confirm": "Potrjujem zapisnik",
+    "confirmPrompt": "Potrdim zapisnik? Po potrditvi ga ni več mogoče spreminjati.",
+    "confirmedToast": "Zapisnik je potrjen.",
+    "edit": "Uredi naprej",
+    "requestChanges": "Vrni v popravek",
+    "reopened": "Zapisnik je spet v pripravi.",
+    "pdf": "Prenesi PDF",
+    "keys": "Ključi",
+    "keysCount": "Število ključev: {{count}}",
+    "keysMissing": "Število ključev ni vpisano.",
+    "keysCountLabel": "Število",
+    "keysNoteLabel": "Opis",
+    "meters": "Števci",
+    "noMeters": "Ni vpisanih odčitkov.",
+    "items": "Prostori in oprema",
+    "noItems": "Še ni postavk. Dodaj prostor in opremo spodaj.",
+    "addItem": "Nova postavka",
+    "room": "Prostor",
+    "itemName": "Oprema ali del prostora",
+    "itemPlaceholder": "Na primer »Štedilnik« ali »Stene«",
+    "condition": "Stanje",
+    "itemNote": "Opomba",
+    "addItemButton": "Dodaj postavko",
+    "notes": "Opombe",
+    "notesPlaceholder": "Splošne opombe k zapisniku …",
+    "roomSuggestions": [
+      "Hodnik",
+      "Kuhinja",
+      "Dnevna soba",
+      "Spalnica",
+      "Kopalnica",
+      "Stranišče",
+      "Balkon",
+      "Klet"
+    ]
   }
 }

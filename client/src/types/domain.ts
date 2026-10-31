@@ -266,3 +266,77 @@ export interface Issue extends Omit<IssueSummary, "_count"> {
   attachments: Attachment[];
   comments: IssueComment[];
 }
+// ---------- Meters, documents, handover (Phase 4) ----------
+
+export type MeterType = "ELECTRICITY" | "WATER" | "GAS" | "HEAT";
+export const METER_TYPES: MeterType[] = ["ELECTRICITY", "WATER", "GAS", "HEAT"];
+export const METER_UNITS: Record<MeterType, string> = { ELECTRICITY: "kWh", WATER: "m³", GAS: "m³", HEAT: "kWh" };
+
+export interface MeterReading {
+  id: string;
+  unitId: string;
+  tenancyId: string | null;
+  handoverId: string | null;
+  meterType: MeterType;
+  meterLabel: string | null;
+  value: string;
+  valueMilli: number;
+  readOn: string;
+  note: string | null;
+  recordedBy: PersonRef;
+  createdAt: string;
+  attachments: Attachment[];
+}
+
+export type DocumentCategory = "CONTRACT" | "ANNEX" | "HOUSE_RULES" | "MANUAL" | "OTHER";
+export const DOCUMENT_CATEGORIES: DocumentCategory[] = ["CONTRACT", "ANNEX", "HOUSE_RULES", "MANUAL", "OTHER"];
+export type DocumentVisibility = "LANDLORD_ONLY" | "TENANTS";
+
+export interface KvitaDocument {
+  id: string;
+  tenancyId: string | null;
+  unitId: string | null;
+  category: DocumentCategory;
+  title: string;
+  visibility: DocumentVisibility;
+  createdAt: string;
+  uploadedBy: PersonRef;
+  attachments: Attachment[];
+}
+
+export type HandoverKind = "MOVE_IN" | "MOVE_OUT";
+export type HandoverStatus = "DRAFT" | "AWAITING_CONFIRMATION" | "CONFIRMED";
+export type ItemCondition = "GOOD" | "WORN" | "DAMAGED" | "MISSING";
+
+export interface HandoverItem {
+  id: string;
+  room: string;
+  name: string;
+  condition: ItemCondition;
+  note: string | null;
+  attachments: Attachment[];
+}
+
+export interface HandoverSummary {
+  id: string;
+  kind: HandoverKind;
+  status: HandoverStatus;
+  handoverOn: string;
+  _count: { items: number };
+}
+
+export interface Handover {
+  id: string;
+  tenancyId: string;
+  kind: HandoverKind;
+  status: HandoverStatus;
+  handoverOn: string;
+  keysCount: number | null;
+  keysNote: string | null;
+  notes: string | null;
+  landlordConfirmedAt: string | null;
+  tenantConfirmedAt: string | null;
+  tenantConfirmedBy: PersonRef | null;
+  items: HandoverItem[];
+  meterReadings: MeterReading[];
+}

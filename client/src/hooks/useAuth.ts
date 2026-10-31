@@ -1,19 +1,27 @@
 import { useCallback } from "react";
 import { useAuthStore } from "@/auth/authStore";
 import { api, refreshAccessToken } from "@/lib/api";
+import { ApiError } from "@/types/api";
 import type { CurrentUser } from "@/types/user";
 import { closeSocket } from "@/lib/realtime";
 import { clearQueryCache } from "./useQuery";
 
-/** Restores the session from the refresh cookie on app start. */
-export async function bootstrapSession(): Promise<void> {
+/**
+ * Restores the session from the refresh cookie on app start. A temporarily unreachable server is retried
+ * (3×, growing delay) instead of signing the person out.
+ */
+export async function bootstrapSession(attempt = 0): Promise<void> {
   const store = useAuthStore.getState();
-  const token = await refreshAccessToken();
-  if (!token) return store.clear();
   try {
+    const token = await refreshAccessToken();
+    if (!token) return store.clear();
     const { user } = await api<{ user: CurrentUser }>("/api/me");
     store.setSession(token, user);
-  } catch {
+  } catch (err) {
+    if (err instanceof ApiError && err.code === "NETWORK" && attempt < 3) {
+      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+      return bootstrapSession(attempt + 1);
+    }
     store.clear();
   }
 }

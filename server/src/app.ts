@@ -13,7 +13,10 @@ import { attachmentsRouter, filesPublicRouter } from "./modules/attachments/rout
 import { authRouter } from "./modules/auth/routes.js";
 import { chargesRouter } from "./modules/charges/routes.js";
 import { invitationsPublicRouter, invitationsRouter } from "./modules/invitations/routes.js";
+import { documentsRouter } from "./modules/documents/routes.js";
+import { handoversRouter } from "./modules/handovers/routes.js";
 import { issuesRouter } from "./modules/issues/routes.js";
+import { metersRouter } from "./modules/meters/routes.js";
 import { messagesRouter } from "./modules/messages/routes.js";
 import { propertiesRouter } from "./modules/properties/routes.js";
 import { tenanciesRouter } from "./modules/tenancies/routes.js";
@@ -77,6 +80,9 @@ export function createApp(deps: AppDeps): Express {
   app.use("/api", chargesRouter(deps));
   app.use("/api", messagesRouter());
   app.use("/api", issuesRouter());
+  app.use("/api", metersRouter());
+  app.use("/api", documentsRouter());
+  app.use("/api", handoversRouter(deps));
 
   app.use("/api", notFoundHandler);
   app.use(errorHandler);
