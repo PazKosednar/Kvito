@@ -56,7 +56,16 @@ if ($dbLine -and $dbLine.Line -match '@([^:/]+):(\d+)/') {
   }
 }
 
-# 5. Migrations (non-destructive)
+# 5. Ports free? (Kvita: API 4180, client 5180)
+foreach ($port in 4180, 5180) {
+  $busy = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+  if ($busy) {
+    $cmd = (Get-CimInstance Win32_Process -Filter "ProcessId=$($busy.OwningProcess)").CommandLine
+    Fail "Vrata $port so že zasedena (PID $($busy.OwningProcess): $cmd). Je Kvita morda že zagnana v drugem oknu? Ustavi jo s Ctrl+C ali: Stop-Process -Id $($busy.OwningProcess)"
+  }
+}
+
+# 6. Migrations (non-destructive)
 Write-Step 'Uveljavljam migracije baze …'
 npm run db:deploy -w server
 if ($LASTEXITCODE -ne 0) { Fail 'Migracije niso uspele.' }
@@ -67,7 +76,7 @@ if ($Seed) {
   if ($LASTEXITCODE -ne 0) { Fail 'Seed ni uspel.' }
 }
 
-# 6. Run
+# 7. Run
 Write-Host ''
 Write-Host 'Kvita teče:' -ForegroundColor Green
 Write-Host '  Aplikacija: http://localhost:5180'
