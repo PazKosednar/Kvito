@@ -121,3 +121,95 @@ export interface InvitationPreview {
   city: string;
   expiresAt: string;
 }
+
+// ---------- Charges (Phase 2) ----------
+
+export type ChargeStatus = "OPEN" | "REPORTED_PAID" | "CONFIRMED" | "OVERDUE" | "DISPUTED";
+export type ChargeType = "RENT" | "BILL" | "OTHER";
+export type PayTo = "LANDLORD" | "SUPPLIER";
+export type AttachmentKind = "BILL" | "PAYMENT_PROOF" | "MESSAGE" | "ISSUE" | "METER" | "HANDOVER" | "DOCUMENT";
+
+export interface Attachment {
+  id: string;
+  kind: AttachmentKind;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  url: string;
+  createdAt: string;
+}
+
+export interface PaymentReport {
+  id: string;
+  paidOn: string | null;
+  amountCents: number;
+  note: string | null;
+  status: "PENDING" | "ACCEPTED" | "REJECTED";
+  rejectReason: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+  reportedBy: PersonRef;
+  attachments: Attachment[];
+}
+
+export interface ChargeShare {
+  id: string;
+  refNo: number;
+  memberId: string;
+  amountCents: number;
+  status: ChargeStatus;
+  confirmedAt: string | null;
+  reference: string | null;
+  member: { id: string; userId: string; user: PersonRef };
+  paymentReports: PaymentReport[];
+}
+
+export interface Charge {
+  id: string;
+  tenancyId: string;
+  type: ChargeType;
+  costType: CostType | null;
+  title: string;
+  description: string | null;
+  amountCents: number;
+  dueDate: string;
+  rentPeriod: string | null;
+  status: ChargeStatus;
+  payTo: PayTo;
+  payeeName: string;
+  payeeIban: string;
+  payeeStreet: string | null;
+  payeeCity: string | null;
+  reference: string | null;
+  purposeCode: string | null;
+  purpose: string | null;
+  createdAt: string;
+  shares: ChargeShare[];
+  attachments: Attachment[];
+}
+
+export interface ChargesSummary {
+  kvita: boolean;
+  openCents: number;
+  overdueCents: number;
+  awaitingConfirmationCents: number;
+  count: number;
+}
+
+export interface PaymentData {
+  chargeId: string;
+  shareId: string;
+  payTo: PayTo;
+  payeeName: string;
+  payeeIban: string;
+  payeeAddress: string | null;
+  amountCents: number;
+  reference: string | null;
+  purpose: string;
+  purposeCode: string;
+  dueDate: string;
+  title: string;
+  qrText: string | null;
+  qrSvg: string | null;
+  qrUnavailable: string | null;
+}

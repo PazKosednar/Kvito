@@ -5,13 +5,19 @@ import { env } from "./config/env.js";
 import { logger } from "./lib/logger.js";
 import { prisma } from "./lib/prisma.js";
 import { ConsoleEmailSender } from "./services/email/ConsoleEmailSender.js";
+import { generateMonthlyRent, markOverdue } from "./services/jobs/rent.js";
+import { startScheduler } from "./services/jobs/scheduler.js";
+import { LocalDiskStorage } from "./services/storage/Storage.js";
 
 async function main() {
   const uploadDir = path.resolve(env.UPLOAD_DIR);
   await mkdir(uploadDir, { recursive: true });
 
   // TODO(preveri): production e-mail provider (EU) – until then e-mails are only printed.
-  const app = createApp({ emailSender: new ConsoleEmailSender() });
+  const emailSender = new ConsoleEmailSender();
+  // TODO(faza 5): S3-compatible EU storage in production.
+  const storage = new LocalDiskStorage(uploadDir);
+  const app = createApp({ emailSender, storage });
 
   const server = app.listen(env.PORT, () => {
     logger.info(`Kvita API posluša na http://localhost:${env.PORT} (uploads: ${uploadDir})`);
@@ -26,8 +32,14 @@ async function main() {
     process.exit(1);
   });
 
+  const stopJobs = startScheduler([
+    { name: "monthly-rent", run: generateMonthlyRent },
+    { name: "mark-overdue", run: markOverdue },
+  ]);
+
   const shutdown = (signal: string) => {
     logger.info(`${signal} – zapiram strežnik`);
+    stopJobs();
     server.close(() => {
       void prisma.$disconnect().finally(() => process.exit(0));
     });

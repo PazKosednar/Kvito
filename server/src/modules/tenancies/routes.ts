@@ -4,7 +4,7 @@ import { audit, diff } from "../../lib/audit.js";
 import { badRequest } from "../../lib/errors.js";
 import { prisma } from "../../lib/prisma.js";
 import { cents, costType, dateOnly, iban, idParam, optionalText, splitMethod, text } from "../../lib/validation.js";
-import { authUserId, requireAuth } from "../../middleware/auth.js";
+import { authUserId } from "../../middleware/auth.js";
 import { validateBody } from "../../middleware/validate.js";
 import { assertTenancyAccess, assertTenancyLandlord, assertUnitOwner } from "../access/access.js";
 import { tenancyInclude } from "./dto.js";
@@ -52,7 +52,6 @@ const MemberPatch = z
 
 export function tenanciesRouter(): Router {
   const router = Router();
-  router.use(requireAuth);
 
   /** Tenancies of the signed-in user in the given role (default: tenant view). */
   router.get("/tenancies", async (req, res) => {

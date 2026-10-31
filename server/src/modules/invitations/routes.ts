@@ -7,7 +7,7 @@ import { randomToken, sha256 } from "../../lib/crypto.js";
 import { AppError, badRequest, notFound } from "../../lib/errors.js";
 import { prisma } from "../../lib/prisma.js";
 import { idParam } from "../../lib/validation.js";
-import { authUserId, requireAuth } from "../../middleware/auth.js";
+import { authUserId } from "../../middleware/auth.js";
 import { validateBody } from "../../middleware/validate.js";
 import type { EmailSender } from "../../services/email/EmailSender.js";
 import { invitationEmail } from "../../services/email/templates.js";
@@ -46,10 +46,9 @@ function invitationState(inv: { acceptedAt: Date | null; revokedAt: Date | null;
   return "PENDING" as const;
 }
 
-export function invitationsRouter(deps: { emailSender: EmailSender }): Router {
+/** Public: preview an invitation (no login needed to see what you are joining). */
+export function invitationsPublicRouter(): Router {
   const router = Router();
-
-  // ---------- Public: preview an invitation (no login needed to see what you are joining) ----------
   router.get("/invitations/:token", previewLimiter, async (req, res) => {
     const token = tokenParam.parse(req.params.token);
     const inv = await prisma.invitation.findUnique({
@@ -78,8 +77,12 @@ export function invitationsRouter(deps: { emailSender: EmailSender }): Router {
       },
     });
   });
+  return router;
+}
 
-  router.use(requireAuth);
+/** Authenticated (mounted behind requireAuth in app.ts). */
+export function invitationsRouter(deps: { emailSender: EmailSender }): Router {
+  const router = Router();
 
   // ---------- Tenant: accept ----------
   router.post("/invitations/:token/accept", previewLimiter, async (req, res) => {

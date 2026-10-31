@@ -3,7 +3,7 @@ import { z } from "zod";
 import { badRequest, notFound } from "../../lib/errors.js";
 import { prisma } from "../../lib/prisma.js";
 import { idParam, optionalText, text } from "../../lib/validation.js";
-import { authUserId, requireAuth } from "../../middleware/auth.js";
+import { authUserId } from "../../middleware/auth.js";
 import { validateBody } from "../../middleware/validate.js";
 import { assertPropertyOwner, assertUnitOwner } from "../access/access.js";
 
@@ -20,7 +20,6 @@ const activeTenancy = { where: { deletedAt: null, status: { in: ["DRAFT", "ACTIV
 
 export function propertiesRouter(): Router {
   const router = Router();
-  router.use(requireAuth);
 
   /** Landlord overview: properties → units → current tenancy with members. */
   router.get("/properties", async (req, res) => {

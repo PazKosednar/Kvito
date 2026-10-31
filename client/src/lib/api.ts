@@ -6,7 +6,10 @@ type Method = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
 interface RequestOptions {
   method?: Method;
+  /** JSON body. */
   body?: unknown;
+  /** Raw body (file upload); sent with the blob's own Content-Type. */
+  file?: Blob;
   /** Attach the access token and transparently refresh it once on 401. Default: true. */
   auth?: boolean;
   signal?: AbortSignal;
@@ -32,8 +35,8 @@ export function refreshAccessToken(): Promise<string | null> {
   return refreshInFlight;
 }
 
-export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, auth = true, signal } = options;
+async function request(path: string, options: RequestOptions): Promise<Response> {
+  const { method = "GET", body, file, auth = true, signal } = options;
 
   const send = (token: string | null) =>
     fetch(`${API_BASE_URL}${path}`, {
@@ -42,9 +45,10 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
       headers: {
         Accept: "application/json",
         ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+        ...(file ? { "Content-Type": file.type || "application/octet-stream" } : {}),
         ...(auth && token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      ...(body !== undefined ? { body: JSON.stringify(body) } : file ? { body: file } : {}),
       ...(signal ? { signal } : {}),
     });
 
@@ -64,11 +68,24 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
     throw new ApiError(0, "NETWORK");
   }
 
-  if (res.status === 204) return undefined as T;
-  const data: unknown = await res.json().catch(() => null);
   if (!res.ok) {
+    const data: unknown = await res.json().catch(() => null);
     const error = (data as ApiErrorBody | null)?.error;
     throw new ApiError(res.status, error?.code ?? "UNKNOWN", error?.details);
   }
-  return data as T;
+  return res;
 }
+
+export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const res = await request(path, options);
+  if (res.status === 204) return undefined as T;
+  return (await res.json().catch(() => null)) as T;
+}
+
+/** Binary responses (e.g. the UPN QR as PNG). */
+export async function apiBlob(path: string, options: RequestOptions = {}): Promise<Blob> {
+  return (await request(path, options)).blob();
+}
+
+/** Absolute URL for links returned by the API (signed file URLs are relative to the API origin). */
+export const apiUrl = (path: string) => (path.startsWith("http") ? path : `${API_BASE_URL}${path}`);

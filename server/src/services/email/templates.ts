@@ -26,6 +26,59 @@ function button(url: string, label: string): string {
   return `<a href="${escapeHtml(url)}" style="display:inline-block;margin:8px 0 16px;padding:14px 22px;background:${BRAND.primary};color:#ffffff;border-radius:12px;font-weight:700;text-decoration:none">${escapeHtml(label)}</a>`;
 }
 
+const eur = (cents: number) =>
+  new Intl.NumberFormat("sl-SI", { style: "currency", currency: "EUR" }).format(cents / 100);
+const day = (d: Date) => new Intl.DateTimeFormat("sl-SI", { timeZone: "UTC" }).format(d);
+
+/** Payment data + UPN QR (as an attached image), for paying from another device. */
+export function paymentEmail(
+  to: string,
+  p: {
+    title: string;
+    amountCents: number;
+    dueDate: Date;
+    payeeName: string;
+    payeeIban: string;
+    reference: string | null;
+    purpose: string;
+    qrPng: Buffer | null;
+  },
+): EmailMessage {
+  const subject = `Plačilo: ${p.title} (${eur(p.amountCents)})`;
+  const rows: [string, string][] = [
+    ["Znesek", eur(p.amountCents)],
+    ["Rok", day(p.dueDate)],
+    ["Prejemnik", p.payeeName],
+    ["IBAN", p.payeeIban],
+    ...(p.reference ? ([["Sklic", p.reference.replace(/^(RF\d{2}|SI\d{2})/, "$1 ")]] as [string, string][]) : []),
+    ["Namen", p.purpose],
+  ];
+  const text = [
+    `Podatki za plačilo: ${p.title}`,
+    "",
+    ...rows.map(([k, v]) => `${k}: ${v}`),
+    "",
+    p.qrPng ? "Kodo UPN QR najdeš v priponki. Skeniraj jo v svoji bančni aplikaciji." : "",
+    "Kvita denarja ne prejema. Plačaš v svoji banki.",
+  ].join("\n");
+  const html = layout(
+    subject,
+    `<p style="margin:0 0 12px">Podatki za plačilo: <strong>${escapeHtml(p.title)}</strong></p>
+     ${p.qrPng ? `<p style="margin:0 0 12px"><img src="cid:upnqr" width="240" height="240" alt="UPN QR" style="display:block;background:#fff;border-radius:8px"></p>` : ""}
+     <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background:${BRAND.slip};border-radius:12px;padding:12px 16px">
+       ${rows.map(([k, v]) => `<tr><td style="padding:4px 0;color:${BRAND.muted}">${escapeHtml(k)}</td><td style="padding:4px 0;font-weight:600;text-align:right">${escapeHtml(v)}</td></tr>`).join("")}
+     </table>
+     <p style="margin:16px 0 0;color:${BRAND.muted}">Kvita denarja ne prejema. Plačaš v svoji banki.</p>`,
+  );
+  return {
+    to,
+    subject,
+    text,
+    html,
+    ...(p.qrPng ? { attachments: [{ filename: "upn-qr.png", content: p.qrPng, contentType: "image/png", cid: "upnqr" }] } : {}),
+  };
+}
+
 export function invitationEmail(
   to: string,
   p: { url: string; landlordName: string | null; place: string; days: number },

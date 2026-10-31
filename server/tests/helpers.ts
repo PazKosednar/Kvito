@@ -19,8 +19,13 @@ export async function setupApp() {
   const { prisma } = await import("../src/lib/prisma.js");
   const { createApp } = await import("../src/app.js");
   const { signAccessToken } = await import("../src/modules/auth/tokens.js");
+  const { LocalDiskStorage } = await import("../src/services/storage/Storage.js");
+  const { mkdtemp } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const path = await import("node:path");
   const mail = new CapturingEmailSender();
-  const app: Express = createApp({ emailSender: mail });
+  const storage = new LocalDiskStorage(await mkdtemp(path.join(tmpdir(), "kvita-test-")));
+  const app: Express = createApp({ emailSender: mail, storage });
 
   /** Creates a user and returns an authenticated supertest agent factory. */
   async function login(email: string, name?: string) {

@@ -37,7 +37,8 @@ describe.skipIf(!hasDb)("auth flow (smoke)", () => {
   beforeAll(async () => {
     ({ prisma } = await import("../src/lib/prisma.js"));
     const { createApp } = await import("../src/app.js");
-    app = createApp({ emailSender: mail });
+    const { LocalDiskStorage } = await import("../src/services/storage/Storage.js");
+    app = createApp({ emailSender: mail, storage: new LocalDiskStorage(process.cwd() + "/.test-uploads") });
   });
 
   afterAll(async () => {

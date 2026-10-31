@@ -21,7 +21,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "you": "you",
-    "retry": "Try again"
+    "retry": "Try again",
+    "remove": "Remove"
   },
   "auth": {
     "title": "Sign in",
@@ -122,7 +123,17 @@
     "INVITE_EXPIRED": "The invitation has expired.",
     "INVITE_REVOKED": "The invitation was revoked.",
     "INVITE_EMAIL_MISMATCH": "The invitation is for a different e-mail.",
-    "INVITE_OWN_PROPERTY": "You can't accept your own invitation as a tenant."
+    "INVITE_OWN_PROPERTY": "You can't accept your own invitation as a tenant.",
+    "SHARES_INVALID": "Tenant shares don't add up to 100 %. Edit them under Details.",
+    "NO_MEMBERS": "The tenancy has no tenants yet. Invite one first.",
+    "CHARGE_LOCKED": "This charge already has reported or confirmed payments, so it can't be changed.",
+    "TRANSITION_NOT_ALLOWED": "That's not possible in the current state.",
+    "NOT_YOUR_SHARE": "This is another tenant's share.",
+    "FILE_TYPE_NOT_ALLOWED": "You can upload a PDF or an image (JPG, PNG, WEBP, HEIC).",
+    "FILE_EMPTY": "The file is empty.",
+    "ATTACHMENT_INVALID": "The attachment can't be used. Upload it again.",
+    "SUPPLIER_PAYEE_REQUIRED": "Enter the supplier's name and IBAN.",
+    "FILE_LINK_EXPIRED": "The file link expired. Refresh the page."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -132,10 +143,14 @@
     "INVALID_IBAN": "The IBAN is not valid. Check the digits.",
     "INVALID_POSTAL_CODE": "The postal code has 4 digits.",
     "INVALID_DATE": "The date is not valid.",
-    "END_BEFORE_START": "The end must be after the start."
+    "END_BEFORE_START": "The end must be after the start.",
+    "INVALID_REFERENCE": "The reference must look like SI00 … or RF.. (with valid check digits).",
+    "INVALID_PURPOSE_CODE": "The purpose code has 4 capital letters.",
+    "SUPPLIER_PAYEE_REQUIRED": "Enter the supplier's name and IBAN."
   },
   "tabs": {
-    "details": "Details"
+    "details": "Details",
+    "charges": "Charges"
   },
   "properties": {
     "add": "Add a property",
@@ -285,5 +300,135 @@
       "REVOKED": "This invitation was revoked",
       "PENDING": ""
     }
+  },
+  "chargeStatus": {
+    "OPEN": "Open",
+    "OVERDUE": "Overdue",
+    "REPORTED_PAID": "Awaiting confirmation",
+    "CONFIRMED": "Paid",
+    "DISPUTED": "Disputed"
+  },
+  "charges": {
+    "dueOn": "due {{date}}",
+    "dueToday": "due today",
+    "dueIn_one": "due in {{count}} day",
+    "dueIn_other": "due in {{count}} days",
+    "lateBy_one": "{{count}} day late",
+    "lateBy_other": "{{count}} days late",
+    "kvitaTitle": "All settled",
+    "kvitaBody": "Your landlord has confirmed all your payments.",
+    "emptyTenantTitle": "No charges yet",
+    "emptyTenantBody": "When your landlord posts rent or a bill, it shows up here with the payment details.",
+    "toPay": "To pay",
+    "waiting": "Awaiting confirmation",
+    "waitingHint": "You reported the payment. Your landlord still needs to confirm it.",
+    "settled": "Paid",
+    "showAll": "Show all ({{count}})",
+    "landlordAllSettled": "All settled.",
+    "landlordSummary": "Open: {{open}}.",
+    "landlordSummaryLate": "Open: {{open}}, of which {{late}} is overdue.",
+    "new": "New charge",
+    "toConfirm": "Awaiting your confirmation",
+    "disputed": "Disputed",
+    "open": "Open",
+    "emptyLandlordTitle": "No charges yet",
+    "emptyLandlordBody": "Rent is created automatically at the start of the month. Add a bill with “New charge”.",
+    "reportedBy": "{{name}} reports paying {{amount}}",
+    "withProof": "with proof",
+    "confirm": "Confirm",
+    "confirmed": "Payment confirmed.",
+    "confirmDelete": "Delete “{{title}}”?",
+    "deleted": "Charge deleted.",
+    "delete": "Delete charge",
+    "total": "{{amount}} in total",
+    "confirmedOn": "Payment confirmed on {{date}}.",
+    "reportedTitle": "Payment reported",
+    "reportedBody": "Once your landlord confirms it, you'll see “Kvita ✓” here.",
+    "disputedNote": "This charge is marked as disputed. Sort it out in messages.",
+    "rejectedNote": "Your landlord can't see the payment yet: {{reason}}",
+    "noReason": "no explanation",
+    "reportPaid": "Paid – tell my landlord",
+    "reportTitle": "Report payment of {{amount}}",
+    "paidOn": "Payment date",
+    "note": "Message",
+    "noteHint": "Optional, e.g. “paid via online banking”.",
+    "addProof": "Add proof",
+    "reportSubmit": "Report payment",
+    "reported": "Payment reported.",
+    "disputeCta": "Something's wrong with this charge",
+    "disputeLabel": "What's wrong?",
+    "disputeSubmit": "Mark as disputed",
+    "shares": "Shares",
+    "payment": "Payment",
+    "paymentData": "Payment details",
+    "payTo": {
+      "LANDLORD": "Me",
+      "SUPPLIER": "Supplier"
+    },
+    "payToHint": {
+      "LANDLORD": "The tenant pays you, to the IBAN in the tenancy terms. Each gets their own reference.",
+      "SUPPLIER": "The tenant pays the supplier directly, using the original bill's details."
+    },
+    "markPaid": "Mark as paid",
+    "reopen": "Reopen",
+    "reopened": "The charge is open again.",
+    "reject": "I can't see the payment",
+    "rejectLabel": "Note for the tenant",
+    "history": "Earlier reports",
+    "reportStatus": {
+      "PENDING": "{{name}} reported paying ({{date}}).",
+      "ACCEPTED": "Payment ({{date}}) confirmed.",
+      "REJECTED": "Reported payment ({{date}}) was not confirmed."
+    },
+    "newTitle": "New charge",
+    "newSubtitle": "A bill or another cost your tenant pays.",
+    "uploadBill": "Upload the bill",
+    "uploadBillHint": "PDF or photo. If it has a UPN QR code, we fill in the details for you.",
+    "scanFound": "We read the UPN QR code and filled in the details. Check them.",
+    "scanNotFound": "No UPN QR code found. Enter the details by hand.",
+    "costType": "Type of cost",
+    "notCovered": "not in the agreement",
+    "title": "Title",
+    "titleHint": "As your tenant will see it, e.g. “Electricity October”.",
+    "amount": "Amount",
+    "dueDate": "Due date",
+    "splitNote": "The amount is split between tenants ({{method}}).",
+    "whoGetsPaid": "Who gets paid",
+    "referenceHint": "Reference from the original bill.",
+    "purposeHint": "Optional. If empty, we use the title.",
+    "description": "Note for the tenant",
+    "publish": "Publish charge",
+    "created": "Charge published."
+  },
+  "pay": {
+    "payee": "Payee",
+    "iban": "IBAN",
+    "amount": "Amount",
+    "reference": "Reference",
+    "purpose": "Purpose",
+    "purposeCode": "Purpose code",
+    "via": "Paid to",
+    "dueBy": "Due {{date}}",
+    "qrLabel": "UPN QR code for the payment",
+    "qrHint": "You can't scan a code with the phone that shows it. Copy the details into your banking app or save the code.",
+    "saveQr": "Save QR",
+    "emailQr": "Send by e-mail",
+    "emailed": "We sent the payment details to {{email}}.",
+    "copyLabel": "Copy: {{label}}",
+    "supplierNote": "You pay the supplier directly. Kvita never receives money.",
+    "noMoneyNote": "You pay in your own bank. Kvita never receives money.",
+    "qrUnavailable": {
+      "PAYEE_ADDRESS_MISSING": "No QR code: the payee has no address. Use the Copy buttons.",
+      "OTHER": "No QR code for this payment. Use the Copy buttons."
+    }
+  },
+  "upnTest": {
+    "title": "UPN QR test",
+    "intro": "Sample codes generated per the official standard (V15, ECC M, ISO-8859-2). Scan them with different banking apps and check the details.",
+    "warning": "The payee IBAN is fictional. Do not confirm a payment in your bank.",
+    "step1": "Open this page on a computer.",
+    "step2": "In your banking app choose “Pay with UPN QR” and scan the code.",
+    "step3": "Compare the details with the description and note what each bank shows.",
+    "payload": "Code content (20 fields)"
   }
 }

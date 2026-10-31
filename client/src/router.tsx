@@ -2,6 +2,10 @@ import { createBrowserRouter } from "react-router";
 import { LoginPage } from "@/auth/LoginPage";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
 import { ROUTES } from "@/constants";
+import { ChargeFormPage } from "@/features/charges/ChargeFormPage";
+import { ChargePage } from "@/features/charges/ChargePage";
+import { ChargesTab } from "@/features/charges/ChargesTab";
+import { UpnTestPage } from "@/features/charges/UpnTestPage";
 import { AcceptInvitePage } from "@/features/invitations/AcceptInvitePage";
 import { PropertyFormPage } from "@/features/properties/PropertyFormPage";
 import { PropertyPage } from "@/features/properties/PropertyPage";
@@ -18,6 +22,8 @@ export const router = createBrowserRouter([
   { path: ROUTES.login, element: <LoginPage /> },
   // Public: an invitation link must work before signing in.
   { path: "/povabilo/:token", element: <AcceptInvitePage /> },
+  // Manual UPN QR test page (samples are only served outside production).
+  { path: "/upn-test", element: <UpnTestPage /> },
   {
     element: <ProtectedRoute />,
     children: [
@@ -35,7 +41,12 @@ export const router = createBrowserRouter([
           {
             path: "najemi/:id",
             element: <TenancyLayout />,
-            children: [{ index: true, element: <TenancyDetailsTab /> }],
+            children: [
+              { index: true, element: <ChargesTab /> },
+              { path: "obveznosti/nova", element: <ChargeFormPage /> },
+              { path: "obveznosti/:chargeId", element: <ChargePage /> },
+              { path: "podatki", element: <TenancyDetailsTab /> },
+            ],
           },
         ],
       },
