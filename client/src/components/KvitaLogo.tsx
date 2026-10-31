@@ -4,14 +4,15 @@ interface KvitaLogoProps {
   className?: string;
   /** Show the "Kvita" wordmark next to the mark. */
   withWordmark?: boolean;
+  size?: "sm" | "md";
 }
 
 /** Temporary Kvita mark (check mark + key). Same geometry as public/logo.svg; colors come from tokens. */
-export function KvitaLogo({ className, withWordmark = false }: KvitaLogoProps) {
+export function KvitaLogo({ className, withWordmark = false, size = "md" }: KvitaLogoProps) {
   return (
-    <span className={cn("inline-flex items-center gap-2", className)}>
-      <svg viewBox="0 0 64 64" aria-hidden="true" className="size-9 shrink-0">
-        <rect width="64" height="64" rx="14" className="fill-primary" />
+    <span className={cn("inline-flex items-center gap-2.5", className)}>
+      <svg viewBox="0 0 64 64" aria-hidden="true" className={cn("shrink-0", size === "sm" ? "size-8" : "size-10")}>
+        <rect width="64" height="64" rx="16" className="fill-primary" />
         <g
           transform="translate(-2 3)"
           fill="none"
@@ -25,8 +26,11 @@ export function KvitaLogo({ className, withWordmark = false }: KvitaLogoProps) {
           <path d="M29.6 41 L33.4 44.2 M33.6 36.2 L37.4 39.4" />
         </g>
       </svg>
-      {withWordmark && <span className="text-2xl font-bold tracking-tight text-primary">Kvita</span>}
-      {!withWordmark && <span className="sr-only">Kvita</span>}
+      {withWordmark ? (
+        <span className={cn("font-extrabold tracking-[-0.03em]", size === "sm" ? "text-xl" : "text-2xl")}>Kvita</span>
+      ) : (
+        <span className="sr-only">Kvita</span>
+      )}
     </span>
   );
 }

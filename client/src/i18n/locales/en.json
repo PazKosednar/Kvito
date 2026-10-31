@@ -1,60 +1,84 @@
 {
   "app": {
     "name": "Kvita",
-    "tagline": "Renting, sorted. Everything in one place."
+    "headline": "All settled. Every month.",
+    "lead": "Rent, bills and messages between landlord and tenant in one place."
+  },
+  "slip": {
+    "title": "Rent",
+    "payee": "Payee",
+    "purpose": "Purpose",
+    "purposeValue": "Rent November",
+    "due": "Due"
   },
   "common": {
-    "continue": "Continue",
-    "back": "Back",
     "loading": "Loading …",
-    "retry": "Try again",
-    "close": "Close"
+    "close": "Close",
+    "copy": "Copy",
+    "copied": "Copied"
   },
   "auth": {
     "title": "Sign in",
-    "emailLabel": "E-mail",
+    "emailLabel": "Your e-mail",
     "emailPlaceholder": "name@example.com",
-    "emailHint": "We'll send you a code. No password needed.",
+    "emailHint": "No password needed. We'll send you a 6-digit code.",
     "sendCode": "Send code",
     "codeTitle": "Enter the code",
-    "codeSentTo": "We sent a code to {{email}}.",
+    "codeSentTo": "We sent it to {{email}} at {{time}}.",
+    "codeSentToNoTime": "We sent it to {{email}}.",
+    "codeValidity": "The code is valid for 10 minutes. Only the latest code works.",
     "codeLabel": "6-digit code",
     "verify": "Sign in",
     "resend": "Send a new code",
+    "resendIn": "You can request a new code in {{seconds}} s",
     "changeEmail": "Use another e-mail",
-    "devHint": "Development: the code is printed in the server console.",
+    "devHint": "Development: the code is in the server terminal, in the latest “E-mail za {{email}}” block.",
     "logout": "Sign out",
-    "loggedOut": "Signed out. See you soon!"
+    "loggedOut": "Signed out."
   },
   "onboarding": {
-    "title": "Great to have you here!",
-    "subtitle": "What brings you to Kvita? You can change this any time.",
+    "title": "What brings you to Kvita?",
+    "subtitle": "Pick where you start. You can add the other role any time.",
     "landlord": "I rent out a property",
-    "landlordHint": "Rent, bills and talking to your tenants.",
+    "landlordHint": "Post rent and bills, confirm payments and talk to your tenants.",
     "tenant": "I rent a home",
-    "tenantHint": "Payments, messages and repairs in one place."
+    "tenantHint": "See what to pay and by when, report payments and message your landlord."
   },
   "roles": {
     "LANDLORD": "Landlord",
     "TENANT": "Tenant",
-    "switchTo": "Switch to: {{role}}",
+    "switchLabel": "Role",
+    "addRole": {
+      "LANDLORD": "I also rent out a property",
+      "TENANT": "I also rent a home"
+    },
     "switched": "You are now: {{role}}"
   },
+  "greeting": {
+    "morning": "Good morning",
+    "day": "Hello",
+    "evening": "Good evening"
+  },
   "home": {
-    "greeting": "Hi, {{name}}!",
-    "greetingNoName": "Hi!",
-    "landlordEmptyTitle": "Let's get started",
-    "landlordEmptyBody": "Soon you'll add your property here and invite your tenants.",
-    "tenantEmptyTitle": "No tenancy yet",
-    "tenantEmptyBody": "Once your landlord invites you, rent, bills and messages show up here.",
-    "kvita": "Kvita ✓",
-    "kvitaHint": "All settled."
+    "landlordIntro": "Set up your rental in three steps.",
+    "landlordSteps": {
+      "property": "Add a property and its units",
+      "propertyHint": "The address and the flats you rent out.",
+      "tenancy": "Enter the tenancy",
+      "tenancyHint": "Rent, payment day, deposit and your IBAN.",
+      "invite": "Invite your tenant",
+      "inviteHint": "Send a link or show a QR code. No app install needed."
+    },
+    "comingSoon": "These steps arrive in the next Kvita update.",
+    "tenantTitle": "No tenancy linked yet",
+    "tenantBody": "Send your landlord your e-mail so they can invite you. Once you accept, rent, bills and messages show up here.",
+    "tenantEmailLabel": "Your e-mail for the invitation"
   },
   "theme": {
-    "label": "Theme",
+    "label": "Appearance",
     "light": "Light",
     "dark": "Dark",
-    "system": "Device"
+    "system": "Auto"
   },
   "language": {
     "label": "Language",
@@ -63,25 +87,25 @@
   },
   "install": {
     "iosTitle": "Add Kvita to your Home Screen",
-    "iosBody": "That way we can send you reminders. In Safari tap “Share”, then “Add to Home Screen”.",
+    "iosBody": "It's the only way your iPhone can send you reminders. In Safari tap Share, then Add to Home Screen.",
     "updateAvailable": "A new version of Kvita is available.",
     "update": "Update"
   },
   "notFound": {
     "title": "Page not found",
-    "body": "The link may be outdated. Head back to the start.",
+    "body": "The link may be outdated or mistyped.",
     "home": "Go home"
   },
   "errors": {
-    "generic": "Oops, something went wrong. Please try again.",
-    "network": "Can't reach the server. Check your connection.",
-    "VALIDATION_ERROR": "Please check what you entered.",
-    "OTP_INVALID": "The code is wrong or has expired.",
-    "OTP_TOO_MANY_ATTEMPTS": "Too many attempts. Request a new code.",
-    "OTP_RATE_LIMITED": "We've sent a lot of codes. Try again in an hour.",
-    "TOO_MANY_REQUESTS": "A bit slower, please. Try again in a few minutes.",
+    "generic": "Something went wrong. Please try again.",
+    "network": "Can't reach the server. Check your connection and try again.",
+    "VALIDATION_ERROR": "Check what you entered. Something is missing or in the wrong format.",
+    "OTP_INVALID": "The code doesn't match or has expired. Make sure you enter the latest code.",
+    "OTP_TOO_MANY_ATTEMPTS": "Too many wrong attempts. Request a new code.",
+    "OTP_RATE_LIMITED": "We've already sent 5 codes to this e-mail in the last hour. Enter the latest one or try again in an hour.",
+    "TOO_MANY_REQUESTS": "Too many requests at once. Try again in a few minutes.",
     "ACCOUNT_DELETED": "This account has been deleted.",
-    "UNAUTHORIZED": "Please sign in again.",
-    "TOKEN_INVALID": "Please sign in again."
+    "UNAUTHORIZED": "Your session expired. Please sign in again.",
+    "TOKEN_INVALID": "Your session expired. Please sign in again."
   }
 }

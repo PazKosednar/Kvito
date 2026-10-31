@@ -1,7 +1,7 @@
 import type { EmailMessage } from "./EmailSender.js";
 
 // Brand colors mirror client/src/styles/tokens.css (e-mail clients do not support CSS variables).
-const BRAND = { primary: "#1f7a72", text: "#1c2826", muted: "#5b6b68", bg: "#f4f7f6", card: "#ffffff" };
+const BRAND = { primary: "#4e40a0", text: "#1e1c2c", muted: "#63626e", bg: "#f9f7f4", card: "#ffffff", slip: "#fad1bb" };
 
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
@@ -36,7 +36,7 @@ export function loginCodeEmail(to: string, code: string, ttlMinutes: number): Em
     subject,
     `<p style="margin:0 0 12px">Živjo!</p>
      <p style="margin:0 0 8px">Tvoja koda za prijavo:</p>
-     <p style="margin:0 0 12px;font-size:32px;font-weight:700;letter-spacing:6px;color:${BRAND.primary}">${escapeHtml(code)}</p>
+     <p style="margin:0 0 12px;padding:12px 16px;background:${BRAND.slip};border-radius:10px;font-size:32px;font-weight:700;letter-spacing:8px;color:${BRAND.text}">${escapeHtml(code)}</p>
      <p style="margin:0 0 12px">Velja ${ttlMinutes} minut.</p>
      <p style="margin:0;color:${BRAND.muted}">Kode ne potrebuješ? Potem to sporočilo kar prezri.</p>`,
   );

@@ -5,18 +5,17 @@ interface EmptyStateProps {
   icon: LucideIcon;
   title: string;
   body: string;
+  /** The next step – an empty screen is an invitation to act. */
   action?: ReactNode;
 }
 
-/** Friendly placeholder for screens without data yet. */
+/** Placeholder for lists without data yet (Phase 1+). Left-aligned, quiet, always points to the next step. */
 export function EmptyState({ icon: Icon, title, body, action }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed bg-card px-6 py-10 text-center">
-      <span className="flex size-14 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
-        <Icon className="size-7" aria-hidden="true" />
-      </span>
+    <div className="flex flex-col items-start gap-3 py-6">
+      <Icon className="size-8 text-primary" aria-hidden="true" />
       <h2 className="text-lg font-semibold">{title}</h2>
-      <p className="max-w-sm text-muted-foreground">{body}</p>
+      <p className="max-w-[46ch] text-muted-foreground">{body}</p>
       {action}
     </div>
   );

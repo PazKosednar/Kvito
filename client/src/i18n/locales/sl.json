@@ -1,60 +1,84 @@
 {
   "app": {
     "name": "Kvita",
-    "tagline": "Najem brez zapletov. Vse na enem mestu."
+    "headline": "Vse poravnano. Vsak mesec.",
+    "lead": "Najemnina, položnice in sporočila med najemodajalcem in najemnikom na enem mestu."
+  },
+  "slip": {
+    "title": "Najemnina",
+    "payee": "Prejemnik",
+    "purpose": "Namen",
+    "purposeValue": "Najemnina november",
+    "due": "Rok"
   },
   "common": {
-    "continue": "Naprej",
-    "back": "Nazaj",
     "loading": "Nalagam …",
-    "retry": "Poskusi znova",
-    "close": "Zapri"
+    "close": "Zapri",
+    "copy": "Kopiraj",
+    "copied": "Kopirano"
   },
   "auth": {
     "title": "Prijava",
-    "emailLabel": "E-pošta",
+    "emailLabel": "Tvoj e-naslov",
     "emailPlaceholder": "ime@primer.si",
-    "emailHint": "Poslali ti bomo kodo. Gesla ne potrebuješ.",
+    "emailHint": "Gesla ne potrebuješ. Poslali ti bomo 6-mestno kodo.",
     "sendCode": "Pošlji kodo",
     "codeTitle": "Vpiši kodo",
-    "codeSentTo": "Kodo smo poslali na {{email}}.",
+    "codeSentTo": "Poslali smo jo na {{email}} ob {{time}}.",
+    "codeSentToNoTime": "Poslali smo jo na {{email}}.",
+    "codeValidity": "Koda velja 10 minut. Velja samo zadnja poslana koda.",
     "codeLabel": "6-mestna koda",
     "verify": "Prijava",
     "resend": "Pošlji novo kodo",
-    "changeEmail": "Drug e-naslov",
-    "devHint": "Razvoj: koda je izpisana v konzoli strežnika.",
+    "resendIn": "Novo kodo lahko zahtevaš čez {{seconds}} s",
+    "changeEmail": "Uporabi drug e-naslov",
+    "devHint": "Razvoj: kodo najdeš v terminalu strežnika, v zadnjem bloku »E-mail za {{email}}«.",
     "logout": "Odjava",
-    "loggedOut": "Odjava je uspela. Se vidimo!"
+    "loggedOut": "Odjava uspela."
   },
   "onboarding": {
-    "title": "Lepo, da si tu!",
-    "subtitle": "Kaj te pripelje v Kvito? To lahko kadar koli spremeniš.",
+    "title": "Kaj te pripelje v Kvito?",
+    "subtitle": "Izberi, kje začneš. Drugo vlogo lahko dodaš kadar koli.",
     "landlord": "Oddajam nepremičnino",
-    "landlordHint": "Najemnine, položnice in komunikacija z najemniki.",
+    "landlordHint": "Objaviš najemnino in položnice, potrjuješ plačila in se dogovarjaš z najemniki.",
     "tenant": "Najemam stanovanje",
-    "tenantHint": "Plačila, sporočila in okvare na enem mestu."
+    "tenantHint": "Vidiš, kaj in do kdaj plačaš, javiš plačilo in pišeš najemodajalcu."
   },
   "roles": {
     "LANDLORD": "Najemodajalec",
     "TENANT": "Najemnik",
-    "switchTo": "Preklopi na: {{role}}",
+    "switchLabel": "Vloga",
+    "addRole": {
+      "LANDLORD": "Tudi oddajam nepremičnino",
+      "TENANT": "Tudi najemam stanovanje"
+    },
     "switched": "Zdaj si v vlogi: {{role}}"
   },
+  "greeting": {
+    "morning": "Dobro jutro",
+    "day": "Dober dan",
+    "evening": "Dober večer"
+  },
   "home": {
-    "greeting": "Živjo, {{name}}!",
-    "greetingNoName": "Živjo!",
-    "landlordEmptyTitle": "Začnimo z najemom",
-    "landlordEmptyBody": "Kmalu bo tu prostor za tvojo nepremičnino in povabila najemnikom.",
-    "tenantEmptyTitle": "Še nimaš najema",
-    "tenantEmptyBody": "Ko te najemodajalec povabi, se tu pokažejo najemnina, položnice in sporočila.",
-    "kvita": "Kvita ✓",
-    "kvitaHint": "Vse je poravnano."
+    "landlordIntro": "Tvoj najem postaviš v treh korakih.",
+    "landlordSteps": {
+      "property": "Dodaj nepremičnino in enote",
+      "propertyHint": "Naslov in stanovanja, ki jih oddajaš.",
+      "tenancy": "Vpiši najem",
+      "tenancyHint": "Najemnina, dan plačila, varščina in tvoj IBAN.",
+      "invite": "Povabi najemnika",
+      "inviteHint": "Pošlji povezavo ali pokaži QR kodo. Aplikacije ni treba nameščati."
+    },
+    "comingSoon": "Ti koraki pridejo v naslednji posodobitvi Kvite.",
+    "tenantTitle": "Najem še ni povezan",
+    "tenantBody": "Najemodajalcu pošlji svoj e-naslov in te bo povabil. Ko sprejmeš povabilo, tu vidiš najemnino, položnice in sporočila.",
+    "tenantEmailLabel": "Tvoj e-naslov za povabilo"
   },
   "theme": {
-    "label": "Tema",
-    "light": "Svetla",
-    "dark": "Temna",
-    "system": "Kot naprava"
+    "label": "Videz",
+    "light": "Svetel",
+    "dark": "Temen",
+    "system": "Samodejno"
   },
   "language": {
     "label": "Jezik",
@@ -63,25 +87,25 @@
   },
   "install": {
     "iosTitle": "Dodaj Kvito na začetni zaslon",
-    "iosBody": "Tako ti bomo lahko pošiljali opomnike. V Safariju tapni »Deli« in nato »Dodaj na začetni zaslon«.",
+    "iosBody": "Samo tako ti iPhone pošilja opomnike. V Safariju tapni Deli in nato Dodaj na začetni zaslon.",
     "updateAvailable": "Na voljo je nova različica Kvite.",
     "update": "Posodobi"
   },
   "notFound": {
     "title": "Te strani ni",
-    "body": "Morda je povezava stara. Vrni se na začetek.",
+    "body": "Povezava je morda zastarela ali napačno prepisana.",
     "home": "Na začetek"
   },
   "errors": {
-    "generic": "Ups, nekaj je šlo narobe. Poskusi še enkrat.",
-    "network": "Ni povezave s strežnikom. Preveri internet.",
-    "VALIDATION_ERROR": "Preveri vnesene podatke.",
-    "OTP_INVALID": "Koda ni prava ali je potekla.",
-    "OTP_TOO_MANY_ATTEMPTS": "Preveč poskusov. Zahtevaj novo kodo.",
-    "OTP_RATE_LIMITED": "Poslali smo že veliko kod. Poskusi čez eno uro.",
-    "TOO_MANY_REQUESTS": "Malo počasneje, prosim. Poskusi čez nekaj minut.",
+    "generic": "Nekaj se je zalomilo. Poskusi še enkrat.",
+    "network": "Ni povezave s strežnikom. Preveri internet in poskusi znova.",
+    "VALIDATION_ERROR": "Preveri vneseno. Nekaj manjka ali ni v pravi obliki.",
+    "OTP_INVALID": "Koda se ne ujema ali je potekla. Preveri, da vpisuješ zadnjo poslano kodo.",
+    "OTP_TOO_MANY_ATTEMPTS": "Preveč napačnih poskusov. Zahtevaj novo kodo.",
+    "OTP_RATE_LIMITED": "Za ta e-naslov smo v zadnji uri poslali že 5 kod. Vpiši zadnjo prejeto ali poskusi čez eno uro.",
+    "TOO_MANY_REQUESTS": "Preveč zahtevkov naenkrat. Poskusi čez nekaj minut.",
     "ACCOUNT_DELETED": "Ta račun je izbrisan.",
-    "UNAUTHORIZED": "Prijavi se znova.",
-    "TOKEN_INVALID": "Prijavi se znova."
+    "UNAUTHORIZED": "Seja je potekla. Prijavi se znova.",
+    "TOKEN_INVALID": "Seja je potekla. Prijavi se znova."
   }
 }

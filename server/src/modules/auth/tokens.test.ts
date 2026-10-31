@@ -10,8 +10,12 @@ describe("access tokens", () => {
 
   it("rejects tampered tokens", async () => {
     const token = await signAccessToken("user_123");
-    const [h, p, s] = token.split(".");
-    expect(await verifyAccessToken(`${h}.${p}.${s?.slice(0, -2)}xx`)).toBeNull();
+    const [h, p, s = ""] = token.split(".");
+    // Change a character in the middle of the signature: the last base64url character only
+    // carries padding bits, so altering it is not guaranteed to change the decoded bytes.
+    const mid = Math.floor(s.length / 2);
+    const tampered = `${s.slice(0, mid)}${s[mid] === "A" ? "B" : "A"}${s.slice(mid + 1)}`;
+    expect(await verifyAccessToken(`${h}.${p}.${tampered}`)).toBeNull();
   });
 
   it("rejects tokens signed with another secret", async () => {

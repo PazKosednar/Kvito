@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@fontsource-variable/schibsted-grotesk/wght.css";
 @import "./styles/tokens.css";
 
 @custom-variant dark (&:is(.dark *));
@@ -22,22 +23,35 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-slip: var(--slip);
+  --color-slip-foreground: var(--slip-foreground);
+  --color-slip-line: var(--slip-line);
+  --color-slip-field: var(--slip-field);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-stamp: var(--stamp);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
 
   --radius-sm: calc(var(--radius) - 6px);
-  --radius-md: calc(var(--radius) - 3px);
+  --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Schibsted Grotesk Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Type scale (perfect fourth, 16px base). */
+  --text-display: 2.5rem;
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.03em;
+  --text-title: 1.75rem;
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.02em;
 }
 
 @layer base {
@@ -46,16 +60,58 @@
   }
   html {
     -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
   }
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.5;
     min-height: 100dvh;
   }
-  /* Respect iOS safe areas in standalone PWA mode. */
+  /* Amounts, codes and dates line up. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
   #root {
     min-height: 100dvh;
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+/* The single orchestrated motion: the "Kvita ✓" stamp lands on the slip. */
+@keyframes stamp-land {
+  0% {
+    opacity: 0;
+    transform: rotate(-14deg) scale(1.6);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-7deg) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-8deg) scale(1);
+  }
+}
+.animate-stamp {
+  animation: stamp-land 520ms cubic-bezier(0.2, 0.9, 0.3, 1.2) 450ms both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-stamp {
+    animation: none;
+    transform: rotate(-8deg);
+  }
+}
+
+/* Perforated tear-off edge of a payment slip. */
+.slip-perforation {
+  background-image: radial-gradient(circle at 6px 0, var(--background) 4px, transparent 4.5px);
+  background-size: 12px 8px;
+  background-repeat: repeat-x;
 }

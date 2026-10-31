@@ -126,7 +126,10 @@ server/
 
 ## Barve in znamka
 
-Vse barve so v [client/src/styles/tokens.css](client/src/styles/tokens.css) (svetla in temna tema).
-Primarno barvo je treba ob menjavi popraviti še na dveh mestih, ki ne morejo brati CSS spremenljivk:
-`THEME_COLOR` v `client/vite.config.ts` in `BRAND` v `server/src/services/email/templates.ts`.
+Vse barve so v [client/src/styles/tokens.css](client/src/styles/tokens.css) (svetla in temna tema):
+vijolično črnilo žiga (primarna), papirnato bela, lososova barva položnice UPN za plačila.
+Ob menjavi barv popravi še mesta, ki ne morejo brati CSS spremenljivk: `THEME_COLOR` v `client/vite.config.ts`,
+`theme-color` v `client/index.html`, barvo ozadja v `client/public/logo.svg` in `client/pwa-assets.config.ts`
+ter `BRAND` v `server/src/services/email/templates.ts`.
+Pisava: Schibsted Grotesk (`@fontsource-variable/schibsted-grotesk`, deluje tudi brez povezave).
 Začasni logotip: `client/public/logo.svg` (+ `KvitaLogo.tsx`); nato `npm run icons -w client`.

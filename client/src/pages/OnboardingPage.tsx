@@ -1,4 +1,4 @@
-import { Building2, Home, type LucideIcon } from "lucide-react";
+import { Building2, ChevronRight, KeyRound, Loader2, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router";
@@ -11,7 +11,7 @@ import type { Role } from "@/types/user";
 
 const OPTIONS: { role: Role; icon: LucideIcon; title: string; hint: string }[] = [
   { role: "LANDLORD", icon: Building2, title: "onboarding.landlord", hint: "onboarding.landlordHint" },
-  { role: "TENANT", icon: Home, title: "onboarding.tenant", hint: "onboarding.tenantHint" },
+  { role: "TENANT", icon: KeyRound, title: "onboarding.tenant", hint: "onboarding.tenantHint" },
 ];
 
 export function OnboardingPage() {
@@ -35,28 +35,33 @@ export function OnboardingPage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-4 py-10">
-      <KvitaLogo withWordmark className="self-center" />
-      <div className="text-center">
-        <h1 className="text-2xl font-bold">{t("onboarding.title")}</h1>
-        <p className="mt-2 text-muted-foreground">{t("onboarding.subtitle")}</p>
+    <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col px-6 pt-[calc(1.5rem+env(safe-area-inset-top))] pb-10">
+      <KvitaLogo withWordmark size="sm" />
+      <div className="mt-14">
+        <h1 className="text-title font-bold text-balance">{t("onboarding.title")}</h1>
+        <p className="mt-3 text-muted-foreground">{t("onboarding.subtitle")}</p>
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="mt-8 flex flex-col gap-3">
         {OPTIONS.map(({ role, icon: Icon, title, hint }) => (
           <button
             key={role}
             type="button"
             disabled={pending !== null}
             onClick={() => void choose(role)}
-            className="flex min-h-20 items-center gap-4 rounded-xl border bg-card p-4 text-left transition hover:border-primary hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+            className="group flex items-center gap-4 rounded-xl border bg-card p-5 text-left transition-colors hover:border-primary/50 disabled:opacity-60"
           >
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-secondary text-primary">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-secondary text-primary">
               <Icon className="size-6" aria-hidden="true" />
             </span>
-            <span>
+            <span className="min-w-0 flex-1">
               <span className="block text-lg font-semibold">{t(title)}</span>
-              <span className="block text-sm text-muted-foreground">{t(hint)}</span>
+              <span className="mt-1 block text-sm text-muted-foreground">{t(hint)}</span>
             </span>
+            {pending === role ? (
+              <Loader2 className="size-5 shrink-0 animate-spin text-muted-foreground" />
+            ) : (
+              <ChevronRight className="size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+            )}
           </button>
         ))}
       </div>
