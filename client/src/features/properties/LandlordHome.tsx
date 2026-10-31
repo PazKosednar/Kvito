@@ -1,13 +1,16 @@
-import { DoorOpen, Plus } from "lucide-react";
+import { ArrowUpRight, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { ErrorState, List, ListRow, LoadingState, Section } from "@/components/layout-parts";
+import { FrameCorners, ModuleTile } from "@/components/frame";
+import { IsoGlyph } from "@/components/iso";
+import { ErrorState, List, ListRow, LoadingState } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useProperties } from "@/hooks/useProperties";
 import { TenancyStatusLabel, tenantNames } from "@/features/tenancies/tenancy-ui";
+import type { Property } from "@/types/domain";
 
-/** Landlord home: start steps when empty, otherwise every property with its units. */
+/** Landlord home: start steps when empty, otherwise every property as a framed block with its units. */
 export function LandlordHome() {
   const { t } = useTranslation();
   const toMessage = useErrorMessage();
@@ -19,91 +22,100 @@ export function LandlordHome() {
 
   return (
     <>
-      {properties.map((p) => (
-        <Section
-          key={p.id}
-          title={
-            <Link to={`/nepremicnine/${p.id}`} className="underline-offset-4 hover:underline">
-              {p.name}
-            </Link>
-          }
-        >
-          {p.units.length === 0 ? (
-            <Link to={`/nepremicnine/${p.id}`} className="block rounded-xl border border-dashed p-4 text-muted-foreground hover:border-primary/50">
-              {t("units.emptyBody")}
-            </Link>
-          ) : (
-            <List>
-              {p.units.map((u) => {
-                const tenancy = u.tenancies[0];
-                return (
-                  <ListRow
-                    key={u.id}
-                    to={tenancy ? `/najemi/${tenancy.id}` : `/nepremicnine/${p.id}`}
-                    leading={<DoorOpen className="size-5 shrink-0 text-primary" aria-hidden="true" />}
-                    title={u.name}
-                    subtitle={
-                      tenancy
-                        ? tenantNames(tenancy.members) || t("tenancies.waitingForTenant")
-                        : t("units.vacant")
-                    }
-                    trailing={tenancy ? <TenancyStatusLabel status={tenancy.status} /> : undefined}
-                  />
-                );
-              })}
-            </List>
-          )}
-        </Section>
-      ))}
-      <Section>
-        <Button asChild variant="outline" className="h-12 w-full">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <p className="label-mono">{t("properties.indexLabel", { count: properties.length })}</p>
+        <Button asChild variant="outline">
           <Link to="/nepremicnine/nova">
             <Plus />
             {t("properties.add")}
           </Link>
         </Button>
-      </Section>
+      </div>
+      <div className="flex flex-col gap-8">
+        {properties.map((p, i) => (
+          <PropertyBlock key={p.id} property={p} index={i} />
+        ))}
+      </div>
     </>
+  );
+}
+
+function PropertyBlock({ property: p, index }: { property: Property; index: number }) {
+  const { t } = useTranslation();
+  const occupied = p.units.filter((u) => u.tenancies.some((x) => x.status === "ACTIVE")).length;
+  return (
+    <section className="relative border bg-card">
+      <FrameCorners />
+      <Link to={`/nepremicnine/${p.id}`} className="group grid grid-cols-[1fr_auto] items-end gap-4 border-b p-4 hover:bg-accent">
+        <div className="min-w-0">
+          <p className="label-mono">
+            {String(index + 1).padStart(2, "0")} / {p.city}
+          </p>
+          <h2 className="mt-2 flex items-center gap-2 text-xl font-medium tracking-[-0.02em]">
+            <span className="truncate">{p.name}</span>
+            <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {p.street}, {p.postalCode} {p.city}
+          </p>
+          <p className="label-mono mt-3">{t("properties.occupancy", { occupied, total: p.units.length })}</p>
+        </div>
+        <IsoGlyph name="building" lit={occupied > 0} className="hidden h-24 w-32 sm:block" />
+      </Link>
+      {p.units.length === 0 ? (
+        <Link to={`/nepremicnine/${p.id}`} className="block p-4 text-muted-foreground hover:bg-accent">
+          {t("units.emptyBody")}
+        </Link>
+      ) : (
+        <List className="border-0">
+          {p.units.map((u) => {
+            const tenancy = u.tenancies[0];
+            return (
+              <ListRow
+                key={u.id}
+                to={tenancy ? `/najemi/${tenancy.id}` : `/nepremicnine/${p.id}`}
+                title={u.name}
+                subtitle={tenancy ? tenantNames(tenancy.members) || t("tenancies.waitingForTenant") : t("units.vacant")}
+                trailing={tenancy ? <TenancyStatusLabel status={tenancy.status} /> : undefined}
+              />
+            );
+          })}
+        </List>
+      )}
+    </section>
   );
 }
 
 function LandlordStart() {
   const { t } = useTranslation();
-  // A real sequence, so it is numbered.
-  const steps = (["property", "tenancy", "invite"] as const).map((key) => ({
-    title: t(`home.landlordSteps.${key}`),
-    hint: t(`home.landlordSteps.${key}Hint`),
-  }));
-
+  // A real sequence, so the tiles are numbered.
+  const steps = [
+    { key: "property", glyph: "building" as const },
+    { key: "tenancy", glyph: "slabs" as const },
+    { key: "invite", glyph: "key" as const },
+  ];
   return (
     <section aria-labelledby="landlord-start">
-      <h2 id="landlord-start" className="text-lg text-muted-foreground">
+      <p className="label-mono">{t("home.startLabel")}</p>
+      <h2 id="landlord-start" className="mt-2 text-lg text-muted-foreground">
         {t("home.landlordIntro")}
       </h2>
-      <ol className="mt-5">
-        {steps.map((step, i) => (
-          <li key={step.title} className="relative flex gap-4 pb-7 last:pb-0">
-            {i < steps.length - 1 && <span aria-hidden="true" className="absolute top-10 bottom-1 left-[1.1875rem] w-px bg-border" />}
-            <span
-              className={
-                i === 0
-                  ? "tabular flex size-10 shrink-0 items-center justify-center rounded-sm bg-primary text-sm font-bold text-primary-foreground"
-                  : "tabular flex size-10 shrink-0 items-center justify-center rounded-sm border-2 border-primary/25 text-sm font-bold text-primary"
-              }
-            >
-              {i + 1}
-            </span>
-            <div className="pt-1.5">
-              <p className="font-semibold">{step.title}</p>
-              <p className="mt-1 max-w-[46ch] text-muted-foreground">{step.hint}</p>
-            </div>
-          </li>
+      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+        {steps.map((s, i) => (
+          <ModuleTile
+            key={s.key}
+            glyph={s.glyph}
+            label={`${String(i + 1).padStart(2, "0")} / ${t(`home.landlordSteps.${s.key}`)}`}
+            body={t(`home.landlordSteps.${s.key}Hint`)}
+            {...(i === 0 ? { to: "/nepremicnine/nova" } : {})}
+            className={i === 0 ? "border-primary" : "opacity-70"}
+          />
         ))}
-      </ol>
-      <Button asChild size="xl" className="mt-8 w-full">
+      </div>
+      <Button asChild size="xl" className="mt-8 w-full justify-between sm:w-auto">
         <Link to="/nepremicnine/nova">
-          <Plus />
           {t("properties.addFirst")}
+          <Plus />
         </Link>
       </Button>
     </section>

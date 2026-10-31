@@ -70,13 +70,25 @@ export function PaySlip({ chargeId, shareId }: { chargeId: string; shareId: stri
 
         {payment.qrSvg ? (
           <div className="mt-5 flex flex-col items-center gap-3">
-            {/* Black on white, generous quiet zone – bank apps read it reliably. */}
-            <div
-              className="w-full max-w-60 rounded-lg bg-white p-2 [&_svg]:h-auto [&_svg]:w-full"
-              role="img"
-              aria-label={t("pay.qrLabel")}
-              dangerouslySetInnerHTML={{ __html: payment.qrSvg }}
-            />
+            {/* Black on white, generous quiet zone – bank apps read it reliably. Scanner brackets are outside the code. */}
+            <div className="relative w-full max-w-64 p-3">
+              <span aria-hidden="true" className="absolute top-0 left-0 size-6 border-t-2 border-l-2 border-primary" />
+              <span aria-hidden="true" className="absolute top-0 right-0 size-6 border-t-2 border-r-2 border-primary" />
+              <span aria-hidden="true" className="absolute bottom-0 left-0 size-6 border-b-2 border-l-2 border-primary" />
+              <span aria-hidden="true" className="absolute right-0 bottom-0 size-6 border-r-2 border-b-2 border-primary" />
+              <div className="relative overflow-hidden">
+                <div
+                  className="bg-white p-2 [&_svg]:h-auto [&_svg]:w-full"
+                  role="img"
+                  aria-label={t("pay.qrLabel")}
+                  dangerouslySetInnerHTML={{ __html: payment.qrSvg }}
+                />
+                <span
+                  aria-hidden="true"
+                  className="animate-scan pointer-events-none absolute inset-x-0 top-0 h-px bg-primary shadow-[0_0_12px_2px_var(--primary)] [--scan-distance:14rem]"
+                />
+              </div>
+            </div>
             <p className="text-center text-sm opacity-80">{t("pay.qrHint")}</p>
           </div>
         ) : (

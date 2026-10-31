@@ -22,7 +22,8 @@
     "cancel": "Cancel",
     "you": "you",
     "retry": "Try again",
-    "remove": "Remove"
+    "remove": "Remove",
+    "errorLabel": "Error"
   },
   "auth": {
     "title": "Sign in",
@@ -51,7 +52,11 @@
     "landlord": "I rent out a property",
     "landlordHint": "Post rent and bills, confirm payments and talk to your tenants.",
     "tenant": "I rent a home",
-    "tenantHint": "See what to pay and by when, report payments and message your landlord."
+    "tenantHint": "See what to pay and by when, report payments and message your landlord.",
+    "step": "Start",
+    "eyebrow": "00 / Role",
+    "landlordLabel": "A / Landlord",
+    "tenantLabel": "B / Tenant"
   },
   "roles": {
     "LANDLORD": "Landlord",
@@ -81,7 +86,8 @@
     "comingSoon": "These steps arrive in the next Kvita update.",
     "tenantTitle": "No tenancy linked yet",
     "tenantBody": "Send your landlord your e-mail so they can invite you. Once you accept, rent, bills and messages show up here.",
-    "tenantEmailLabel": "Your e-mail for the invitation"
+    "tenantEmailLabel": "Your e-mail for the invitation",
+    "startLabel": "00 / Start"
   },
   "theme": {
     "label": "Appearance",
@@ -168,7 +174,10 @@
     "create": "Add property",
     "delete": "Delete property",
     "confirmDelete": "Delete “{{name}}” with all its empty units?",
-    "deleted": "Property deleted."
+    "deleted": "Property deleted.",
+    "indexLabel_one": "{{count}} property",
+    "indexLabel_other": "{{count}} properties",
+    "occupancy": "Let {{occupied}} / {{total}}"
   },
   "units": {
     "title": "Units",
@@ -400,7 +409,14 @@
     "purposeHint": "Optional. If empty, we use the title.",
     "description": "Note for the tenant",
     "publish": "Publish charge",
-    "created": "Charge published."
+    "created": "Charge published.",
+    "emptyLabel": "00 / Charges",
+    "nextPayment": "Next payment",
+    "payNow": "Pay",
+    "overviewLabel": "Tenancy status",
+    "statOpen": "Open",
+    "statLate": "Overdue",
+    "statWaiting": "Awaiting confirmation"
   },
   "pay": {
     "payee": "Payee",
@@ -445,6 +461,13 @@
     "role": {
       "LANDLORD": "Landlord overview",
       "TENANT": "My tenancy"
+    },
+    "sections": {
+      "home": "00 / Overview",
+      "najemi": "02 / Tenancy",
+      "nepremicnine": "01 / Properties",
+      "enote": "01 / Units",
+      "povabilo": "Invitation"
     }
   }
 }

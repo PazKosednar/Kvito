@@ -22,7 +22,8 @@
     "cancel": "Prekliči",
     "you": "ti",
     "retry": "Poskusi znova",
-    "remove": "Odstrani"
+    "remove": "Odstrani",
+    "errorLabel": "Napaka"
   },
   "auth": {
     "title": "Prijava",
@@ -51,7 +52,11 @@
     "landlord": "Oddajam nepremičnino",
     "landlordHint": "Objaviš najemnino in položnice, potrjuješ plačila in se dogovarjaš z najemniki.",
     "tenant": "Najemam stanovanje",
-    "tenantHint": "Vidiš, kaj in do kdaj plačaš, javiš plačilo in pišeš najemodajalcu."
+    "tenantHint": "Vidiš, kaj in do kdaj plačaš, javiš plačilo in pišeš najemodajalcu.",
+    "step": "Začetek",
+    "eyebrow": "00 / Vloga",
+    "landlordLabel": "A / Najemodajalec",
+    "tenantLabel": "B / Najemnik"
   },
   "roles": {
     "LANDLORD": "Najemodajalec",
@@ -81,7 +86,8 @@
     "comingSoon": "Ti koraki pridejo v naslednji posodobitvi Kvite.",
     "tenantTitle": "Najem še ni povezan",
     "tenantBody": "Najemodajalcu pošlji svoj e-naslov in te bo povabil. Ko sprejmeš povabilo, tu vidiš najemnino, položnice in sporočila.",
-    "tenantEmailLabel": "Tvoj e-naslov za povabilo"
+    "tenantEmailLabel": "Tvoj e-naslov za povabilo",
+    "startLabel": "00 / Začetek"
   },
   "theme": {
     "label": "Videz",
@@ -168,7 +174,12 @@
     "create": "Dodaj nepremičnino",
     "delete": "Izbriši nepremičnino",
     "confirmDelete": "Izbrišem nepremičnino »{{name}}« z vsemi praznimi enotami?",
-    "deleted": "Nepremičnina je izbrisana."
+    "deleted": "Nepremičnina je izbrisana.",
+    "indexLabel_one": "{{count}} nepremičnina",
+    "indexLabel_two": "{{count}} nepremičnini",
+    "indexLabel_few": "{{count}} nepremičnine",
+    "indexLabel_other": "{{count}} nepremičnin",
+    "occupancy": "Oddano {{occupied}} / {{total}}"
   },
   "units": {
     "title": "Enote",
@@ -406,7 +417,14 @@
     "purposeHint": "Neobvezno. Če ostane prazno, uporabimo naziv.",
     "description": "Opomba za najemnika",
     "publish": "Objavi obveznost",
-    "created": "Obveznost je objavljena."
+    "created": "Obveznost je objavljena.",
+    "emptyLabel": "00 / Obveznosti",
+    "nextPayment": "Naslednje plačilo",
+    "payNow": "Plačaj",
+    "overviewLabel": "Stanje najema",
+    "statOpen": "Odprto",
+    "statLate": "Zamuja",
+    "statWaiting": "Čaka potrditev"
   },
   "pay": {
     "payee": "Prejemnik",
@@ -451,6 +469,13 @@
     "role": {
       "LANDLORD": "Pregled najemodajalca",
       "TENANT": "Moj najem"
+    },
+    "sections": {
+      "home": "00 / Pregled",
+      "najemi": "02 / Najem",
+      "nepremicnine": "01 / Nepremičnine",
+      "enote": "01 / Enote",
+      "povabilo": "Povabilo"
     }
   }
 }

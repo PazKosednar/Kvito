@@ -1,8 +1,10 @@
-import { Check, Plus, Receipt } from "lucide-react";
+import { ArrowRight, Check, Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { toast } from "sonner";
+import { FrameCorners, StatGrid } from "@/components/frame";
+import { IsoGlyph, IsoScene } from "@/components/iso";
 import { KvitaStamp } from "@/components/KvitaStamp";
 import { ErrorState, List, ListRow, LoadingState, Section } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
@@ -36,6 +38,7 @@ function TenantCharges({ charges, memberId, kvita }: { charges: Charge[]; member
   const toPay = mine.filter((x) => UNPAID.includes(x.share.status)).sort((a, b) => byDueAsc(a.charge, b.charge));
   const waiting = mine.filter((x) => x.share.status === "REPORTED_PAID");
   const settled = mine.filter((x) => x.share.status === "CONFIRMED");
+  const next = toPay[0];
 
   const row = ({ charge, share }: { charge: Charge; share: ChargeShare }) => (
     <ListRow
@@ -55,24 +58,31 @@ function TenantCharges({ charges, memberId, kvita }: { charges: Charge[]; member
   return (
     <>
       {kvita && toPay.length === 0 && waiting.length === 0 && (
-        <div className="mb-8 flex items-center gap-4 rounded-xl border bg-card p-5">
-          <KvitaStamp className="shrink-0" />
+        // The special moment: every obligation settled – all cubes turn blue.
+        <div className="relative mb-10 grid items-center gap-2 border bg-card p-5 sm:grid-cols-[1fr_14rem]">
+          <FrameCorners />
           <div>
-            <p className="font-semibold">{t("charges.kvitaTitle")}</p>
-            <p className="text-sm text-muted-foreground">{t("charges.kvitaBody")}</p>
+            <KvitaStamp animate />
+            <p className="mt-4 text-2xl leading-tight font-medium tracking-[-0.03em]">{t("charges.kvitaTitle")}</p>
+            <p className="mt-1 text-muted-foreground">{t("charges.kvitaBody")}</p>
           </div>
+          <IsoScene allSettled className="w-full" labels={[t("frame.cube1"), t("frame.cube2"), t("frame.cube3")]} />
         </div>
       )}
       {mine.length === 0 && (
-        <div className="rounded-xl border border-dashed p-5">
-          <Receipt className="size-6 text-primary" aria-hidden="true" />
-          <p className="mt-2 font-semibold">{t("charges.emptyTenantTitle")}</p>
-          <p className="mt-1 text-muted-foreground">{t("charges.emptyTenantBody")}</p>
+        <div className="grid items-center gap-4 border border-dashed p-5 sm:grid-cols-[1fr_12rem]">
+          <div>
+            <p className="label-mono">{t("charges.emptyLabel")}</p>
+            <p className="mt-2 font-medium">{t("charges.emptyTenantTitle")}</p>
+            <p className="mt-1 text-muted-foreground">{t("charges.emptyTenantBody")}</p>
+          </div>
+          <IsoGlyph name="cubes" className="h-24 w-full" />
         </div>
       )}
-      {toPay.length > 0 && (
+      {next && <NextPayment charge={next.charge} share={next.share} tenancyId={tenancy.id} />}
+      {toPay.length > 1 && (
         <Section title={t("charges.toPay")}>
-          <List>{toPay.map(row)}</List>
+          <List>{toPay.slice(1).map(row)}</List>
         </Section>
       )}
       {waiting.length > 0 && (
@@ -113,20 +123,28 @@ function LandlordCharges({ charges, summary }: { charges: Charge[]; summary: { o
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-muted-foreground">
-          {summary.openCents === 0 && summary.awaitingConfirmationCents === 0
-            ? t("charges.landlordAllSettled")
-            : summary.overdueCents > 0
-              ? t("charges.landlordSummaryLate", { open: formatCents(summary.openCents), late: formatCents(summary.overdueCents) })
-              : t("charges.landlordSummary", { open: formatCents(summary.openCents) })}
-        </p>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="label-mono">{t("charges.overviewLabel")}</p>
         <Button asChild>
           <Link to={`/najemi/${tenancy.id}/obveznosti/nova`}>
             <Plus />
             {t("charges.new")}
           </Link>
         </Button>
+      </div>
+      <div className="mb-10">
+        <StatGrid
+          items={[
+            { label: t("charges.statOpen"), value: formatCents(summary.openCents) },
+            { label: t("charges.statLate"), value: formatCents(summary.overdueCents), tone: summary.overdueCents > 0 ? "danger" : "default" },
+            { label: t("charges.statWaiting"), value: formatCents(summary.awaitingConfirmationCents), tone: summary.awaitingConfirmationCents > 0 ? "accent" : "default" },
+          ]}
+        />
+        {summary.openCents === 0 && summary.awaitingConfirmationCents === 0 && charges.length > 0 && (
+          <div className="mt-4">
+            <KvitaStamp animate />
+          </div>
+        )}
       </div>
 
       {toConfirm.length > 0 && (
@@ -210,5 +228,33 @@ function SettledSection<T extends { charge: Charge }>({ items, render }: { items
         </Button>
       )}
     </Section>
+  );
+}
+
+/** The one thing a tenant came for: what to pay next, one tap away from the payment details. */
+function NextPayment({ charge, share, tenancyId }: { charge: Charge; share: ChargeShare; tenancyId: string }) {
+  const { t } = useTranslation();
+  return (
+    <Link
+      to={`/najemi/${tenancyId}/obveznosti/${charge.id}`}
+      className="group relative mb-10 grid border bg-card transition-colors hover:border-foreground/25 sm:grid-cols-[1fr_auto]"
+    >
+      <FrameCorners />
+      <div className="p-5">
+        <p className="label-mono flex items-center gap-2">
+          <span className={share.status === "OVERDUE" ? "size-1.5 bg-destructive animate-blink" : "size-1.5 bg-primary animate-blink"} aria-hidden="true" />
+          {t("charges.nextPayment")}
+        </p>
+        <p className="tabular mt-4 text-[2.75rem] leading-none font-medium tracking-[-0.05em]">{formatCents(share.amountCents)}</p>
+        <p className="mt-3 font-medium">{charge.title}</p>
+        <p className="text-sm text-muted-foreground">
+          <DueText dueDate={charge.dueDate} status={share.status} />
+        </p>
+      </div>
+      <div className="flex items-center justify-between gap-3 border-t bg-primary px-5 py-4 text-primary-foreground sm:flex-col sm:items-start sm:justify-end sm:border-t-0 sm:border-l">
+        <span className="font-mono text-xs tracking-[0.06em] uppercase">{t("charges.payNow")}</span>
+        <ArrowRight className="size-5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
+      </div>
+    </Link>
   );
 }
