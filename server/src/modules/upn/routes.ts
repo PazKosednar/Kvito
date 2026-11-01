@@ -71,7 +71,7 @@ const SAMPLES: { id: string; title: string; check: string; fields: UpnFields }[]
     id: "minimum",
     title: "Najmanjši znesek 0,01 €",
     check: "Znesek 0,01 €. Uporabno za resničen preizkus z lastnim IBAN-om.",
-    fields: { ...base, amountCents: 1, purposeCode: "OTHR", purpose: "Preizkus Kvita UPN QR" },
+    fields: { ...base, amountCents: 1, purposeCode: "OTHR", purpose: "Preizkus Kvito UPN QR" },
   },
   {
     id: "no-reference",

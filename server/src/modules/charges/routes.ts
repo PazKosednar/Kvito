@@ -15,6 +15,7 @@ import { validateBody } from "../../middleware/validate.js";
 import type { EmailSender } from "../../services/email/EmailSender.js";
 import { paymentEmail } from "../../services/email/templates.js";
 import { assertTenancyAccess, assertTenancyLandlord } from "../access/access.js";
+import { claimAttachments } from "../attachments/service.js";
 import { chargeDto, chargeInclude, createCharge, paymentData, refreshChargeStatus, transitionShare } from "./service.js";
 
 const reference = z
@@ -77,11 +78,13 @@ const ReportBody = z.object({
   attachmentIds: z.array(idParam).max(3).optional(),
 });
 const ReasonBody = z.object({ reason: optionalText(500) });
+const MAX_CHARGE_FILES = 5;
+const AttachBody = z.object({ attachmentIds: z.array(idParam).min(1).max(MAX_CHARGE_FILES) });
 
 export function chargesRouter(deps: { emailSender: EmailSender }): Router {
   const router = Router();
 
-  /** Charges of a tenancy + the viewer's summary ("Kvita ✓" when everything is confirmed). */
+  /** Charges of a tenancy + the viewer's summary ("Kvito ✓" when everything is confirmed). */
   router.get("/tenancies/:id/charges", async (req, res) => {
     const userId = authUserId(req);
     const tenancyId = idParam.parse(req.params.id);
@@ -210,6 +213,49 @@ export function chargesRouter(deps: { emailSender: EmailSender }): Router {
       await audit({ actorId: userId, entityType: "Charge", entityId: id, action: "delete", before: { amountCents: existing.amountCents, status: existing.status }, ip: req.ip }, tx);
     });
     bus.emit("tenancy.changed", { tenancyId: existing.tenancyId, what: "charges" });
+    res.status(204).end();
+  });
+
+  // ---------- Bill attachments (e.g. a scanned položnica) ----------
+
+  /** Landlord attaches more files to an existing charge, also to automatic rent charges. */
+  router.post("/charges/:id/attachments", validateBody(AttachBody), async (req, res) => {
+    const userId = authUserId(req);
+    const id = idParam.parse(req.params.id);
+    const body = req.body as z.infer<typeof AttachBody>;
+    const charge = await prisma.charge.findFirst({ where: { id, deletedAt: null }, select: { tenancyId: true } });
+    if (!charge) throw notFound();
+    await assertTenancyLandlord(userId, charge.tenancyId);
+    const current = await prisma.attachment.count({ where: { chargeId: id, deletedAt: null } });
+    if (current + new Set(body.attachmentIds).size > MAX_CHARGE_FILES) throw badRequest("TOO_MANY_ATTACHMENTS");
+    await prisma.$transaction(async (tx) => {
+      await claimAttachments(tx, body.attachmentIds, {
+        tenancyId: charge.tenancyId,
+        uploadedById: userId,
+        kinds: ["BILL"],
+        link: { chargeId: id },
+      });
+      await audit({ actorId: userId, entityType: "Charge", entityId: id, action: "attach", after: { attachmentIds: body.attachmentIds }, ip: req.ip }, tx);
+    });
+    bus.emit("tenancy.changed", { tenancyId: charge.tenancyId, what: "charges" });
+    const full = await prisma.charge.findUniqueOrThrow({ where: { id }, include: chargeInclude });
+    res.status(201).json({ charge: chargeDto(full) });
+  });
+
+  router.delete("/charges/:id/attachments/:attachmentId", async (req, res) => {
+    const userId = authUserId(req);
+    const id = idParam.parse(req.params.id);
+    const attachmentId = idParam.parse(req.params.attachmentId);
+    const charge = await prisma.charge.findFirst({ where: { id, deletedAt: null }, select: { tenancyId: true } });
+    if (!charge) throw notFound();
+    await assertTenancyLandlord(userId, charge.tenancyId);
+    const { count } = await prisma.attachment.updateMany({
+      where: { id: attachmentId, chargeId: id, deletedAt: null },
+      data: { deletedAt: new Date() },
+    });
+    if (!count) throw notFound();
+    await audit({ actorId: userId, entityType: "Charge", entityId: id, action: "detach", before: { attachmentId }, ip: req.ip });
+    bus.emit("tenancy.changed", { tenancyId: charge.tenancyId, what: "charges" });
     res.status(204).end();
   });
 

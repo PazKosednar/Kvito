@@ -1,4 +1,4 @@
-# Kvita
+# Kvito
 
 Najemnina, položnice, sporočila, okvare in primopredaja med najemodajalcem in najemnikom – na enem mestu.
 Spletna aplikacija + PWA (kasneje iOS/Android prek Capacitorja).

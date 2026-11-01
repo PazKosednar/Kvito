@@ -60,7 +60,7 @@ function drawLogo(doc: PDFKit.PDFDocument, x: number, y: number, h: number) {
 }
 
 export async function renderHandoverPdf(h: FullHandover, storage: Storage): Promise<Buffer> {
-  const doc = new PDFDocument({ size: "A4", margins: { top: 56, bottom: 64, left: 56, right: 56 }, bufferPages: true, info: { Title: "Zapisnik o primopredaji", Author: "Kvita" } });
+  const doc = new PDFDocument({ size: "A4", margins: { top: 56, bottom: 64, left: 56, right: 56 }, bufferPages: true, info: { Title: "Zapisnik o primopredaji", Author: "Kvito" } });
   doc.registerFont("sans", `${FONTS}Geist-Regular.ttf`);
   doc.registerFont("sans-semibold", `${FONTS}Geist-SemiBold.ttf`);
   doc.registerFont("mono", `${FONTS}GeistMono-Regular.ttf`);
@@ -195,7 +195,7 @@ export async function renderHandoverPdf(h: FullHandover, storage: Storage): Prom
   };
   confirmLine("Najemodajalec", h.landlordConfirmedAt, property.owner.name ?? property.owner.email);
   confirmLine(h.tenancy.members.length > 1 ? "Najemniki" : "Najemnik", h.tenantConfirmedAt, h.tenantConfirmedBy?.name ?? h.tenantConfirmedBy?.email ?? null);
-  doc.font("sans").fontSize(8).fillColor(C.faint).text("Potrditvi sta bili dani v aplikaciji Kvita po prijavi z enkratno kodo. Zapisnik ne nadomešča pogodbe.", { width });
+  doc.font("sans").fontSize(8).fillColor(C.faint).text("Potrditvi sta bili dani v aplikaciji Kvito po prijavi z enkratno kodo. Zapisnik ne nadomešča pogodbe.", { width });
 
   // ---- Footer with page numbers ----
   const range = doc.bufferedPageRange();
@@ -207,7 +207,7 @@ export async function renderHandoverPdf(h: FullHandover, storage: Storage): Prom
     const y = doc.page.height - 40;
     doc.moveTo(left, y - 8).lineTo(left + width, y - 8).lineWidth(0.5).strokeColor(C.line).stroke();
     doc.font("mono").fontSize(7.5).fillColor(C.faint);
-    doc.text(`KVITA  ZAPISNIK O PRIMOPREDAJI — ${kind.toUpperCase()}`, left, y, { width: width * 0.7, lineBreak: false, characterSpacing: 0.5 });
+    doc.text(`KVITO  ZAPISNIK O PRIMOPREDAJI — ${kind.toUpperCase()}`, left, y, { width: width * 0.7, lineBreak: false, characterSpacing: 0.5 });
     doc.text(`${i + 1} / ${range.count}`, left + width * 0.7, y, { width: width * 0.3, align: "right", lineBreak: false });
     doc.page.margins.bottom = bottom;
   }

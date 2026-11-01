@@ -13,9 +13,9 @@ function layout(title: string, bodyHtml: string): string {
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px">
     <tr><td align="center">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:${BRAND.card};border-radius:16px;padding:28px">
-        <tr><td style="font-size:22px;font-weight:700;color:${BRAND.primary};padding-bottom:16px">Kvita</td></tr>
+        <tr><td style="font-size:22px;font-weight:700;color:${BRAND.primary};padding-bottom:16px">Kvito</td></tr>
         <tr><td style="font-size:16px;line-height:1.5">${bodyHtml}</td></tr>
-        <tr><td style="font-size:13px;color:${BRAND.muted};padding-top:24px">Kvita – vse o najemu na enem mestu.</td></tr>
+        <tr><td style="font-size:13px;color:${BRAND.muted};padding-top:24px">Kvito – vse o najemu na enem mestu.</td></tr>
       </table>
     </td></tr>
   </table>
@@ -59,7 +59,7 @@ export function paymentEmail(
     ...rows.map(([k, v]) => `${k}: ${v}`),
     "",
     p.qrPng ? "Kodo UPN QR najdeš v priponki. Skeniraj jo v svoji bančni aplikaciji." : "",
-    "Kvita denarja ne prejema. Plačaš v svoji banki.",
+    "Kvito denarja ne prejema. Plačaš v svoji banki.",
   ].join("\n");
   const html = layout(
     subject,
@@ -68,7 +68,7 @@ export function paymentEmail(
      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background:${BRAND.slip};border-radius:12px;padding:12px 16px">
        ${rows.map(([k, v]) => `<tr><td style="padding:4px 0;color:${BRAND.muted}">${escapeHtml(k)}</td><td style="padding:4px 0;font-weight:600;text-align:right">${escapeHtml(v)}</td></tr>`).join("")}
      </table>
-     <p style="margin:16px 0 0;color:${BRAND.muted}">Kvita denarja ne prejema. Plačaš v svoji banki.</p>`,
+     <p style="margin:16px 0 0;color:${BRAND.muted}">Kvito denarja ne prejema. Plačaš v svoji banki.</p>`,
   );
   return {
     to,

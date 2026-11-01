@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Kvita",
+    "name": "Kvito",
     "headline": "Rent is\nsettled.",
     "lead": "Rent, bills and messages between landlord and tenant in one place."
   },
@@ -48,7 +48,7 @@
     "stepCode": "Code"
   },
   "onboarding": {
-    "title": "What brings you to Kvita?",
+    "title": "What brings you to Kvito?",
     "subtitle": "Pick where you start. You can add the other role any time.",
     "landlord": "I rent out a property",
     "landlordHint": "Post rent and bills, confirm payments and talk to your tenants.",
@@ -85,7 +85,7 @@
       "invite": "Invite your tenant",
       "inviteHint": "Send a link or show a QR code. No app install needed."
     },
-    "comingSoon": "These steps arrive in the next Kvita update.",
+    "comingSoon": "These steps arrive in the next Kvito update.",
     "tenantTitle": "No tenancy linked yet",
     "tenantBody": "Send your landlord your e-mail so they can invite you. Once you accept, rent, bills and messages show up here.",
     "tenantEmailLabel": "Your e-mail for the invitation",
@@ -103,9 +103,9 @@
     "en": "English"
   },
   "install": {
-    "iosTitle": "Add Kvita to your Home Screen",
+    "iosTitle": "Add Kvito to your Home Screen",
     "iosBody": "It's the only way your iPhone can send you reminders. In Safari tap Share, then Add to Home Screen.",
-    "updateAvailable": "A new version of Kvita is available.",
+    "updateAvailable": "A new version of Kvito is available.",
     "update": "Update"
   },
   "notFound": {
@@ -213,7 +213,7 @@
     "create": "Add tenancy",
     "createAndInvite": "Save and invite tenant",
     "newTitle": "New tenancy",
-    "newSubtitle": "Enter the terms once. Kvita prepares the rent from them every month.",
+    "newSubtitle": "Enter the terms once. Kvito prepares the rent from them every month.",
     "editTitle": "Edit tenancy terms",
     "sectionRent": "Rent",
     "rent": "Monthly rent",
@@ -236,7 +236,7 @@
     "payeeCityHint": "For example “1000 Ljubljana”.",
     "address": "Address",
     "sectionCosts": "Costs the tenant covers",
-    "costsHint": "Pick what you agreed on. Kvita assumes nothing.",
+    "costsHint": "Pick what you agreed on. Kvito assumes nothing.",
     "costsCovered": "Tenant covers",
     "split": "Split between flatmates",
     "splitHint": {
@@ -299,7 +299,7 @@
     "showOrSend": "Your tenant scans the code with the phone camera or opens the link.",
     "qrLabel": "Invitation QR code",
     "share": "Share",
-    "shareText": "Kvita invitation for the tenancy",
+    "shareText": "Kvito invitation for the tenancy",
     "another": "Invite someone else",
     "onceNote": "You only see this link now. If you lose it, create a new one.",
     "pending": "Open invitations",
@@ -310,7 +310,7 @@
   "acceptInvite": {
     "from": "{{name}} invites you",
     "yourLandlord": "Your landlord",
-    "title": "Join the tenancy on Kvita",
+    "title": "Join the tenancy on Kvito",
     "validUntil": "The invitation is valid until {{date}}.",
     "join": "Join",
     "joined": "Welcome to the tenancy.",
@@ -341,7 +341,7 @@
     "dueIn_other": "Due in {{count}} days.",
     "lateBy_one": "The due date passed {{count}} day ago.",
     "lateBy_other": "The due date passed {{count}} days ago.",
-    "kvitaTitle": "Kvita ✓",
+    "kvitaTitle": "Kvito ✓",
     "kvitaBody": "Your landlord has confirmed all your payments.",
     "emptyTenantTitle": "No charges yet",
     "emptyTenantBody": "When your landlord posts rent or a bill, it shows up here with the payment details.",
@@ -369,7 +369,7 @@
     "total": "{{amount}} in total",
     "confirmedOn": "Payment confirmed on {{date}}.",
     "reportedTitle": "Payment reported",
-    "reportedBody": "Once your landlord confirms it, you'll see “Kvita ✓” here.",
+    "reportedBody": "Once your landlord confirms it, you'll see “Kvito ✓” here.",
     "disputedNote": "This charge is marked as disputed. Sort it out in messages.",
     "rejectedNote": "Your landlord can't see the payment yet: {{reason}}",
     "noReason": "no explanation",
@@ -435,7 +435,9 @@
     "dueShort": "Due: {{date}}",
     "paidOnShort": "Paid: {{date}}",
     "yourShare": "Your share ({{total}} in total)",
-    "reportHint": "Pay in your bank, then tap Paid."
+    "reportHint": "Pay in your bank, then tap Paid.",
+    "addFile": "Add file",
+    "addFileHint": "Add a payment slip or bill (PDF or image) so the tenant can see it with the charge."
   },
   "pay": {
     "payee": "Payee",
@@ -452,8 +454,8 @@
     "emailQr": "Send by e-mail",
     "emailed": "We sent the payment details to {{email}}.",
     "copyLabel": "Copy: {{label}}",
-    "supplierNote": "You pay the supplier directly. Kvita never receives money.",
-    "noMoneyNote": "You pay in your own bank. Kvita never receives money.",
+    "supplierNote": "You pay the supplier directly. Kvito never receives money.",
+    "noMoneyNote": "You pay in your own bank. Kvito never receives money.",
     "qrUnavailable": {
       "PAYEE_ADDRESS_MISSING": "No QR code: the payee has no address. Use the Copy buttons.",
       "OTHER": "No QR code for this payment. Use the Copy buttons."
@@ -478,7 +480,7 @@
     "section": "01 / Sign in",
     "cube1": "01 RENT",
     "cube2": "02 BILLS",
-    "cube3": "03 KVITA ✓",
+    "cube3": "03 KVITO ✓",
     "role": {
       "LANDLORD": "Landlord overview",
       "TENANT": "My tenancy"

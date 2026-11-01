@@ -49,9 +49,9 @@ Referenca prejemnika je neobvezna (obvezna le za JFP).
   Kontrolna števka: nizu (5.–25. mesto) dodamo desno `RF00`, črke pretvorimo v števila (A=10 … Z=35),
   `98 − (n mod 97)`, dvomestno. Primera iz pravil: `RF712348231`, `RF45SBO2010`.
 - **SI** – modeli 00–99; model 12: P1 z mod 11 kontrolno števko, največ 13 znakov.
-- **Kvita uporablja RF**: `RF{kk}{številka deleža obveznosti, 8 mest}` – omogoča kasnejše samodejno ujemanje z izpiskom.
+- **Kvito uporablja RF**: `RF{kk}{številka deleža obveznosti, 8 mest}` – omogoča kasnejše samodejno ujemanje z izpiskom.
 
-## Kode namena (iz uradnega šifranta 2019-08-07), ki jih uporablja Kvita
+## Kode namena (iz uradnega šifranta 2019-08-07), ki jih uporablja Kvito
 | Strošek | Koda | Naziv v šifrantu |
 |---|---|---|
 | Najemnina | `RENT` | Najemnina |

@@ -21,14 +21,14 @@ async function main() {
   const app = createApp({ emailSender, storage });
 
   const server = app.listen(env.PORT, () => {
-    logger.info(`Kvita API posluša na http://localhost:${env.PORT} (uploads: ${uploadDir})`);
+    logger.info(`Kvito API posluša na http://localhost:${env.PORT} (uploads: ${uploadDir})`);
   });
   const io = attachRealtime(server);
   server.on("error", (err: NodeJS.ErrnoException) => {
     // console.error is synchronous, so the message is visible even though we exit immediately.
     console.error(
       err.code === "EADDRINUSE"
-        ? `Vrata ${env.PORT} so že zasedena – je Kvita API morda že zagnan v drugem oknu?`
+        ? `Vrata ${env.PORT} so že zasedena – je Kvito API morda že zagnan v drugem oknu?`
         : `Strežnika ni bilo mogoče zagnati: ${err.message}`,
     );
     process.exit(1);

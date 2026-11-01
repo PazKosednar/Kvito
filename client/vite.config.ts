@@ -16,8 +16,8 @@ export default defineConfig({
       injectRegister: false,
       pwaAssets: { config: true, overrideManifestIcons: true },
       manifest: {
-        name: "Kvita",
-        short_name: "Kvita",
+        name: "Kvito",
+        short_name: "Kvito",
         description: "Najemnina, položnice in sporočila med najemodajalcem in najemnikom na enem mestu.",
         lang: "sl",
         start_url: "/",

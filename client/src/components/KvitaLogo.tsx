@@ -8,8 +8,8 @@ interface KvitaLogoProps {
   size?: "sm" | "md";
 }
 
-/** Official Kvita logo from the CGP. Colors follow the theme (and `.on-panel`). */
+/** Official Kvito logo from the CGP. Colors follow the theme (and `.on-panel`). */
 export function KvitaLogo({ className, withWordmark = false, size = "md" }: KvitaLogoProps) {
   if (withWordmark) return <KvitaLockup className={cn(size === "sm" ? "h-6" : "h-8", className)} />;
-  return <KvitaMark className={cn(size === "sm" ? "size-6" : "size-8", className)} title="Kvita" />;
+  return <KvitaMark className={cn(size === "sm" ? "size-6" : "size-8", className)} title="Kvito" />;
 }

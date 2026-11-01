@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Kvita",
+    "name": "Kvito",
     "headline": "Najemnina je\nporavnana.",
     "lead": "Najemnina, položnice in sporočila med najemodajalcem in najemnikom na enem mestu."
   },
@@ -215,7 +215,7 @@
     "create": "Vpiši najem",
     "createAndInvite": "Shrani in povabi najemnika",
     "newTitle": "Nov najem",
-    "newSubtitle": "Pogoje vpišeš enkrat. Iz njih Kvita vsak mesec pripravi najemnino.",
+    "newSubtitle": "Pogoje vpišeš enkrat. Iz njih Kvito vsak mesec pripravi najemnino.",
     "editTitle": "Uredi pogoje najema",
     "sectionRent": "Najemnina",
     "rent": "Mesečna najemnina",
@@ -238,7 +238,7 @@
     "payeeCityHint": "Na primer »1000 Ljubljana«.",
     "address": "Naslov",
     "sectionCosts": "Stroški, ki jih krije najemnik",
-    "costsHint": "Izberi, kar velja po vajinem dogovoru. Kvita ničesar ne predpostavlja.",
+    "costsHint": "Izberi, kar velja po vajinem dogovoru. Kvito ničesar ne predpostavlja.",
     "costsCovered": "Krije najemnik",
     "split": "Delitev med sostanovalce",
     "splitHint": {
@@ -349,7 +349,7 @@
     "lateBy_two": "Rok je potekel pred {{count}} dnevoma.",
     "lateBy_few": "Rok je potekel pred {{count}} dnevi.",
     "lateBy_other": "Rok je potekel pred {{count}} dnevi.",
-    "kvitaTitle": "Kvita ✓",
+    "kvitaTitle": "Kvito ✓",
     "kvitaBody": "Najemodajalec je potrdil vsa tvoja plačila.",
     "emptyTenantTitle": "Še ni obveznosti",
     "emptyTenantBody": "Ko najemodajalec objavi najemnino ali položnico, jo vidiš tukaj skupaj s podatki za plačilo.",
@@ -377,7 +377,7 @@
     "total": "skupaj {{amount}}",
     "confirmedOn": "Plačilo je potrjeno {{date}}.",
     "reportedTitle": "Plačilo je javljeno",
-    "reportedBody": "Ko ga najemodajalec potrdi, bo tu »Kvita ✓«.",
+    "reportedBody": "Ko ga najemodajalec potrdi, bo tu »Kvito ✓«.",
     "disputedNote": "Ta obveznost je označena kot sporna. Dogovorita se v sporočilih.",
     "rejectedNote": "Najemodajalec plačila še ne vidi: {{reason}}",
     "noReason": "brez pojasnila",
@@ -443,7 +443,9 @@
     "dueShort": "Rok: {{date}}",
     "paidOnShort": "Plačano: {{date}}",
     "yourShare": "Tvoj delež (skupaj {{total}})",
-    "reportHint": "Plačaj v svoji banki, nato tapni Plačano."
+    "reportHint": "Plačaj v svoji banki, nato tapni Plačano.",
+    "addFile": "Dodaj prilogo",
+    "addFileHint": "Tu lahko dodaš položnico ali račun (PDF ali slika), da ga najemnik vidi ob obveznosti."
   },
   "pay": {
     "payee": "Prejemnik",
@@ -460,8 +462,8 @@
     "emailQr": "Pošlji na e-pošto",
     "emailed": "Podatke za plačilo smo poslali na {{email}}.",
     "copyLabel": "Kopiraj: {{label}}",
-    "supplierNote": "Plačaš neposredno dobavitelju. Kvita denarja ne prejema.",
-    "noMoneyNote": "Plačaš v svoji banki. Kvita denarja ne prejema.",
+    "supplierNote": "Plačaš neposredno dobavitelju. Kvito denarja ne prejema.",
+    "noMoneyNote": "Plačaš v svoji banki. Kvito denarja ne prejema.",
     "qrUnavailable": {
       "PAYEE_ADDRESS_MISSING": "Koda QR ni na voljo, ker prejemnik nima vpisanega naslova. Uporabi gumbe Kopiraj.",
       "OTHER": "Koda QR za to plačilo ni na voljo. Uporabi gumbe Kopiraj."
@@ -486,7 +488,7 @@
     "section": "01 / Prijava",
     "cube1": "01 NAJEMNINA",
     "cube2": "02 POLOŽNICE",
-    "cube3": "03 KVITA ✓",
+    "cube3": "03 KVITO ✓",
     "role": {
       "LANDLORD": "Pregled najemodajalca",
       "TENANT": "Moj najem"

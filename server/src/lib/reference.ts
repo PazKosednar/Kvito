@@ -21,10 +21,10 @@ export function isValidRfReference(ref: string): boolean {
   return mod97(lettersToDigits(r.slice(4) + r.slice(0, 4))) === 1;
 }
 
-/** Kvita's reference for a charge share: RF + check + share number (8 digits) – lets us match bank statements later. */
+/** Kvito's reference for a charge share: RF + check + share number (8 digits) – lets us match bank statements later. */
 export const shareReference = (refNo: number): string => rfReference(String(refNo).padStart(8, "0"));
 
-/** Recovers the share number from a Kvita reference (for future statement matching). */
+/** Recovers the share number from a Kvito reference (for future statement matching). */
 export function refNoFromReference(ref: string): number | null {
   const r = ref.replace(/\s+/g, "").toUpperCase();
   if (!isValidRfReference(r) || !/^RF\d{2}\d{8}$/.test(r)) return null;

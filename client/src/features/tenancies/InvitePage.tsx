@@ -115,7 +115,7 @@ function InviteLink({ url, onAnother, sentTo }: { url: string; onAnother: () => 
           <Button
             variant="secondary"
             className="h-12"
-            onClick={() => void navigator.share({ title: "Kvita", text: t("invite.shareText"), url }).catch(() => undefined)}
+            onClick={() => void navigator.share({ title: "Kvito", text: t("invite.shareText"), url }).catch(() => undefined)}
           >
             <Share2 />
             {t("invite.share")}

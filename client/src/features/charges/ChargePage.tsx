@@ -55,7 +55,7 @@ export function ChargePage() {
           {charge.shares.length > 1 && `, ${t("charges.total", { amount: formatCents(charge.amountCents) })}`}
         </p>
         {charge.description && <p className="mt-3 whitespace-pre-line">{charge.description}</p>}
-        <Files files={charge.attachments} />
+        {isLandlord ? <ChargeFiles charge={charge} q={q} /> : <Files files={charge.attachments} />}
       </div>
 
       {!isLandlord && myShare && <TenantShare charge={charge} share={myShare} q={q} />}
@@ -341,6 +341,64 @@ function ReportLine({ report }: { report: ChargeShare["paymentReports"][number] 
       {report.note && <p className="mt-1 text-muted-foreground">»{report.note}«</p>}
       {report.rejectReason && <p className="mt-1 text-danger">{report.rejectReason}</p>}
       <Files files={report.attachments} />
+    </div>
+  );
+}
+
+const MAX_FILES = 5;
+
+/** Landlord's view of the bill files: open, remove, or add another one (e.g. a položnica). */
+function ChargeFiles({ charge, q }: { charge: Charge; q: Q }) {
+  const { t } = useTranslation();
+  const toMessage = useErrorMessage();
+  const [busy, setBusy] = useState(false);
+
+  const run = async (fn: () => Promise<void>) => {
+    setBusy(true);
+    try {
+      await fn();
+    } catch (err) {
+      toast.error(toMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="mt-3">
+      <ul className="flex flex-wrap gap-2">
+        {charge.attachments.map((f) => (
+          <li key={f.id} className="inline-flex items-center rounded-lg border bg-card">
+            <a href={apiUrl(f.url)} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center gap-2 pl-3 text-sm font-medium hover:text-primary">
+              <FileText className="size-4 text-primary" aria-hidden="true" />
+              <span className="max-w-48 truncate">{f.fileName}</span>
+            </a>
+            <Button variant="ghost" size="icon" aria-label={t("common.remove")} disabled={busy} onClick={() => void run(() => q.detachFile(f.id))}>
+              <X />
+            </Button>
+          </li>
+        ))}
+        {charge.attachments.length < MAX_FILES && (
+          <li>
+            <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-dashed px-3 text-sm font-medium hover:border-primary/50">
+              {busy ? <Loader2 className="size-4 animate-spin" /> : <Paperclip className="size-4 text-primary" aria-hidden="true" />}
+              {t("charges.addFile")}
+              <input
+                type="file"
+                accept="application/pdf,image/*"
+                className="sr-only"
+                disabled={busy}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) void run(() => q.attachFile(f));
+                }}
+              />
+            </label>
+          </li>
+        )}
+      </ul>
+      {charge.attachments.length === 0 && <p className="mt-2 text-sm text-muted-foreground">{t("charges.addFileHint")}</p>}
     </div>
   );
 }

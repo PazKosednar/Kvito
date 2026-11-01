@@ -1,16 +1,16 @@
-# Kvita – specifikacija MVP
+# Kvito – specifikacija MVP
 
-Spletna aplikacija + PWA **Kvita** za komunikacijo in obveznosti med najemodajalcem in najemnikom v Sloveniji (dolgoročni in srednjeročni najem). Kasneje jo zapakiramo s Capacitorjem za iOS in Android, zato je arhitektura API-first in brez odvisnosti od funkcij, ki obstajajo samo v brskalniku.
+Spletna aplikacija + PWA **Kvito** za komunikacijo in obveznosti med najemodajalcem in najemnikom v Sloveniji (dolgoročni in srednjeročni najem). Kasneje jo zapakiramo s Capacitorjem za iOS in Android, zato je arhitektura API-first in brez odvisnosti od funkcij, ki obstajajo samo v brskalniku.
 
 Jezik: koda, imena v bazi in komentarji v angleščini; uporabniški vmesnik v slovenščini (i18n pripravljen za `sl` in `en`).
 
 ## 1. Znamka
-- Ime: **Kvita** (iz »biti kvit« = vse je poravnano). Ime se v kodi in vmesniku piše vedno točno tako.
+- Ime: **Kvito** (iz »biti kvit« = vse je poravnano). Ime se v kodi in vmesniku piše vedno točno tako.
 - Ton: topel, preprost, brez pravniškega jezika. Kratki stavki, tikanje.
 - Barve: mirna zelena ali modrozelena kot primarna barva, ki vzbuja zaupanje, a ne deluje bančno. Vse barve so design tokens na enem mestu (CSS spremenljivke + Tailwind/shadcn tema), enostavno zamenljive. Svetla in temna tema.
 - Logotip: začasen SVG (kljukica + ključ); iz njega se generirajo PWA ikone in favicon.
-- Mikrobesedila: ko ima najemno razmerje vse obveznosti potrjene, se prikaže stanje »Kvita ✓«. Prazna stanja in obvestila so prijazna, ne birokratska.
-- PWA manifest: `name` in `short_name` = »Kvita«, `lang` = »sl«.
+- Mikrobesedila: ko ima najemno razmerje vse obveznosti potrjene, se prikaže stanje »Kvito ✓«. Prazna stanja in obvestila so prijazna, ne birokratska.
+- PWA manifest: `name` in `short_name` = »Kvito«, `lang` = »sl«.
 - Bundle ID za kasnejši Capacitor: `TODO(preveri)` – predlog `si.kvita.app`, potrditev, ko bo domena urejena.
 
 ## 2. Produkt
@@ -38,9 +38,9 @@ Vse med najemodajalcem in najemnikom na enem mestu: obveznosti (najemnina, polo�
 6. **Sporočila:** pogovor na najemno razmerje, priponke (slike, PDF), oznaka prebrano, sistemska sporočila ob dogodkih; sporočilo je lahko vezano na obveznost ali okvaro.
 7. **Okvare:** kategorija, opis, fotke, nujnost; `NEW` → `IN_PROGRESS` → `RESOLVED`; komentarji.
 8. **Števci:** odčitek + fotka (elektrika, voda, plin, toplota), zgodovina po enoti.
-9. **Primopredaja (vselitev in izselitev):** prostori in oprema s fotkami, stanje števcev, ključi; potrdita obe strani; PDF zapisnik z logotipom Kvita.
+9. **Primopredaja (vselitev in izselitev):** prostori in oprema s fotkami, stanje števcev, ključi; potrdita obe strani; PDF zapisnik z logotipom Kvito.
 10. **Dokumenti:** pogodba, aneksi, hišni red, navodila naprav; nastavljiva vidnost.
-11. **Opomniki:** 3 dni pred rokom, na dan roka in po zamudi; najemodajalcu tedenski povzetek. Web Push, e-pošta kot rezerva. E-poštne predloge v slogu znamke Kvita.
+11. **Opomniki:** 3 dni pred rokom, na dan roka in po zamudi; najemodajalcu tedenski povzetek. Web Push, e-pošta kot rezerva. E-poštne predloge v slogu znamke Kvito.
 12. **Pregled za najemodajalca:** odprto in zamujeno po enotah; letni izvoz prejetih plačil v CSV/PDF (brez davčnih izračunov).
 13. **Revizijska sled:** vsaka sprememba zneska ali statusa se zabeleži (kdo, kdaj, prej/potem); samo mehko brisanje.
 
@@ -87,9 +87,9 @@ Vse med najemodajalcem in najemnikom na enem mestu: obveznosti (najemnina, polo�
 ## 9. Faze
 Po vsaki fazi: kratek povzetek (kaj je narejeno, kako preizkusiti s konkretnimi koraki, odprti TODO-ji), nato čakanje na potrditev.
 
-0. Ogrodje monorepa, design tokens in začasni logotip Kvita, prijava z enkratno kodo, vloge, seed, `start.ps1`, README.
+0. Ogrodje monorepa, design tokens in začasni logotip Kvito, prijava z enkratno kodo, vloge, seed, `start.ps1`, README.
 1. Nepremičnine, enote, najemna razmerja, povabila.
-2. Obveznosti, mesečna najemnina, položnice, UPN QR, javljanje in potrjevanje plačil, stanje »Kvita ✓«.
+2. Obveznosti, mesečna najemnina, položnice, UPN QR, javljanje in potrjevanje plačil, stanje »Kvito ✓«.
 3. Sporočila, priponke, okvare.
 4. Števci, primopredaja s PDF, dokumenti.
 5. Opomniki in push, pregled za najemodajalca, izvoz, revizijska sled, priprava za deploy na Railway.

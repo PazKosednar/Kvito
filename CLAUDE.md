@@ -1,4 +1,4 @@
-# Kvita – trajna pravila projekta
+# Kvito – trajna pravila projekta
 
 Spletna aplikacija + PWA za komunikacijo in obveznosti med najemodajalcem in najemnikom v Sloveniji (dolgoročni in srednjeročni najem). Kasneje Capacitor (iOS/Android), zato API-first in brez odvisnosti od funkcij, ki obstajajo samo v brskalniku.
 
@@ -7,12 +7,12 @@ Celotna specifikacija: [docs/SPEC.md](docs/SPEC.md).
 Komunikacija z lastnikom projekta: slovenščina. Koda, imena v bazi in komentarji: angleščina. Uporabniški vmesnik: slovenščina (i18n pripravljen za `sl` in `en`).
 
 ## Znamka
-- Ime: **Kvita** (iz »biti kvit« = vse je poravnano). Ime se v kodi in vmesniku piše vedno točno tako.
+- Ime: **Kvito** (iz »biti kvit« = vse je poravnano). Ime se v kodi in vmesniku piše vedno točno tako.
 - Ton: topel, preprost, brez pravniškega jezika. Kratki stavki, tikanje.
 - **Celostna grafična podoba (CGP) je v [files/cgp/kvita-cgp](files/cgp/kvita-cgp) in je zavezujoča** (README, tokens.json, komponente, logotipi, ilustracije). »Inženirski mir«: grafit in topel kamen, tanke linije in mreže, mono nadnaslovi, ena sama zelena (`accent`) za »poravnano«. Teme: Kamen (svetla, privzeta) in Grafit (temna); `panel` je temen v obeh. Gibanje 150–200 ms, samo barva in prosojnost. Brez senc razen plavajočih plasti. Statusi vedno z besedo in ikono.
-- Tokeni CGP so 1:1 v [client/src/styles/tokens.css](client/src/styles/tokens.css); komponente CGP (StatusBadge, ChargeCard, PaymentPanel, SettledBanner, Eyebrow, logotip) so v `client/src/components/brand.tsx`. Zneski »1.250,00 €«, datumi »15. 11. 2026«.- Logotip: uradni iz CGP (»list s kljukico« + besedni znak KVITA); PWA ikone se generirajo iz `client/public/logo.svg` (ikona aplikacije iz CGP).
-- Mikrobesedila: ko ima najemno razmerje vse obveznosti potrjene, prikaži stanje »Kvita ✓«. Prazna stanja in obvestila naj bodo prijazna, ne birokratska.
-- PWA manifest: `name` in `short_name` = »Kvita«, `lang` = »sl«.
+- Tokeni CGP so 1:1 v [client/src/styles/tokens.css](client/src/styles/tokens.css); komponente CGP (StatusBadge, ChargeCard, PaymentPanel, SettledBanner, Eyebrow, logotip) so v `client/src/components/brand.tsx`. Zneski »1.250,00 €«, datumi »15. 11. 2026«.- Logotip: uradni iz CGP (»list s kljukico« + besedni znak KVITO); PWA ikone se generirajo iz `client/public/logo.svg` (ikona aplikacije iz CGP).
+- Mikrobesedila: ko ima najemno razmerje vse obveznosti potrjene, prikaži stanje »Kvito ✓«. Prazna stanja in obvestila naj bodo prijazna, ne birokratska.
+- PWA manifest: `name` in `short_name` = »Kvito«, `lang` = »sl«.
 - Bundle ID za kasnejši Capacitor: `TODO(preveri)` – predlog `si.kvita.app`, potrdim, ko bo domena urejena.
 
 ## Pravila dela

@@ -1,5 +1,5 @@
 /*
- * Kvita design tokens – from the official CGP (files/cgp/kvita-cgp/tokens.json, v1).
+ * Kvito design tokens – from the official CGP (files/cgp/kvita-cgp/tokens.json, v1).
  * "Inženirski mir": graphite and warm stone, thin lines and grids, mono eyebrows and ONE green that means "settled".
  * This is the ONLY place colors are defined. The CGP names are kept 1:1 (--surface, --ink, --accent …);
  * the shadcn/Tailwind names below are aliases so components keep working.

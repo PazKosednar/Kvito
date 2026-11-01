@@ -21,7 +21,7 @@ describe("RF reference (ISO 11649)", () => {
     expect(isValidRfReference("RF712348232")).toBe(false);
   });
 
-  it("builds and parses Kvita share references", () => {
+  it("builds and parses Kvito share references", () => {
     const ref = shareReference(42);
     expect(ref).toMatch(/^RF\d{2}00000042$/);
     expect(isValidRfReference(ref)).toBe(true);

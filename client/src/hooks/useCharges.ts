@@ -86,6 +86,25 @@ export function useCharge(chargeId: string | undefined) {
     if (tenancyId) await refresh(tenancyId);
   }, [chargeId, tenancyId]);
 
+  /** Upload a file (e.g. a položnica) and attach it to this charge. */
+  const attachFile = useCallback(
+    async (file: File) => {
+      if (!tenancyId) return;
+      const att = await uploadAttachment(tenancyId, file, "BILL");
+      await api(`/api/charges/${chargeId}/attachments`, { method: "POST", body: { attachmentIds: [att.id] } });
+      await refresh(tenancyId);
+    },
+    [chargeId, tenancyId],
+  );
+
+  const detachFile = useCallback(
+    async (attachmentId: string) => {
+      await api(`/api/charges/${chargeId}/attachments/${attachmentId}`, { method: "DELETE" });
+      if (tenancyId) await refresh(tenancyId);
+    },
+    [chargeId, tenancyId],
+  );
+
   const charge = q.data?.charge;
   const myShare = charge?.shares.find((s) => s.memberId === q.data?.memberId) ?? null;
 
@@ -102,6 +121,8 @@ export function useCharge(chargeId: string | undefined) {
     reopen: (shareId: string) => act(shareId, "reopen"),
     update,
     remove,
+    attachFile,
+    detachFile,
   };
 }
 

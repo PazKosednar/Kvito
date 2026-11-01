@@ -2,7 +2,7 @@
   "name": "kvita",
   "private": true,
   "version": "0.1.0",
-  "description": "Kvita – landlord and tenant obligations and communication in one place.",
+  "description": "Kvito – landlord and tenant obligations and communication in one place.",
   "workspaces": [
     "server",
     "client"

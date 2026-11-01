@@ -1,5 +1,5 @@
 /**
- * Phase 2 flow: bill split between flatmates → report → confirm → "Kvita ✓"; UPN payment data; uploads;
+ * Phase 2 flow: bill split between flatmates → report → confirm → "Kvito ✓"; UPN payment data; uploads;
  * idempotent monthly rent and overdue marking; access rules for every action.
  */
 import request from "supertest";
@@ -95,6 +95,27 @@ describe.skipIf(!hasDb)("charges flow", () => {
     await request(ctx.app).get(fileUrl.replace(/sig=[0-9a-f]/, "sig=0")).expect(403);
   });
 
+  it("lets the landlord attach and remove a položnica afterwards, but not the tenant", async () => {
+    const upload = await request(ctx.app)
+      .post(`/api/tenancies/${tenancyId}/attachments?kind=BILL&name=polozn.pdf`)
+      .set(await authHeader(landlord))
+      .set("Content-Type", "application/pdf")
+      .send(Buffer.from("%PDF-1.7\n% slip\n"))
+      .expect(201);
+    const id = upload.body.attachment.id as string;
+
+    await luka.post(`/api/charges/${chargeId}/attachments`, { attachmentIds: [id] }).expect(404);
+    const res = await landlord.post(`/api/charges/${chargeId}/attachments`, { attachmentIds: [id] }).expect(201);
+    expect(res.body.charge.attachments).toHaveLength(2);
+    // A file can only be claimed once.
+    await landlord.post(`/api/charges/${chargeId}/attachments`, { attachmentIds: [id] }).expect(400);
+
+    await luka.del(`/api/charges/${chargeId}/attachments/${id}`).expect(404);
+    await landlord.del(`/api/charges/${chargeId}/attachments/${id}`).expect(204);
+    const after = (await landlord.get(`/api/charges/${chargeId}`).expect(200)).body.charge;
+    expect(after.attachments).toHaveLength(1);
+  });
+
   it("rejects uploads that are not PDF or images", async () => {
     const res = await request(ctx.app)
       .post(`/api/tenancies/${tenancyId}/attachments?kind=BILL&name=x.pdf`)
@@ -132,7 +153,7 @@ describe.skipIf(!hasDb)("charges flow", () => {
     await stranger.post(`/api/charges/${chargeId}/shares/${lukaShare}/report`, {}).expect(404);
   });
 
-  it("runs report → reject → report → confirm and reaches Kvita ✓", async () => {
+  it("runs report → reject → report → confirm and reaches Kvito ✓", async () => {
     await luka.post(`/api/charges/${chargeId}/shares/${lukaShare}/report`, { paidOn: "2026-10-20", note: "Plačano v NLB Klik" }).expect(200);
     const rejected = await landlord.post(`/api/charges/${chargeId}/shares/${lukaShare}/reject`, { reason: "Nakazila ne vidim" }).expect(200);
     expect(rejected.body.status).toBe("OPEN");

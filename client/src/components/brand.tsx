@@ -1,5 +1,5 @@
 /**
- * Kvita brand components, implemented from the official CGP (files/cgp/kvita-cgp: components/bundle.js + bundle.css).
+ * Kvito brand components, implemented from the official CGP (files/cgp/kvita-cgp: components/bundle.js + bundle.css).
  * Same anatomy, labels and tokens; built as React + Tailwind so they share the app's tokens and i18n.
  */
 import type { ReactNode } from "react";
@@ -25,10 +25,10 @@ export function KvitaMark({ className, title }: { className?: string; title?: st
   );
 }
 
-/** Mark + KVITA wordmark (drawn from straight 8 px strokes). Colors follow the theme or `.on-panel`. Min. width 96 px. */
+/** Mark + KVITO wordmark (drawn from straight 8 px strokes; the O is a square ring like the I and T). Colors follow the theme or `.on-panel`. Min. width 96 px. */
 export function KvitaLockup({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 220 48" className={cn("h-6 w-auto", className)} role="img" aria-label="Kvita">
+    <svg viewBox="0 0 220 48" className={cn("h-6 w-auto", className)} role="img" aria-label="Kvito">
       <path d={SHEET} fill="var(--logo-sheet)" />
       <polyline points="12,25 20,33 33,18" fill="none" stroke="var(--logo-check)" strokeWidth="7" strokeLinecap="square" strokeLinejoin="miter" />
       <g transform="translate(64 4)" fill="var(--logo-word)">
@@ -39,8 +39,7 @@ export function KvitaLockup({ className }: { className?: string }) {
         <rect x="74" y="0" width="8" height="40" />
         <rect x="88" y="0" width="30" height="8" />
         <rect x="99" y="0" width="8" height="40" />
-        <polygon points="135,0 145,0 156,40 147,40 140,13 133,40 124,40" />
-        <rect x="131" y="25" width="18" height="7" />
+        <path d="M124 0H156V40H124Z M132 8V32H148V8Z" fillRule="evenodd" />
       </g>
     </svg>
   );
@@ -161,7 +160,7 @@ export function ChargeCard({
 
 // ---------- SettledBanner ----------
 
-/** "Kvita ✓" – only when everything is confirmed (never for partially paid months). It simply appears. */
+/** "Kvito ✓" – only when everything is confirmed (never for partially paid months). It simply appears. */
 export function SettledBanner({ period, children, className }: { period?: ReactNode; children?: ReactNode; className?: string }) {
   const { t } = useTranslation();
   return (
@@ -170,7 +169,7 @@ export function SettledBanner({ period, children, className }: { period?: ReactN
       <div>
         <Eyebrow onPanel>{period ?? t("settled.thisMonth")}</Eyebrow>
         <p className="mt-1 text-title font-semibold">
-          Kvita <span className="text-signal">✓</span>
+          Kvito <span className="text-signal">✓</span>
         </p>
         <p className="mt-1 text-sm text-ink-on-panel-muted">{children ?? t("settled.body")}</p>
       </div>
