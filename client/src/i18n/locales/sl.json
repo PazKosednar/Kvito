@@ -24,7 +24,8 @@
     "retry": "Poskusi znova",
     "remove": "Odstrani",
     "errorLabel": "Napaka",
-    "saved": "Shranjeno."
+    "saved": "Shranjeno.",
+    "offline": "Brez povezave si. Prikazani so zadnji znani podatki."
   },
   "auth": {
     "title": "Prijava",
@@ -85,7 +86,7 @@
       "invite": "Povabi najemnika",
       "inviteHint": "Pošlji povezavo ali pokaži QR kodo. Aplikacije ni treba nameščati."
     },
-    "comingSoon": "Ti koraki pridejo v naslednji posodobitvi Kvite.",
+    "comingSoon": "Ti koraki pridejo v naslednji posodobitvi Kvita.",
     "tenantTitle": "Najem še ni povezan",
     "tenantBody": "Najemodajalcu pošlji svoj e-naslov in te bo povabil. Ko sprejmeš povabilo, tu vidiš najemnino, položnice in sporočila.",
     "tenantEmailLabel": "Tvoj e-naslov za povabilo",
@@ -105,7 +106,7 @@
   "install": {
     "iosTitle": "Dodaj Kvito na začetni zaslon",
     "iosBody": "Samo tako ti iPhone pošilja opomnike. V Safariju tapni Deli in nato Dodaj na začetni zaslon.",
-    "updateAvailable": "Na voljo je nova različica Kvite.",
+    "updateAvailable": "Na voljo je nova različica Kvita.",
     "update": "Posodobi"
   },
   "notFound": {
@@ -314,7 +315,7 @@
   "acceptInvite": {
     "from": "{{name}} te vabi",
     "yourLandlord": "Tvoj najemodajalec",
-    "title": "Pridruži se najemu v Kviti",
+    "title": "Pridruži se najemu v Kvitu",
     "validUntil": "Povabilo velja do {{date}}.",
     "join": "Pridruži se",
     "joined": "Zdaj si del najema.",
@@ -731,5 +732,35 @@
       "Balkon",
       "Klet"
     ]
+  },
+  "notifications": {
+    "eyebrow": "Pregled",
+    "title": "Obvestila",
+    "markAllRead": "Vse prebrano",
+    "empty": "Zaenkrat ni obvestil. Ko se bo kaj zgodilo, bo to tukaj.",
+    "bellUnread_one": "Obvestila, {{count}} neprebrano",
+    "bellUnread_two": "Obvestila, {{count}} neprebrani",
+    "bellUnread_few": "Obvestila, {{count}} neprebrana",
+    "bellUnread_other": "Obvestila, {{count}} neprebranih",
+    "push": {
+      "enable": "Vklopi",
+      "disable": "Izklopi",
+      "off": {
+        "title": "Opomniki na telefonu",
+        "body": "Vklopi obvestila, da ti Kvito pove, kdaj zapade plačilo in kdaj najemodajalec odgovori."
+      },
+      "on": {
+        "title": "Obvestila so vklopljena",
+        "body": "Na tej napravi dobiš opomnike in novice. Izklopiš jih lahko kadar koli."
+      },
+      "denied": {
+        "title": "Obvestila so blokirana",
+        "body": "Dovoli jih v nastavitvah brskalnika za to stran in se vrni sem."
+      },
+      "unsupported": {
+        "title": "Obvestila v tem brskalniku niso na voljo",
+        "body": "Opomnike dobiš po e-pošti. Za obvestila na telefonu dodaj Kvito na začetni zaslon."
+      }
+    }
   }
 }

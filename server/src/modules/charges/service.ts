@@ -144,6 +144,7 @@ export async function createCharge(db: Prisma.TransactionClient, tenancyId: stri
   );
   await postSystemMessage(db, tenancyId, "CHARGE_CREATED", { title: charge.title, amountCents: charge.amountCents }, { chargeId: charge.id });
   bus.emit("tenancy.changed", { tenancyId, what: "charges" });
+  bus.emit("charge.activity", { tenancyId, chargeId: charge.id, kind: "created", actorId, title: charge.title, amountCents: charge.amountCents });
   return charge;
 }
 
@@ -253,6 +254,18 @@ export async function transitionShare(opts: {
       );
     }
     bus.emit("tenancy.changed", { tenancyId: share.charge.tenancyId, what: "charges" });
+    const kind = ({ report: "reported", confirm: "confirmed", reject: "rejected", dispute: "disputed" } as const)[opts.action as "report" | "confirm" | "reject" | "dispute"];
+    if (kind) {
+      bus.emit("charge.activity", {
+        tenancyId: share.charge.tenancyId,
+        chargeId: share.chargeId,
+        kind,
+        actorId: opts.actorId,
+        title: share.charge.title,
+        amountCents: share.amountCents,
+        shareUserId: share.member.userId,
+      });
+    }
     return { status: next, chargeStatus };
   });
 }

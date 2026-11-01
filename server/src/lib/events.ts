@@ -7,6 +7,17 @@ import { EventEmitter } from "node:events";
 export interface DomainEvents {
   "message.created": { tenancyId: string; messageId: string };
   "conversation.read": { tenancyId: string; userId: string; lastReadAt: string };
+  "charge.activity": {
+    tenancyId: string;
+    chargeId: string;
+    kind: "created" | "reported" | "confirmed" | "rejected" | "disputed";
+    /** Who did it (null: the system, e.g. automatic monthly rent). */
+    actorId: string | null;
+    title: string;
+    amountCents: number;
+    /** User the share belongs to (for reported/confirmed/rejected/disputed). */
+    shareUserId?: string;
+  };
   "tenancy.changed": { tenancyId: string; what: "charges" | "issues" | "members" | "documents" | "handover" | "meters" };
 }
 

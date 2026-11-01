@@ -24,7 +24,8 @@
     "retry": "Try again",
     "remove": "Remove",
     "errorLabel": "Error",
-    "saved": "Saved."
+    "saved": "Saved.",
+    "offline": "You're offline. Showing the last data we have."
   },
   "auth": {
     "title": "Sign in",
@@ -719,5 +720,33 @@
       "Balcony",
       "Cellar"
     ]
+  },
+  "notifications": {
+    "eyebrow": "Overview",
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "empty": "Nothing yet. When something happens, you'll see it here.",
+    "bellUnread_one": "Notifications, {{count}} unread",
+    "bellUnread_other": "Notifications, {{count}} unread",
+    "push": {
+      "enable": "Turn on",
+      "disable": "Turn off",
+      "off": {
+        "title": "Reminders on your phone",
+        "body": "Turn on notifications so Kvito tells you when a payment is due and when your landlord replies."
+      },
+      "on": {
+        "title": "Notifications are on",
+        "body": "This device gets reminders and updates. You can turn them off any time."
+      },
+      "denied": {
+        "title": "Notifications are blocked",
+        "body": "Allow them in your browser settings for this site, then come back."
+      },
+      "unsupported": {
+        "title": "This browser can't show notifications",
+        "body": "You'll get reminders by e-mail. For phone notifications, add Kvito to your Home Screen."
+      }
+    }
   }
 }

@@ -1,4 +1,4 @@
-# UPN QR – povzetek uradnih pravil (za implementacijo v Kviti)
+# UPN QR – povzetek uradnih pravil (za implementacijo v Kvitu)
 
 Viri (uradni dokumenti ZBS, prebrani 31. 10. 2026 iz `objava_dokumentacije_UPN_QR-2016-12-15.zip` in
 `Sifrant_kod_namenov_placil_javen.zip` z https://www.zbs-giz.si/placilni-promet/):

@@ -3,6 +3,7 @@ import { useAuthStore } from "@/auth/authStore";
 import { api, refreshAccessToken } from "@/lib/api";
 import { ApiError } from "@/types/api";
 import type { CurrentUser } from "@/types/user";
+import { disablePush } from "@/lib/push";
 import { closeSocket } from "@/lib/realtime";
 import { clearQueryCache } from "./useQuery";
 
@@ -45,12 +46,16 @@ export function useAuth() {
   }, []);
 
   const logout = useCallback(async () => {
+    // This device must stop receiving the previous person's notifications.
+    await disablePush().catch(() => undefined);
     try {
       await api("/api/auth/logout", { method: "POST", auth: false });
     } finally {
       useAuthStore.getState().clear();
       clearQueryCache();
       closeSocket();
+      // Offline copies of this person's data must not outlive the session.
+      void globalThis.caches?.delete("kvito-api").catch(() => undefined);
     }
   }, []);
 

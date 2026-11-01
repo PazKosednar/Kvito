@@ -31,7 +31,25 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api\//],
-        // TODO(faza 1+): runtime caching of the latest API data for offline reading.
+        // Web Push handlers (push + notificationclick).
+        importScripts: ["push-sw.js"],
+        // Offline reading: the last successful answer of every read-only API call. The network always wins
+        // when it is there; the cache only answers when it is not. Cleared on sign-out (see useAuth).
+        runtimeCaching: [
+          {
+            urlPattern: ({ url, request }: { url: URL; request: Request }) =>
+              request.method === "GET" &&
+              url.pathname.startsWith("/api/") &&
+              !/^\/api\/(auth|push|files|upn)\b/.test(url.pathname) &&
+              !url.pathname.endsWith("/qr.png"),
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "kvito-api",
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 150, maxAgeSeconds: 14 * 24 * 60 * 60 },
+            },
+          },
+        ],
       },
       devOptions: { enabled: false },
     }),

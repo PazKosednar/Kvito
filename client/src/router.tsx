@@ -17,6 +17,7 @@ import { HandoverTab } from "@/features/handover/HandoverTab";
 import { MetersTab } from "@/features/meters/MetersTab";
 import { PropertyFormPage } from "@/features/properties/PropertyFormPage";
 import { PropertyPage } from "@/features/properties/PropertyPage";
+import { NotificationsPage } from "@/features/notifications/NotificationsPage";
 import { InvitePage } from "@/features/tenancies/InvitePage";
 import { TenancyDetailsTab } from "@/features/tenancies/TenancyDetailsTab";
 import { TenancyFormPage } from "@/features/tenancies/TenancyFormPage";
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
         element: <AppShell />,
         children: [
           { index: true, element: <HomePage /> },
+          { path: "obvestila", element: <NotificationsPage /> },
           { path: "nepremicnine/nova", element: <PropertyFormPage /> },
           { path: "nepremicnine/:id", element: <PropertyPage /> },
           { path: "nepremicnine/:id/uredi", element: <PropertyFormPage /> },

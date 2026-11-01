@@ -17,6 +17,7 @@ import { documentsRouter } from "./modules/documents/routes.js";
 import { handoversRouter } from "./modules/handovers/routes.js";
 import { issuesRouter } from "./modules/issues/routes.js";
 import { metersRouter } from "./modules/meters/routes.js";
+import { notificationsRouter } from "./modules/notifications/routes.js";
 import { messagesRouter } from "./modules/messages/routes.js";
 import { propertiesRouter } from "./modules/properties/routes.js";
 import { tenanciesRouter } from "./modules/tenancies/routes.js";
@@ -28,6 +29,8 @@ import type { Storage } from "./services/storage/Storage.js";
 export interface AppDeps {
   emailSender: EmailSender;
   storage: Storage;
+  /** Public VAPID key; null/undefined when Web Push is not configured. */
+  pushPublicKey?: string | null;
 }
 
 export function createApp(deps: AppDeps): Express {
@@ -73,6 +76,7 @@ export function createApp(deps: AppDeps): Express {
 
   // Everything below requires a valid access token. Routers do not repeat this check.
   app.use("/api", requireAuth);
+  app.use("/api", notificationsRouter(deps));
   app.use("/api", attachmentsRouter(deps));
   app.use("/api", invitationsRouter(deps));
   app.use("/api", propertiesRouter());

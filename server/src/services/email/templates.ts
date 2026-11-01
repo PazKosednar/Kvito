@@ -125,3 +125,15 @@ export function loginCodeEmail(to: string, code: string, ttlMinutes: number): Em
   );
   return { to, subject, text, html };
 }
+
+/** Generic notification (reminders, payment updates) for people who have no push set up. */
+export function notificationEmail(to: string, p: { title: string; body: string; url: string }): EmailMessage {
+  const text = [p.body, "", `Odpri v Kvitu: ${p.url}`].join("\n");
+  const html = layout(
+    p.title,
+    `<p style="margin:0 0 4px;font-size:18px;font-weight:700">${escapeHtml(p.title)}</p>
+     <p style="margin:0 0 4px">${escapeHtml(p.body)}</p>
+     ${button(p.url, "Odpri v Kvitu")}`,
+  );
+  return { to, subject: p.title, text, html };
+}

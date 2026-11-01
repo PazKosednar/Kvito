@@ -17,6 +17,7 @@ export const ROUTES = {
   home: "/",
   login: "/prijava",
   onboarding: "/dobrodoslica",
+  notifications: "/obvestila",
 } as const;
 
 export const OTP_LENGTH = 6;

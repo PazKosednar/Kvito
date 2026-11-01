@@ -2,8 +2,10 @@ import { useTranslation } from "react-i18next";
 import { Link, Outlet, useLocation } from "react-router";
 import { Eyebrow, KvitaLockup } from "@/components/brand";
 import { ROUTES } from "@/constants";
+import { useOnline } from "@/hooks/useOnline";
 import { useRole } from "@/hooks/useRole";
 import { AccountMenu } from "./AccountMenu";
+import { NotificationsBell } from "./NotificationsBell";
 import { RoleSwitch } from "./RoleSwitch";
 
 /** App frame on stone: a quiet header (lockup, role eyebrow, account) and a content column. */
@@ -11,6 +13,7 @@ export function AppShell() {
   const { t } = useTranslation();
   const { activeRole } = useRole();
   const location = useLocation();
+  const online = useOnline();
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -22,11 +25,18 @@ export function AppShell() {
           {activeRole && (
             <Eyebrow className="hidden truncate sm:inline-flex">{t(`frame.role.${activeRole}`)}</Eyebrow>
           )}
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-1">
+            <NotificationsBell />
             <AccountMenu />
           </div>
         </div>
       </header>
+
+      {!online && (
+        <p role="status" className="border-b border-line bg-warn-soft px-4 py-2 text-center text-sm text-warn">
+          {t("common.offline")}
+        </p>
+      )}
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 pt-6 pb-[calc(3rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-8">
         <RoleSwitch className="mb-8" />

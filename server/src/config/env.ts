@@ -20,6 +20,10 @@ const EnvSchema = z.object({
   OTP_MAX_PER_HOUR: z.coerce.number().int().positive().default(5),
   COOKIE_SECURE: bool.default(false),
   UPLOAD_DIR: z.string().default("uploads"),
+  /** Web Push (VAPID). Without keys push is switched off and e-mail is used. Generate: npm run vapid -w server */
+  VAPID_PUBLIC_KEY: z.string().min(1).optional(),
+  VAPID_PRIVATE_KEY: z.string().min(1).optional(),
+  VAPID_SUBJECT: z.string().min(1).default("mailto:podpora@kvito.si"),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
