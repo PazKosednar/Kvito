@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
+import { audit } from "../../lib/audit.js";
 import { notFound } from "../../lib/errors.js";
 import { prisma } from "../../lib/prisma.js";
 import { authUserId, requireAuth } from "../../middleware/auth.js";
@@ -45,6 +46,8 @@ export function usersRouter(): Router {
         ...(roles ? { roles } : {}),
       },
     });
+    const changed = ["name", "phone", "locale", "activeRole"].filter((k) => (body as Record<string, unknown>)[k] !== undefined);
+    if (changed.length) await audit({ actorId: user.id, entityType: "User", entityId: user.id, action: "update.profile", after: { fields: changed }, ip: req.ip });
     res.json({ user: toMeDto(user) });
   });
 

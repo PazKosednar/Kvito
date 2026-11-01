@@ -1,27 +1,27 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { createApp } from "./app.js";
-import { env } from "./config/env.js";
+import { env, isProd } from "./config/env.js";
 import { logger } from "./lib/logger.js";
 import { prisma } from "./lib/prisma.js";
-import { ConsoleEmailSender } from "./services/email/ConsoleEmailSender.js";
+import { createEmailSender } from "./services/email/createEmailSender.js";
 import { attachNotificationListeners } from "./services/notifications/listeners.js";
 import { createNotifier } from "./services/notifications/notifier.js";
 import { NullPushSender, WebPushSender } from "./services/push/WebPushSender.js";
 import { sendPaymentReminders, sendWeeklySummaries } from "./services/jobs/reminders.js";
+import { purgeExpiredData } from "./services/jobs/retention.js";
 import { attachRealtime } from "./services/realtime.js";
 import { generateMonthlyRent, markOverdue } from "./services/jobs/rent.js";
 import { startScheduler } from "./services/jobs/scheduler.js";
-import { LocalDiskStorage } from "./services/storage/Storage.js";
+import { createStorage } from "./services/storage/createStorage.js";
 
 async function main() {
   const uploadDir = path.resolve(env.UPLOAD_DIR);
-  await mkdir(uploadDir, { recursive: true });
+  if (!isProd || env.STORAGE_DRIVER === "local") await mkdir(uploadDir, { recursive: true });
 
-  // TODO(preveri): production e-mail provider (EU) – until then e-mails are only printed.
-  const emailSender = new ConsoleEmailSender();
-  // TODO(faza 5): S3-compatible EU storage in production.
-  const storage = new LocalDiskStorage(uploadDir);
+  // TODO(preveri): choose the production SMTP provider (EU); until SMTP_HOST is set, e-mails are only printed.
+  const emailSender = createEmailSender();
+  const storage = createStorage(uploadDir);
   const pushSender =
     env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY
       ? new WebPushSender(env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY, env.VAPID_SUBJECT)
@@ -50,6 +50,7 @@ async function main() {
     { name: "mark-overdue", run: markOverdue },
     { name: "payment-reminders", run: (now) => sendPaymentReminders(notifier, now) },
     { name: "weekly-summary", run: (now) => sendWeeklySummaries(notifier, now) },
+    { name: "retention", run: purgeExpiredData },
   ]);
 
   const shutdown = (signal: string) => {

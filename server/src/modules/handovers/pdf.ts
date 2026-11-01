@@ -1,14 +1,10 @@
-import { fileURLToPath } from "node:url";
 import PDFDocument from "pdfkit";
 import type { Prisma } from "../../generated/prisma/client.js";
 import { formatMeterValue, METER_UNITS } from "../../lib/meters.js";
+import { C, drawLogo, registerFonts } from "../../lib/pdf.js";
 import { prisma } from "../../lib/prisma.js";
 import type { Storage } from "../../services/storage/Storage.js";
 import type { handoverInclude } from "./routes.js";
-
-/** CGP colors (Kamen) for print. */
-const C = { ink: "#121212", muted: "#55514a", faint: "#66625a", line: "#d6d2ca", accent: "#0a7a45", signal: "#38e08c", sunken: "#e4e1da" };
-const FONTS = fileURLToPath(new URL("../../../assets/fonts/", import.meta.url));
 
 type FullHandover = Prisma.HandoverGetPayload<{
   include: typeof handoverInclude & {
@@ -39,32 +35,9 @@ async function readImage(storage: Storage, key: string): Promise<Buffer | null> 
   }
 }
 
-/** The official mark + wordmark (assets/Logos), drawn as vectors so the PDF stays sharp. */
-function drawLogo(doc: PDFKit.PDFDocument, x: number, y: number, h: number) {
-  const s = h / 48;
-  doc.save().translate(x, y).scale(s);
-  doc.path("M4 0 H34 L48 14 V44 A4 4 0 0 1 44 48 H4 A4 4 0 0 1 0 44 V4 A4 4 0 0 1 4 0 Z").fill(C.ink);
-  // Open polyline (polygon() would close the path into a triangle).
-  doc.moveTo(12, 25).lineTo(20, 33).lineTo(33, 18).lineWidth(7).lineCap("square").lineJoin("miter").stroke(C.signal);
-  doc.translate(64, 4).fillColor(C.ink);
-  doc.rect(0, 0, 8, 40).fill();
-  doc.polygon([8, 13], [19, 0], [30, 0], [8, 25]).fill();
-  doc.polygon([12, 19], [30, 40], [20, 40], [7, 25]).fill();
-  doc.polygon([36, 0], [45, 0], [52, 28], [59, 0], [68, 0], [57, 40], [47, 40]).fill();
-  doc.rect(74, 0, 8, 40).fill();
-  doc.rect(88, 0, 30, 8).fill();
-  doc.rect(99, 0, 8, 40).fill();
-  doc.polygon([135, 0], [145, 0], [156, 40], [147, 40], [140, 13], [133, 40], [124, 40]).fill();
-  doc.rect(131, 25, 18, 7).fill();
-  doc.restore();
-}
-
 export async function renderHandoverPdf(h: FullHandover, storage: Storage): Promise<Buffer> {
   const doc = new PDFDocument({ size: "A4", margins: { top: 56, bottom: 64, left: 56, right: 56 }, bufferPages: true, info: { Title: "Zapisnik o primopredaji", Author: "Kvito" } });
-  doc.registerFont("sans", `${FONTS}Geist-Regular.ttf`);
-  doc.registerFont("sans-semibold", `${FONTS}Geist-SemiBold.ttf`);
-  doc.registerFont("mono", `${FONTS}GeistMono-Regular.ttf`);
-  doc.registerFont("mono-medium", `${FONTS}GeistMono-Medium.ttf`);
+  registerFonts(doc);
 
   const chunks: Buffer[] = [];
   doc.on("data", (c: Buffer) => chunks.push(c));

@@ -95,6 +95,8 @@ Vsi ukazi se poženejo iz korena repozitorija.
 | `npm run build` | produkcijski build obeh delov |
 | `npm test` | unit + smoke testi (server uporablja bazo `kvita_test`) |
 | `npm run db:migrate` | nova migracija iz `server/prisma/schema.prisma` (razvoj) |
+| `npm run db:deploy` | uporabi migracije (produkcija, Railway) |
+| `npm run vapid -w server` | ustvari ključe za Web Push |
 | `npm run db:seed` | razvojni podatki (idempotentno, varno za ponovitev) |
 | `npm run db:studio -w server` | Prisma Studio (pregled baze v brskalniku) |
 | `npm run icons -w client` | ponovno generira favicon in PWA ikone iz `client/public/logo.svg` |
@@ -133,3 +135,8 @@ Ob menjavi barv popravi še mesta, ki ne morejo brati CSS spremenljivk: `THEME_C
 ter `BRAND` v `server/src/services/email/templates.ts`.
 Pisava: Schibsted Grotesk (`@fontsource-variable/schibsted-grotesk`, deluje tudi brez povezave).
 Začasni logotip: `client/public/logo.svg` (+ `KvitaLogo.tsx`); nato `npm run icons -w client`.
+
+## Namestitev in podatki
+- Produkcija (Railway, EU): [docs/DEPLOY.md](docs/DEPLOY.md)
+- Hramba, izvoz in izbris podatkov: [docs/RETENTION.md](docs/RETENTION.md)
+- Obvestila: brez VAPID ključev gredo opomniki po e-pošti; ključe ustvariš z `npm run vapid -w server`. V razvoju je storitveni delavec izklopljen, zato push preizkusiš z `npm run build` in `SERVE_CLIENT=true`.

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useProperties } from "@/hooks/useProperties";
 import { TenancyStatusLabel, tenantNames } from "@/features/tenancies/tenancy-ui";
+import { ExportsSection, OverviewPanel, useUnitAttention } from "./OverviewPanel";
 import type { Property } from "@/types/domain";
 
 /** Landlord home: start steps when empty, otherwise every property as a framed block with its units. */
@@ -23,6 +24,9 @@ export function LandlordHome() {
 
   return (
     <>
+      <div className="mb-6 empty:hidden">
+        <OverviewPanel />
+      </div>
       <div className="mb-4 flex items-center justify-between gap-3">
         <p className="label-mono">{t("properties.indexLabel", { count: properties.length })}</p>
         <Button asChild variant="outline">
@@ -37,12 +41,14 @@ export function LandlordHome() {
           <PropertyBlock key={p.id} property={p} index={i} />
         ))}
       </div>
+      <ExportsSection />
     </>
   );
 }
 
 function PropertyBlock({ property: p, index }: { property: Property; index: number }) {
   const { t } = useTranslation();
+  const attention = useUnitAttention();
   const occupied = p.units.filter((u) => u.tenancies.some((x) => x.status === "ACTIVE")).length;
   return (
     <section className="rounded-md border border-line bg-surface-raised">
@@ -74,7 +80,18 @@ function PropertyBlock({ property: p, index }: { property: Property; index: numb
                 to={tenancy ? `/najemi/${tenancy.id}` : `/nepremicnine/${p.id}`}
                 title={u.name}
                 subtitle={tenancy ? tenantNames(tenancy.members) || t("tenancies.waitingForTenant") : t("units.vacant")}
-                trailing={tenancy ? <TenancyStatusLabel status={tenancy.status} /> : undefined}
+                trailing={
+                  tenancy ? (
+                    (() => {
+                      const a = attention(tenancy.id);
+                      return a ? (
+                        <span className={a.warn ? "font-mono text-xs font-medium tracking-[0.06em] text-warn uppercase" : "font-mono text-xs font-medium tracking-[0.06em] text-ink-muted uppercase"}>{a.text}</span>
+                      ) : (
+                        <TenancyStatusLabel status={tenancy.status} />
+                      );
+                    })()
+                  ) : undefined
+                }
               />
             );
           })}

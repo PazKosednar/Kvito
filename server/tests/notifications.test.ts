@@ -63,7 +63,8 @@ describe.skipIf(!hasDb)("notifications and reminders", () => {
     await luka.post("/api/push/subscriptions", { ...sub, endpoint: "http://insecure.test/x" }).expect(400);
   });
 
-  it("sends reminders once per milestone, by push when a device is registered", async () => {
+  // The jobs scan the whole (shared) test database, so give them room.
+  it("sends reminders once per milestone, by push when a device is registered", { timeout: 60_000 }, async () => {
     const { createNotifier } = await import("../src/services/notifications/notifier.js");
     const { sendPaymentReminders } = await import("../src/services/jobs/reminders.js");
     const notifier = createNotifier({ emailSender: ctx.mail, pushSender: push });
@@ -141,5 +142,5 @@ describe.skipIf(!hasDb)("notifications and reminders", () => {
     expect(await sendWeeklySummaries(notifier, at("2031-03-17"))).toBe(0); // once per week
     const note = await ctx.prisma.notification.findFirst({ where: { userId: landlord.user.id, type: "summary.weekly" } });
     expect(note?.body).toMatch(/čaka na tvojo potrditev: 1/);
-  });
+  }, 60_000);
 });

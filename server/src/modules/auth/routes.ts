@@ -1,5 +1,6 @@
 import { Router, type CookieOptions, type Request, type RequestHandler } from "express";
 import { env, isProd } from "../../config/env.js";
+import { audit } from "../../lib/audit.js";
 import { forbidden, unauthorized } from "../../lib/errors.js";
 import { validateBody } from "../../middleware/validate.js";
 import { requestCodeLimiter, verifyCodeLimiter } from "../../middleware/rateLimit.js";
@@ -43,6 +44,7 @@ export function authRouter(deps: { emailSender: EmailSender }): Router {
   router.post("/verify-code", verifyCodeLimiter, validateBody(VerifyCodeBody), async (req, res) => {
     const { user, tokens } = await verifyLoginCode(req.body.email, req.body.code, clientMeta(req));
     res.cookie(REFRESH_COOKIE, tokens.refreshToken, cookieOptions(tokens.refreshExpiresAt));
+    await audit({ actorId: user.id, entityType: "User", entityId: user.id, action: "login", ip: req.ip });
     res.json({ accessToken: tokens.accessToken, user: toMeDto(user) });
   });
 

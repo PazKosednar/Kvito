@@ -3,7 +3,9 @@ import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
 import { pinoHttp } from "pino-http";
-import { env } from "./config/env.js";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { env, isProd } from "./config/env.js";
 import { logger } from "./lib/logger.js";
 import { prisma } from "./lib/prisma.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
@@ -19,6 +21,8 @@ import { issuesRouter } from "./modules/issues/routes.js";
 import { metersRouter } from "./modules/meters/routes.js";
 import { notificationsRouter } from "./modules/notifications/routes.js";
 import { messagesRouter } from "./modules/messages/routes.js";
+import { privacyRouter } from "./modules/users/privacy.js";
+import { reportsRouter } from "./modules/reports/routes.js";
 import { propertiesRouter } from "./modules/properties/routes.js";
 import { tenanciesRouter } from "./modules/tenancies/routes.js";
 import { upnRouter } from "./modules/upn/routes.js";
@@ -40,7 +44,23 @@ export function createApp(deps: AppDeps): Express {
   app.set("trust proxy", 1);
   app.disable("x-powered-by");
 
-  app.use(helmet({ crossOriginResourcePolicy: { policy: "same-site" } }));
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: "same-site" },
+      contentSecurityPolicy: {
+        directives: {
+          // Fonts are bundled (no CDN); blob: is used for photo previews and the saved QR image.
+          "default-src": ["'self'"],
+          "img-src": ["'self'", "data:", "blob:"],
+          "connect-src": ["'self'"],
+          "style-src": ["'self'", "'unsafe-inline'"],
+          "frame-ancestors": ["'none'"],
+          // https-only upgrade would break plain-http local runs of the production build.
+          "upgrade-insecure-requests": isProd ? [] : null,
+        },
+      },
+    }),
+  );
   app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
   app.use(express.json({ limit: "100kb" }));
   app.use(cookieParser());
@@ -80,6 +100,8 @@ export function createApp(deps: AppDeps): Express {
   app.use("/api", attachmentsRouter(deps));
   app.use("/api", invitationsRouter(deps));
   app.use("/api", propertiesRouter());
+  app.use("/api", reportsRouter());
+  app.use("/api", privacyRouter());
   app.use("/api", tenanciesRouter());
   app.use("/api", chargesRouter(deps));
   app.use("/api", messagesRouter());
@@ -89,6 +111,32 @@ export function createApp(deps: AppDeps): Express {
   app.use("/api", handoversRouter(deps));
 
   app.use("/api", notFoundHandler);
+
+  // One service: the same server delivers the built web client (PWA) when it is there.
+  if (env.SERVE_CLIENT ?? isProd) serveClient(app);
+
   app.use(errorHandler);
   return app;
+}
+
+const CLIENT_DIST = fileURLToPath(new URL("../../client/dist/", import.meta.url));
+
+/** Static files with sane caching: hashed assets forever, the app shell and service worker never. */
+function serveClient(app: Express): void {
+  app.use(
+    express.static(CLIENT_DIST, {
+      index: false,
+      setHeaders(res, file) {
+        const name = path.basename(file);
+        const immutable = file.includes(`${path.sep}assets${path.sep}`);
+        res.setHeader("Cache-Control", immutable ? "public, max-age=31536000, immutable" : name === "sw.js" || name.endsWith(".html") || name === "manifest.webmanifest" ? "no-cache" : "public, max-age=3600");
+      },
+    }),
+  );
+  // Client-side routes (React Router): everything that is not API, realtime or a file gets the app shell.
+  app.get(/^\/(?!api\/|socket\.io\/).*/, (req, res, next) => {
+    if (path.extname(req.path)) return next();
+    res.setHeader("Cache-Control", "no-cache");
+    res.sendFile(path.join(CLIENT_DIST, "index.html"), (err) => err && next(err));
+  });
 }

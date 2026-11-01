@@ -1,4 +1,5 @@
-import { LogOut, Plus } from "lucide-react";
+import { LogOut, Plus, ShieldCheck } from "lucide-react";
+import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   DropdownMenu,
@@ -58,6 +59,7 @@ export function AccountMenu() {
   const { roles, otherRole } = useRole();
   const { theme, setTheme } = useTheme();
   const { changeRole, changeLanguage, signOut } = useAccountActions();
+  const navigate = useNavigate();
   if (!user) return null;
 
   const canAddRole = otherRole !== null && !roles.includes(otherRole);
@@ -105,6 +107,10 @@ export function AccountMenu() {
         />
         <DropdownMenuSeparator />
 
+        <DropdownMenuItem className="py-3" onSelect={() => void navigate("/zasebnost")}>
+          <ShieldCheck />
+          {t("privacy.menu")}
+        </DropdownMenuItem>
         <DropdownMenuItem className="py-3" onSelect={() => void signOut()}>
           <LogOut />
           {t("auth.logout")}

@@ -748,5 +748,37 @@
         "body": "You'll get reminders by e-mail. For phone notifications, add Kvito to your Home Screen."
       }
     }
+  },
+  "overview": {
+    "eyebrow": "Money overview",
+    "overdue": "Overdue",
+    "waiting": "To confirm",
+    "open": "Still to receive",
+    "unitOverdue": "Overdue {{amount}}",
+    "unitDisputed_one": "Dispute ({{count}})",
+    "unitDisputed_other": "Dispute ({{count}})",
+    "unitWaiting_one": "To confirm ({{count}})",
+    "unitWaiting_other": "To confirm ({{count}})"
+  },
+  "exports": {
+    "title": "Payments received",
+    "body": "A list of the payments you confirmed in the chosen year. For your accountant or your own records. Kvito is not a tax return.",
+    "year": "Year"
+  },
+  "privacy": {
+    "menu": "Privacy",
+    "eyebrow": "Account",
+    "title": "Privacy and data",
+    "subtitle": "Kvito keeps only what it needs. Here you can download or delete all of it.",
+    "exportTitle": "My data",
+    "exportBody": "Download a file with everything Kvito holds about you: profile, tenancies, payments, messages, meter readings and activity log.",
+    "exportButton": "Download my data",
+    "deleteTitle": "Delete account",
+    "deleteBody": "We delete your name, e-mail, phone, devices and notifications, and sign you out everywhere.",
+    "deleteKept": "Charges, confirmed payments and messages stay with the other side because they need them for their records. They will show as “Deleted user”. Landlords must end all active tenancies first.",
+    "typeEmail": "To confirm, type your e-mail address ({{email}})",
+    "deleteButton": "Delete account",
+    "deleteConfirm": "This can't be undone. Delete your account?",
+    "deleted": "Your account is deleted."
   }
 }

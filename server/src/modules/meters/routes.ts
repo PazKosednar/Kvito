@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import type { Prisma } from "../../generated/prisma/client.js";
+import { audit } from "../../lib/audit.js";
 import { badRequest, notFound } from "../../lib/errors.js";
 import { bus } from "../../lib/events.js";
 import { formatMeterValue, parseMeterValue } from "../../lib/meters.js";
@@ -101,7 +102,11 @@ export function metersRouter(): Router {
       where: { unitId: tenancy.unitId, meterType: body.meterType, meterLabel: body.meterLabel ?? null, deletedAt: null, readOn: { lte: body.readOn } },
       orderBy: [{ readOn: "desc" }, { createdAt: "desc" }],
     });
-    const reading = await prisma.$transaction((tx) => createReading(tx, { tenancyId, unitId: tenancy.unitId, userId, body }));
+    const reading = await prisma.$transaction(async (tx) => {
+      const created = await createReading(tx, { tenancyId, unitId: tenancy.unitId, userId, body });
+      await audit({ actorId: userId, entityType: "MeterReading", entityId: created.id, action: "create", after: { meterType: body.meterType, readOn: body.readOn }, ip: req.ip }, tx);
+      return created;
+    });
     bus.emit("tenancy.changed", { tenancyId, what: "meters" });
     res.status(201).json({ reading: readingDto(reading), lowerThanPrevious: !!previous && previous.valueMilli > body.value });
   });
@@ -114,6 +119,7 @@ export function metersRouter(): Router {
     if (reading.recordedById !== userId && access.role !== "LANDLORD") throw notFound();
     if (reading.handoverId) throw badRequest("PART_OF_HANDOVER");
     await prisma.meterReading.update({ where: { id: reading.id }, data: { deletedAt: new Date() } });
+    await audit({ actorId: userId, entityType: "MeterReading", entityId: reading.id, action: "delete", before: { meterType: reading.meterType, readOn: reading.readOn }, ip: req.ip });
     res.status(204).end();
   });
 

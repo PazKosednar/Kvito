@@ -20,6 +20,23 @@ const EnvSchema = z.object({
   OTP_MAX_PER_HOUR: z.coerce.number().int().positive().default(5),
   COOKIE_SECURE: bool.default(false),
   UPLOAD_DIR: z.string().default("uploads"),
+  /** Serve the built web client from this server (one Railway service). Default: on in production. */
+  SERVE_CLIENT: bool.optional(),
+  /** E-mail over SMTP (any EU provider). Required in production, otherwise e-mails are only printed. */
+  SMTP_HOST: z.string().min(1).optional(),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_SECURE: bool.default(false),
+  SMTP_USER: z.string().min(1).optional(),
+  SMTP_PASS: z.string().min(1).optional(),
+  MAIL_FROM: z.string().min(3).default("Kvito <obvestila@kvito.si>"),
+  /** "local" = UPLOAD_DIR on disk (development). "s3" = S3-compatible EU object storage (production). */
+  STORAGE_DRIVER: z.enum(["local", "s3"]).optional(),
+  S3_BUCKET: z.string().min(1).optional(),
+  S3_REGION: z.string().min(1).default("eu-central-1"),
+  S3_ENDPOINT: z.string().url().optional(),
+  S3_ACCESS_KEY_ID: z.string().min(1).optional(),
+  S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+  S3_FORCE_PATH_STYLE: bool.default(false),
   /** Web Push (VAPID). Without keys push is switched off and e-mail is used. Generate: npm run vapid -w server */
   VAPID_PUBLIC_KEY: z.string().min(1).optional(),
   VAPID_PRIVATE_KEY: z.string().min(1).optional(),

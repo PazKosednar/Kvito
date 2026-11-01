@@ -762,5 +762,41 @@
         "body": "Opomnike dobiš po e-pošti. Za obvestila na telefonu dodaj Kvito na začetni zaslon."
       }
     }
+  },
+  "overview": {
+    "eyebrow": "Pregled denarja",
+    "overdue": "V zamudi",
+    "waiting": "Čaka potrditev",
+    "open": "Še za prejeti",
+    "unitOverdue": "Zamuda {{amount}}",
+    "unitDisputed_one": "Spor ({{count}})",
+    "unitDisputed_two": "Spor ({{count}})",
+    "unitDisputed_few": "Spor ({{count}})",
+    "unitDisputed_other": "Spor ({{count}})",
+    "unitWaiting_one": "Čaka potrditev ({{count}})",
+    "unitWaiting_two": "Čaka potrditev ({{count}})",
+    "unitWaiting_few": "Čaka potrditev ({{count}})",
+    "unitWaiting_other": "Čaka potrditev ({{count}})"
+  },
+  "exports": {
+    "title": "Prejeta plačila",
+    "body": "Seznam plačil, ki si jih potrdil v izbranem letu. Za knjigovodjo ali lastno evidenco. Kvito ni davčni obračun.",
+    "year": "Leto"
+  },
+  "privacy": {
+    "menu": "Zasebnost",
+    "eyebrow": "Račun",
+    "title": "Zasebnost in podatki",
+    "subtitle": "Kvito hrani le tisto, kar potrebuje. Tukaj lahko vse preneseš ali izbrišeš.",
+    "exportTitle": "Moji podatki",
+    "exportBody": "Prenesi datoteko z vsem, kar Kvito hrani o tebi: profil, najeme, plačila, sporočila, odčitke in dnevnik dejanj.",
+    "exportButton": "Prenesi moje podatke",
+    "deleteTitle": "Izbris računa",
+    "deleteBody": "Izbrišemo tvoje ime, e-pošto, telefon, naprave in obvestila. Odjavljen boš povsod.",
+    "deleteKept": "Obveznosti, potrjena plačila in sporočila ostanejo drugi strani, ker jih potrebuje za evidenco. Prikazana bodo kot »Izbrisan uporabnik«. Najemodajalec mora pred izbrisom zaključiti vse aktivne najeme.",
+    "typeEmail": "Za potrditev vpiši svoj e-poštni naslov ({{email}})",
+    "deleteButton": "Izbriši račun",
+    "deleteConfirm": "Računa ni mogoče obnoviti. Res ga želiš izbrisati?",
+    "deleted": "Račun je izbrisan."
   }
 }
