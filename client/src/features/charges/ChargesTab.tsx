@@ -8,6 +8,7 @@ import { PanelSummary } from "@/components/frame";
 import { ErrorState, List, ListRow, LoadingState, Section } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
 import { useCharges, useConfirmShare } from "@/hooks/useCharges";
+import { useChargeTitle } from "@/hooks/useChargeTitle";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { daysUntil, formatDate } from "@/lib/dates";
 import { formatCents } from "@/lib/money";
@@ -25,7 +26,8 @@ function useKind() {
     const month = new Intl.DateTimeFormat(i18n.language === "en" ? "en-GB" : "sl-SI", { month: "short", year: "numeric", timeZone: "UTC" })
       .format(new Date(`${c.dueDate.slice(0, 10)}T00:00:00Z`))
       .replace(".", "");
-    return `${t(`costs.${c.costType ?? "OTHER"}`)} · ${month}`;
+    const what = c.type === "DEPOSIT" || c.type === "ADVANCE" || c.type === "SETTLEMENT" ? t(`chargeType.${c.type}`) : t(`costs.${c.costType ?? "OTHER"}`);
+    return `${what} · ${month}`;
   };
 }
 
@@ -48,6 +50,7 @@ function TenantCharges({ charges, memberId, kvita }: { charges: Charge[]; member
   const { t } = useTranslation();
   const navigate = useNavigate();
   const kind = useKind();
+  const titleOf = useChargeTitle();
   const { tenancy } = useTenancyContext();
   const mine = charges
     .map((c) => ({ charge: c, share: c.shares.find((s) => s.memberId === memberId) }))
@@ -61,7 +64,7 @@ function TenantCharges({ charges, memberId, kvita }: { charges: Charge[]; member
     <ListRow
       key={charge.id}
       to={`/najemi/${tenancy.id}/obveznosti/${charge.id}`}
-      title={charge.title}
+      title={titleOf(charge)}
       subtitle={<DueText dueDate={charge.dueDate} status={share.status} />}
       trailing={
         <span className="flex flex-col items-end gap-1">
@@ -95,7 +98,7 @@ function TenantCharges({ charges, memberId, kvita }: { charges: Charge[]; member
                 key={charge.id}
                 index={String(i + 1).padStart(2, "0")}
                 kind={kind(charge)}
-                title={charge.title}
+                title={titleOf(charge)}
                 meta={charge.shares.length > 1 ? t("charges.yourShare", { total: formatCents(charge.amountCents) }) : <DueText dueDate={charge.dueDate} status={share.status} />}
                 amountCents={share.amountCents}
                 status={share.status}
@@ -134,6 +137,7 @@ function LandlordCharges({
 }) {
   const { t } = useTranslation();
   const kind = useKind();
+  const titleOf = useChargeTitle();
   const { tenancy } = useTenancyContext();
   const toConfirm = charges.flatMap((c) => c.shares.filter((s) => s.status === "REPORTED_PAID").map((s) => ({ charge: c, share: s })));
   const open = charges.filter((c) => c.status === "OPEN" || c.status === "OVERDUE" || c.status === "REPORTED_PAID").sort(byDueAsc);
@@ -145,7 +149,7 @@ function LandlordCharges({
     <ListRow
       key={charge.id}
       to={`/najemi/${tenancy.id}/obveznosti/${charge.id}`}
-      title={charge.title}
+      title={titleOf(charge)}
       subtitle={<DueText dueDate={charge.dueDate} status={charge.status} />}
       trailing={
         <span className="flex flex-col items-end gap-1">
@@ -219,6 +223,7 @@ function LandlordCharges({
 /** Reported payment as a ChargeCard with one primary action: confirm. */
 function ConfirmCard({ charge, share, index, kind }: { charge: Charge; share: ChargeShare; index: number; kind: string }) {
   const { t } = useTranslation();
+  const titleOf = useChargeTitle();
   const toMessage = useErrorMessage();
   const { tenancy } = useTenancyContext();
   const confirmShare = useConfirmShare(tenancy.id);
@@ -241,7 +246,7 @@ function ConfirmCard({ charge, share, index, kind }: { charge: Charge; share: Ch
     <ChargeCard
       index={String(index + 1).padStart(2, "0")}
       kind={kind}
-      title={<Link to={`/najemi/${tenancy.id}/obveznosti/${charge.id}`} className="hover:underline">{charge.title}</Link>}
+      title={<Link to={`/najemi/${tenancy.id}/obveznosti/${charge.id}`} className="hover:underline">{titleOf(charge)}</Link>}
       meta={`${t("charges.reportedBy", { name: share.member.user.name ?? share.member.user.email, amount: formatCents(share.amountCents) })}${report?.attachments.length ? `, ${t("charges.withProof")}` : ""}`}
       amountCents={share.amountCents}
       status={share.status}

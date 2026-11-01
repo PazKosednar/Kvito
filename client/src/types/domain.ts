@@ -62,6 +62,9 @@ export interface Tenancy {
   payeeCity: string | null;
   coveredCosts: CostType[];
   splitMethod: SplitMethod;
+  noticePeriodDays: number | null;
+  rentReviewMonth: number | null;
+  paymentNote: string | null;
   members: TenancyMember[];
 }
 
@@ -125,7 +128,7 @@ export interface InvitationPreview {
 // ---------- Charges (Phase 2) ----------
 
 export type ChargeStatus = "OPEN" | "REPORTED_PAID" | "CONFIRMED" | "OVERDUE" | "DISPUTED";
-export type ChargeType = "RENT" | "BILL" | "OTHER";
+export type ChargeType = "RENT" | "BILL" | "OTHER" | "DEPOSIT" | "ADVANCE" | "SETTLEMENT";
 export type PayTo = "LANDLORD" | "SUPPLIER";
 export type AttachmentKind = "BILL" | "PAYMENT_PROOF" | "MESSAGE" | "ISSUE" | "METER" | "HANDOVER" | "DOCUMENT";
 
@@ -145,6 +148,7 @@ export interface PaymentReport {
   amountCents: number;
   note: string | null;
   status: "PENDING" | "ACCEPTED" | "REJECTED";
+  source: "TENANT" | "BANK_IMPORT" | "LANDLORD";
   rejectReason: string | null;
   createdAt: string;
   reviewedAt: string | null;
@@ -174,6 +178,7 @@ export interface Charge {
   amountCents: number;
   dueDate: string;
   rentPeriod: string | null;
+  autoKey: string | null;
   status: ChargeStatus;
   payTo: PayTo;
   payeeName: string;
@@ -186,6 +191,14 @@ export interface Charge {
   createdAt: string;
   shares: ChargeShare[];
   attachments: Attachment[];
+  lines: ChargeLine[];
+}
+
+export interface ChargeLine {
+  id: string;
+  costType: CostType;
+  label: string | null;
+  amountCents: number;
 }
 
 export interface ChargesSummary {
@@ -209,6 +222,7 @@ export interface PaymentData {
   purposeCode: string;
   dueDate: string;
   title: string;
+  paymentNote: string | null;
   qrText: string | null;
   qrSvg: string | null;
   qrUnavailable: string | null;
@@ -339,4 +353,127 @@ export interface Handover {
   tenantConfirmedBy: PersonRef | null;
   items: HandoverItem[];
   meterReadings: MeterReading[];
+}
+// ---------- Contract money (Phase 6) ----------
+
+export type DepositStatus = "AWAITING_PAYMENT" | "HELD" | "RETURN_PROPOSED" | "RETURN_DISPUTED" | "RETURN_AGREED" | "RETURNED";
+
+export interface DepositDeduction {
+  id: string;
+  reason: string;
+  amountCents: number;
+  handoverItem: { id: string; room: string; name: string; condition: ItemCondition } | null;
+}
+
+export interface Deposit {
+  id: string;
+  amountCents: number;
+  status: DepositStatus;
+  charge: { id: string; status: ChargeStatus } | null;
+  receivedOn: string | null;
+  returnCents: number | null;
+  keptCents: number | null;
+  proposalNote: string | null;
+  proposedAt: string | null;
+  disputeReason: string | null;
+  agreedAt: string | null;
+  returnedOn: string | null;
+  receiptConfirmedAt: string | null;
+  deductions: DepositDeduction[];
+  returnByMember: { memberId: string; name: string; amountCents: number }[];
+}
+
+export interface DepositState {
+  agreedCents: number | null;
+  rentCents: number;
+  deposit: Deposit | null;
+  damagedItems: { id: string; room: string; name: string; condition: ItemCondition; note: string | null }[];
+}
+
+export interface CostAdvance {
+  id: string;
+  costType: CostType;
+  amountCents: number;
+}
+
+export type SettlementStatus = "DRAFT" | "SENT" | "DISPUTED" | "ACCEPTED" | "CLOSED";
+
+export interface SettlementTotals {
+  advanceCents: number;
+  actualCents: number;
+  /** > 0: the tenant pays the difference; < 0: the landlord returns it. */
+  balanceCents: number;
+}
+
+export interface SettlementSummary {
+  id: string;
+  periodFrom: string;
+  periodTo: string;
+  status: SettlementStatus;
+  sentAt: string | null;
+  refundedOn: string | null;
+  totals: SettlementTotals;
+}
+
+export interface SettlementLine {
+  id: string;
+  costType: CostType;
+  advanceCents: number;
+  actualCents: number;
+  note: string | null;
+}
+
+export interface Settlement extends SettlementSummary {
+  tenancyId: string;
+  note: string | null;
+  dueDate: string | null;
+  disputeReason: string | null;
+  respondedAt: string | null;
+  refundConfirmedAt: string | null;
+  charge: { id: string; status: ChargeStatus } | null;
+  lines: SettlementLine[];
+  attachments: Attachment[];
+  refundByMember: { memberId: string; name: string; amountCents: number }[];
+}
+
+export interface RentChange {
+  id: string;
+  effectiveFrom: string;
+  rentCents: number;
+  previousCents: number;
+  note: string | null;
+  appliedAt: string | null;
+  createdAt: string;
+}
+
+export type CloseoutKey = "charges" | "moveOut" | "meters" | "keys" | "settlement" | "deposit";
+
+export interface Closeout {
+  items: { key: CloseoutKey; state: "done" | "pending" | "na"; detail?: Record<string, string | number | null> }[];
+  ready: boolean;
+  status: TenancyStatus;
+  endDate: string | null;
+}
+
+// ---------- Bank statement import ----------
+
+export type BankMatchState = "READY" | "AMOUNT_DIFFERS" | "AMOUNT_UNKNOWN" | "ALREADY_CONFIRMED" | "DUPLICATE";
+
+export interface BankMatch {
+  entryId: string;
+  bookedOn: string | null;
+  amountCents: number | null;
+  counterparty: string | null;
+  reference: string | null;
+  state: BankMatchState;
+  share: { id: string; chargeId: string; tenancyId: string; title: string; place: string; tenant: string; amountCents: number; status: ChargeStatus; dueDate: string };
+}
+
+export interface BankPreview {
+  format: "camt" | "csv";
+  entries: number;
+  credits: number;
+  matches: BankMatch[];
+  foreignReferences: number;
+  unmatched: { entryId: string; bookedOn: string | null; amountCents: number | null; counterparty: string | null; purpose: string | null; reference: string | null }[];
 }

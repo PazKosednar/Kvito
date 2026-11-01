@@ -85,6 +85,12 @@ export function PaySlip({ chargeId, shareId }: { chargeId: string; shareId: stri
           </Button>
         </div>
       )}
+      {payment.paymentNote && (
+        <p className="rounded-sm border border-line bg-surface-raised px-4 py-3 text-sm">
+          <span className="label-mono mb-1 block">{t("pay.otherWays")}</span>
+          {payment.paymentNote}
+        </p>
+      )}
       <p className="text-sm text-ink-muted">{payment.payTo === "SUPPLIER" ? t("pay.supplierNote") : t("pay.noMoneyNote")}</p>
     </div>
   );

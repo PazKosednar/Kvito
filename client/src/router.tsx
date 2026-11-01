@@ -7,6 +7,10 @@ import { ChargePage } from "@/features/charges/ChargePage";
 import { ChargesTab } from "@/features/charges/ChargesTab";
 import { UpnTestPage } from "@/features/charges/UpnTestPage";
 import { AcceptInvitePage } from "@/features/invitations/AcceptInvitePage";
+import { BankImportPage } from "@/features/bank/BankImportPage";
+import { ContractTab } from "@/features/contract/ContractTab";
+import { DepositReturnPage } from "@/features/contract/DepositReturnPage";
+import { SettlementPage } from "@/features/contract/SettlementPage";
 import { IssueFormPage } from "@/features/issues/IssueFormPage";
 import { IssuePage } from "@/features/issues/IssuePage";
 import { IssuesTab } from "@/features/issues/IssuesTab";
@@ -44,6 +48,7 @@ export const router = createBrowserRouter([
           { index: true, element: <HomePage /> },
           { path: "obvestila", element: <NotificationsPage /> },
           { path: "zasebnost", element: <PrivacyPage /> },
+          { path: "izpisek", element: <BankImportPage /> },
           { path: "nepremicnine/nova", element: <PropertyFormPage /> },
           { path: "nepremicnine/:id", element: <PropertyPage /> },
           { path: "nepremicnine/:id/uredi", element: <PropertyFormPage /> },
@@ -58,6 +63,9 @@ export const router = createBrowserRouter([
               { path: "obveznosti/nova", element: <ChargeFormPage /> },
               { path: "obveznosti/:chargeId", element: <ChargePage /> },
               { path: "sporocila", element: <MessagesTab /> },
+              { path: "pogodba", element: <ContractTab /> },
+              { path: "pogodba/varscina", element: <DepositReturnPage /> },
+              { path: "pogodba/obracun/:settlementId", element: <SettlementPage /> },
               { path: "okvare", element: <IssuesTab /> },
               { path: "okvare/nova", element: <IssueFormPage /> },
               { path: "okvare/:issueId", element: <IssuePage /> },

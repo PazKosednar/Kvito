@@ -141,7 +141,7 @@ function Bubble({ message: m, mine, tenancyId, read }: { message: Message; mine:
 }
 
 function LinkChip({ message: m, tenancyId }: { message: Message; tenancyId: string }) {
-  const to = m.charge ? `/najemi/${tenancyId}/obveznosti/${m.charge.id}` : `/najemi/${tenancyId}/okvare/${m.issue!.id}`;
+  const to = m.systemEvent?.startsWith("DEPOSIT_") || m.systemEvent?.startsWith("SETTLEMENT_") || m.systemEvent === "RENT_CHANGED" ? `/najemi/${tenancyId}/pogodba` : m.charge ? `/najemi/${tenancyId}/obveznosti/${m.charge.id}` : `/najemi/${tenancyId}/okvare/${m.issue!.id}`;
   const Icon = m.charge ? Receipt : Wrench;
   return (
     <Link to={to} className="mb-1.5 inline-flex max-w-full items-center gap-1.5 text-xs font-medium text-primary hover:underline">
@@ -155,8 +155,15 @@ function LinkChip({ message: m, tenancyId }: { message: Message; tenancyId: stri
 function SystemLine({ message: m, tenancyId }: { message: Message; tenancyId: string }) {
   const { t } = useTranslation();
   const d = m.systemData ?? {};
+  // Any "…Cents" value becomes an amount (returnCents → {{return}}); from/to become dates (a month: its first day).
+  const formatted: Record<string, string> = {};
+  for (const [k, v] of Object.entries(d)) {
+    if (k.endsWith("Cents") && typeof v === "number") formatted[k.slice(0, -5)] = formatCents(Math.abs(v));
+    if ((k === "from" || k === "to") && typeof v === "string") formatted[k] = formatDate(v.length === 7 ? `${v}-01` : v);
+  }
   const params = {
     ...d,
+    ...formatted,
     amount: typeof d["amountCents"] === "number" ? formatCents(d["amountCents"]) : "",
     status: typeof d["status"] === "string" ? t(`issueStatus.${d["status"]}`) : "",
   };

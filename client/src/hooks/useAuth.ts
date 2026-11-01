@@ -5,7 +5,11 @@ import { ApiError } from "@/types/api";
 import type { CurrentUser } from "@/types/user";
 import { disablePush } from "@/lib/push";
 import { closeSocket } from "@/lib/realtime";
+import i18n from "@/i18n";
 import { clearQueryCache } from "./useQuery";
+
+/** The sign-in screen's language: the code e-mail is written in it and a new account starts with it. */
+const screenLocale = () => (i18n.language === "en" ? "en" : "sl");
 
 /**
  * Restores the session from the refresh cookie on app start. A temporarily unreachable server is retried
@@ -32,13 +36,13 @@ export function useAuth() {
   const user = useAuthStore((s) => s.user);
 
   const requestCode = useCallback(async (email: string) => {
-    await api("/api/auth/request-code", { method: "POST", body: { email }, auth: false });
+    await api("/api/auth/request-code", { method: "POST", body: { email, locale: screenLocale() }, auth: false });
   }, []);
 
   const verifyCode = useCallback(async (email: string, code: string) => {
     const res = await api<{ accessToken: string; user: CurrentUser }>("/api/auth/verify-code", {
       method: "POST",
-      body: { email, code },
+      body: { email, code, locale: screenLocale() },
       auth: false,
     });
     useAuthStore.getState().setSession(res.accessToken, res.user);

@@ -18,6 +18,8 @@ export function useRealtime(tenancyId: string | undefined) {
     const refreshOther = (p: { what?: string }) => {
       if (p.what === "charges") void invalidate(`/api/tenancies/${tenancyId}/charges`, "/api/charges/");
       else if (p.what === "issues") void invalidate(`/api/tenancies/${tenancyId}/issues`, "/api/issues/");
+      // Deposit, advances, settlements and rent: everything under the tenancy plus settlement pages and linked charges.
+      else if (p.what === "contract") void invalidate(`/api/tenancies/${tenancyId}`, "/api/settlements/", "/api/charges/");
       else void invalidate(`/api/tenancies/${tenancyId}`);
     };
 

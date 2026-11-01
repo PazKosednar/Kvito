@@ -4,13 +4,13 @@ import { NavLink, Outlet, useParams } from "react-router";
 import { Eyebrow } from "@/components/brand";
 import { CountBadge } from "@/components/count-badge";
 import { ErrorState, LoadingState } from "@/components/layout-parts";
-import { useNewCharges } from "@/hooks/useNotifications";
+import { useNewItems } from "@/hooks/useNotifications";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useUnread } from "@/hooks/useMessages";
 import { useRealtime } from "@/hooks/useRealtime";
 import { useTenancy } from "@/hooks/useTenancies";
 import { cn } from "@/lib/utils";
-import { TENANCY_TABS } from "./tabs";
+import { TENANCY_TABS, type TabBadgeKind } from "./tabs";
 import { TenancyStatusLabel } from "./tenancy-ui";
 
 type TenancyCtx = ReturnType<typeof useTenancy> & { tenancy: NonNullable<ReturnType<typeof useTenancy>["tenancy"]> };
@@ -31,13 +31,14 @@ export function TenancyLayout() {
   const q = useTenancy(id);
   useRealtime(q.tenancy?.id);
   const unread = useUnread();
-  const newCharges = useNewCharges();
+  const newItems = useNewItems();
 
   if (q.loading) return <LoadingState />;
   if (q.error || !q.tenancy) return <ErrorState message={toMessage(q.error)} onRetry={() => void q.reload()} />;
   const { tenancy } = q;
   const tabs = TENANCY_TABS.filter((tab) => !tab.landlordOnly || q.isLandlord);
-  const badgeCount = (badge: "unread" | "charges" | undefined) => (badge === "unread" ? unread[tenancy.id] : badge === "charges" ? newCharges.byTenancy[tenancy.id] : 0) ?? 0;
+  const badgeCount = (badge: TabBadgeKind | undefined) =>
+    (badge === "unread" ? unread[tenancy.id] : badge === "charges" ? newItems.byTenancy[tenancy.id] : badge === "contract" ? newItems.contractByTenancy[tenancy.id] : 0) ?? 0;
   const href = (path: string) => (path ? `/najemi/${tenancy.id}/${path}` : `/najemi/${tenancy.id}`);
 
   return (
@@ -105,9 +106,10 @@ export function TenancyLayout() {
   );
 }
 
-/** New-things count on a section: unread messages, or charges with unread notifications. */
-function TabBadge({ tab, count, className }: { tab: "unread" | "charges" | undefined; count: number; className?: string }) {
+/** New-things count on a section: unread messages, or unread notifications about charges or the contract. */
+function TabBadge({ tab, count, className }: { tab: TabBadgeKind | undefined; count: number; className?: string }) {
   const { t } = useTranslation();
   if (!tab || count <= 0) return null;
-  return <CountBadge count={count} className={className} label={t(tab === "unread" ? "messages.unread" : "charges.newCount", { count })} />;
+  const label = { unread: "messages.unread", charges: "charges.newCount", contract: "contract.newCount" }[tab];
+  return <CountBadge count={count} className={className} label={t(label, { count })} />;
 }

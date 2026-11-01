@@ -1,7 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
-import { ChipGroup, Field, MoneyInput, Segmented, TextInput } from "@/components/form";
+import { ChipGroup, Field, MoneyInput, Segmented, Select, TextInput } from "@/components/form";
 import { FormError, LoadingState, PageHeader, Section } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
@@ -69,7 +69,7 @@ function TenancyForm({ existing }: { existing: TenancyDetail | undefined }) {
                 )}
               </Field>
             </div>
-            <Field label={t("tenancies.deposit")} hint={t("tenancies.depositHint")} error={fieldError("deposit")}>
+            <Field label={t("tenancies.deposit")} hint={form.depositAboveThreeRents ? <span className="text-warn">{t("tenancies.depositHigh")}</span> : t("tenancies.depositHint")} error={fieldError("deposit")}>
               {(p) => <MoneyInput {...p} value={v.deposit} onChange={(e) => set("deposit", e.target.value)} />}
             </Field>
             <div className="grid grid-cols-2 gap-3">
@@ -78,6 +78,23 @@ function TenancyForm({ existing }: { existing: TenancyDetail | undefined }) {
               </Field>
               <Field label={t("tenancies.end")} hint={t("tenancies.endHint")} error={fieldError("endDate")}>
                 {(p) => <TextInput {...p} type="date" value={v.endDate} onChange={(e) => set("endDate", e.target.value)} />}
+              </Field>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label={t("tenancies.noticePeriod")} hint={t("tenancies.noticePeriodHint")} error={fieldError("noticePeriodDays")}>
+                {(p) => <TextInput {...p} value={v.noticePeriodDays} onChange={(e) => set("noticePeriodDays", e.target.value)} inputMode="numeric" maxLength={3} placeholder="30" />}
+              </Field>
+              <Field label={t("tenancies.rentReview")} hint={t("tenancies.rentReviewHint")}>
+                {(p) => (
+                  <Select {...p} value={v.rentReviewMonth} onChange={(e) => set("rentReviewMonth", e.target.value)}>
+                    <option value="">{t("tenancies.rentReviewNone")}</option>
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <option key={i + 1} value={String(i + 1)}>
+                        {t(`months.${i + 1}`)}
+                      </option>
+                    ))}
+                  </Select>
+                )}
               </Field>
             </div>
           </div>
@@ -107,6 +124,9 @@ function TenancyForm({ existing }: { existing: TenancyDetail | undefined }) {
             </Field>
             <Field label={t("tenancies.payeeCity")} hint={t("tenancies.payeeCityHint")}>
               {(p) => <TextInput {...p} value={v.payeeCity} onChange={(e) => set("payeeCity", e.target.value)} maxLength={33} placeholder="1000 Ljubljana" />}
+            </Field>
+            <Field label={t("tenancies.paymentNote")} hint={t("tenancies.paymentNoteHint")}>
+              {(p) => <TextInput {...p} value={v.paymentNote} onChange={(e) => set("paymentNote", e.target.value)} maxLength={120} placeholder={t("tenancies.paymentNotePlaceholder")} />}
             </Field>
           </div>
         </Section>

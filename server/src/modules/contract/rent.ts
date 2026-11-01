@@ -93,7 +93,7 @@ export function rentRouter(): Router {
     const tenancy = await prisma.tenancy.findUniqueOrThrow({ where: { id: tenancyId }, select: { status: true, endDate: true, depositCents: true, unitId: true } });
     const end = tenancy.endDate ?? todayInLjubljana();
 
-    const [moveOut, unpaid, deposit, lastAdvance, closedSettlements] = await Promise.all([
+    const [moveOut, unpaid, deposit, lastAdvance, closedSettlements, advancesSetUp] = await Promise.all([
       prisma.handover.findFirst({
         where: { tenancyId, kind: "MOVE_OUT", deletedAt: null },
         orderBy: { handoverOn: "desc" },
@@ -107,6 +107,7 @@ export function rentRouter(): Router {
       prisma.deposit.findUnique({ where: { tenancyId }, select: { status: true } }),
       prisma.charge.findFirst({ where: { tenancyId, type: "ADVANCE", deletedAt: null }, orderBy: { dueDate: "desc" }, select: { dueDate: true } }),
       prisma.costSettlement.findMany({ where: { tenancyId, deletedAt: null, status: "CLOSED" }, select: { periodTo: true } }),
+      prisma.costAdvance.count({ where: { tenancyId, deletedAt: null } }),
     ]);
     const finalReadings = moveOut?._count.meterReadings
       ? moveOut._count.meterReadings
@@ -121,6 +122,8 @@ export function rentRouter(): Router {
       {
         key: "settlement",
         state: !lastAdvance ? "na" : closedSettlements.some((s) => s.periodTo >= lastAdvance.dueDate) ? "done" : "pending",
+        // Advances set up but not charged yet: nothing to settle so far.
+        detail: { configured: advancesSetUp > 0 ? 1 : 0 },
       },
       {
         key: "deposit",

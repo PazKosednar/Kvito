@@ -1,36 +1,25 @@
-import { Crown, Mail, Pencil, Phone, UserPlus, UserX } from "lucide-react";
+import { Crown, Mail, Phone, UserPlus, UserX } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { toast } from "sonner";
 import { Facts, List, Section } from "@/components/layout-parts";
+import { splitPreview } from "@/lib/split";
 import { Button } from "@/components/ui/button";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
-import { formatDate } from "@/lib/dates";
 import { formatCents } from "@/lib/money";
 import { useTenancyContext } from "./TenancyLayout";
-import { TenancyStatusLabel } from "./tenancy-ui";
 
 /** People, terms and payee details of a tenancy. Landlords can edit and invite. */
 export function TenancyDetailsTab() {
   const { t } = useTranslation();
   const toMessage = useErrorMessage();
-  const { tenancy, isLandlord, memberId, removeMember, update } = useTenancyContext();
+  const { tenancy, isLandlord, memberId, removeMember } = useTenancyContext();
   const owner = tenancy.unit.property.owner;
 
   const remove = async (id: string, name: string) => {
     if (!window.confirm(t("tenancies.confirmRemoveMember", { name }))) return;
     try {
       await removeMember(id);
-    } catch (err) {
-      toast.error(toMessage(err));
-    }
-  };
-
-  const end = async () => {
-    if (!window.confirm(t("tenancies.confirmEnd"))) return;
-    try {
-      await update({ status: "ENDED" });
-      toast.success(t("tenancies.ended"));
     } catch (err) {
       toast.error(toMessage(err));
     }
@@ -119,41 +108,12 @@ export function TenancyDetailsTab() {
         </Section>
       )}
 
-      <Section
-        title={t("tenancies.terms")}
-        action={
-          isLandlord ? (
-            <Button asChild variant="ghost">
-              <Link to={`/najemi/${tenancy.id}/uredi`}>
-                <Pencil />
-                {t("common.edit")}
-              </Link>
-            </Button>
-          ) : undefined
-        }
-      >
-        <Facts
-          items={[
-            { label: t("tenancies.status.label"), value: <TenancyStatusLabel status={tenancy.status} /> },
-            { label: t("tenancies.rent"), value: formatCents(tenancy.rentCents) },
-            { label: t("tenancies.dueDay"), value: t("tenancies.dueDayValue", { day: tenancy.rentDueDay }) },
-            ...(tenancy.depositCents != null
-              ? [{ label: t("tenancies.deposit"), value: formatCents(tenancy.depositCents) }]
-              : []),
-            {
-              label: t("tenancies.period"),
-              value: tenancy.endDate
-                ? `${formatDate(tenancy.startDate)} – ${formatDate(tenancy.endDate)}`
-                : t("tenancies.since", { date: formatDate(tenancy.startDate) }),
-            },
-            {
-              label: t("tenancies.costsCovered"),
-              value: tenancy.coveredCosts.length ? tenancy.coveredCosts.map((c) => t(`costs.${c}`)).join(", ") : "–",
-            },
-            { label: t("tenancies.split"), value: t(`split.${tenancy.splitMethod}`) },
-          ]}
-        />
-      </Section>
+      <p className="mt-10 text-sm text-ink-muted">
+        {t("tenancies.termsMoved")}{" "}
+        <Link to={`/najemi/${tenancy.id}/pogodba`} className="text-primary underline-offset-4 hover:underline">
+          {t("tabs.contract")}
+        </Link>
+      </p>
 
       <Section title={t("tenancies.sectionPayee")}>
         <Facts
@@ -167,13 +127,6 @@ export function TenancyDetailsTab() {
         />
       </Section>
 
-      {isLandlord && tenancy.status === "ACTIVE" && (
-        <Section>
-          <Button variant="ghost" className="text-muted-foreground" onClick={() => void end()}>
-            {t("tenancies.endTenancy")}
-          </Button>
-        </Section>
-      )}
     </>
   );
 }
@@ -185,6 +138,8 @@ function SharesEditor() {
   const { tenancy, updateMember } = useTenancyContext();
   const isPct = tenancy.splitMethod === "PERCENTAGE";
   const total = tenancy.members.reduce((s, m) => s + (m.shareBasisPoints ?? 0), 0);
+  // What each person pays of the rent with the current shares (the server splits every charge the same way).
+  const preview = splitPreview(tenancy.rentCents, tenancy.members, tenancy.splitMethod);
 
   const save = async (memberId: string, raw: string) => {
     const n = Number(raw.replace(",", "."));
@@ -202,7 +157,10 @@ function SharesEditor() {
       <div className="mt-3 flex flex-col gap-3">
         {tenancy.members.map((m) => (
           <label key={m.id} className="flex items-center justify-between gap-3">
-            <span className="truncate">{m.user.name ?? m.user.email}</span>
+            <span className="min-w-0">
+              <span className="block truncate">{m.user.name ?? m.user.email}</span>
+              {preview && <span className="block text-sm text-ink-muted">{t("tenancies.rentShare", { amount: formatCents(preview.get(m.id) ?? 0) })}</span>}
+            </span>
             <span className="flex items-center gap-2">
               <input
                 className="tabular h-11 w-20 rounded-lg border border-input bg-background px-3 text-right"

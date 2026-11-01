@@ -1,7 +1,7 @@
 import { CheckCheck, FileText, Loader2, Paperclip, RotateCcw, Trash2, Undo2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { Field, Textarea, TextInput } from "@/components/form";
 import { StatusBadge } from "@/components/brand";
@@ -9,8 +9,9 @@ import { ErrorState, FormError, List, LoadingState, Section } from "@/components
 import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { uploadAttachment, useCharge } from "@/hooks/useCharges";
+import { useChargeTitle } from "@/hooks/useChargeTitle";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
-import { useNewCharges, useNotifications } from "@/hooks/useNotifications";
+import { useNewItems, useNotifications } from "@/hooks/useNotifications";
 import { apiUrl } from "@/lib/api";
 import { formatDate, formatDateTime, todayInput } from "@/lib/dates";
 import { formatCents } from "@/lib/money";
@@ -26,8 +27,9 @@ export function ChargePage() {
   const navigate = useNavigate();
   const { tenancy } = useTenancyContext();
   const q = useCharge(chargeId);
-  const { unreadByCharge } = useNewCharges();
+  const { unreadByCharge } = useNewItems();
   const { markRead } = useNotifications();
+  const titleOf = useChargeTitle();
 
   // Opening a charge is reading what is new about it.
   const pending = chargeId ? unreadByCharge[chargeId] : undefined;
@@ -40,7 +42,7 @@ export function ChargePage() {
   const { charge, myShare, isLandlord } = q;
 
   const remove = async () => {
-    if (!window.confirm(t("charges.confirmDelete", { title: charge.title }))) return;
+    if (!window.confirm(t("charges.confirmDelete", { title: titleOf(charge) }))) return;
     try {
       await q.remove();
       toast.success(t("charges.deleted"));
@@ -51,12 +53,14 @@ export function ChargePage() {
   };
 
   const shown = isLandlord ? charge : { ...charge, status: myShare?.status ?? charge.status };
+  // Deposit and settlement charges belong to their contract record; they change only there.
+  const managed = charge.type === "DEPOSIT" || charge.type === "SETTLEMENT";
 
   return (
     <>
       <div className="mb-6">
         <div className="flex items-start justify-between gap-3">
-          <h2 className="text-title font-semibold">{charge.title}</h2>
+          <h2 className="text-title font-semibold">{titleOf(charge)}</h2>
           <ChargeStatusPill status={shown.status} />
         </div>
         <p className="mt-1 text-muted-foreground">
@@ -64,13 +68,22 @@ export function ChargePage() {
           {charge.shares.length > 1 && `, ${t("charges.total", { amount: formatCents(charge.amountCents) })}`}
         </p>
         {charge.description && <p className="mt-3 whitespace-pre-line">{charge.description}</p>}
+        {charge.lines.length > 0 && <ChargeLines lines={charge.lines} />}
+        {managed && (
+          <p className="mt-3 text-sm text-ink-muted">
+            {t("charges.managedNote")}{" "}
+            <Link to={`/najemi/${tenancy.id}/pogodba`} className="text-primary underline-offset-4 hover:underline">
+              {t("tabs.contract")}
+            </Link>
+          </p>
+        )}
         {isLandlord ? <ChargeFiles charge={charge} q={q} /> : <Files files={charge.attachments} />}
       </div>
 
       {!isLandlord && myShare && <TenantShare charge={charge} share={myShare} q={q} />}
       {isLandlord && <LandlordShares charge={charge} q={q} />}
 
-      {isLandlord && !charge.shares.some((s) => s.status === "CONFIRMED") && (
+      {isLandlord && !managed && !charge.shares.some((s) => s.status === "CONFIRMED") && (
         <Section>
           <Button variant="ghost" className="text-danger hover:text-destructive" onClick={() => void remove()}>
             <Trash2 />
@@ -83,6 +96,21 @@ export function ChargePage() {
 }
 
 type Q = ReturnType<typeof useCharge>;
+
+/** Breakdown of an advance or a settlement by cost type. */
+function ChargeLines({ lines }: { lines: Charge["lines"] }) {
+  const { t } = useTranslation();
+  return (
+    <dl className="mt-4 divide-y divide-line rounded-md border border-line bg-surface-raised">
+      {lines.map((l) => (
+        <div key={l.id} className="flex items-baseline justify-between gap-4 px-4 py-2.5">
+          <dt className="text-ink-muted">{l.label ?? t(`costs.${l.costType}`)}</dt>
+          <dd className="mono text-ink">{formatCents(l.amountCents)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
 
 // ---------- Tenant ----------
 

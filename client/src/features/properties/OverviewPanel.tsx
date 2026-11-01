@@ -1,11 +1,13 @@
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, Upload } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import { Select } from "@/components/form";
 import { PanelSummary } from "@/components/frame";
 import { Section } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/constants";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useOverview, usePaymentExport } from "@/hooks/useReports";
 import { formatCents } from "@/lib/money";
@@ -47,6 +49,24 @@ export function useUnitAttention() {
 }
 
 /** Yearly list of received payments for the accountant. */
+/** Entry to matching incoming payments from a bank statement. */
+export function BankImportSection() {
+  const { t } = useTranslation();
+  return (
+    <Section title={t("bank.title")} className="mt-10">
+      <div className="flex flex-wrap items-center gap-4 rounded-md border border-line bg-surface-raised p-4">
+        <p className="min-w-0 flex-1 text-sm text-ink-muted">{t("bank.entryHint")}</p>
+        <Button asChild variant="secondary">
+          <Link to={ROUTES.bankImport}>
+            <Upload />
+            {t("bank.cta")}
+          </Link>
+        </Button>
+      </div>
+    </Section>
+  );
+}
+
 export function ExportsSection() {
   const { t } = useTranslation();
   const toMessage = useErrorMessage();

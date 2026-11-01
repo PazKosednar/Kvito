@@ -41,20 +41,34 @@ export function useNotifications() {
 }
 
 const CHARGE_URL = /^\/najemi\/([^/]+)\/obveznosti\/([^/]+)/;
+const CONTRACT_URL = /^\/najemi\/([^/]+)\/pogodba/;
 
-/** What is new per tenancy: unread notifications about charges, grouped by tenancy and by charge. */
-export function useNewCharges() {
+/**
+ * What is new per tenancy, from unread notifications: about charges (per tenancy and per charge)
+ * and about the contract (deposit, settlements, rent).
+ */
+export function useNewItems() {
   const { notifications } = useNotifications();
   return useMemo(() => {
     const byTenancy: Record<string, number> = {};
+    const contractByTenancy: Record<string, number> = {};
     const unreadByCharge: Record<string, string[]> = {};
+    const unreadContract: Record<string, string[]> = {};
     for (const n of notifications) {
-      const m = n.readAt || !n.url ? null : CHARGE_URL.exec(n.url);
-      if (!m) continue;
-      byTenancy[m[1]!] = (byTenancy[m[1]!] ?? 0) + 1;
-      (unreadByCharge[m[2]!] ??= []).push(n.id);
+      if (n.readAt || !n.url) continue;
+      const c = CHARGE_URL.exec(n.url);
+      if (c) {
+        byTenancy[c[1]!] = (byTenancy[c[1]!] ?? 0) + 1;
+        (unreadByCharge[c[2]!] ??= []).push(n.id);
+        continue;
+      }
+      const k = CONTRACT_URL.exec(n.url);
+      if (k) {
+        contractByTenancy[k[1]!] = (contractByTenancy[k[1]!] ?? 0) + 1;
+        (unreadContract[k[1]!] ??= []).push(n.id);
+      }
     }
-    return { byTenancy, unreadByCharge };
+    return { byTenancy, contractByTenancy, unreadByCharge, unreadContract };
   }, [notifications]);
 }
 

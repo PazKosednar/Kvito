@@ -16,6 +16,9 @@ export interface TenancyInput {
   payeeCity: string | null;
   coveredCosts: CostType[];
   splitMethod: SplitMethod;
+  noticePeriodDays: number | null;
+  rentReviewMonth: number | null;
+  paymentNote: string | null;
 }
 
 /** Tenancies of the signed-in user in a role. */

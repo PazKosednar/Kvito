@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useProperties } from "@/hooks/useProperties";
 import { TenancyStatusLabel, tenantNames } from "@/features/tenancies/tenancy-ui";
-import { ExportsSection, OverviewPanel, useUnitAttention } from "./OverviewPanel";
+import { BankImportSection, ExportsSection, OverviewPanel, useUnitAttention } from "./OverviewPanel";
 import type { Property } from "@/types/domain";
 
 /** Landlord home: start steps when empty, otherwise every property as a framed block with its units. */
@@ -41,6 +41,7 @@ export function LandlordHome() {
           <PropertyBlock key={p.id} property={p} index={i} />
         ))}
       </div>
+      <BankImportSection />
       <ExportsSection />
     </>
   );

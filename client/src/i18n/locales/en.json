@@ -150,7 +150,23 @@
     "INVALID_METER_VALUE": "The meter reading is not valid.",
     "PART_OF_HANDOVER": "This reading is part of a handover record.",
     "HANDOVER_LOCKED": "The record is awaiting confirmation or confirmed, so it can't be changed.",
-    "HANDOVER_EMPTY": "The record is empty. Add at least one item."
+    "HANDOVER_EMPTY": "The record is empty. Add at least one item.",
+    "DEPOSIT_NOT_AGREED": "No deposit is set. Add it to the tenancy terms first.",
+    "DEPOSIT_EXISTS": "The deposit is already recorded.",
+    "DEPOSIT_LOCKED": "The deposit is already paid or reported, so the request can't be withdrawn.",
+    "DEDUCTIONS_EXCEED_DEPOSIT": "The amounts kept are higher than the deposit.",
+    "DEDUCTION_INVALID": "Each amount kept must be more than zero.",
+    "HANDOVER_ITEM_INVALID": "That handover item belongs to another tenancy.",
+    "CHARGE_MANAGED": "Change this charge in the Contract tab.",
+    "SETTLEMENT_LOCKED": "The settlement has been sent, so it can't be changed now.",
+    "SETTLEMENT_EMPTY": "Add at least one cost.",
+    "DUE_DATE_REQUIRED": "The tenant will pay the difference. Enter a due date.",
+    "MONTH_IN_PAST": "You can schedule a change from this month on.",
+    "RENT_ALREADY_CREATED": "This month's rent has already been created. Choose the next month.",
+    "RENT_CHANGE_APPLIED": "The change is already in effect, so it can't be cancelled.",
+    "TENANCY_NOT_ACTIVE": "The tenancy is not active.",
+    "STATEMENT_EMPTY": "The file has no transactions. Choose a statement from your e-bank.",
+    "STATEMENT_UNREADABLE": "We can't read this file. Use a camt.053 (XML) or CSV statement from your e-bank."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -165,7 +181,10 @@
     "INVALID_PURPOSE_CODE": "The purpose code has 4 capital letters.",
     "SUPPLIER_PAYEE_REQUIRED": "Enter the supplier's name and IBAN.",
     "EMPTY_MESSAGE": "Write a message or attach a file.",
-    "INVALID_METER_VALUE": "Enter a reading, e.g. 12345 or 12345.6."
+    "INVALID_METER_VALUE": "Enter a reading, e.g. 12345 or 12345.6.",
+    "noticeDays": "Enter a number of days from 1 to 730.",
+    "INVALID_MONTH": "Choose a month.",
+    "DUPLICATE_COST_TYPE": "List each cost only once."
   },
   "tabs": {
     "details": "Details",
@@ -174,7 +193,8 @@
     "issues": "Repairs",
     "meters": "Meters",
     "documents": "Documents",
-    "handover": "Handover"
+    "handover": "Handover",
+    "contract": "Contract"
   },
   "properties": {
     "add": "Add a property",
@@ -268,7 +288,20 @@
       "ACTIVE": "Active",
       "ENDED": "Ended",
       "DRAFT": "Draft"
-    }
+    },
+    "noticePeriod": "Notice period",
+    "noticePeriodHint": "In days, as written in the contract.",
+    "noticePeriodValue_one": "{{count}} day",
+    "noticePeriodValue_other": "{{count}} days",
+    "rentReview": "Yearly rent review",
+    "rentReviewHint": "In this month Kvito reminds you to review the rent.",
+    "rentReviewNone": "No reminder",
+    "paymentNote": "Other ways to pay",
+    "paymentNoteHint": "Tenants see this next to the payment details. Kvito never receives money.",
+    "paymentNotePlaceholder": "E.g. Flik: 041 123 456",
+    "depositHigh": "The deposit is higher than three months' rent. Check that this fits the contract and the law.",
+    "termsMoved": "Rent, deposit, costs and closing the tenancy are in the tab",
+    "rentShare": "Rent: {{amount}}"
   },
   "costs": {
     "RENT": "Rent",
@@ -440,7 +473,8 @@
     "yourShare": "Your share ({{total}} in total)",
     "reportHint": "Pay in your bank, then tap Paid.",
     "addFile": "Add file",
-    "addFileHint": "Add a payment slip or bill (PDF or image) so the tenant can see it with the charge."
+    "addFileHint": "Add a payment slip or bill (PDF or image) so the tenant can see it with the charge.",
+    "managedNote": "This charge belongs to the contract (deposit or cost settlement). Change it in the tab"
   },
   "pay": {
     "payee": "Payee",
@@ -465,7 +499,8 @@
     },
     "panelLabel": "Payment details",
     "dueShort": "Due: {{date}}",
-    "copyHint": "Copy the details into your banking app."
+    "copyHint": "Copy the details into your banking app.",
+    "otherWays": "Other ways to pay"
   },
   "upnTest": {
     "title": "UPN QR test",
@@ -525,7 +560,15 @@
     "HANDOVER_READY": "The handover record awaits confirmation.",
     "HANDOVER_CONFIRMED": "The handover record is confirmed.",
     "DOCUMENT_ADDED": "New document: {{title}}.",
-    "UNKNOWN": "Something changed in the tenancy."
+    "UNKNOWN": "Something changed in the tenancy.",
+    "DEPOSIT_PROPOSED": "Deposit return proposal: {{return}} back, {{kept}} kept.",
+    "DEPOSIT_AGREED": "Deposit agreed: {{return}} back.",
+    "DEPOSIT_DISPUTED": "The tenant disagrees with the deposit return proposal.",
+    "DEPOSIT_RETURNED": "Deposit returned: {{return}}.",
+    "SETTLEMENT_SENT": "Cost settlement sent for {{from}} – {{to}}.",
+    "SETTLEMENT_ACCEPTED": "The cost settlement was accepted.",
+    "SETTLEMENT_DISPUTED": "The tenant disagrees with the cost settlement.",
+    "RENT_CHANGED": "From {{from}} the rent is {{rent}}."
   },
   "issueStatus": {
     "NEW": "New",
@@ -782,5 +825,272 @@
     "deleteButton": "Delete account",
     "deleteConfirm": "This can't be undone. Delete your account?",
     "deleted": "Your account is deleted."
+  },
+  "months": {
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December"
+  },
+  "chargeTitle": {
+    "rent": "Rent {{month}}",
+    "advance": "Cost advance {{month}}",
+    "deposit": "Security deposit",
+    "settlement": "Cost settlement {{from}} – {{to}}"
+  },
+  "chargeType": {
+    "DEPOSIT": "Deposit",
+    "ADVANCE": "Advance",
+    "SETTLEMENT": "Settlement"
+  },
+  "depositStatus": {
+    "AWAITING_PAYMENT": "Awaiting payment",
+    "HELD": "Held by landlord",
+    "RETURN_PROPOSED": "Return proposed",
+    "RETURN_DISPUTED": "No agreement",
+    "RETURN_AGREED": "Agreed",
+    "RETURNED": "Returned"
+  },
+  "settlementStatus": {
+    "DRAFT": "Draft",
+    "SENT": "Awaiting reply",
+    "DISPUTED": "No agreement",
+    "ACCEPTED": "Accepted",
+    "CLOSED": "Settled"
+  },
+  "contract": {
+    "newCount_one": "{{count}} new thing in the contract",
+    "newCount_other": "{{count}} new things in the contract",
+    "rent": {
+      "title": "Rent and terms",
+      "scheduled": "From {{date}}: {{amount}}",
+      "before": "Before {{amount}}.",
+      "cancel": "Cancel change",
+      "confirmCancel": "Cancel this rent change?",
+      "change": "Change the rent",
+      "history": "Past changes:",
+      "hint": "Enter the new rent as agreed or as the contract provides. Kvito does not calculate any index. The tenant is notified.",
+      "from": "Applies from",
+      "newAmount": "New rent",
+      "note": "Note",
+      "notePlaceholder": "E.g. yearly adjustment per contract",
+      "save": "Save change",
+      "saved": "Change saved. The tenant has been notified."
+    },
+    "deposit": {
+      "title": "Security deposit",
+      "none": "No deposit is set.",
+      "setAmount": "Add it to the terms",
+      "tenantWaiting": "The agreed deposit is {{amount}}. When your landlord sends the payment details, you'll find them among your charges.",
+      "startHint": "Send the payment details, or record that you already received the deposit.",
+      "mode": {
+        "request": "Ask for payment",
+        "received": "Already received"
+      },
+      "dueDate": "Due date",
+      "receivedOn": "Received on",
+      "requestCta": "Send",
+      "receivedCta": "Record",
+      "requested": "The tenant got the deposit payment details.",
+      "recorded": "Deposit recorded.",
+      "awaiting": "Waiting for payment.",
+      "held": "The landlord holds the deposit.",
+      "heldSince": "Held by the landlord since {{date}}.",
+      "heldTenant": "At the end of the tenancy your landlord proposes the return. You confirm it.",
+      "openCharge": "Open charge",
+      "pay": "Pay the deposit",
+      "withdraw": "Withdraw request",
+      "confirmWithdraw": "Withdraw the deposit payment request?",
+      "withdrawn": "Request withdrawn.",
+      "proposeCta": "Propose the return",
+      "returned": "Returned",
+      "kept": "Kept",
+      "fromHandover": "From the record: {{item}}",
+      "perPerson": "Per person:",
+      "disputedNote": "The tenant disagrees: {{reason}}",
+      "disputeLabel": "What do you disagree with?",
+      "disputeSubmit": "Send",
+      "disputeSent": "Your landlord will get your answer.",
+      "accept": "I agree",
+      "acceptedToast": "Thanks. Your landlord will return the agreed amount.",
+      "dispute": "I disagree",
+      "editProposal": "Edit proposal",
+      "waitingTenant": "Waiting for the tenant's answer.",
+      "waitingLandlord": "Your landlord will prepare a new proposal.",
+      "returnedOn": "Returned on",
+      "markReturned": "I returned {{amount}}",
+      "returnedToast": "Recorded. The tenant will confirm receipt.",
+      "agreedTenant": "Agreed. Your landlord will return {{amount}}.",
+      "returnedOnText": "Returned on {{date}}: {{amount}}.",
+      "allKept": "It was agreed that the whole deposit is kept.",
+      "receiptConfirmed": "Receipt confirmed.",
+      "confirmReceipt": "I received the money",
+      "receiptToast": "Thanks, receipt confirmed.",
+      "proposalTitle": "Deposit return proposal",
+      "proposalSubtitle": "Deposit: {{amount}}. List what you keep and why. The tenant accepts or declines.",
+      "fromMoveOut": "From the move-out record",
+      "deductions": "What is kept",
+      "noDeductions": "Nothing. The tenant gets the whole deposit back.",
+      "reason": "Reason",
+      "reasonPlaceholder": "E.g. repairing a damaged door",
+      "addDeduction": "Add item",
+      "noteLabel": "Message to the tenant",
+      "noteHint": "Optional. E.g. when and how you return the money.",
+      "proposalFooter": "Kvito doesn't move money. You return it yourself, then record it here.",
+      "sendProposal": "Send proposal",
+      "proposalSent": "The proposal was sent to the tenant.",
+      "rowsIncomplete": "Each item needs a reason and an amount."
+    },
+    "costs": {
+      "title": "Costs and settlement",
+      "editAdvances": "Edit",
+      "perMonth": "Total per month",
+      "advancesHint": "Advances are charged once a month, together, due with the rent. At the end of the period you settle them against the actual costs.",
+      "noAdvances": "Costs are not paid in advances.",
+      "noAdvancesLandlord": "No advances. If the tenant pays a monthly advance for costs, add it here.",
+      "advancesEditHint": "Monthly amount per cost. Applies from the next monthly charge.",
+      "costType": "Cost",
+      "amount": "Amount",
+      "addAdvance": "Add cost",
+      "advancesSaved": "Advances saved.",
+      "settlements": "Settlements",
+      "newSettlement": "New settlement",
+      "noSettlements": "No settlements yet.",
+      "newSettlementHint": "Choose the period. Kvito adds up the advances for it; you enter the actual costs from the bills.",
+      "from": "From",
+      "to": "To",
+      "createSettlement": "Create settlement",
+      "settlement": "Cost settlement",
+      "owes": "To pay {{amount}}",
+      "refund": "Refund {{amount}}",
+      "even": "No difference",
+      "advances": "Advances",
+      "actual": "Actual",
+      "difference": "Difference",
+      "advancesWere": "Advances: {{amount}}",
+      "bills": "Bills",
+      "addBill": "Add bill",
+      "period": "Period",
+      "advancesFromPeriod": "Advances are recalculated for the chosen period when you save.",
+      "lines": "Costs",
+      "addLine": "Add cost …",
+      "result": "Result",
+      "dueDate": "Due date for the difference",
+      "dueDateHint": "Once the tenant accepts, the difference appears among their charges.",
+      "note": "Message to the tenant",
+      "notePlaceholder": "E.g. the building manager's statement for 2026 is attached.",
+      "send": "Send to the tenant",
+      "saveDraft": "Save draft",
+      "saved": "Draft saved.",
+      "sent": "The settlement was sent to the tenant.",
+      "delete": "Delete draft",
+      "confirmDelete": "Delete this settlement draft?",
+      "disputedNote": "The tenant disagrees: {{reason}}",
+      "disputeLabel": "What do you disagree with?",
+      "disputeSubmit": "Send",
+      "disputeSent": "Your landlord will get your answer.",
+      "accept": "I agree",
+      "acceptedToast": "Thanks, the settlement is accepted.",
+      "dispute": "I disagree",
+      "waitingTenant": "Waiting for the tenant to accept.",
+      "payCharge": "Pay the difference",
+      "openCharge": "Open the difference",
+      "paidCharge": "The difference is settled",
+      "refundedOn": "Returned on",
+      "markRefunded": "I returned {{amount}}",
+      "refundedToast": "Recorded. The tenant will confirm receipt.",
+      "refundPending": "Your landlord will return {{amount}}.",
+      "refundedText": "Overpayment returned on {{date}}: {{amount}}."
+    },
+    "closeout": {
+      "title": "Closing the tenancy",
+      "hint": "What is still missing for everything to be settled at move-out.",
+      "endedHint": "The tenancy is closed. This is how it was left.",
+      "open": "Open",
+      "confirmEndNotReady": "Something is still missing. Close the tenancy anyway?",
+      "state": {
+        "done": "done",
+        "pending": "missing",
+        "na": "does not apply"
+      },
+      "items": {
+        "charges": {
+          "label": "Charges",
+          "done": "Everything is settled.",
+          "pending_one": "{{count}} still unsettled ({{amount}}).",
+          "pending_other": "{{count}} still unsettled ({{amount}}).",
+          "na": ""
+        },
+        "moveOut": {
+          "label": "Move-out record",
+          "done": "Confirmed by both sides.",
+          "pending": "Prepare it in the Handover tab and confirm it together.",
+          "na": ""
+        },
+        "meters": {
+          "label": "Final meter readings",
+          "done": "Recorded.",
+          "pending": "Record the meters at move-out.",
+          "na": ""
+        },
+        "keys": {
+          "label": "Keys",
+          "done": "The number of keys is in the record.",
+          "pending": "Enter the returned keys in the move-out record.",
+          "na": ""
+        },
+        "settlement": {
+          "label": "Cost settlement",
+          "done": "Settled up to the last advance.",
+          "pending": "Prepare a cost settlement up to the end of the tenancy.",
+          "na": "No advances, no settlement needed.",
+          "naConfigured": "No advances have been charged yet, so no settlement is needed so far."
+        },
+        "deposit": {
+          "label": "Deposit",
+          "done": "Returned or agreed.",
+          "pending": "Propose the return and record it.",
+          "na": "No deposit."
+        }
+      }
+    }
+  },
+  "bank": {
+    "title": "Bank statement",
+    "eyebrow": "Payments",
+    "entryHint": "Upload a statement from your e-bank and Kvito recognises payments by their reference. You confirm them in one click.",
+    "cta": "Import statement",
+    "subtitle": "Kvito finds incoming payments with a Kvito reference and links them to charges. You choose which ones to confirm.",
+    "choose": "Choose a file",
+    "formats": "camt.053 (XML) or CSV from your e-bank",
+    "privacy": "We don't store the file. It is only used to find payments; outgoing and other incoming transactions are not saved anywhere.",
+    "summary": "Incoming: {{credits}} · Recognised: {{matched}}",
+    "matches": "Recognised payments",
+    "select": "Confirm payment: {{title}}",
+    "state": {
+      "READY": "Amount matches",
+      "AMOUNT_DIFFERS": "Paid {{paid}}, expected {{expected}}. Check before confirming.",
+      "AMOUNT_UNKNOWN": "The amount couldn't be read. Check before confirming.",
+      "ALREADY_CONFIRMED": "Already confirmed",
+      "DUPLICATE": "The same reference appears twice"
+    },
+    "confirm_one": "Confirm {{count}} payment",
+    "confirm_other": "Confirm {{count}} payments",
+    "confirmedToast_one": "{{count}} payment confirmed.",
+    "confirmedToast_other": "{{count}} payments confirmed.",
+    "another": "Upload another statement",
+    "noMatches": "No payments with a Kvito reference in this statement. Confirm payments without one on the charge itself.",
+    "foreign": "Some references don't belong to your tenancies ({{count}}). They are not shown.",
+    "unmatched_one": "{{count}} incoming payment without a Kvito reference",
+    "unmatched_other": "{{count}} incoming payments without a Kvito reference",
+    "unmatchedHint": "If one of these is a tenant's payment, confirm it on the charge."
   }
 }
