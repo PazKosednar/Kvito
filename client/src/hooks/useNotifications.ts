@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import { currentPushSubscription, disablePush, enablePush, pushSupported } from "@/lib/push";
 import { invalidate, useQuery } from "./useQuery";
@@ -38,6 +38,24 @@ export function useNotifications() {
   }, []);
 
   return { ...q, notifications: q.data?.notifications ?? [], unread: q.data?.unread ?? 0, markRead };
+}
+
+const CHARGE_URL = /^\/najemi\/([^/]+)\/obveznosti\/([^/]+)/;
+
+/** What is new per tenancy: unread notifications about charges, grouped by tenancy and by charge. */
+export function useNewCharges() {
+  const { notifications } = useNotifications();
+  return useMemo(() => {
+    const byTenancy: Record<string, number> = {};
+    const unreadByCharge: Record<string, string[]> = {};
+    for (const n of notifications) {
+      const m = n.readAt || !n.url ? null : CHARGE_URL.exec(n.url);
+      if (!m) continue;
+      byTenancy[m[1]!] = (byTenancy[m[1]!] ?? 0) + 1;
+      (unreadByCharge[m[2]!] ??= []).push(n.id);
+    }
+    return { byTenancy, unreadByCharge };
+  }, [notifications]);
 }
 
 export type PushState = "loading" | "unsupported" | "unconfigured" | "denied" | "off" | "on";

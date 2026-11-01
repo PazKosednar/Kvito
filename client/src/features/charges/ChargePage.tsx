@@ -1,5 +1,5 @@
 import { CheckCheck, FileText, Loader2, Paperclip, RotateCcw, Trash2, Undo2, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { uploadAttachment, useCharge } from "@/hooks/useCharges";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
+import { useNewCharges, useNotifications } from "@/hooks/useNotifications";
 import { apiUrl } from "@/lib/api";
 import { formatDate, formatDateTime, todayInput } from "@/lib/dates";
 import { formatCents } from "@/lib/money";
@@ -25,6 +26,14 @@ export function ChargePage() {
   const navigate = useNavigate();
   const { tenancy } = useTenancyContext();
   const q = useCharge(chargeId);
+  const { unreadByCharge } = useNewCharges();
+  const { markRead } = useNotifications();
+
+  // Opening a charge is reading what is new about it.
+  const pending = chargeId ? unreadByCharge[chargeId] : undefined;
+  useEffect(() => {
+    if (pending?.length) void markRead(pending);
+  }, [pending, markRead]);
 
   if (q.loading) return <LoadingState />;
   if (q.error || !q.charge) return <ErrorState message={toMessage(q.error)} onRetry={() => void q.reload()} />;

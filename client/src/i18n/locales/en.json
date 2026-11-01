@@ -336,6 +336,8 @@
     "DISPUTED": "Disputed"
   },
   "charges": {
+    "newCount_one": "{{count}} new thing in charges",
+    "newCount_other": "{{count}} new things in charges",
     "dueOn": "due {{date}}",
     "dueToday": "Due today.",
     "dueIn_one": "Due in {{count}} day.",

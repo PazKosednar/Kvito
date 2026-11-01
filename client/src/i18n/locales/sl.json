@@ -340,6 +340,10 @@
     "DISPUTED": "Spor"
   },
   "charges": {
+    "newCount_one": "{{count}} novost pri obveznostih",
+    "newCount_two": "{{count}} novosti pri obveznostih",
+    "newCount_few": "{{count}} novosti pri obveznostih",
+    "newCount_other": "{{count}} novosti pri obveznostih",
     "dueOn": "rok {{date}}",
     "dueToday": "Rok je danes.",
     "dueIn_one": "Rok je čez {{count}} dan.",

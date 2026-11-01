@@ -2,7 +2,9 @@ import { createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, Outlet, useParams } from "react-router";
 import { Eyebrow } from "@/components/brand";
+import { CountBadge } from "@/components/count-badge";
 import { ErrorState, LoadingState } from "@/components/layout-parts";
+import { useNewCharges } from "@/hooks/useNotifications";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useUnread } from "@/hooks/useMessages";
 import { useRealtime } from "@/hooks/useRealtime";
@@ -29,11 +31,13 @@ export function TenancyLayout() {
   const q = useTenancy(id);
   useRealtime(q.tenancy?.id);
   const unread = useUnread();
+  const newCharges = useNewCharges();
 
   if (q.loading) return <LoadingState />;
   if (q.error || !q.tenancy) return <ErrorState message={toMessage(q.error)} onRetry={() => void q.reload()} />;
   const { tenancy } = q;
   const tabs = TENANCY_TABS.filter((tab) => !tab.landlordOnly || q.isLandlord);
+  const badgeCount = (badge: "unread" | "charges" | undefined) => (badge === "unread" ? unread[tenancy.id] : badge === "charges" ? newCharges.byTenancy[tenancy.id] : 0) ?? 0;
   const href = (path: string) => (path ? `/najemi/${tenancy.id}/${path}` : `/najemi/${tenancy.id}`);
 
   return (
@@ -67,7 +71,7 @@ export function TenancyLayout() {
               }
             >
               {t(tab.label)}
-              {tab.badge === "unread" && (unread[tenancy.id] ?? 0) > 0 && <UnreadDot count={unread[tenancy.id]!} />}
+              <TabBadge tab={tab.badge} count={badgeCount(tab.badge)} className="ml-1.5" />
             </NavLink>
           ))}
         </nav>
@@ -88,7 +92,7 @@ export function TenancyLayout() {
             >
               <span className="tabular opacity-50">{String(i + 1).padStart(2, "0")}</span>
               {t(tab.label)}
-              {tab.badge === "unread" && (unread[tenancy.id] ?? 0) > 0 && <UnreadDot count={unread[tenancy.id]!} className="ml-auto" />}
+              <TabBadge tab={tab.badge} count={badgeCount(tab.badge)} className="ml-auto" />
             </NavLink>
           ))}
         </nav>
@@ -101,15 +105,9 @@ export function TenancyLayout() {
   );
 }
 
-/** Unread count (CGP: pill shapes only for status dots and toggles). */
-function UnreadDot({ count, className }: { count: number; className?: string }) {
+/** New-things count on a section: unread messages, or charges with unread notifications. */
+function TabBadge({ tab, count, className }: { tab: "unread" | "charges" | undefined; count: number; className?: string }) {
   const { t } = useTranslation();
-  return (
-    <span
-      aria-label={t("messages.unread", { count })}
-      className={cn("ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 font-mono text-[10px] font-medium text-primary-foreground", className)}
-    >
-      {count > 9 ? "9+" : count}
-    </span>
-  );
+  if (!tab || count <= 0) return null;
+  return <CountBadge count={count} className={className} label={t(tab === "unread" ? "messages.unread" : "charges.newCount", { count })} />;
 }
