@@ -37,12 +37,12 @@ export function authRouter(deps: { emailSender: EmailSender }): Router {
   const router = Router();
 
   router.post("/request-code", requestCodeLimiter, validateBody(RequestCodeBody), async (req, res) => {
-    await requestLoginCode(req.body.email, clientMeta(req), deps.emailSender);
+    await requestLoginCode(req.body.email, clientMeta(req), deps.emailSender, req.body.locale);
     res.status(202).json({ ok: true });
   });
 
   router.post("/verify-code", verifyCodeLimiter, validateBody(VerifyCodeBody), async (req, res) => {
-    const { user, tokens } = await verifyLoginCode(req.body.email, req.body.code, clientMeta(req));
+    const { user, tokens } = await verifyLoginCode(req.body.email, req.body.code, clientMeta(req), req.body.locale);
     res.cookie(REFRESH_COOKIE, tokens.refreshToken, cookieOptions(tokens.refreshExpiresAt));
     await audit({ actorId: user.id, entityType: "User", entityId: user.id, action: "login", ip: req.ip });
     res.json({ accessToken: tokens.accessToken, user: toMeDto(user) });

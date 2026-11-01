@@ -38,15 +38,31 @@ export function splitAmount(totalCents: number, members: SplitMember[], method: 
     weights = members.map(() => 1);
   }
 
+  const parts = distribute(totalCents, weights, members.map((m) => m.isPrimary));
+  return new Map(members.map((m, i) => [m.id, parts[i]!]));
+}
+
+/**
+ * Splits an amount in proportion to arbitrary non-negative weights (e.g. what each person paid).
+ * All-zero weights split equally. The parts add up exactly to the total.
+ */
+export function splitProportional(totalCents: number, weights: number[]): number[] {
+  if (!Number.isInteger(totalCents) || totalCents < 0) throw new Error("totalCents must be a non-negative integer");
+  if (weights.length === 0) return [];
+  const usable = weights.some((w) => w > 0) ? weights.map((w) => Math.max(0, w)) : weights.map(() => 1);
+  return distribute(totalCents, usable, weights.map(() => false));
+}
+
+function distribute(totalCents: number, weights: number[], primary: boolean[]): number[] {
   const totalWeight = weights.reduce((s, w) => s + w, 0);
   const exact = weights.map((w) => (totalCents * w) / totalWeight);
   const parts = exact.map(Math.floor);
   let left = totalCents - parts.reduce((s, p) => s + p, 0);
 
-  const order = members
-    .map((m, i) => ({ i, rem: exact[i]! - parts[i]!, primary: m.isPrimary }))
+  const order = weights
+    .map((_, i) => ({ i, rem: exact[i]! - parts[i]!, primary: primary[i]! }))
+    .filter((o) => weights[o.i]! > 0)
     .sort((a, b) => b.rem - a.rem || Number(b.primary) - Number(a.primary) || a.i - b.i);
   for (let k = 0; left > 0; k = (k + 1) % order.length, left--) parts[order[k]!.i]! += 1;
-
-  return new Map(members.map((m, i) => [m.id, parts[i]!]));
+  return parts;
 }

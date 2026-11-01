@@ -11,7 +11,8 @@ import { NullPushSender, WebPushSender } from "./services/push/WebPushSender.js"
 import { sendPaymentReminders, sendWeeklySummaries } from "./services/jobs/reminders.js";
 import { purgeExpiredData } from "./services/jobs/retention.js";
 import { attachRealtime } from "./services/realtime.js";
-import { generateMonthlyRent, markOverdue } from "./services/jobs/rent.js";
+import { sendContractReminders } from "./services/jobs/contract.js";
+import { generateMonthlyAdvances, generateMonthlyRent, markOverdue } from "./services/jobs/rent.js";
 import { startScheduler } from "./services/jobs/scheduler.js";
 import { createStorage } from "./services/storage/createStorage.js";
 
@@ -47,9 +48,11 @@ async function main() {
 
   const stopJobs = startScheduler([
     { name: "monthly-rent", run: generateMonthlyRent },
+    { name: "monthly-advances", run: generateMonthlyAdvances },
     { name: "mark-overdue", run: markOverdue },
     { name: "payment-reminders", run: (now) => sendPaymentReminders(notifier, now) },
     { name: "weekly-summary", run: (now) => sendWeeklySummaries(notifier, now) },
+    { name: "contract-reminders", run: (now) => sendContractReminders(notifier, now) },
     { name: "retention", run: purgeExpiredData },
   ]);
 

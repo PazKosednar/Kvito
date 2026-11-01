@@ -1,4 +1,5 @@
 import { env } from "../../config/env.js";
+import type { Locale } from "../../i18n/format.js";
 import { badRequest, tooManyRequests } from "../../lib/errors.js";
 import { prisma } from "../../lib/prisma.js";
 import type { EmailSender } from "../../services/email/EmailSender.js";
@@ -10,7 +11,7 @@ import { issueSession, type ClientMeta } from "./sessions.js";
  * Creates and e-mails a one-time code. Responds identically whether or not the account exists
  * (accounts are created on first successful verification).
  */
-export async function requestLoginCode(rawEmail: string, meta: ClientMeta, emailSender: EmailSender): Promise<void> {
+export async function requestLoginCode(rawEmail: string, meta: ClientMeta, emailSender: EmailSender, screenLocale?: Locale): Promise<void> {
   const email = normalizeEmail(rawEmail);
   const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
   const recent = await prisma.loginCode.count({ where: { email, createdAt: { gte: hourAgo } } });
@@ -30,11 +31,13 @@ export async function requestLoginCode(rawEmail: string, meta: ClientMeta, email
     }),
   ]);
 
+  // An existing account keeps its own language; otherwise the language of the sign-in screen.
+  const existing = await prisma.user.findUnique({ where: { email }, select: { locale: true } });
   // In development the ConsoleEmailSender prints the code to the server console.
-  await emailSender.send(loginCodeEmail(email, code, env.OTP_TTL_MIN));
+  await emailSender.send(loginCodeEmail(email, code, env.OTP_TTL_MIN, existing?.locale ?? screenLocale ?? "sl"));
 }
 
-export async function verifyLoginCode(rawEmail: string, code: string, meta: ClientMeta) {
+export async function verifyLoginCode(rawEmail: string, code: string, meta: ClientMeta, screenLocale?: Locale) {
   const email = normalizeEmail(rawEmail);
   const loginCode = await prisma.loginCode.findFirst({
     where: { email, consumedAt: null, expiresAt: { gt: new Date() } },
@@ -65,7 +68,7 @@ export async function verifyLoginCode(rawEmail: string, code: string, meta: Clie
   const user = await prisma.user.upsert({
     where: { email },
     update: { lastLoginAt: new Date() },
-    create: { email, lastLoginAt: new Date() },
+    create: { email, lastLoginAt: new Date(), ...(screenLocale ? { locale: screenLocale } : {}) },
   });
   if (user.deletedAt) throw badRequest("ACCOUNT_DELETED");
 

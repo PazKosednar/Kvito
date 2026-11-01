@@ -18,6 +18,8 @@ export async function generateMonthlyRent(now = new Date()): Promise<number> {
   const month = today.getUTCMonth() + 1;
   const period = `${year}-${String(month).padStart(2, "0")}`;
   const monthStart = new Date(Date.UTC(year, month - 1, 1));
+  // A scheduled rent change for this month must be in place before this month's rent is created.
+  await applyRentChanges(monthStart);
 
   const tenancies = await prisma.tenancy.findMany({
     where: {
@@ -64,6 +66,87 @@ export async function generateMonthlyRent(now = new Date()): Promise<number> {
     }
   }
   if (created) logger.info(`Najemnine za ${period}: ustvarjenih ${created}`);
+  return created;
+}
+
+/** Scheduled rent changes that are due: the tenancy's rent becomes the newest one. Idempotent (appliedAt). */
+export async function applyRentChanges(monthStart: Date): Promise<number> {
+  const due = await prisma.rentChange.findMany({
+    where: { deletedAt: null, appliedAt: null, effectiveFrom: { lte: monthStart }, tenancy: { deletedAt: null } },
+    orderBy: { effectiveFrom: "asc" },
+  });
+  const latest = new Map(due.map((c) => [c.tenancyId, c]));
+  for (const [tenancyId, change] of latest) {
+    await prisma.$transaction(async (tx) => {
+      const before = await tx.tenancy.findUniqueOrThrow({ where: { id: tenancyId }, select: { rentCents: true } });
+      await tx.tenancy.update({ where: { id: tenancyId }, data: { rentCents: change.rentCents } });
+      await tx.rentChange.updateMany({ where: { id: { in: due.filter((c) => c.tenancyId === tenancyId).map((c) => c.id) } }, data: { appliedAt: new Date() } });
+      await audit({ actorId: null, entityType: "Tenancy", entityId: tenancyId, action: "rentChange", before: { rentCents: before.rentCents }, after: { rentCents: change.rentCents, rentChangeId: change.id } }, tx);
+    });
+    bus.emit("tenancy.changed", { tenancyId, what: "contract" });
+  }
+  return latest.size;
+}
+
+/**
+ * One charge per month with all monthly cost advances (akontacije) of a tenancy, due with the rent.
+ * Idempotent through the unique (tenancyId, autoKey) – "advance:YYYY-MM".
+ */
+export async function generateMonthlyAdvances(now = new Date()): Promise<number> {
+  const today = todayInLjubljana(now);
+  const year = today.getUTCFullYear();
+  const month = today.getUTCMonth() + 1;
+  const period = `${year}-${String(month).padStart(2, "0")}`;
+  const monthStart = new Date(Date.UTC(year, month - 1, 1));
+  const autoKey = `advance:${period}`;
+
+  const tenancies = await prisma.tenancy.findMany({
+    where: {
+      deletedAt: null,
+      status: "ACTIVE",
+      startDate: { lte: dueDateInMonth(year, month, 31) },
+      OR: [{ endDate: null }, { endDate: { gte: monthStart } }],
+      members: { some: { deletedAt: null, leftAt: null } },
+      costAdvances: { some: { deletedAt: null } },
+      charges: { none: { autoKey } },
+    },
+    select: { id: true, rentDueDay: true, startDate: true, costAdvances: { where: { deletedAt: null }, orderBy: { createdAt: "asc" } } },
+  });
+
+  let created = 0;
+  for (const t of tenancies) {
+    const dueDate = dueDateInMonth(year, month, t.rentDueDay);
+    if (dueDate < t.startDate) continue;
+    const total = t.costAdvances.reduce((s, a) => s + a.amountCents, 0);
+    const title = `Akontacija stroškov ${MONTHS_SL[month - 1]} ${year}`;
+    try {
+      await prisma.$transaction((tx) =>
+        createCharge(
+          tx,
+          t.id,
+          {
+            type: "ADVANCE",
+            costType: null,
+            title,
+            amountCents: total,
+            dueDate,
+            autoKey,
+            payTo: "LANDLORD",
+            // TODO(preveri): purpose code for cost advances; OTHR ("Drugo") is always valid.
+            purposeCode: "OTHR",
+            purpose: title,
+            lines: t.costAdvances.map((a) => ({ costType: a.costType, amountCents: a.amountCents })),
+          },
+          null,
+        ),
+      );
+      created++;
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") continue;
+      logger.error({ err, tenancyId: t.id }, "Advance generation failed");
+    }
+  }
+  if (created) logger.info(`Akontacije za ${period}: ustvarjenih ${created}`);
   return created;
 }
 

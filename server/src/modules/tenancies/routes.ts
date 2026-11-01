@@ -22,6 +22,9 @@ const TenancyBody = z
     payeeCity: optionalText(33),
     coveredCosts: z.array(costType).max(12).default([]),
     splitMethod: splitMethod.default("EQUAL"),
+    noticePeriodDays: z.number().int().min(1).max(730).nullable().optional(),
+    rentReviewMonth: z.number().int().min(1).max(12).nullable().optional(),
+    paymentNote: optionalText(120),
   })
   .refine((b) => !b.endDate || b.endDate >= b.startDate, { message: "END_BEFORE_START", path: ["endDate"] });
 
@@ -39,6 +42,9 @@ const TenancyPatch = z
     coveredCosts: z.array(costType).max(12),
     splitMethod,
     status: z.enum(["ACTIVE", "ENDED"]),
+    noticePeriodDays: z.number().int().min(1).max(730).nullable(),
+    rentReviewMonth: z.number().int().min(1).max(12).nullable(),
+    paymentNote: optionalText(120),
   })
   .partial();
 
@@ -92,6 +98,9 @@ export function tenanciesRouter(): Router {
           payeeCity: body.payeeCity ?? null,
           coveredCosts: body.coveredCosts,
           splitMethod: body.splitMethod,
+          noticePeriodDays: body.noticePeriodDays ?? null,
+          rentReviewMonth: body.rentReviewMonth ?? null,
+          paymentNote: body.paymentNote ?? null,
         },
         include: tenancyInclude,
       });

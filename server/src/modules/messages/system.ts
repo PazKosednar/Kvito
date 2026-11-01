@@ -15,7 +15,15 @@ export type SystemEvent =
   | "ISSUE_STATUS"
   | "HANDOVER_READY"
   | "HANDOVER_CONFIRMED"
-  | "DOCUMENT_ADDED";
+  | "DOCUMENT_ADDED"
+  | "DEPOSIT_PROPOSED"
+  | "DEPOSIT_AGREED"
+  | "DEPOSIT_DISPUTED"
+  | "DEPOSIT_RETURNED"
+  | "SETTLEMENT_SENT"
+  | "SETTLEMENT_ACCEPTED"
+  | "SETTLEMENT_DISPUTED"
+  | "RENT_CHANGED";
 
 export async function postSystemMessage(
   db: Db,

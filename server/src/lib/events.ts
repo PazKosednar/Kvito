@@ -1,4 +1,15 @@
 import { EventEmitter } from "node:events";
+import type { ChargeTitleSource } from "../i18n/format.js";
+
+/** Deposit, cost settlement and rent events – each becomes a notification for the other side. */
+export type ContractActivity =
+  | { kind: "deposit.proposed"; returnCents: number; keptCents: number }
+  | { kind: "deposit.agreed" | "deposit.disputed" | "deposit.receipt" }
+  | { kind: "deposit.returned"; returnCents: number; returnedOn: Date }
+  | { kind: "settlement.sent"; settlementId: string; periodFrom: Date; periodTo: Date; balanceCents: number }
+  | { kind: "settlement.accepted" | "settlement.disputed" | "settlement.refundReceipt"; settlementId: string }
+  | { kind: "settlement.refunded"; settlementId: string; refundCents: number; refundedOn: Date }
+  | { kind: "rent.scheduled"; rentCents: number; effectiveFrom: Date };
 
 /**
  * In-process domain events. Realtime (Socket.IO) and notifications subscribe here,
@@ -13,12 +24,14 @@ export interface DomainEvents {
     kind: "created" | "reported" | "confirmed" | "rejected" | "disputed";
     /** Who did it (null: the system, e.g. automatic monthly rent). */
     actorId: string | null;
-    title: string;
+    /** Enough to show the title in the reader's language. */
+    charge: ChargeTitleSource;
     amountCents: number;
     /** User the share belongs to (for reported/confirmed/rejected/disputed). */
     shareUserId?: string;
   };
-  "tenancy.changed": { tenancyId: string; what: "charges" | "issues" | "members" | "documents" | "handover" | "meters" };
+  "contract.activity": { tenancyId: string; actorId: string } & ContractActivity;
+  "tenancy.changed": { tenancyId: string; what: "charges" | "issues" | "members" | "documents" | "handover" | "meters" | "contract" };
 }
 
 class TypedBus {

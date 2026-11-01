@@ -71,24 +71,32 @@ describe.skipIf(!hasDb)("notifications and reminders", () => {
 
     const created = await landlord.post(`/api/tenancies/${tenancyId}/charges`, { title: "Elektrika", amountCents: 5000, dueDate: "2031-03-10", costType: "ELECTRICITY" }).expect(201);
     chargeId = created.body.charge.id;
-    const mailBefore = ctx.mail.sent.length;
+    const lukasMail = () => ctx.mail.sent.filter((m) => m.to === luka.user.email).length;
+    const mailBefore = lukasMail();
+    // Other test files leave charges in the shared database: count only Luka's reminders.
+    const mine = () => ctx.prisma.notification.count({ where: { userId: luka.user.id, type: { startsWith: "reminder." } } });
+    const sent = async (now: Date) => {
+      const before = await mine();
+      await sendPaymentReminders(notifier, now);
+      return (await mine()) - before;
+    };
 
-    expect(await sendPaymentReminders(notifier, at("2031-03-06"))).toBe(0); // 4 days before: too early
-    expect(await sendPaymentReminders(notifier, at("2031-03-07"))).toBe(1); // 3 days before
-    expect(await sendPaymentReminders(notifier, at("2031-03-07"))).toBe(0); // same day again: deduplicated
-    expect(await sendPaymentReminders(notifier, at("2031-03-10", 7))).toBe(0); // before 08:00 nothing goes out
-    expect(await sendPaymentReminders(notifier, at("2031-03-10"))).toBe(1); // due today
-    expect(await sendPaymentReminders(notifier, at("2031-03-11"))).toBe(1); // overdue, week 0
-    expect(await sendPaymentReminders(notifier, at("2031-03-14"))).toBe(0); // still week 0
-    expect(await sendPaymentReminders(notifier, at("2031-03-18"))).toBe(1); // week 1
+    expect(await sent(at("2031-03-06"))).toBe(0); // 4 days before: too early
+    expect(await sent(at("2031-03-07"))).toBe(1); // 3 days before
+    expect(await sent(at("2031-03-07"))).toBe(0); // same day again: deduplicated
+    expect(await sent(at("2031-03-10", 7))).toBe(0); // before 08:00 nothing goes out
+    expect(await sent(at("2031-03-10"))).toBe(1); // due today
+    expect(await sent(at("2031-03-11"))).toBe(1); // overdue, week 0
+    expect(await sent(at("2031-03-14"))).toBe(0); // still week 0
+    expect(await sent(at("2031-03-18"))).toBe(1); // week 1
 
-    const mine = push.sent.filter((p) => p.target.endpoint === "https://push.example.test/abc");
-    expect(mine.map((p) => p.payload.title)).toEqual(
+    const pushed = push.sent.filter((p) => p.target.endpoint === "https://push.example.test/abc");
+    expect(pushed.map((p) => p.payload.title)).toEqual(
       expect.arrayContaining(["Rok za plačilo čez 3 dni", "Rok za plačilo je danes", "Obveznost je v zamudi"]),
     );
-    expect(mine[0]?.payload.url).toBe(`/najemi/${tenancyId}/obveznosti/${chargeId}`);
+    expect(pushed[0]?.payload.url).toBe(`/najemi/${tenancyId}/obveznosti/${chargeId}`);
     // Push reached the device, so no e-mail was needed.
-    expect(ctx.mail.sent.length).toBe(mailBefore);
+    expect(lukasMail()).toBe(mailBefore);
   });
 
   it("falls back to e-mail when the person has no device, and removes dead subscriptions", async () => {
@@ -97,13 +105,30 @@ describe.skipIf(!hasDb)("notifications and reminders", () => {
 
     push.gone.add("https://push.example.test/abc");
     const before = ctx.mail.sent.length;
-    await notifier.notify({ userId: luka.user.id, type: "test", title: "Preizkus", body: "Telo", dedupeKey: `t:${Date.now()}` });
+    await notifier.notify({ userId: luka.user.id, type: "test", text: () => ({ title: "Preizkus", body: "Telo" }), dedupeKey: `t:${Date.now()}` });
     expect(await ctx.prisma.pushSubscription.count({ where: { userId: luka.user.id } })).toBe(0); // gone → deleted
     expect(ctx.mail.sent.length).toBe(before + 1);
     expect(ctx.mail.sent.at(-1)?.to).toBe(luka.user.email);
 
-    await notifier.notify({ userId: luka.user.id, type: "chat", title: "Klepet", body: "x", email: "never", dedupeKey: `c:${Date.now()}` });
+    await notifier.notify({ userId: luka.user.id, type: "chat", text: () => ({ title: "Klepet", body: "x" }), email: "never", dedupeKey: `c:${Date.now()}` });
     expect(ctx.mail.sent.length).toBe(before + 1); // never e-mailed
+  });
+
+  it("writes the notification in the recipient's language", async () => {
+    const { createNotifier } = await import("../src/services/notifications/notifier.js");
+    const { N } = await import("../src/i18n/notifications.js");
+    const notifier = createNotifier({ emailSender: ctx.mail, pushSender: push });
+    await ctx.prisma.user.update({ where: { id: luka.user.id }, data: { locale: "en" } });
+    try {
+      const rent = { type: "RENT" as const, title: "Najemnina november 2026", rentPeriod: "2026-11", autoKey: null };
+      await notifier.notify({ userId: luka.user.id, type: "reminder.today", text: N.reminderToday(rent, 125_000), dedupeKey: `en:${Date.now()}` });
+      const row = await ctx.prisma.notification.findFirstOrThrow({ where: { userId: luka.user.id, type: "reminder.today" }, orderBy: { createdAt: "desc" } });
+      expect(row.title).toBe("Payment is due today");
+      expect(row.body).toBe("Rent November 2026: €1,250.00");
+      expect(ctx.mail.sent.at(-1)?.html).toContain("Open in Kvito");
+    } finally {
+      await ctx.prisma.user.update({ where: { id: luka.user.id }, data: { locale: "sl" } });
+    }
   });
 
   it("notifies the other side of a payment and keeps the inbox private", async () => {

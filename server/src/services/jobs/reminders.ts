@@ -1,7 +1,7 @@
+import { N } from "../../i18n/notifications.js";
 import { DISPLAY_TZ, addDays, toDateOnly, todayInLjubljana } from "../../lib/dates.js";
 import { logger } from "../../lib/logger.js";
 import { prisma } from "../../lib/prisma.js";
-import { eur } from "../notifications/listeners.js";
 import type { Notifier } from "../notifications/notifier.js";
 
 const MS_DAY = 86_400_000;
@@ -34,7 +34,7 @@ export async function sendPaymentReminders(notifier: Notifier, now = new Date())
       id: true,
       amountCents: true,
       member: { select: { userId: true } },
-      charge: { select: { id: true, tenancyId: true, title: true, dueDate: true } },
+      charge: { select: { id: true, tenancyId: true, type: true, title: true, rentPeriod: true, autoKey: true, dueDate: true } },
     },
     take: 2000,
   });
@@ -44,21 +44,20 @@ export async function sendPaymentReminders(notifier: Notifier, now = new Date())
     const days = Math.round((s.charge.dueDate.getTime() - today.getTime()) / MS_DAY);
     const userId = s.member.userId;
     const url = `/najemi/${s.charge.tenancyId}/obveznosti/${s.charge.id}`;
-    const what = `${s.charge.title}: ${eur(s.amountCents)}`;
 
-    let n: { type: string; title: string; body: string; key: string } | null = null;
+    let n: { type: string; text: ReturnType<typeof N.reminderToday>; key: string } | null = null;
     if (days < 0) {
       const week = Math.floor((-days - 1) / 7);
       if (week < OVERDUE_REMINDERS) {
-        n = { type: "reminder.overdue", title: "Obveznost je v zamudi", body: `${what}. Rok je bil ${toDateOnly(s.charge.dueDate).split("-").reverse().join(". ")}.`, key: `overdue:${s.id}:${week}` };
+        n = { type: "reminder.overdue", text: N.reminderOverdue(s.charge, s.amountCents, s.charge.dueDate), key: `overdue:${s.id}:${week}` };
       }
     } else if (days === 0) {
-      n = { type: "reminder.today", title: "Rok za plačilo je danes", body: what, key: `today:${s.id}` };
+      n = { type: "reminder.today", text: N.reminderToday(s.charge, s.amountCents), key: `today:${s.id}` };
     } else {
-      n = { type: "reminder.upcoming", title: `Rok za plačilo čez ${days} ${days === 1 ? "dan" : days === 2 ? "dneva" : "dni"}`, body: what, key: `upcoming:${s.id}` };
+      n = { type: "reminder.upcoming", text: N.reminderUpcoming(s.charge, s.amountCents, days), key: `upcoming:${s.id}` };
     }
     if (!n) continue;
-    if (await notifier.notify({ userId, type: n.type, title: n.title, body: n.body, url, dedupeKey: n.key, email: "fallback" })) sent++;
+    if (await notifier.notify({ userId, type: n.type, text: n.text, url, dedupeKey: n.key, email: "fallback" })) sent++;
   }
   if (sent) logger.info(`Opomniki: poslanih ${sent}`);
   return sent;
@@ -98,17 +97,11 @@ export async function sendWeeklySummaries(notifier: Notifier, now = new Date()):
 
   let sent = 0;
   for (const [userId, r] of byLandlord) {
-    const parts = [
-      r.overdue ? `v zamudi: ${r.overdue} (${eur(r.overdueCents)})` : null,
-      r.waiting ? `čaka na tvojo potrditev: ${r.waiting}` : null,
-      r.soon ? `zapade ta teden: ${r.soon}` : null,
-    ].filter(Boolean);
-    if (!parts.length) continue;
+    if (!r.overdue && !r.waiting && !r.soon) continue;
     const ok = await notifier.notify({
       userId,
       type: "summary.weekly",
-      title: "Tvoj teden v Kvitu",
-      body: parts.join(" · "),
+      text: N.weeklySummary(r),
       url: "/",
       dedupeKey: `weekly:${userId}:${week}`,
       email: "fallback",

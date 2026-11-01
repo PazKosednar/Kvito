@@ -13,7 +13,9 @@ import { apiLimiter } from "./middleware/rateLimit.js";
 import { requireAuth } from "./middleware/auth.js";
 import { attachmentsRouter, filesPublicRouter } from "./modules/attachments/routes.js";
 import { authRouter } from "./modules/auth/routes.js";
+import { bankRouter } from "./modules/bank/routes.js";
 import { chargesRouter } from "./modules/charges/routes.js";
+import { contractRouter } from "./modules/contract/routes.js";
 import { invitationsPublicRouter, invitationsRouter } from "./modules/invitations/routes.js";
 import { documentsRouter } from "./modules/documents/routes.js";
 import { handoversRouter } from "./modules/handovers/routes.js";
@@ -104,6 +106,8 @@ export function createApp(deps: AppDeps): Express {
   app.use("/api", privacyRouter());
   app.use("/api", tenanciesRouter());
   app.use("/api", chargesRouter(deps));
+  app.use("/api", contractRouter());
+  app.use("/api", bankRouter());
   app.use("/api", messagesRouter());
   app.use("/api", issuesRouter());
   app.use("/api", metersRouter());

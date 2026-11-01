@@ -10,6 +10,7 @@ export interface PaymentRow {
   tenant: string;
   title: string;
   costType: string | null;
+  type: string;
   dueDate: Date;
   amountCents: number;
 }
@@ -28,6 +29,10 @@ const COST_LABEL: Record<string, string> = {
   CLEANING: "Čiščenje",
   OTHER: "Drugo",
 };
+
+/** Deposit, advances and settlements are not rent – the export says what each payment was. */
+const TYPE_LABEL: Record<string, string> = { DEPOSIT: "Varščina", ADVANCE: "Akontacija stroškov", SETTLEMENT: "Poračun stroškov" };
+const kindLabel = (r: { type: string; costType: string | null }): string => TYPE_LABEL[r.type] ?? (r.costType ? (COST_LABEL[r.costType] ?? r.costType) : "");
 
 const dayUtc = (d: Date) => new Intl.DateTimeFormat("sl-SI", { timeZone: "UTC" }).format(d);
 const dayLocal = (d: Date) => new Intl.DateTimeFormat("sl-SI", { timeZone: "Europe/Ljubljana" }).format(d);
@@ -60,6 +65,7 @@ export async function loadPaymentRows(landlordId: string, year: number): Promise
         select: {
           title: true,
           costType: true,
+          type: true,
           dueDate: true,
           tenancy: { select: { unit: { select: { name: true, property: { select: { name: true } } } } } },
         },
@@ -74,6 +80,7 @@ export async function loadPaymentRows(landlordId: string, year: number): Promise
     tenant: s.member.user.name ?? s.member.user.email,
     title: s.charge.title,
     costType: s.charge.costType,
+    type: s.charge.type,
     dueDate: s.charge.dueDate,
     amountCents: s.amountCents,
   }));
@@ -92,7 +99,7 @@ export function paymentsCsv(rows: PaymentRow[]): Buffer {
       r.unit,
       r.tenant,
       r.title,
-      r.costType ? (COST_LABEL[r.costType] ?? r.costType) : "",
+      kindLabel(r),
       dayUtc(r.dueDate),
       sheetMoney(r.amountCents),
     ]
@@ -145,7 +152,7 @@ export async function renderPaymentsPdf(rows: PaymentRow[], year: number, landlo
       header();
     }
     const y = doc.y;
-    const cells = [dayLocal(r.confirmedAt), `${r.property} / ${r.unit}`, r.tenant, r.title, r.costType ? (COST_LABEL[r.costType] ?? r.costType) : "", `${money(r.amountCents)} €`];
+    const cells = [dayLocal(r.confirmedAt), `${r.property} / ${r.unit}`, r.tenant, r.title, kindLabel(r), `${money(r.amountCents)} €`];
     cells.forEach((text, i) =>
       doc
         .font(i === 5 || i === 0 ? "mono" : "sans")

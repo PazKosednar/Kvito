@@ -1,4 +1,4 @@
-import type { ChargeStatus, CostType, PayTo, Prisma, PrismaClient } from "../../generated/prisma/client.js";
+import type { ChargeStatus, ChargeType, CostType, PayTo, Prisma, PrismaClient } from "../../generated/prisma/client.js";
 import { audit } from "../../lib/audit.js";
 import { aggregateStatus, nextShareStatus, TransitionError, type ShareAction } from "../../lib/charge-status.js";
 import { todayInLjubljana } from "../../lib/dates.js";
@@ -11,9 +11,17 @@ import { shareReference } from "../../lib/reference.js";
 import { SplitError, splitAmount } from "../../lib/split.js";
 import { buildUpnQrText, UpnError } from "../../lib/upnqr.js";
 import { attachmentDto, attachmentSelect, claimAttachments } from "../attachments/service.js";
+import { syncLinkedRecords } from "../contract/linked.js";
 import { postSystemMessage } from "../messages/system.js";
 
 type Db = PrismaClient | Prisma.TransactionClient;
+
+const titleSource = (c: { type: ChargeType; title: string; rentPeriod: string | null; autoKey: string | null }) => ({
+  type: c.type,
+  title: c.title,
+  rentPeriod: c.rentPeriod,
+  autoKey: c.autoKey,
+});
 
 export const chargeInclude = {
   shares: {
@@ -32,6 +40,7 @@ export const chargeInclude = {
     },
   },
   attachments: attachmentSelect,
+  lines: { orderBy: { sortOrder: "asc" }, select: { id: true, costType: true, label: true, amountCents: true } },
 } satisfies Prisma.ChargeInclude;
 
 type ChargeRow = Prisma.ChargeGetPayload<{ include: typeof chargeInclude }>;
@@ -61,13 +70,17 @@ export async function refreshChargeStatus(db: Db, chargeId: string): Promise<Cha
 // ---------- Create ----------
 
 export interface ChargeInput {
-  type: "RENT" | "BILL" | "OTHER";
+  type: ChargeType;
   costType: CostType | null;
   title: string;
   description?: string | null;
   amountCents: number;
   dueDate: Date;
   rentPeriod?: string | null;
+  /** Idempotency key of other generated charges (advances, settlements). */
+  autoKey?: string | null;
+  /** Optional breakdown by cost type. */
+  lines?: { costType: CostType; label?: string | null; amountCents: number }[];
   payTo: PayTo;
   payeeName?: string | null;
   payeeIban?: string | null;
@@ -110,6 +123,7 @@ export async function createCharge(db: Prisma.TransactionClient, tenancyId: stri
       amountCents: input.amountCents,
       dueDate: input.dueDate,
       rentPeriod: input.rentPeriod ?? null,
+      autoKey: input.autoKey ?? null,
       status: pastDue ? "OVERDUE" : "OPEN",
       payTo: input.payTo,
       payeeName: supplier ? input.payeeName! : tenancy.payeeName,
@@ -127,6 +141,9 @@ export async function createCharge(db: Prisma.TransactionClient, tenancyId: stri
           status: pastDue ? ("OVERDUE" as const) : ("OPEN" as const),
         })),
       },
+      ...(input.lines?.length
+        ? { lines: { create: input.lines.map((l, i) => ({ costType: l.costType, label: l.label ?? null, amountCents: l.amountCents, sortOrder: i })) } }
+        : {}),
     },
   });
 
@@ -144,7 +161,7 @@ export async function createCharge(db: Prisma.TransactionClient, tenancyId: stri
   );
   await postSystemMessage(db, tenancyId, "CHARGE_CREATED", { title: charge.title, amountCents: charge.amountCents }, { chargeId: charge.id });
   bus.emit("tenancy.changed", { tenancyId, what: "charges" });
-  bus.emit("charge.activity", { tenancyId, chargeId: charge.id, kind: "created", actorId, title: charge.title, amountCents: charge.amountCents });
+  bus.emit("charge.activity", { tenancyId, chargeId: charge.id, kind: "created", actorId, charge: titleSource(charge), amountCents: charge.amountCents });
   return charge;
 }
 
@@ -167,6 +184,8 @@ export async function transitionShare(opts: {
   ip?: string | undefined;
   report?: { paidOn: Date | null; note: string | null; attachmentIds?: string[] };
   reason?: string | null;
+  /** Confirmation from the landlord's bank statement: recorded as the accepted payment. */
+  bankEntry?: { ref: string; paidOn: Date | null };
 }) {
   return prisma.$transaction(async (tx) => {
     const share = await tx.chargeShare.findFirst({
@@ -214,18 +233,37 @@ export async function transitionShare(opts: {
       });
     }
     if (opts.action === "confirm" || opts.action === "reject") {
-      await tx.paymentReport.updateMany({
+      const { count } = await tx.paymentReport.updateMany({
         where: { chargeShareId: share.id, status: "PENDING", deletedAt: null },
         data: {
           status: opts.action === "confirm" ? "ACCEPTED" : "REJECTED",
           reviewedById: opts.actorId,
           reviewedAt: now,
           rejectReason: opts.action === "reject" ? (opts.reason ?? null) : null,
+          ...(opts.bankEntry ? { bankEntryRef: opts.bankEntry.ref, ...(opts.bankEntry.paidOn ? { paidOn: opts.bankEntry.paidOn } : {}) } : {}),
         },
       });
+      // Seen on the statement before the tenant said anything: the statement entry is the payment record.
+      if (opts.bankEntry && count === 0) {
+        await tx.paymentReport.create({
+          data: {
+            chargeShareId: share.id,
+            reportedById: opts.actorId,
+            paidOn: opts.bankEntry.paidOn,
+            amountCents: share.amountCents,
+            status: "ACCEPTED",
+            source: "BANK_IMPORT",
+            bankEntryRef: opts.bankEntry.ref,
+            reviewedById: opts.actorId,
+            reviewedAt: now,
+          },
+        });
+      }
     }
 
     const chargeStatus = await refreshChargeStatus(tx, share.chargeId);
+    // Deposit and settlement records follow the payment of their charge.
+    await syncLinkedRecords(tx, share.charge, chargeStatus, opts.actorId);
     await audit(
       {
         actorId: opts.actorId,
@@ -233,7 +271,7 @@ export async function transitionShare(opts: {
         entityId: share.id,
         action: opts.action,
         before: { status: share.status },
-        after: { status: next, chargeStatus, ...(opts.reason ? { reason: opts.reason } : {}) },
+        after: { status: next, chargeStatus, ...(opts.reason ? { reason: opts.reason } : {}), ...(opts.bankEntry ? { source: "BANK_IMPORT", bankEntryRef: opts.bankEntry.ref } : {}) },
         ip: opts.ip,
       },
       tx,
@@ -261,7 +299,7 @@ export async function transitionShare(opts: {
         chargeId: share.chargeId,
         kind,
         actorId: opts.actorId,
-        title: share.charge.title,
+        charge: titleSource(share.charge),
         amountCents: share.amountCents,
         shareUserId: share.member.userId,
       });
@@ -328,6 +366,8 @@ export async function paymentData(chargeId: string, shareId: string) {
     purposeCode,
     dueDate: charge.dueDate,
     title: charge.title,
+    /** Landlord's note on other ways to pay (e.g. Flik). Informative only. */
+    paymentNote: charge.payTo === "LANDLORD" ? charge.tenancy.paymentNote : null,
     qrText,
     qrUnavailable,
   };

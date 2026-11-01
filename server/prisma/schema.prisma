@@ -58,6 +58,12 @@ enum ChargeType {
   RENT
   BILL
   OTHER
+  /// Payment of the security deposit (varščina) – linked from Deposit.chargeId.
+  DEPOSIT
+  /// Monthly advance for running costs (akontacija), generated from CostAdvance.
+  ADVANCE
+  /// Additional payment from a cost settlement (poračun), linked from CostSettlement.chargeId.
+  SETTLEMENT
 }
 
 enum ChargeStatus {
@@ -78,6 +84,13 @@ enum PaymentReportStatus {
   PENDING
   ACCEPTED
   REJECTED
+}
+
+/// Where a payment record came from: the tenant's "I paid", the landlord's bank statement, or the landlord directly.
+enum PaymentSource {
+  TENANT
+  BANK_IMPORT
+  LANDLORD
 }
 
 // ---------- Users & auth ----------
@@ -191,25 +204,31 @@ model Unit {
 }
 
 model Tenancy {
-  id           String        @id @default(cuid())
-  unitId       String
-  status       TenancyStatus @default(DRAFT)
-  startDate    DateTime      @db.Date
-  endDate      DateTime?     @db.Date
-  rentCents    Int
+  id               String        @id @default(cuid())
+  unitId           String
+  status           TenancyStatus @default(DRAFT)
+  startDate        DateTime      @db.Date
+  endDate          DateTime?     @db.Date
+  rentCents        Int
   /// Day of month rent is due (1-31; clamped to the last day of shorter months).
-  rentDueDay   Int
-  depositCents Int?
-  payeeName    String
-  payeeIban    String
-  payeeStreet  String?
-  payeeCity    String?
+  rentDueDay       Int
+  depositCents     Int?
+  payeeName        String
+  payeeIban        String
+  payeeStreet      String?
+  payeeCity        String?
   /// Costs the tenant covers, as configured by the landlord.
-  coveredCosts CostType[]    @default([])
-  splitMethod  SplitMethod   @default(EQUAL)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  deletedAt    DateTime?
+  coveredCosts     CostType[]    @default([])
+  splitMethod      SplitMethod   @default(EQUAL)
+  /// Notice period in days as written in the contract. Entered by the landlord; Kvito implies no legal default.
+  noticePeriodDays Int?
+  /// Month (1–12) in which the landlord wants a reminder to review the rent (e.g. indexation per contract).
+  rentReviewMonth  Int?
+  /// Informative note for other ways to pay, e.g. "Flik: 041 123 456". Kvito never receives or forwards money.
+  paymentNote      String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  deletedAt        DateTime?
 
   unit              Unit               @relation(fields: [unitId], references: [id])
   members           TenancyMember[]
@@ -222,6 +241,10 @@ model Tenancy {
   meterReadings     MeterReading[]
   handovers         Handover[]
   attachments       Attachment[]
+  deposit           Deposit?
+  costAdvances      CostAdvance[]
+  settlements       CostSettlement[]
+  rentChanges       RentChange[]
 
   @@index([unitId])
 }
@@ -283,6 +306,8 @@ model Charge {
   dueDate     DateTime     @db.Date
   /// "YYYY-MM" for automatically generated rent; enforces one rent charge per month (idempotent cron).
   rentPeriod  String?
+  /// Idempotency key for other generated charges, e.g. "advance:2026-11" (one per tenancy).
+  autoKey     String?
   status      ChargeStatus @default(OPEN)
   payTo       PayTo        @default(LANDLORD)
   payeeName   String
@@ -300,13 +325,17 @@ model Charge {
   updatedAt   DateTime     @updatedAt
   deletedAt   DateTime?
 
-  tenancy     Tenancy       @relation(fields: [tenancyId], references: [id])
-  createdBy   User?         @relation("ChargeCreatedBy", fields: [createdById], references: [id])
+  tenancy     Tenancy         @relation(fields: [tenancyId], references: [id])
+  createdBy   User?           @relation("ChargeCreatedBy", fields: [createdById], references: [id])
   shares      ChargeShare[]
   attachments Attachment[]
   messages    Message[]
+  lines       ChargeLine[]
+  deposit     Deposit?
+  settlement  CostSettlement?
 
   @@unique([tenancyId, rentPeriod])
+  @@unique([tenancyId, autoKey])
   @@index([tenancyId, status])
   @@index([dueDate])
 }
@@ -347,6 +376,9 @@ model PaymentReport {
   reviewedById  String?
   reviewedAt    DateTime?
   rejectReason  String?
+  source        PaymentSource       @default(TENANT)
+  /// Bank statement entry id (camt AcctSvcrRef or a hash of the row) for BANK_IMPORT.
+  bankEntryRef  String?
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
   deletedAt     DateTime?
@@ -412,17 +444,19 @@ model Attachment {
   meterReadingId  String?
   handoverItemId  String?
   documentId      String?
+  settlementId    String?
 
-  tenancy       Tenancy?       @relation(fields: [tenancyId], references: [id])
-  uploadedBy    User           @relation(fields: [uploadedById], references: [id])
-  charge        Charge?        @relation(fields: [chargeId], references: [id])
-  paymentReport PaymentReport? @relation(fields: [paymentReportId], references: [id])
-  message       Message?       @relation(fields: [messageId], references: [id])
-  issue         Issue?         @relation(fields: [issueId], references: [id])
-  issueComment  IssueComment?  @relation(fields: [issueCommentId], references: [id])
-  meterReading  MeterReading?  @relation(fields: [meterReadingId], references: [id])
-  handoverItem  HandoverItem?  @relation(fields: [handoverItemId], references: [id])
-  document      Document?      @relation(fields: [documentId], references: [id])
+  tenancy       Tenancy?        @relation(fields: [tenancyId], references: [id])
+  uploadedBy    User            @relation(fields: [uploadedById], references: [id])
+  charge        Charge?         @relation(fields: [chargeId], references: [id])
+  paymentReport PaymentReport?  @relation(fields: [paymentReportId], references: [id])
+  message       Message?        @relation(fields: [messageId], references: [id])
+  issue         Issue?          @relation(fields: [issueId], references: [id])
+  issueComment  IssueComment?   @relation(fields: [issueCommentId], references: [id])
+  meterReading  MeterReading?   @relation(fields: [meterReadingId], references: [id])
+  handoverItem  HandoverItem?   @relation(fields: [handoverItemId], references: [id])
+  document      Document?       @relation(fields: [documentId], references: [id])
+  settlement    CostSettlement? @relation(fields: [settlementId], references: [id])
 
   @@index([tenancyId])
   @@index([uploadedById])
@@ -661,8 +695,9 @@ model HandoverItem {
   createdAt  DateTime      @default(now())
   deletedAt  DateTime?
 
-  handover    Handover     @relation(fields: [handoverId], references: [id])
+  handover    Handover           @relation(fields: [handoverId], references: [id])
   attachments Attachment[]
+  deductions  DepositDeduction[]
 
   @@index([handoverId])
 }
@@ -710,4 +745,164 @@ model PushSubscription {
   user User @relation(fields: [userId], references: [id])
 
   @@index([userId])
+}
+
+// ---------- Contract money: deposit, cost advances, settlements, rent changes (Phase 6) ----------
+
+/// Breakdown of a charge by cost type (monthly advances, settlements).
+model ChargeLine {
+  id          String   @id @default(cuid())
+  chargeId    String
+  costType    CostType
+  label       String?
+  amountCents Int
+  sortOrder   Int      @default(0)
+
+  charge Charge @relation(fields: [chargeId], references: [id])
+
+  @@index([chargeId])
+}
+
+/// Security deposit (varščina). Kvito only records it – the money moves between the people, outside the app.
+///   AWAITING_PAYMENT → (charge confirmed) HELD → propose → RETURN_PROPOSED → accept → RETURN_AGREED → returned → RETURNED
+///   RETURN_PROPOSED → dispute → RETURN_DISPUTED → propose again → RETURN_PROPOSED
+enum DepositStatus {
+  AWAITING_PAYMENT
+  HELD
+  RETURN_PROPOSED
+  RETURN_DISPUTED
+  RETURN_AGREED
+  RETURNED
+}
+
+model Deposit {
+  id                 String        @id @default(cuid())
+  tenancyId          String        @unique
+  amountCents        Int
+  status             DepositStatus
+  /// Charge the tenant pays the deposit with (null when it was received before Kvito).
+  chargeId           String?       @unique
+  receivedOn         DateTime?     @db.Date
+  returnCents        Int?
+  proposalNote       String?
+  proposedAt         DateTime?
+  disputeReason      String?
+  agreedAt           DateTime?
+  agreedById         String?
+  returnedOn         DateTime?     @db.Date
+  /// The tenant confirmed the returned money arrived.
+  receiptConfirmedAt DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  tenancy    Tenancy            @relation(fields: [tenancyId], references: [id])
+  charge     Charge?            @relation(fields: [chargeId], references: [id])
+  deductions DepositDeduction[]
+}
+
+/// A reason the landlord keeps part of the deposit, ideally pointing at a damaged item from the move-out record.
+model DepositDeduction {
+  id             String   @id @default(cuid())
+  depositId      String
+  reason         String
+  amountCents    Int
+  handoverItemId String?
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  deposit      Deposit       @relation(fields: [depositId], references: [id])
+  handoverItem HandoverItem? @relation(fields: [handoverItemId], references: [id])
+
+  @@index([depositId])
+}
+
+/// Monthly advance for one cost type (akontacija). Active rows become one ADVANCE charge per month.
+model CostAdvance {
+  id          String    @id @default(cuid())
+  tenancyId   String
+  costType    CostType
+  amountCents Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  tenancy Tenancy @relation(fields: [tenancyId], references: [id])
+
+  @@index([tenancyId])
+}
+
+/// Settlement of running costs for a period (letni obračun): actual costs vs. charged advances.
+///   DRAFT → send → SENT → accept → ACCEPTED → (charge confirmed / refund recorded) → CLOSED
+///   SENT → dispute → DISPUTED → send again → SENT
+enum SettlementStatus {
+  DRAFT
+  SENT
+  DISPUTED
+  ACCEPTED
+  CLOSED
+}
+
+model CostSettlement {
+  id                String           @id @default(cuid())
+  tenancyId         String
+  periodFrom        DateTime         @db.Date
+  periodTo          DateTime         @db.Date
+  status            SettlementStatus @default(DRAFT)
+  note              String?
+  /// Due date of the additional payment when the tenant owes the difference.
+  dueDate           DateTime?        @db.Date
+  sentAt            DateTime?
+  respondedAt       DateTime?
+  disputeReason     String?
+  /// Charge created on acceptance when the tenant owes the difference.
+  chargeId          String?          @unique
+  /// Overpayment returned by the landlord (outside Kvito), and the tenant's confirmation.
+  refundedOn        DateTime?        @db.Date
+  refundConfirmedAt DateTime?
+  createdById       String
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+
+  tenancy     Tenancy          @relation(fields: [tenancyId], references: [id])
+  charge      Charge?          @relation(fields: [chargeId], references: [id])
+  lines       SettlementLine[]
+  attachments Attachment[]
+
+  @@index([tenancyId])
+}
+
+model SettlementLine {
+  id           String   @id @default(cuid())
+  settlementId String
+  costType     CostType
+  /// Advances charged for this cost type in the period (computed by the server).
+  advanceCents Int
+  /// Actual cost per the bills.
+  actualCents  Int
+  note         String?
+  sortOrder    Int      @default(0)
+
+  settlement CostSettlement @relation(fields: [settlementId], references: [id])
+
+  @@index([settlementId])
+}
+
+/// Rent change from a month on (e.g. yearly indexation per contract). Applied by the rent job.
+model RentChange {
+  id            String    @id @default(cuid())
+  tenancyId     String
+  /// First day of the month the new rent applies to.
+  effectiveFrom DateTime  @db.Date
+  rentCents     Int
+  previousCents Int
+  note          String?
+  createdById   String
+  appliedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  deletedAt     DateTime?
+
+  tenancy Tenancy @relation(fields: [tenancyId], references: [id])
+
+  @@index([tenancyId, effectiveFrom])
 }

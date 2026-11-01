@@ -79,6 +79,8 @@ const ReportBody = z.object({
 });
 const ReasonBody = z.object({ reason: optionalText(500) });
 const MAX_CHARGE_FILES = 5;
+/** Deposit and settlement charges are changed through their own record (see modules/contract). */
+const MANAGED: string[] = ["DEPOSIT", "SETTLEMENT"];
 const AttachBody = z.object({ attachmentIds: z.array(idParam).min(1).max(MAX_CHARGE_FILES) });
 
 export function chargesRouter(deps: { emailSender: EmailSender }): Router {
@@ -163,6 +165,7 @@ export function chargesRouter(deps: { emailSender: EmailSender }): Router {
     const existing = await prisma.charge.findFirst({ where: { id, deletedAt: null }, include: { shares: { where: { deletedAt: null } } } });
     if (!existing) throw notFound();
     await assertTenancyLandlord(userId, existing.tenancyId);
+    if (MANAGED.includes(existing.type)) throw badRequest("CHARGE_MANAGED");
     if (existing.shares.some((s) => s.status === "CONFIRMED" || s.status === "REPORTED_PAID")) throw badRequest("CHARGE_LOCKED");
 
     await prisma.$transaction(async (tx) => {
@@ -205,6 +208,7 @@ export function chargesRouter(deps: { emailSender: EmailSender }): Router {
     const existing = await prisma.charge.findFirst({ where: { id, deletedAt: null }, include: { shares: true } });
     if (!existing) throw notFound();
     await assertTenancyLandlord(userId, existing.tenancyId);
+    if (MANAGED.includes(existing.type)) throw badRequest("CHARGE_MANAGED");
     if (existing.shares.some((s) => s.status === "CONFIRMED")) throw badRequest("CHARGE_LOCKED");
     const now = new Date();
     await prisma.$transaction(async (tx) => {
