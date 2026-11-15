@@ -14,10 +14,17 @@ export interface TenantHistory {
   months: { period: string; state: HistoryState }[];
 }
 
+/** How long a confirming landlord has used Kvito, and with how many other tenants. */
+export interface LandlordInfo {
+  since: string;
+  otherTenants: number;
+}
+
 export interface SharedReference {
   name: string;
   history: TenantHistory;
   landlords: number;
+  landlordInfo: LandlordInfo[];
   createdAt: string;
   expiresAt: string;
 }
@@ -32,7 +39,7 @@ export interface ReferenceLink {
 
 /** The tenant's own history (what a shared link shows) and the links they shared. */
 export function useMyReferences() {
-  const history = useQuery<{ name: string; history: TenantHistory; landlords: number }>("/api/my-history");
+  const history = useQuery<{ name: string; history: TenantHistory; landlords: number; landlordInfo: LandlordInfo[] }>("/api/my-history");
   const links = useQuery<{ references: ReferenceLink[] }>("/api/references");
 
   /** The link is returned only now; the server keeps just a hash of it. */

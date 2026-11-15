@@ -12,17 +12,30 @@ import { validateBody } from "../../middleware/validate.js";
 
 /**
  * Najemniški življenjepis: a tenant shares a link with a future landlord. The summary is built from what
- * landlords confirmed in Kvito (payments, deposits), without amounts or addresses. The tenant decides who sees it
+ * landlords entered and confirmed in Kvito (payments, deposits), without amounts or addresses. Kvito does not verify
+ * who a landlord is, so the reader also gets how long each landlord has used Kvito and with how many other tenants. The tenant decides who sees it
  * (the link), for how long (expiry) and can revoke it any time.
  */
 
 const CreateBody = z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90)]).default(30) });
 const MAX_ACTIVE = 10;
 
-async function historyOf(userId: string): Promise<{ name: string; history: TenantHistory; landlords: number }> {
+/** What the reader may want to know to weigh the confirmations: how long each landlord has used Kvito, and with how many other tenants. */
+export interface LandlordInfo {
+  since: Date;
+  otherTenants: number;
+}
+
+async function historyOf(userId: string): Promise<{ name: string; history: TenantHistory; landlords: number; landlordInfo: LandlordInfo[] }> {
   const user = await prisma.user.findFirstOrThrow({ where: { id: userId, deletedAt: null }, select: { name: true, email: true } });
+  // Only tenancies of other people with a confirmed e-mail count: a tenant cannot confirm their own payments
+  // by renting from themselves.
   const memberships = await prisma.tenancyMember.findMany({
-    where: { userId, deletedAt: null, tenancy: { deletedAt: null } },
+    where: {
+      userId,
+      deletedAt: null,
+      tenancy: { deletedAt: null, unit: { property: { ownerId: { not: userId }, owner: { deletedAt: null, emailVerifiedAt: { not: null } } } } },
+    },
     select: {
       joinedAt: true,
       leftAt: true,
@@ -32,7 +45,7 @@ async function historyOf(userId: string): Promise<{ name: string; history: Tenan
   const tenancyIds = memberships.map((m) => m.tenancy.id);
   const [shares, deposits, settlementsAccepted] = await Promise.all([
     prisma.chargeShare.findMany({
-      where: { deletedAt: null, member: { userId, deletedAt: null }, charge: { deletedAt: null } },
+      where: { deletedAt: null, member: { userId, deletedAt: null }, charge: { deletedAt: null, tenancyId: { in: tenancyIds } } },
       select: {
         status: true,
         confirmedAt: true,
@@ -53,8 +66,21 @@ async function historyOf(userId: string): Promise<{ name: string; history: Tenan
     settlementsAccepted,
     today: new Date(),
   });
-  const landlords = new Set(memberships.map((m) => m.tenancy.unit.property.ownerId)).size;
-  return { name: user.name ?? user.email.split("@")[0]!, history, landlords };
+  const ownerIds = [...new Set(memberships.map((m) => m.tenancy.unit.property.ownerId))];
+  const landlordInfo = await Promise.all(
+    ownerIds.map(async (ownerId) => {
+      const [owner, others] = await Promise.all([
+        prisma.user.findUniqueOrThrow({ where: { id: ownerId }, select: { createdAt: true } }),
+        prisma.tenancyMember.findMany({
+          where: { deletedAt: null, userId: { not: userId }, tenancy: { deletedAt: null, unit: { property: { ownerId } } } },
+          distinct: ["userId"],
+          select: { userId: true },
+        }),
+      ]);
+      return { since: owner.createdAt, otherTenants: others.length };
+    }),
+  );
+  return { name: user.name ?? user.email.split("@")[0]!, history, landlords: ownerIds.length, landlordInfo };
 }
 
 const urlFor = (token: string) => `${env.CLIENT_ORIGIN}/referenca/${token}`;
@@ -66,10 +92,10 @@ export function referencesPublicRouter(): Router {
     const token = z.string().min(20).max(100).parse(req.params.token);
     const ref = await prisma.tenantReference.findUnique({ where: { tokenHash: sha256(token) } });
     if (!ref || ref.revokedAt || ref.expiresAt < new Date()) throw notFound();
-    const { name, history, landlords } = await historyOf(ref.userId);
+    const { name, history, landlords, landlordInfo } = await historyOf(ref.userId);
     await prisma.tenantReference.update({ where: { id: ref.id }, data: { views: { increment: 1 }, lastViewedAt: new Date() } });
     res.setHeader("Cache-Control", "no-store");
-    res.json({ reference: { name, history, landlords, createdAt: ref.createdAt, expiresAt: ref.expiresAt } });
+    res.json({ reference: { name, history, landlords, landlordInfo, createdAt: ref.createdAt, expiresAt: ref.expiresAt } });
   });
   return router;
 }

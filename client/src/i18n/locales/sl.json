@@ -1394,7 +1394,7 @@
   "history": {
     "menu": "Moj najemniški življenjepis",
     "title": "Najemniški življenjepis",
-    "subtitle": "Pokaži bodočemu najemodajalcu, da plačuješ zanesljivo. Podatke so potrdili tvoji najemodajalci v Kvitu.",
+    "subtitle": "Pokaži bodočemu najemodajalcu, kako plačuješ. Podatke so v Kvitu vnesli in potrdili tvoji najemodajalci.",
     "share": "Deli s povezavo",
     "shareHint": "Povezava pokaže samo povzetek spodaj: brez zneskov, naslovov in e-pošte. Kadar koli jo lahko prekličeš.",
     "validFor": "Veljavnost povezave",
@@ -1416,8 +1416,8 @@
     "confirmRevoke": "Prekličem povezavo? Kdor jo ima, je ne bo več mogel odpreti.",
     "revoked": "Povezava je preklicana.",
     "preview": "Tako jo vidi najemodajalec",
-    "eyebrow": "Najemniški življenjepis · Kvito ✓",
-    "verified": "Podatke so potrdili najemodajalci v aplikaciji Kvito.",
+    "eyebrow": "Najemniški življenjepis · Kvito",
+    "verified": "Podatke so v Kvitu vnesli in potrdili najemodajalci s potrjenim e-naslovom. Kvito ne preverja njihove identitete.",
     "months": "Mesecev najema",
     "onTime": "Plačano v roku",
     "confirmed": "Potrjenih plačil",
@@ -1436,9 +1436,14 @@
     "depositsLine": "Varščine",
     "depositsValue": "{{full}} vrnjenih v celoti · {{partly}} delno · {{held}} pri najemodajalcu",
     "settlementsLine": "Potrjeni obračuni stroškov",
-    "footnote": "»V roku« pomeni plačano do roka obveznosti. Povzetek ne vsebuje zneskov, naslovov ali kontaktov.",
+    "footnote": "»V roku« pomeni plačano do roka obveznosti. Šteje le najeme pri najemodajalcih s potrjenim e-naslovom. Povzetek ne vsebuje zneskov, naslovov ali kontaktov.",
     "validUntil": "Povezava velja do {{date}}.",
     "notFoundTitle": "Povezava ne velja",
-    "notFoundBody": "Povezava je potekla ali jo je najemnik preklical. Prosi ga za novo."
+    "notFoundBody": "Povezava je potekla ali jo je najemnik preklical. Prosi ga za novo.",
+    "landlordLine": "Najemodajalec {{n}}",
+    "landlordValue_one": "v Kvitu od {{date}} · {{count}} drug najemnik",
+    "landlordValue_two": "v Kvitu od {{date}} · {{count}} druga najemnika",
+    "landlordValue_few": "v Kvitu od {{date}} · {{count}} drugi najemniki",
+    "landlordValue_other": "v Kvitu od {{date}} · {{count}} drugih najemnikov"
   }
 }

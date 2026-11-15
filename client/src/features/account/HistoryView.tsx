@@ -1,14 +1,15 @@
 import { Minus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { STATUS_STYLE, StatusIcon } from "@/components/brand";
-import type { HistoryState, TenantHistory } from "@/hooks/useReferences";
+import type { HistoryState, LandlordInfo, TenantHistory } from "@/hooks/useReferences";
+import { formatDate } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 
 /** History states drawn with the charge status styles: paid in time = confirmed, paid late = waiting. */
 const AS_STATUS = { ON_TIME: "CONFIRMED", LATE: "REPORTED_PAID", OPEN: "OPEN", OVERDUE: "OVERDUE", DISPUTED: "DISPUTED" } as const;
 
 /** The verified renting history: headline numbers and the last 24 months. Shared by the tenant's preview and the public link. */
-export function HistoryView({ name, history, landlords }: { name: string; history: TenantHistory; landlords: number }) {
+export function HistoryView({ name, history, landlords, landlordInfo }: { name: string; history: TenantHistory; landlords: number; landlordInfo: LandlordInfo[] }) {
   const { t, i18n } = useTranslation();
   const label = (p: string, month: "short" | "long") =>
     new Intl.DateTimeFormat(i18n.language === "en" ? "en-GB" : "sl-SI", { month, ...(month === "long" ? { year: "numeric" } : {}), timeZone: "UTC" })
@@ -81,6 +82,13 @@ export function HistoryView({ name, history, landlords }: { name: string; histor
           <span className="text-ink-muted">{t("history.settlementsLine")}</span>
           <span className="mono text-right">{history.settlementsAccepted}</span>
         </li>
+        {/* Who confirmed it: lets the reader judge the weight of the confirmations. */}
+        {landlordInfo.map((l, i) => (
+          <li key={i} className="flex justify-between gap-4 px-4 py-3">
+            <span className="text-ink-muted">{t("history.landlordLine", { n: i + 1 })}</span>
+            <span className="mono text-right">{t("history.landlordValue", { date: formatDate(l.since), count: l.otherTenants })}</span>
+          </li>
+        ))}
       </ul>
       <p className="text-xs text-ink-muted">{t("history.footnote")}</p>
     </div>

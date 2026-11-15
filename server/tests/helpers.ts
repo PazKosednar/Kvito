@@ -29,7 +29,8 @@ export async function setupApp() {
 
   /** Creates a user and returns an authenticated supertest agent factory. */
   async function login(email: string, name?: string) {
-    const user = await prisma.user.create({ data: { email, name: name ?? null } });
+    // Accounts in tests have a confirmed e-mail, as after a normal sign-up.
+    const user = await prisma.user.create({ data: { email, name: name ?? null, emailVerifiedAt: new Date() } });
     const token = await signAccessToken(user.id);
     const auth = { Authorization: `Bearer ${token}` };
     return {

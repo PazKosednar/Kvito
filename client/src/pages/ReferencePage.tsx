@@ -28,7 +28,7 @@ export function ReferencePage() {
             </div>
           ) : (
             <>
-              <HistoryView name={q.reference.name} history={q.reference.history} landlords={q.reference.landlords} />
+              <HistoryView name={q.reference.name} history={q.reference.history} landlords={q.reference.landlords} landlordInfo={q.reference.landlordInfo} />
               <p className="mt-6 text-xs text-ink-faint">{t("history.validUntil", { date: formatDate(q.reference.expiresAt) })}</p>
             </>
           )}

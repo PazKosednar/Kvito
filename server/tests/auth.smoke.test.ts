@@ -69,7 +69,8 @@ describe.skipIf(!hasDb)("auth flow (smoke)", () => {
   let refreshCookie = "";
   const password = "Kvito-geslo-1";
 
-  it("registers, but the account works only after the e-mailed code", async () => {
+  // Several scrypt hashes (≈32 MiB each): can take longer than the default 5 s when the whole suite runs.
+  it("registers, but the account works only after the e-mailed code", { timeout: 30_000 }, async () => {
     await signup({ name: "Napačno ime", email, password: "prvo-geslo-1" }).expect(202);
     // Signing up again before confirming replaces the attempt (nobody can sit on an address).
     await signup({ name: "Smoke Test", email: email.toUpperCase(), password, locale: "en" }).expect(202);

@@ -1362,7 +1362,7 @@
   "history": {
     "menu": "My renting history",
     "title": "Renting history",
-    "subtitle": "Show a future landlord that you pay reliably. Your landlords confirmed this data in Kvito.",
+    "subtitle": "Show a future landlord how you pay. Your landlords entered and confirmed this data in Kvito.",
     "share": "Share with a link",
     "shareHint": "The link shows only the summary below: no amounts, addresses or e-mail. You can revoke it any time.",
     "validFor": "Link validity",
@@ -1380,8 +1380,8 @@
     "confirmRevoke": "Revoke the link? Whoever has it can no longer open it.",
     "revoked": "Link revoked.",
     "preview": "What a landlord sees",
-    "eyebrow": "Renting history · Kvito ✓",
-    "verified": "Confirmed by landlords in the Kvito app.",
+    "eyebrow": "Renting history · Kvito",
+    "verified": "Entered and confirmed in Kvito by landlords with a confirmed e-mail. Kvito does not verify who they are.",
     "months": "Months renting",
     "onTime": "Paid on time",
     "confirmed": "Confirmed payments",
@@ -1400,9 +1400,12 @@
     "depositsLine": "Deposits",
     "depositsValue": "{{full}} returned in full · {{partly}} partly · {{held}} held",
     "settlementsLine": "Accepted cost settlements",
-    "footnote": "“On time” means paid by the due date. The summary has no amounts, addresses or contacts.",
+    "footnote": "“On time” means paid by the due date. Only tenancies with landlords who confirmed their e-mail count. No amounts, addresses or contacts.",
     "validUntil": "This link is valid until {{date}}.",
     "notFoundTitle": "This link is not valid",
-    "notFoundBody": "The link expired or the tenant revoked it. Ask them for a new one."
+    "notFoundBody": "The link expired or the tenant revoked it. Ask them for a new one.",
+    "landlordLine": "Landlord {{n}}",
+    "landlordValue_one": "in Kvito since {{date}} · {{count}} other tenant",
+    "landlordValue_other": "in Kvito since {{date}} · {{count}} other tenants"
   }
 }

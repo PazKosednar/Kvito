@@ -124,11 +124,19 @@ describe.skipIf(!hasDb)("forecast, yearly summary and renting history", () => {
     // A future landlord opens it without an account.
     const shown = (await request(ctx.app).get(`/api/references/${token}`).expect(200)).body.reference;
     expect(shown).toMatchObject({ name: "Tina Test", landlords: 1 });
+    // The reader sees how much weight the confirmations carry.
+    expect(shown.landlordInfo).toEqual([{ since: expect.any(String), otherTenants: 0 }]);
+
+    // A landlord without a confirmed e-mail does not count (e.g. a second account the tenant opened herself).
+    await ctx.prisma.user.update({ where: { id: landlord.user.id }, data: { emailVerifiedAt: null } });
+    const unverified = (await request(ctx.app).get(`/api/references/${token}`).expect(200)).body.reference;
+    expect(unverified).toMatchObject({ landlords: 0, history: { monthsRented: 0, payments: { confirmed: 0 } } });
+    await ctx.prisma.user.update({ where: { id: landlord.user.id }, data: { emailVerifiedAt: new Date() } });
     expect(shown.history.monthsRented).toBeGreaterThan(0);
     expect(JSON.stringify(shown)).not.toMatch(/Maistrova|51000|tina-/); // no address, amounts or e-mail
 
     const list = (await tina.get("/api/references").expect(200)).body.references;
-    expect(list).toEqual([expect.objectContaining({ id: created.reference.id, views: 1 })]);
+    expect(list).toEqual([expect.objectContaining({ id: created.reference.id, views: 2 })]);
     await stranger.del(`/api/references/${created.reference.id}`).expect(404);
     await tina.del(`/api/references/${created.reference.id}`).expect(204);
     await request(ctx.app).get(`/api/references/${token}`).expect(404);
