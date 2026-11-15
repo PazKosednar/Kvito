@@ -41,9 +41,15 @@ export function useAuth() {
     return res.user;
   }, []);
 
-  /** Creates the account; it works after the e-mailed code is entered (verifyEmail). */
+  /**
+   * Creates the account. Usually it works after the e-mailed code is entered (verifyEmail) and this returns null;
+   * when the server skips e-mail confirmation (temporary setting) the new account is signed in right away.
+   */
   const register = useCallback(async (input: { name: string; email: string; password: string }) => {
-    await api("/api/auth/register", { method: "POST", body: { ...input, acceptTerms: true, locale: screenLocale() }, auth: false });
+    const res = await api<{ accessToken?: string; user?: CurrentUser }>("/api/auth/register", { method: "POST", body: { ...input, acceptTerms: true, locale: screenLocale() }, auth: false });
+    if (!res?.accessToken || !res.user) return null;
+    useAuthStore.getState().setSession(res.accessToken, res.user);
+    return res.user;
   }, []);
 
   const verifyEmail = useCallback(async (email: string, code: string, password: string) => {

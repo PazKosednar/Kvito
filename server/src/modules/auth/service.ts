@@ -1,3 +1,4 @@
+import { env } from "../../config/env.js";
 import type { Locale, User } from "../../generated/prisma/client.js";
 import { badRequest, tooManyRequests } from "../../lib/errors.js";
 import { dummyHash, hashPassword, verifyPassword } from "../../lib/password.js";
@@ -35,11 +36,33 @@ const clearFailures = { failedLogins: 0, loginLockedUntil: null };
  * New account. It cannot be used until the e-mail is confirmed with the code we send; signing up again with an
  * unconfirmed e-mail replaces the earlier attempt, so nobody can hold on to somebody else's address.
  */
-export async function register(input: { name: string; email: string; password: string; locale?: Locale | undefined }, emailSender: EmailSender, ip?: string): Promise<void> {
+export async function register(input: { name: string; email: string; password: string; locale?: Locale | undefined }, emailSender: EmailSender, ip?: string, meta?: ClientMeta) {
   const email = normalizeEmail(input.email);
   const existing = await prisma.user.findUnique({ where: { email }, select: { id: true, deletedAt: true, emailVerifiedAt: true } });
   if (existing?.deletedAt) throw badRequest("ACCOUNT_DELETED");
   if (existing?.emailVerifiedAt) throw badRequest("EMAIL_TAKEN");
+
+  if (env.SKIP_EMAIL_VERIFICATION) {
+    // Without the code an unconfirmed account is usable, so it must never be replaced by a second sign-up.
+    if (existing) throw badRequest("EMAIL_TAKEN");
+    try {
+      const user = await prisma.user.create({
+        data: {
+          email,
+          name: input.name,
+          passwordHash: await hashPassword(input.password),
+          termsVersion: TERMS_VERSION,
+          termsAcceptedAt: new Date(),
+          lastLoginAt: new Date(),
+          ...(input.locale ? { locale: input.locale } : {}),
+        },
+      });
+      return { user, tokens: await issueSession(user.id, meta ?? {}) };
+    } catch (err) {
+      if ((err as { code?: string }).code === "P2002") throw badRequest("EMAIL_TAKEN");
+      throw err;
+    }
+  }
   // Check the code quota before changing anything.
   await assertCodeQuota(email, "VERIFY_EMAIL");
 
@@ -63,6 +86,7 @@ export async function register(input: { name: string; email: string; password: s
     throw err;
   }
   await sendCode(email, "VERIFY_EMAIL", emailSender, locale, ip);
+  return null;
 }
 
 /** Sends a new confirmation code. Answers the same whether or not such an unconfirmed account exists. */
@@ -107,7 +131,7 @@ export async function login(rawEmail: string, password: string, meta: ClientMeta
   }
   if (user.deletedAt) throw badRequest("ACCOUNT_DELETED");
   // Only someone who knows the password learns that the e-mail still needs confirming.
-  if (!user.emailVerifiedAt) throw badRequest("EMAIL_NOT_VERIFIED");
+  if (!user.emailVerifiedAt && !env.SKIP_EMAIL_VERIFICATION) throw badRequest("EMAIL_NOT_VERIFIED");
 
   const updated = await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date(), ...clearFailures } });
   const tokens = await issueSession(user.id, meta);

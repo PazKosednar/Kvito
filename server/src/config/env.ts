@@ -30,6 +30,12 @@ const EnvSchema = z.object({
    * are written to the server log. Never enable it once real users sign in.
    */
   EMAIL_CONSOLE_IN_PRODUCTION: bool.default(false),
+  /**
+   * Temporary, for testing without an SMTP provider: a new account signs in right away, without the e-mailed code,
+   * and an unconfirmed e-mail does not block login. The e-mail stays unconfirmed (emailVerifiedAt = null).
+   * An e-mail that already has an account cannot be signed up again, so nobody can take over an unconfirmed one.
+   */
+  SKIP_EMAIL_VERIFICATION: bool.default(false),
   /** "local" = UPLOAD_DIR on disk (development). "s3" = S3-compatible EU object storage (production). */
   STORAGE_DRIVER: z.enum(["local", "s3"]).optional(),
   S3_BUCKET: z.string().min(1).optional(),

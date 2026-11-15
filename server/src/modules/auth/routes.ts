@@ -43,11 +43,19 @@ export function authRouter(deps: { emailSender: EmailSender }): Router {
     res.json({ accessToken: tokens.accessToken, user: toMeDto(user) });
   };
 
-  /** New account: a code goes to the e-mail; the account works once the code is entered (/verify-email). */
+  /**
+   * New account: a code goes to the e-mail; the account works once the code is entered (/verify-email).
+   * With SKIP_EMAIL_VERIFICATION (temporary) the new account is signed in right away.
+   */
   router.post("/register", registerLimiter, validateBody(RegisterBody), async (req, res) => {
     const body = req.body as z.infer<typeof RegisterBody>;
-    await register(body, deps.emailSender, req.ip);
-    res.status(202).json({ verify: true, email: body.email });
+    const signedIn = await register(body, deps.emailSender, req.ip, clientMeta(req));
+    if (!signedIn) {
+      res.status(202).json({ verify: true, email: body.email });
+      return;
+    }
+    await audit({ actorId: signedIn.user.id, entityType: "User", entityId: signedIn.user.id, action: "register", after: { termsVersion: signedIn.user.termsVersion, emailVerification: "skipped" }, ip: req.ip });
+    signIn(res, signedIn.user, signedIn.tokens);
   });
 
   router.post("/verify-email", loginLimiter, validateBody(VerifyEmailBody), async (req, res) => {

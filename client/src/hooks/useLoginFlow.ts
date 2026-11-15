@@ -93,7 +93,7 @@ export function useLoginFlow(onSuccess: () => void) {
             await auth.login(e, password);
             return onSuccess();
           case "register":
-            await auth.register({ name: name.trim(), email: e, password });
+            if (await auth.register({ name: name.trim(), email: e, password })) return onSuccess();
             setModeState("verify");
             setCode("");
             setCooldown(RESEND_COOLDOWN_S);
