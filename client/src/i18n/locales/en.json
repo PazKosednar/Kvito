@@ -166,7 +166,11 @@
     "RENT_CHANGE_APPLIED": "The change is already in effect, so it can't be cancelled.",
     "TENANCY_NOT_ACTIVE": "The tenancy is not active.",
     "STATEMENT_EMPTY": "The file has no transactions. Choose a statement from your e-bank.",
-    "STATEMENT_UNREADABLE": "We can't read this file. Use a camt.053 (XML) or CSV statement from your e-bank."
+    "STATEMENT_UNREADABLE": "We can't read this file. Use a camt.053 (XML) or CSV statement from your e-bank.",
+    "COST_ENTRY_LOCKED": "This month is part of a settlement that was sent, so it can no longer change.",
+    "CREDIT_CHOICE_REQUIRED": "Choose what should happen with the credit.",
+    "MONTH_BEFORE_START": "The tenancy started later. Pick a month from the start of the tenancy on.",
+    "RANGE_TOO_LONG": "Pick at most 36 months at once."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -301,7 +305,12 @@
     "paymentNotePlaceholder": "E.g. Flik: 041 123 456",
     "depositHigh": "The deposit is higher than three months' rent. Check that this fits the contract and the law.",
     "termsMoved": "Rent, deposit, costs and closing the tenancy are in the tab",
-    "rentShare": "Rent: {{amount}}"
+    "rentShare": "Rent: {{amount}}",
+    "billingMode": "Paying rent and costs",
+    "billingModeHint": {
+      "COMBINED": "The tenant pays one amount a month: rent and the cost advance together, with one payment slip.",
+      "SEPARATE": "Rent and the cost advance are two separate charges a month."
+    }
   },
   "costs": {
     "RENT": "Rent",
@@ -474,7 +483,9 @@
     "reportHint": "Pay in your bank, then tap Paid.",
     "addFile": "Add file",
     "addFileHint": "Add a payment slip or bill (PDF or image) so the tenant can see it with the charge.",
-    "managedNote": "This charge belongs to the contract (deposit or cost settlement). Change it in the tab"
+    "managedNote": "This charge belongs to the contract (deposit or cost settlement). Change it in the tab",
+    "creditLine": "Credit from settlement",
+    "carriedInLine": "Credit from the previous settlement"
   },
   "pay": {
     "payee": "Payee",
@@ -568,7 +579,10 @@
     "SETTLEMENT_SENT": "Cost settlement sent for {{from}} – {{to}}.",
     "SETTLEMENT_ACCEPTED": "The cost settlement was accepted.",
     "SETTLEMENT_DISPUTED": "The tenant disagrees with the cost settlement.",
-    "RENT_CHANGED": "From {{from}} the rent is {{rent}}."
+    "RENT_CHANGED": "From {{from}} the rent is {{rent}}.",
+    "SETTLEMENT_CREDIT_CARRY_OVER": "Settlement accepted. {{amount}} stays as credit until the next settlement.",
+    "SETTLEMENT_CREDIT_OFFSET_NEXT": "Settlement accepted. {{amount}} is deducted from the next payment.",
+    "SETTLEMENT_CREDIT_REFUND": "Settlement accepted. The landlord pays back {{amount}}."
   },
   "issueStatus": {
     "NEW": "New",
@@ -844,7 +858,8 @@
     "rent": "Rent {{month}}",
     "advance": "Cost advance {{month}}",
     "deposit": "Security deposit",
-    "settlement": "Cost settlement {{from}} – {{to}}"
+    "settlement": "Cost settlement {{from}} – {{to}}",
+    "combined": "Rent and costs {{month}}"
   },
   "chargeType": {
     "DEPOSIT": "Deposit",
@@ -964,7 +979,7 @@
       "settlements": "Settlements",
       "newSettlement": "New settlement",
       "noSettlements": "No settlements yet.",
-      "newSettlementHint": "Choose the period. Kvito adds up the advances for it; you enter the actual costs from the bills.",
+      "newSettlementHint": "Pick the period. Kvito adds up the advances and the costs you entered month by month.",
       "from": "From",
       "to": "To",
       "createSettlement": "Create settlement",
@@ -1008,7 +1023,25 @@
       "markRefunded": "I returned {{amount}}",
       "refundedToast": "Recorded. The tenant will confirm receipt.",
       "refundPending": "Your landlord will return {{amount}}.",
-      "refundedText": "Overpayment returned on {{date}}: {{amount}}."
+      "refundedText": "Overpayment returned on {{date}}: {{amount}}.",
+      "credit": "Credit {{amount}}",
+      "lumpSum": "Costs (lump sum)",
+      "perMonthCombined": "Total a month (rent and costs)",
+      "advancesHintCombined": "The tenant pays rent and costs together, once a month. The settlement compares the advances with the actual costs.",
+      "billingSaved": "Saved. Applies from the next monthly payment.",
+      "advanceKind": "Advance",
+      "lumpSumMode": "One amount",
+      "perTypeMode": "By cost type",
+      "lumpSumHint": "One monthly amount for all costs, e.g. €110.00. Applies from the next monthly payment.",
+      "actualTotal": "Actual costs",
+      "advancesTotal": "Advances paid",
+      "carriedIn": "Credit from the previous settlement",
+      "recalculate": "Recalculate for the new period",
+      "editMonths": "Edit monthly costs",
+      "fromMonthsHint": "Amounts come from the monthly costs. Correct them there; the settlement updates itself.",
+      "noMonthsYet": "No costs entered for this period yet.",
+      "lineNotes": "Notes on the costs",
+      "lineNotePlaceholder": "Optional, e.g. per the building manager's bill"
     },
     "closeout": {
       "title": "Closing the tenancy",
@@ -1059,8 +1092,95 @@
           "done": "Returned or agreed.",
           "pending": "Propose the return and record it.",
           "na": "No deposit."
+        },
+        "credit": {
+          "label": "Credit from settlements",
+          "done": "Paid back.",
+          "pending": "The tenant has {{amount}} in credit. Pay it back and record it.",
+          "na": "No credit."
         }
       }
+    },
+    "monthly": {
+      "title": "Costs by month",
+      "subtitleLandlord": "Enter each bill when it arrives. The tenant sees the same table; the settlement builds itself.",
+      "subtitleTenant": "Actual costs as the landlord enters them, and the advances you paid.",
+      "emptyTenant": "The landlord has not entered any costs yet.",
+      "runningTitle": "From {{from}} to {{to}}",
+      "running": {
+        "tenant": {
+          "credit": "You currently have {{amount}} in credit.",
+          "owes": "You would currently pay {{amount}} extra.",
+          "even": "Everything is even right now."
+        },
+        "landlord": {
+          "credit": "The tenant currently has {{amount}} in credit.",
+          "owes": "The tenant would currently pay {{amount}} extra.",
+          "even": "Everything is even right now."
+        }
+      },
+      "runningDetail": "Costs {{costs}}, advances {{advances}}.",
+      "runningCredit": "Includes credit from earlier settlements: {{amount}}.",
+      "informative": "This is for information. It counts once the settlement is sent and accepted.",
+      "otherMonths": "Other months …",
+      "sinceSettlement": "Since the last settlement",
+      "show": "Show",
+      "emptyMonthLandlord": "No costs this month yet. Add them when the bill arrives.",
+      "emptyMonth": "No costs entered for this month yet.",
+      "addCost": "Add a cost",
+      "editCost": "Edit: {{cost}}",
+      "note": "Note",
+      "notePlaceholder": "Optional, e.g. bill number",
+      "confirmDelete": "Remove this cost?",
+      "saved": "Cost entered.",
+      "locked": "Settled",
+      "month": "Month",
+      "costsTotal": "Costs",
+      "total": "Total",
+      "linkHint": "Bills by month and the running balance"
+    },
+    "credit": {
+      "question": "You have {{amount}} in credit. What should happen with it?",
+      "recommended": "Landlord's suggestion",
+      "recommendLabel": "What do you suggest for the credit?",
+      "recommendHint": "The tenant chooses; your suggestion is marked.",
+      "noRecommendation": "No suggestion",
+      "accept": "Accept the settlement",
+      "choice": {
+        "CARRY_OVER": {
+          "title": "Keep it as credit",
+          "text": "{{amount}} stays with the landlord and counts in the next settlement."
+        },
+        "OFFSET_NEXT": {
+          "title": "Deduct it from the next payment",
+          "text": "{{amount}} is deducted from the next monthly payment.",
+          "preview": "For {{month}} you pay {{after}} instead of {{before}}."
+        },
+        "REFUND": {
+          "title": "Pay it back to me",
+          "text": "The landlord transfers {{amount}} to you."
+        }
+      },
+      "toast": {
+        "CARRY_OVER": "Thanks. The amount stays as credit until the next settlement.",
+        "OFFSET_NEXT": "Thanks. The amount is deducted from the next payment.",
+        "REFUND": "Thanks. The landlord will pay the amount back."
+      },
+      "remaining": {
+        "CARRY_OVER": "Credit {{amount}}",
+        "OFFSET_NEXT": "Still to deduct {{amount}}"
+      },
+      "state": {
+        "CARRY_OVER": "{{amount}} stays as credit until the next settlement.",
+        "OFFSET_NEXT": "{{amount}} is still being deducted from the next monthly payments."
+      },
+      "done": {
+        "CARRY_OVER": "The credit of {{amount}} went into the next settlement.",
+        "OFFSET_NEXT": "The credit of {{amount}} was used for monthly payments."
+      },
+      "refundedText": "Credit paid back on {{date}}.",
+      "refundHint": "For example when the tenancy ends.",
+      "confirmRefund": "Record that you paid {{amount}} back to the tenant?"
     }
   },
   "bank": {
@@ -1092,5 +1212,9 @@
     "unmatched_one": "{{count}} incoming payment without a Kvito reference",
     "unmatched_other": "{{count}} incoming payments without a Kvito reference",
     "unmatchedHint": "If one of these is a tenant's payment, confirm it on the charge."
+  },
+  "billingMode": {
+    "COMBINED": "One payment a month",
+    "SEPARATE": "Separately"
   }
 }

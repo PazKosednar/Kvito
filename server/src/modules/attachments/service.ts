@@ -46,7 +46,8 @@ type Link =
   | { meterReadingId: string }
   | { handoverItemId: string }
   | { documentId: string }
-  | { settlementId: string };
+  | { settlementId: string }
+  | { costEntryId: string };
 
 /**
  * Links freshly uploaded files to a record. Only files uploaded by the same person, to the same tenancy,
@@ -75,6 +76,7 @@ export async function claimAttachments(
       handoverItemId: null,
       documentId: null,
       settlementId: null,
+      costEntryId: null,
     },
     data: opts.link,
   });

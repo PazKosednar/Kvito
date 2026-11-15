@@ -32,6 +32,8 @@ describe.skipIf(!hasDb)("contract money and bank import", () => {
           noticePeriodDays: 30,
           rentReviewMonth: opts.rentReviewMonth ?? null,
           paymentNote: "Flik: 041 123 456",
+          // Rent and advances as two charges; the combined payment is covered in billing.test.ts.
+          billingMode: "SEPARATE",
         })
         .expect(201)
     ).body.tenancy.id as string;
@@ -130,39 +132,60 @@ describe.skipIf(!hasDb)("contract money and bank import", () => {
     expect(charges[0]!.lines.map((l) => [l.costType, l.amountCents])).toEqual([["HEATING", 6_000], ["WATER", 2_000]]);
   });
 
-  it("settles the year: advances prefilled, sent, accepted, the difference becomes a charge", async () => {
+  it("settles the year: advances and monthly costs prefilled, sent, accepted, the difference becomes a charge", async () => {
+    await ana.put(`/api/tenancies/${tenancyId}/costs/2031-03/HEATING`, { amountCents: 1 }).expect(404); // tenants only read
+    await landlord.put(`/api/tenancies/${tenancyId}/costs/2031-03/HEATING`, { amountCents: 9_000 }).expect(200);
+    await landlord.put(`/api/tenancies/${tenancyId}/costs/2031-03/HEATING`, { amountCents: 9_500, note: "Popravek" }).expect(200); // same month: corrected
+    await landlord.put(`/api/tenancies/${tenancyId}/costs/2031-03/WATER`, { amountCents: 1_500 }).expect(200);
+    await landlord.put(`/api/tenancies/${tenancyId}/costs/2031-03/RENT`, { amountCents: 1 }).expect(400);
+
     let { body } = await landlord.post(`/api/tenancies/${tenancyId}/settlements`, { periodFrom: "2031-01-01", periodTo: "2031-12-31" }).expect(201);
     const id = body.settlement.id as string;
-    expect(body.settlement.lines.map((l: { costType: string; advanceCents: number }) => [l.costType, l.advanceCents])).toEqual([["WATER", 2_000], ["HEATING", 6_000]]);
+    expect(body.settlement.lines.map((l: { costType: string; advanceCents: number; actualCents: number }) => [l.costType, l.advanceCents, l.actualCents])).toEqual([
+      ["WATER", 2_000, 1_500],
+      ["HEATING", 6_000, 9_500],
+    ]);
+    expect(body.settlement.totals).toEqual({ advanceCents: 8_000, actualCents: 11_000, carriedInCents: 0, balanceCents: 3_000 });
+    expect(body.settlement.months).toHaveLength(12);
+    expect(body.settlement.months[2]).toMatchObject({ period: "2031-03", advanceCents: 8_000, costCents: 11_000 });
     await ana.get(`/api/settlements/${id}`).expect(404); // draft = landlord's working copy
 
-    ({ body } = await landlord.patch(`/api/settlements/${id}`, { lines: [{ costType: "HEATING", actualCents: 9_500 }, { costType: "WATER", actualCents: 1_500 }] }).expect(200));
-    expect(body.settlement.totals).toEqual({ advanceCents: 8_000, actualCents: 11_000, balanceCents: 3_000 });
     expect((await landlord.post(`/api/settlements/${id}/send`).expect(400)).body.error.code).toBe("DUE_DATE_REQUIRED");
-    await landlord.patch(`/api/settlements/${id}`, { dueDate: "2032-01-20" }).expect(200);
+    await landlord.patch(`/api/settlements/${id}`, { dueDate: "2032-01-20", lines: [{ costType: "HEATING", note: "Po računih upravnika" }] }).expect(200);
     await landlord.post(`/api/settlements/${id}/send`).expect(200);
     await landlord.patch(`/api/settlements/${id}`, { note: "x" }).expect(400); // sent = locked
+    // The months of a sent settlement are fixed.
+    expect((await landlord.put(`/api/tenancies/${tenancyId}/costs/2031-03/WATER`, { amountCents: 1 }).expect(400)).body.error.code).toBe("COST_ENTRY_LOCKED");
 
     ({ body } = await ana.post(`/api/settlements/${id}/accept`).expect(200));
     expect(body.settlement.status).toBe("ACCEPTED");
+    expect(body.settlement.lines.find((l: { costType: string }) => l.costType === "HEATING").note).toBe("Po računih upravnika");
     const chargeId = body.settlement.charge.id as string;
     const charge = (await ana.get(`/api/charges/${chargeId}`).expect(200)).body.charge;
     expect(charge).toMatchObject({ type: "SETTLEMENT", amountCents: 3_000 });
-    expect(charge.lines.map((l: { costType: string; amountCents: number }) => [l.costType, l.amountCents])).toEqual([["HEATING", 3_500], ["WATER", -500]]);
+    expect(charge.lines.map((l: { costType: string; amountCents: number }) => [l.costType, l.amountCents])).toEqual([["WATER", -500], ["HEATING", 3_500]]);
 
     await pay(chargeId);
     ({ body } = await ana.get(`/api/settlements/${id}`).expect(200));
     expect(body.settlement.status).toBe("CLOSED");
   });
 
-  it("returns an overpayment: the landlord records the refund, the tenant confirms it", async () => {
-    let { body } = await landlord.post(`/api/tenancies/${tenancyId}/settlements`, { periodFrom: "2031-01-01", periodTo: "2031-06-30" }).expect(201);
+  it("returns an overpayment: the landlord records the refund, the tenant confirms it", { timeout: 60_000 }, async () => {
+    const { generateMonthlyAdvances } = await import("../src/services/jobs/rent.js");
+    const other = await newTenancy({ startDate: "2031-01-01" });
+    await landlord.put(`/api/tenancies/${other}/advances`, { items: [{ costType: "HEATING", amountCents: 6_000 }, { costType: "WATER", amountCents: 2_000 }] }).expect(200);
+    await generateMonthlyAdvances(new Date("2031-03-02T09:00:00Z"));
+    await landlord.put(`/api/tenancies/${other}/costs/2031-03/HEATING`, { amountCents: 1_000 }).expect(200);
+
+    let { body } = await landlord.post(`/api/tenancies/${other}/settlements`, { periodFrom: "2031-01-01", periodTo: "2031-06-30" }).expect(201);
     const id = body.settlement.id as string;
-    await landlord.patch(`/api/settlements/${id}`, { lines: [{ costType: "HEATING", actualCents: 1_000 }, { costType: "WATER", actualCents: 0 }] }).expect(200);
     await landlord.post(`/api/settlements/${id}/send`).expect(200);
     await ana.post(`/api/settlements/${id}/dispute`, { reason: "Preveri prosim." }).expect(200);
+    // Disputed: the landlord may correct the month again.
+    await landlord.put(`/api/tenancies/${other}/costs/2031-03/WATER`, { amountCents: 0 }).expect(200);
     await landlord.post(`/api/settlements/${id}/send`).expect(200);
-    ({ body } = await ana.post(`/api/settlements/${id}/accept`).expect(200));
+    expect((await ana.post(`/api/settlements/${id}/accept`).expect(400)).body.error.code).toBe("CREDIT_CHOICE_REQUIRED");
+    ({ body } = await ana.post(`/api/settlements/${id}/accept`, { creditChoice: "REFUND" }).expect(200));
     expect(body.settlement).toMatchObject({ status: "ACCEPTED", charge: null, totals: { balanceCents: -7_000 } });
     expect(body.settlement.refundByMember).toEqual([expect.objectContaining({ amountCents: 7_000 })]);
     ({ body } = await landlord.post(`/api/settlements/${id}/refunded`, { refundedOn: "2031-07-10" }).expect(200));

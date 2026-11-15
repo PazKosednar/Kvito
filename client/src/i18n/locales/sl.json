@@ -166,7 +166,11 @@
     "RENT_CHANGE_APPLIED": "Sprememba že velja, zato je ne moreš preklicati.",
     "TENANCY_NOT_ACTIVE": "Najem ni aktiven.",
     "STATEMENT_EMPTY": "V datoteki ni prometa. Izberi izpisek iz spletne banke.",
-    "STATEMENT_UNREADABLE": "Te datoteke ne znamo prebrati. Uporabi izpisek camt.053 (XML) ali CSV iz spletne banke."
+    "STATEMENT_UNREADABLE": "Te datoteke ne znamo prebrati. Uporabi izpisek camt.053 (XML) ali CSV iz spletne banke.",
+    "COST_ENTRY_LOCKED": "Ta mesec je že v poslanem obračunu, zato ga ne moreš več spreminjati.",
+    "CREDIT_CHOICE_REQUIRED": "Izberi, kaj naj se zgodi z dobroimetjem.",
+    "MONTH_BEFORE_START": "Najem se je začel kasneje. Izberi mesec od začetka najema naprej.",
+    "RANGE_TOO_LONG": "Izberi največ 36 mesecev naenkrat."
   },
   "validation": {
     "invalid": "Vrednost ni pravilna.",
@@ -307,7 +311,12 @@
     "paymentNotePlaceholder": "Npr. Flik: 041 123 456",
     "depositHigh": "Varščina je višja od treh mesečnih najemnin. Preveri, ali je to v skladu s pogodbo in zakonom.",
     "termsMoved": "Najemnina, varščina, stroški in zaključek najema so v zavihku",
-    "rentShare": "Najemnina: {{amount}}"
+    "rentShare": "Najemnina: {{amount}}",
+    "billingMode": "Plačilo najemnine in stroškov",
+    "billingModeHint": {
+      "COMBINED": "Najemnik vsak mesec plača en znesek (pavšal): najemnino in akontacijo za stroške skupaj, z enim UPN.",
+      "SEPARATE": "Najemnina in akontacija za stroške sta dve ločeni obveznosti na mesec."
+    }
   },
   "costs": {
     "RENT": "Najemnina",
@@ -486,7 +495,9 @@
     "reportHint": "Plačaj v svoji banki, nato tapni Plačano.",
     "addFile": "Dodaj prilogo",
     "addFileHint": "Tu lahko dodaš položnico ali račun (PDF ali slika), da ga najemnik vidi ob obveznosti.",
-    "managedNote": "To obveznost ureja pogodba (varščina ali obračun stroškov). Spremembe so v zavihku"
+    "managedNote": "To obveznost ureja pogodba (varščina ali obračun stroškov). Spremembe so v zavihku",
+    "creditLine": "Dobroimetje iz obračuna",
+    "carriedInLine": "Dobroimetje iz prejšnjega obračuna"
   },
   "pay": {
     "payee": "Prejemnik",
@@ -582,7 +593,10 @@
     "SETTLEMENT_SENT": "Poslan je obračun stroškov {{from}} – {{to}}.",
     "SETTLEMENT_ACCEPTED": "Obračun stroškov je potrjen.",
     "SETTLEMENT_DISPUTED": "Najemnik se ne strinja z obračunom stroškov.",
-    "RENT_CHANGED": "Od {{from}} bo najemnina {{rent}}."
+    "RENT_CHANGED": "Od {{from}} bo najemnina {{rent}}.",
+    "SETTLEMENT_CREDIT_CARRY_OVER": "Obračun je potrjen. {{amount}} ostane v dobro do naslednjega obračuna.",
+    "SETTLEMENT_CREDIT_OFFSET_NEXT": "Obračun je potrjen. {{amount}} se odšteje od naslednjega plačila.",
+    "SETTLEMENT_CREDIT_REFUND": "Obračun je potrjen. Najemodajalec vrne {{amount}}."
   },
   "issueStatus": {
     "NEW": "Nova",
@@ -866,7 +880,8 @@
     "rent": "Najemnina {{month}}",
     "advance": "Akontacija stroškov {{month}}",
     "deposit": "Varščina",
-    "settlement": "Poračun stroškov {{from}} – {{to}}"
+    "settlement": "Poračun stroškov {{from}} – {{to}}",
+    "combined": "Najemnina in stroški {{month}}"
   },
   "chargeType": {
     "DEPOSIT": "Varščina",
@@ -988,7 +1003,7 @@
       "settlements": "Obračuni",
       "newSettlement": "Nov obračun",
       "noSettlements": "Obračunov še ni.",
-      "newSettlementHint": "Izberi obdobje. Kvito sešteje akontacije iz tega obdobja, ti vpišeš dejanske stroške iz računov.",
+      "newSettlementHint": "Izberi obdobje. Kvito sešteje akontacije in stroške, ki si jih vpisal po mesecih.",
       "from": "Od",
       "to": "Do",
       "createSettlement": "Ustvari obračun",
@@ -1032,7 +1047,25 @@
       "markRefunded": "Vrnil sem {{amount}}",
       "refundedToast": "Zabeleženo. Najemnik bo potrdil prejem.",
       "refundPending": "Najemodajalec ti bo vrnil {{amount}}.",
-      "refundedText": "Preplačilo vrnjeno {{date}}: {{amount}}."
+      "refundedText": "Preplačilo vrnjeno {{date}}: {{amount}}.",
+      "credit": "V dobro {{amount}}",
+      "lumpSum": "Stroški (pavšal)",
+      "perMonthCombined": "Skupaj na mesec (najemnina in stroški)",
+      "advancesHintCombined": "Najemnik plača najemnino in stroške skupaj, enkrat na mesec. Ob obračunu se akontacije primerjajo z dejanskimi stroški.",
+      "billingSaved": "Shranjeno. Velja od naslednjega mesečnega plačila.",
+      "advanceKind": "Akontacija",
+      "lumpSumMode": "En skupen znesek",
+      "perTypeMode": "Po vrstah stroškov",
+      "lumpSumHint": "En mesečni znesek za vse stroške skupaj, npr. 110,00 €. Velja od naslednjega mesečnega plačila.",
+      "actualTotal": "Dejanski stroški",
+      "advancesTotal": "Plačane akontacije",
+      "carriedIn": "Dobroimetje iz prejšnjega obračuna",
+      "recalculate": "Preračunaj za novo obdobje",
+      "editMonths": "Uredi stroške po mesecih",
+      "fromMonthsHint": "Zneski so iz stroškov po mesecih. Popravljaš jih tam; obračun se preračuna sam.",
+      "noMonthsYet": "Za to obdobje še ni vpisanih stroškov.",
+      "lineNotes": "Pojasnila k stroškom",
+      "lineNotePlaceholder": "Ni obvezno, npr. po računu upravnika"
     },
     "closeout": {
       "title": "Zaključek najema",
@@ -1085,8 +1118,95 @@
           "done": "Vrnjena oziroma dogovorjena.",
           "pending": "Predlagaj vračilo in ga zabeleži.",
           "na": "Varščine ni."
+        },
+        "credit": {
+          "label": "Dobroimetje iz obračuna",
+          "done": "Vrnjeno.",
+          "pending": "Najemnik ima {{amount}} v dobro. Vrni mu znesek in to zabeleži.",
+          "na": "Ni dobroimetja."
         }
       }
+    },
+    "monthly": {
+      "title": "Stroški po mesecih",
+      "subtitleLandlord": "Vpiši znesek vsakega računa, ko ga dobiš. Najemnik vidi isto tabelo, obračun se sestavi sam.",
+      "subtitleTenant": "Dejanski stroški, kot jih vpisuje najemodajalec, in akontacije, ki si jih plačal.",
+      "emptyTenant": "Najemodajalec še ni vpisal stroškov.",
+      "runningTitle": "Od {{from}} do {{to}}",
+      "running": {
+        "tenant": {
+          "credit": "Trenutno imaš {{amount}} v dobro.",
+          "owes": "Trenutno je {{amount}} za doplačilo.",
+          "even": "Trenutno je vse poravnano."
+        },
+        "landlord": {
+          "credit": "Najemnik ima trenutno {{amount}} v dobro.",
+          "owes": "Najemnik bi trenutno doplačal {{amount}}.",
+          "even": "Trenutno je vse poravnano."
+        }
+      },
+      "runningDetail": "Stroški {{costs}}, akontacije {{advances}}.",
+      "runningCredit": "Upoštevano je dobroimetje iz prejšnjih obračunov: {{amount}}.",
+      "informative": "Znesek je informativen. Velja, ko je obračun poslan in potrjen.",
+      "otherMonths": "Drugi meseci …",
+      "sinceSettlement": "Od zadnjega obračuna",
+      "show": "Pokaži",
+      "emptyMonthLandlord": "Ta mesec še ni stroškov. Dodaj jih, ko dobiš račun.",
+      "emptyMonth": "Ta mesec še ni vpisanih stroškov.",
+      "addCost": "Dodaj strošek",
+      "editCost": "Uredi: {{cost}}",
+      "note": "Opomba",
+      "notePlaceholder": "Ni obvezno, npr. številka računa",
+      "confirmDelete": "Odstranim ta strošek?",
+      "saved": "Strošek je vpisan.",
+      "locked": "V obračunu",
+      "month": "Mesec",
+      "costsTotal": "Stroški",
+      "total": "Skupaj",
+      "linkHint": "Računi po mesecih in sprotno stanje"
+    },
+    "credit": {
+      "question": "Imaš {{amount}} v dobro. Kaj naj se zgodi z zneskom?",
+      "recommended": "Predlog najemodajalca",
+      "recommendLabel": "Kaj predlagaš za dobroimetje?",
+      "recommendHint": "Najemnik izbere sam; tvoj predlog bo označen.",
+      "noRecommendation": "Brez predloga",
+      "accept": "Potrdi obračun",
+      "choice": {
+        "CARRY_OVER": {
+          "title": "Pusti v dobro",
+          "text": "{{amount}} ostane pri najemodajalcu in se upošteva v naslednjem obračunu."
+        },
+        "OFFSET_NEXT": {
+          "title": "Odštej od naslednjega plačila",
+          "text": "{{amount}} se odšteje od naslednjega mesečnega plačila.",
+          "preview": "Za {{month}} plačaš {{after}} namesto {{before}}."
+        },
+        "REFUND": {
+          "title": "Vrni mi na račun",
+          "text": "Najemodajalec ti nakaže {{amount}}."
+        }
+      },
+      "toast": {
+        "CARRY_OVER": "Hvala. Znesek ostane v dobro do naslednjega obračuna.",
+        "OFFSET_NEXT": "Hvala. Znesek se odšteje od naslednjega plačila.",
+        "REFUND": "Hvala. Najemodajalec ti bo vrnil znesek."
+      },
+      "remaining": {
+        "CARRY_OVER": "V dobro {{amount}}",
+        "OFFSET_NEXT": "Za poračun pri plačilih {{amount}}"
+      },
+      "state": {
+        "CARRY_OVER": "{{amount}} ostaja v dobro do naslednjega obračuna.",
+        "OFFSET_NEXT": "{{amount}} se še odšteje od naslednjih mesečnih plačil."
+      },
+      "done": {
+        "CARRY_OVER": "Dobroimetje {{amount}} je preneseno v naslednji obračun.",
+        "OFFSET_NEXT": "Dobroimetje {{amount}} je porabljeno pri mesečnih plačilih."
+      },
+      "refundedText": "Dobroimetje vrnjeno {{date}}.",
+      "refundHint": "Na primer ob koncu najema.",
+      "confirmRefund": "Zabeležim, da si najemniku vrnil {{amount}}?"
     }
   },
   "bank": {
@@ -1124,5 +1244,9 @@
     "unmatched_few": "{{count}} prilivi brez sklica Kvito",
     "unmatched_other": "{{count}} prilivov brez sklica Kvito",
     "unmatchedHint": "Če je katero od teh plačilo najemnika, ga potrdi pri obveznosti."
+  },
+  "billingMode": {
+    "COMBINED": "Eno plačilo na mesec",
+    "SEPARATE": "Ločeno"
   }
 }

@@ -8,7 +8,7 @@ import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { useAuth } from "@/hooks/useAuth";
 import { createTenancy, useTenancy } from "@/hooks/useTenancies";
 import { useTenancyForm } from "@/hooks/useTenancyForm";
-import { COST_TYPES, type SplitMethod, type TenancyDetail } from "@/types/domain";
+import { COST_TYPES, type BillingMode, type SplitMethod, type TenancyDetail } from "@/types/domain";
 
 /** Create (/enote/:unitId/najem) or edit (/najemi/:id/uredi) a tenancy. */
 export function TenancyFormPage() {
@@ -139,6 +139,18 @@ function TenancyForm({ existing }: { existing: TenancyDetail | undefined }) {
             onChange={(c) => set("coveredCosts", c)}
             options={COST_TYPES.map((c) => ({ value: c, label: t(`costs.${c}`) }))}
           />
+          <div className="mt-6">
+            <Field label={t("tenancies.billingMode")} hint={t(`tenancies.billingModeHint.${v.billingMode}`)}>
+              {() => (
+                <Segmented<BillingMode>
+                  label={t("tenancies.billingMode")}
+                  value={v.billingMode}
+                  onChange={(m) => set("billingMode", m)}
+                  options={(["COMBINED", "SEPARATE"] as const).map((m) => ({ value: m, label: t(`billingMode.${m}`) }))}
+                />
+              )}
+            </Field>
+          </div>
           <div className="mt-6">
             <Field label={t("tenancies.split")} hint={t(`tenancies.splitHint.${v.splitMethod}`)}>
               {() => (

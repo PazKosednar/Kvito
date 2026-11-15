@@ -54,6 +54,11 @@ enum CostType {
   OTHER
 }
 
+enum BillingMode {
+  COMBINED
+  SEPARATE
+}
+
 enum ChargeType {
   RENT
   BILL
@@ -226,10 +231,13 @@ model Tenancy {
   rentReviewMonth  Int?
   /// Informative note for other ways to pay, e.g. "Flik: 041 123 456". Kvito never receives or forwards money.
   paymentNote      String?
+  /// COMBINED: rent and monthly cost advances are one charge (pavšal); SEPARATE: two charges a month.
+  billingMode      BillingMode   @default(SEPARATE)
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
   deletedAt        DateTime?
 
+  costEntries       CostEntry[]
   unit              Unit               @relation(fields: [unitId], references: [id])
   members           TenancyMember[]
   invitations       Invitation[]
@@ -445,7 +453,9 @@ model Attachment {
   handoverItemId  String?
   documentId      String?
   settlementId    String?
+  costEntryId     String?
 
+  costEntry     CostEntry?      @relation(fields: [costEntryId], references: [id])
   tenancy       Tenancy?        @relation(fields: [tenancyId], references: [id])
   uploadedBy    User            @relation(fields: [uploadedById], references: [id])
   charge        Charge?         @relation(fields: [chargeId], references: [id])
@@ -757,10 +767,14 @@ model ChargeLine {
   label       String?
   amountCents Int
   sortOrder   Int      @default(0)
+  /// Set on a negative line that pays part of the charge with a settlement's credit (pobot dobroimetja).
+  creditSettlementId String?
 
-  charge Charge @relation(fields: [chargeId], references: [id])
+  charge           Charge          @relation(fields: [chargeId], references: [id])
+  creditSettlement CostSettlement? @relation("CreditOffset", fields: [creditSettlementId], references: [id])
 
   @@index([chargeId])
+  @@index([creditSettlementId])
 }
 
 /// Security deposit (varščina). Kvito only records it – the money moves between the people, outside the app.
@@ -859,6 +873,13 @@ model CostSettlement {
   /// Overpayment returned by the landlord (outside Kvito), and the tenant's confirmation.
   refundedOn        DateTime?        @db.Date
   refundConfirmedAt DateTime?
+  /// What the landlord suggests doing with a credit, and what the tenant chose on acceptance.
+  recommendedChoice    CreditChoice?
+  creditChoice         CreditChoice?
+  /// Credit not used yet (carried over or being offset against the next charges).
+  creditRemainingCents Int           @default(0)
+  /// Credit taken over from earlier settlements when this one was sent.
+  carriedInCents       Int           @default(0)
   createdById       String
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
@@ -868,8 +889,40 @@ model CostSettlement {
   charge      Charge?          @relation(fields: [chargeId], references: [id])
   lines       SettlementLine[]
   attachments Attachment[]
+  offsetLines ChargeLine[]     @relation("CreditOffset")
 
   @@index([tenancyId])
+}
+
+/// What happens with a settlement credit (tenant's choice).
+enum CreditChoice {
+  /// Stays as credit until the next settlement.
+  CARRY_OVER
+  /// Deducted from the next monthly charge(s).
+  OFFSET_NEXT
+  /// Paid back by the landlord.
+  REFUND
+}
+
+/// Actual running cost for one month and cost type, entered by the landlord as the bills come in.
+/// One active entry per (tenancy, period, costType) – partial unique index in the migration.
+model CostEntry {
+  id          String    @id @default(cuid())
+  tenancyId   String
+  /// "YYYY-MM"
+  period      String
+  costType    CostType
+  amountCents Int
+  note        String?
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  tenancy     Tenancy      @relation(fields: [tenancyId], references: [id])
+  attachments Attachment[]
+
+  @@index([tenancyId, period])
 }
 
 model SettlementLine {

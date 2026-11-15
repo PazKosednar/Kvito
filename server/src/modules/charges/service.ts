@@ -40,7 +40,7 @@ export const chargeInclude = {
     },
   },
   attachments: attachmentSelect,
-  lines: { orderBy: { sortOrder: "asc" }, select: { id: true, costType: true, label: true, amountCents: true } },
+  lines: { orderBy: { sortOrder: "asc" }, select: { id: true, costType: true, label: true, amountCents: true, creditSettlementId: true } },
 } satisfies Prisma.ChargeInclude;
 
 type ChargeRow = Prisma.ChargeGetPayload<{ include: typeof chargeInclude }>;
@@ -80,7 +80,7 @@ export interface ChargeInput {
   /** Idempotency key of other generated charges (advances, settlements). */
   autoKey?: string | null;
   /** Optional breakdown by cost type. */
-  lines?: { costType: CostType; label?: string | null; amountCents: number }[];
+  lines?: { costType: CostType; label?: string | null; amountCents: number; creditSettlementId?: string | null }[];
   payTo: PayTo;
   payeeName?: string | null;
   payeeIban?: string | null;
@@ -142,10 +142,21 @@ export async function createCharge(db: Prisma.TransactionClient, tenancyId: stri
         })),
       },
       ...(input.lines?.length
-        ? { lines: { create: input.lines.map((l, i) => ({ costType: l.costType, label: l.label ?? null, amountCents: l.amountCents, sortOrder: i })) } }
+        ? {
+            lines: {
+              create: input.lines.map((l, i) => ({ costType: l.costType, label: l.label ?? null, amountCents: l.amountCents, sortOrder: i, creditSettlementId: l.creditSettlementId ?? null })),
+            },
+          }
         : {}),
     },
   });
+
+  // Fully paid with credit: nothing to pay, nothing to confirm.
+  if (input.amountCents === 0) {
+    await db.chargeShare.updateMany({ where: { chargeId: charge.id }, data: { status: "CONFIRMED", confirmedAt: new Date() } });
+    await db.charge.update({ where: { id: charge.id }, data: { status: "CONFIRMED" } });
+    charge.status = "CONFIRMED";
+  }
 
   if (actorId) {
     await claimAttachments(db, input.attachmentIds, {

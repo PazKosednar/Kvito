@@ -16,6 +16,7 @@ import type { EmailSender } from "../../services/email/EmailSender.js";
 import { paymentEmail } from "../../services/email/templates.js";
 import { assertTenancyAccess, assertTenancyLandlord } from "../access/access.js";
 import { claimAttachments } from "../attachments/service.js";
+import { restoreOffsetCredit } from "../contract/credit.js";
 import { chargeDto, chargeInclude, createCharge, paymentData, refreshChargeStatus, transitionShare } from "./service.js";
 
 const reference = z
@@ -167,6 +168,8 @@ export function chargesRouter(deps: { emailSender: EmailSender }): Router {
     await assertTenancyLandlord(userId, existing.tenancyId);
     if (MANAGED.includes(existing.type)) throw badRequest("CHARGE_MANAGED");
     if (existing.shares.some((s) => s.status === "CONFIRMED" || s.status === "REPORTED_PAID")) throw badRequest("CHARGE_LOCKED");
+    // Part of it is paid with a settlement credit: the amount follows the credit, not a hand edit.
+    if (body.amountCents !== undefined && (await prisma.chargeLine.count({ where: { chargeId: id, creditSettlementId: { not: null } } }))) throw badRequest("CHARGE_MANAGED");
 
     await prisma.$transaction(async (tx) => {
       await tx.charge.update({ where: { id }, data: body });
@@ -214,6 +217,8 @@ export function chargesRouter(deps: { emailSender: EmailSender }): Router {
     await prisma.$transaction(async (tx) => {
       await tx.chargeShare.updateMany({ where: { chargeId: id }, data: { deletedAt: now } });
       await tx.charge.update({ where: { id }, data: { deletedAt: now } });
+      // Credit used to pay part of it goes back to the settlement it came from.
+      await restoreOffsetCredit(tx, id, userId);
       await audit({ actorId: userId, entityType: "Charge", entityId: id, action: "delete", before: { amountCents: existing.amountCents, status: existing.status }, ip: req.ip }, tx);
     });
     bus.emit("tenancy.changed", { tenancyId: existing.tenancyId, what: "charges" });

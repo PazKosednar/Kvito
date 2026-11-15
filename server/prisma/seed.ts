@@ -178,8 +178,93 @@ async function main() {
     ],
   );
 
+  const gaja = await seedPavsal(landlord.id, tenancyBase);
+
   console.log("Seed končan. Prijava (koda se izpiše v konzolo strežnika):");
-  for (const u of [landlord, ana, luka, nina]) console.log(`  ${u.email}  (${u.roles.join(", ")})`);
+  for (const u of [landlord, ana, luka, nina, gaja]) console.log(`  ${u.email}  (${u.roles.join(", ")})`);
+}
+
+/**
+ * Tenancy C – pavšal: 400 € rent + 110 € for costs in one monthly payment, costs entered month by month,
+ * a settlement for Feb–Oct sent to the tenant with 223,71 € in her favour (numbers from a real spreadsheet).
+ */
+async function seedPavsal(landlordId: string, base: { status: "ACTIVE"; rentDueDay: number; payeeName: string; payeeIban: string; payeeStreet: string; payeeCity: string }) {
+  const gaja = await upsertUser("gaja@kvita.test", "Gaja Kuhar", ["TENANT"]);
+  const unitId = "seed-unit-c";
+  const tenancyId = "seed-tenancy-c";
+  await prisma.unit.upsert({ where: { id: unitId }, update: {}, create: { id: unitId, propertyId: ID.property, name: "Stanovanje C", floor: "2. nadstropje" } });
+  await prisma.tenancy.upsert({
+    where: { id: tenancyId },
+    update: {},
+    create: { ...base, id: tenancyId, unitId, startDate: utcDate(2026, 2, 1), rentCents: 40000, depositCents: 80000, billingMode: "COMBINED", splitMethod: "EQUAL" },
+  });
+  const member = await upsertMember(tenancyId, gaja.id, { isPrimary: true });
+  if (!(await prisma.costAdvance.count({ where: { tenancyId, deletedAt: null } }))) {
+    await prisma.costAdvance.create({ data: { tenancyId, costType: "OTHER", amountCents: 11000 } });
+  }
+
+  const months: [string, number, number, number][] = [
+    ["2026-02", 4441, 4333, 1402],
+    ["2026-03", 4056, 3632, 1402],
+    ["2026-04", 4353, 2450, 1402],
+    ["2026-05", 5741, 2960, 1402],
+    ["2026-06", 4808, 1720, 1402],
+    ["2026-07", 4395, 1845, 1402],
+    ["2026-08", 4600, 1551, 1402],
+    ["2026-09", 4755, 870, 1402],
+    ["2026-10", 4800, 2701, 1402],
+  ];
+  for (const [period] of [...months, ["2026-11"] as const]) {
+    const [y, m] = period.split("-").map(Number) as [number, number];
+    const paid = period !== "2026-11";
+    await upsertCharge(
+      {
+        id: `seed-charge-c-${period}`,
+        tenancyId,
+        type: "RENT",
+        costType: "RENT",
+        title: `Najemnina in stroški ${period}`,
+        amountCents: 51000,
+        dueDate: utcDate(y, m, 5),
+        rentPeriod: period,
+        autoKey: `combined:${period}`,
+        purposeCode: "RENT",
+        status: paid ? "CONFIRMED" : "OPEN",
+        lines: { create: [{ costType: "RENT", amountCents: 40000, sortOrder: 0 }, { costType: "OTHER", amountCents: 11000, sortOrder: 1 }] },
+      },
+      [{ memberId: member.id, amountCents: 51000, status: paid ? "CONFIRMED" : "OPEN", ...(paid ? { confirmedById: landlordId } : {}) }],
+    );
+  }
+  for (const [period, mgmt, elec, tv] of months) {
+    for (const [costType, amountCents] of [["BUILDING_MANAGEMENT", mgmt], ["ELECTRICITY", elec], ["TV", tv]] as const) {
+      const exists = await prisma.costEntry.findFirst({ where: { tenancyId, period, costType, deletedAt: null } });
+      if (!exists) await prisma.costEntry.create({ data: { tenancyId, period, costType, amountCents, createdById: landlordId, note: costType === "BUILDING_MANAGEMENT" ? "Upravnik" : null } });
+    }
+  }
+  await prisma.costSettlement.upsert({
+    where: { id: "seed-settlement-c-2026" },
+    update: {},
+    create: {
+      id: "seed-settlement-c-2026",
+      tenancyId,
+      periodFrom: utcDate(2026, 2, 1),
+      periodTo: utcDate(2026, 10, 31),
+      status: "SENT",
+      sentAt: utcDate(2026, 11, 14),
+      recommendedChoice: "CARRY_OVER",
+      note: "Običajno pustimo znesek v dobro – vmes je zimska sezona in ogrevanje bo dražje. Odločitev prepuščam tebi.",
+      createdById: landlordId,
+      lines: {
+        create: [
+          { costType: "ELECTRICITY", advanceCents: 0, actualCents: 22062, sortOrder: 0 },
+          { costType: "TV", advanceCents: 0, actualCents: 12618, sortOrder: 1, note: "RTV prispevek" },
+          { costType: "BUILDING_MANAGEMENT", advanceCents: 0, actualCents: 41949, sortOrder: 2, note: "Upravnik" },
+          { costType: "OTHER", advanceCents: 99000, actualCents: 0, sortOrder: 3 },
+        ],
+      },
+    },
+  });
+  return gaja;
 }
 
 async function upsertMember(

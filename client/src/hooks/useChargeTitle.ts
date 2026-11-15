@@ -18,6 +18,7 @@ export function useChargeTitle() {
   );
   return useCallback(
     (c: TitleSource): string => {
+      if (c.type === "RENT" && c.rentPeriod && c.autoKey?.startsWith("combined:")) return t("chargeTitle.combined", { month: month(c.rentPeriod) });
       if (c.type === "RENT" && c.rentPeriod) return t("chargeTitle.rent", { month: month(c.rentPeriod) });
       if (c.type === "ADVANCE" && c.autoKey?.startsWith("advance:")) return t("chargeTitle.advance", { month: month(c.autoKey.slice(8)) });
       if (c.type === "DEPOSIT") return t("chargeTitle.deposit");

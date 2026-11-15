@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DepositTransitionError, depositReturn, nextDepositStatus } from "./deposit-status.js";
-import { SettlementTransitionError, nextSettlementStatus, settlementTotals } from "./settlement.js";
+import { CreditChoiceRequiredError, SettlementTransitionError, nextSettlementStatus, settlementTotals } from "./settlement.js";
 
 describe("deposit status", () => {
   const L = { actor: "LANDLORD" as const };
@@ -49,7 +49,20 @@ describe("cost settlement", () => {
       { advanceCents: 36_000, actualCents: 41_250 },
       { advanceCents: 12_000, actualCents: 9_000 },
     ]);
-    expect(t).toEqual({ advanceCents: 48_000, actualCents: 50_250, balanceCents: 2_250 });
+    expect(t).toEqual({ advanceCents: 48_000, actualCents: 50_250, carriedInCents: 0, balanceCents: 2_250 });
+  });
+
+  it("subtracts credit carried in from an earlier settlement", () => {
+    const t = settlementTotals([{ advanceCents: 10_000, actualCents: 12_000 }], 3_000);
+    expect(t).toEqual({ advanceCents: 10_000, actualCents: 12_000, carriedInCents: 3_000, balanceCents: -1_000 });
+  });
+
+  it("asks the tenant what to do with a credit", () => {
+    const T = { actor: "TENANT" as const, balanceCents: -22_371 };
+    expect(() => nextSettlementStatus("SENT", "accept", T)).toThrow(CreditChoiceRequiredError);
+    expect(nextSettlementStatus("SENT", "accept", { ...T, creditChoice: "REFUND" })).toBe("ACCEPTED");
+    expect(nextSettlementStatus("SENT", "accept", { ...T, creditChoice: "CARRY_OVER" })).toBe("CLOSED");
+    expect(nextSettlementStatus("SENT", "accept", { ...T, creditChoice: "OFFSET_NEXT" })).toBe("CLOSED");
   });
 
   it("moves through send, accept and payment", () => {

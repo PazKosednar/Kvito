@@ -41,9 +41,12 @@ export interface ChargeTitleSource {
 
 /**
  * Titles of generated charges are rebuilt in the reader's language; landlords' own titles stay as written.
- * autoKey formats: "advance:2026-11", "settlement:2026-01-01:2026-12-31".
+ * autoKey formats: "advance:2026-11", "combined:2026-11", "settlement:2026-01-01:2026-12-31".
  */
 export function chargeTitle(c: ChargeTitleSource, l: Locale): string {
+  if (c.type === "RENT" && c.rentPeriod && c.autoKey?.startsWith("combined:")) {
+    return `${l === "en" ? "Rent and costs" : "Najemnina in stroški"} ${periodIn(l, c.rentPeriod)}`;
+  }
   if (c.type === "RENT" && c.rentPeriod) return `${l === "en" ? "Rent" : "Najemnina"} ${periodIn(l, c.rentPeriod)}`;
   if (c.type === "ADVANCE" && c.autoKey?.startsWith("advance:")) {
     return `${l === "en" ? "Cost advance" : "Akontacija stroškov"} ${periodIn(l, c.autoKey.slice(8))}`;

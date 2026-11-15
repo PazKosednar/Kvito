@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { costsRouter } from "./costs.js";
 import { depositRouter } from "./deposit.js";
 import { rentRouter } from "./rent.js";
 import { settlementsRouter } from "./settlements.js";
@@ -8,6 +9,7 @@ export function contractRouter(): Router {
   const router = Router();
   router.use(depositRouter());
   router.use(settlementsRouter());
+  router.use(costsRouter());
   router.use(rentRouter());
   return router;
 }

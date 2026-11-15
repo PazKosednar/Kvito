@@ -1,12 +1,12 @@
 import { useCallback } from "react";
 import { api } from "@/lib/api";
-import type { Closeout, CostAdvance, CostType, DepositState, RentChange, Settlement, SettlementSummary } from "@/types/domain";
+import type { Closeout, CostAdvance, CostType, CostsView, CreditChoice, DepositState, RentChange, Settlement, SettlementSummary } from "@/types/domain";
 import { uploadAttachment } from "./useCharges";
 import { invalidate, useQuery } from "./useQuery";
 
 /** Everything under a tenancy that the contract screens show; one refresh keeps them consistent. */
 const refreshContract = (tenancyId: string) =>
-  invalidate(`/api/tenancies/${tenancyId}/deposit`, `/api/tenancies/${tenancyId}/advances`, `/api/tenancies/${tenancyId}/settlements`, `/api/tenancies/${tenancyId}/rent-changes`, `/api/tenancies/${tenancyId}/closeout`, `/api/tenancies/${tenancyId}/charges`, `/api/tenancies/${tenancyId}`, "/api/settlements/", "/api/charges/");
+  invalidate(`/api/tenancies/${tenancyId}/costs`, `/api/tenancies/${tenancyId}/deposit`, `/api/tenancies/${tenancyId}/advances`, `/api/tenancies/${tenancyId}/settlements`, `/api/tenancies/${tenancyId}/rent-changes`, `/api/tenancies/${tenancyId}/closeout`, `/api/tenancies/${tenancyId}/charges`, `/api/tenancies/${tenancyId}`, "/api/settlements/", "/api/charges/");
 
 // ---------- Deposit ----------
 
@@ -80,7 +80,9 @@ export interface SettlementPatch {
   periodTo?: string;
   note?: string | null;
   dueDate?: string | null;
-  lines?: { costType: CostType; actualCents: number; note?: string | null }[];
+  recommendedChoice?: CreditChoice | null;
+  /** Notes per cost type; the amounts come from the monthly costs. */
+  lines?: { costType: CostType; note?: string | null }[];
 }
 
 export function useSettlement(id: string | undefined) {
@@ -112,13 +114,52 @@ export function useSettlement(id: string | undefined) {
     update: (patch: SettlementPatch) => call("PATCH", "", patch),
     remove: () => call("DELETE", ""),
     send: () => call("POST", "/send"),
-    accept: () => call("POST", "/accept"),
+    accept: (creditChoice?: CreditChoice) => call("POST", "/accept", creditChoice ? { creditChoice } : {}),
     dispute: (reason: string) => call("POST", "/dispute", { reason }),
     markRefunded: (refundedOn: string) => call("POST", "/refunded", { refundedOn }),
     confirmRefund: () => call("POST", "/refund-receipt"),
     attachFile,
     detachFile: (attachmentId: string) => call("DELETE", `/attachments/${attachmentId}`),
   };
+}
+
+// ---------- Monthly costs ----------
+
+/**
+ * Actual running costs by month. Without a range: the months since the last settlement and the running balance.
+ * Landlords enter and correct amounts; tenants only read.
+ */
+export function useCosts(tenancyId: string, range?: { from: string; to: string }) {
+  const base = `/api/tenancies/${tenancyId}/costs`;
+  const q = useQuery<CostsView>(range ? `${base}?from=${range.from}&to=${range.to}` : base);
+
+  const setEntry = useCallback(
+    async (period: string, costType: CostType, amountCents: number | null, note?: string | null) => {
+      if (amountCents === null) await api(`${base}/${period}/${costType}`, { method: "DELETE" });
+      else await api(`${base}/${period}/${costType}`, { method: "PUT", body: { amountCents, note: note ?? null } });
+      await refreshContract(tenancyId);
+    },
+    [base, tenancyId],
+  );
+
+  const attachFile = useCallback(
+    async (entryId: string, file: File) => {
+      const att = await uploadAttachment(tenancyId, file, "BILL");
+      await api(`/api/cost-entries/${entryId}/attachments`, { method: "POST", body: { attachmentIds: [att.id] } });
+      await refreshContract(tenancyId);
+    },
+    [tenancyId],
+  );
+
+  const detachFile = useCallback(
+    async (entryId: string, attachmentId: string) => {
+      await api(`/api/cost-entries/${entryId}/attachments/${attachmentId}`, { method: "DELETE" });
+      await refreshContract(tenancyId);
+    },
+    [tenancyId],
+  );
+
+  return { ...q, costs: q.data, setEntry, attachFile, detachFile };
 }
 
 // ---------- Rent changes & closing ----------

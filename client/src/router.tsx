@@ -9,6 +9,7 @@ import { UpnTestPage } from "@/features/charges/UpnTestPage";
 import { AcceptInvitePage } from "@/features/invitations/AcceptInvitePage";
 import { BankImportPage } from "@/features/bank/BankImportPage";
 import { ContractTab } from "@/features/contract/ContractTab";
+import { CostsPage } from "@/features/contract/CostsPage";
 import { DepositReturnPage } from "@/features/contract/DepositReturnPage";
 import { SettlementPage } from "@/features/contract/SettlementPage";
 import { IssueFormPage } from "@/features/issues/IssueFormPage";
@@ -66,6 +67,7 @@ export const router = createBrowserRouter([
               { path: "pogodba", element: <ContractTab /> },
               { path: "pogodba/varscina", element: <DepositReturnPage /> },
               { path: "pogodba/obracun/:settlementId", element: <SettlementPage /> },
+              { path: "pogodba/stroski", element: <CostsPage /> },
               { path: "okvare", element: <IssuesTab /> },
               { path: "okvare/nova", element: <IssueFormPage /> },
               { path: "okvare/:issueId", element: <IssuePage /> },

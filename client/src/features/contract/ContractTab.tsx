@@ -7,13 +7,13 @@ import { Field, MoneyInput, Select, Textarea, TextInput } from "@/components/for
 import { ErrorState, Facts, FormError, List, ListRow, LoadingState, Section } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
-import { useAdvances, useCloseout, useDeposit, useRentChanges, useSettlements } from "@/hooks/useContract";
+import { useAdvances, useCloseout, useCosts, useDeposit, useRentChanges, useSettlements } from "@/hooks/useContract";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useNewItems, useNotifications } from "@/hooks/useNotifications";
 import { daysUntil, formatDate, todayInput } from "@/lib/dates";
 import { centsToInput, formatCents, parseAmountToCents } from "@/lib/money";
 import { cn } from "@/lib/utils";
-import { COST_TYPES, type CostType, type Deposit } from "@/types/domain";
+import { COST_TYPES, type BillingMode, type CostType, type Deposit } from "@/types/domain";
 import { useTenancyContext } from "@/features/tenancies/TenancyLayout";
 import { DepositStatusLabel, SettlementStatusLabel } from "./contract-ui";
 
@@ -434,6 +434,8 @@ function CostsSection() {
 
   if (advances.loading || settlements.loading) return <LoadingState />;
   if (!isLandlord && advances.advances.length === 0 && settlements.settlements.length === 0) return null;
+  const combined = tenancy.billingMode === "COMBINED" && tenancy.rentCents > 0 && advances.totalCents > 0;
+  const lumpSum = advances.advances.length === 1 && advances.advances[0]!.costType === "OTHER";
 
   return (
     <Section
@@ -452,22 +454,32 @@ function CostsSection() {
       ) : advances.advances.length > 0 ? (
         <>
           <dl className="divide-y divide-line rounded-md border border-line bg-surface-raised">
+            {combined && (
+              <div className="flex items-baseline justify-between gap-4 px-4 py-2.5">
+                <dt className="text-ink-muted">{t("tenancies.rent")}</dt>
+                <dd className="mono">{formatCents(tenancy.rentCents)}</dd>
+              </div>
+            )}
             {advances.advances.map((a) => (
               <div key={a.id} className="flex items-baseline justify-between gap-4 px-4 py-2.5">
-                <dt className="text-ink-muted">{t(`costs.${a.costType}`)}</dt>
+                <dt className="text-ink-muted">{lumpSum ? t("contract.costs.lumpSum") : t(`costs.${a.costType}`)}</dt>
                 <dd className="mono">{formatCents(a.amountCents)}</dd>
               </div>
             ))}
             <div className="flex items-baseline justify-between gap-4 px-4 py-3">
-              <dt className="font-semibold">{t("contract.costs.perMonth")}</dt>
-              <dd className="mono font-semibold">{formatCents(advances.totalCents)}</dd>
+              <dt className="font-semibold">{t(combined ? "contract.costs.perMonthCombined" : "contract.costs.perMonth")}</dt>
+              <dd className="mono font-semibold">{formatCents(advances.totalCents + (combined ? tenancy.rentCents : 0))}</dd>
             </div>
           </dl>
-          <p className="mt-2 text-sm text-ink-muted">{t("contract.costs.advancesHint")}</p>
+          <p className="mt-2 text-sm text-ink-muted">{t(combined ? "contract.costs.advancesHintCombined" : "contract.costs.advancesHint")}</p>
         </>
       ) : (
         <p className="rounded-md border border-dashed border-line p-4 text-ink-muted">{t(isLandlord ? "contract.costs.noAdvancesLandlord" : "contract.costs.noAdvances")}</p>
       )}
+
+      {isLandlord && !editing && <BillingModeSwitch />}
+
+      {advances.advances.length > 0 && <MonthlyCostsLink />}
 
       <div className="mt-6 mb-3 flex min-h-9 items-center justify-between gap-3">
         <h3 className="label-mono">{t("contract.costs.settlements")}</h3>
@@ -486,7 +498,13 @@ function CostsSection() {
               key={s.id}
               to={`/najemi/${tenancy.id}/pogodba/obracun/${s.id}`}
               title={`${formatDate(s.periodFrom)} – ${formatDate(s.periodTo)}`}
-              subtitle={<BalanceText cents={s.totals.balanceCents} />}
+              subtitle={
+                s.creditChoice && s.creditChoice !== "REFUND" && s.creditRemainingCents > 0 ? (
+                  <span className="text-primary">{t(`contract.credit.remaining.${s.creditChoice}`, { amount: formatCents(s.creditRemainingCents) })}</span>
+                ) : (
+                  <BalanceText cents={s.totals.balanceCents} />
+                )
+              }
               trailing={<SettlementStatusLabel status={s.status} />}
             />
           ))}
@@ -498,10 +516,67 @@ function CostsSection() {
   );
 }
 
+/** Landlord: rent and costs as one payment a month (pavšal) or as two. Applies from the next monthly charge. */
+function BillingModeSwitch() {
+  const { t } = useTranslation();
+  const toMessage = useErrorMessage();
+  const { tenancy, update } = useTenancyContext();
+  const [busy, setBusy] = useState(false);
+  const change = async (billingMode: BillingMode) => {
+    if (billingMode === tenancy.billingMode) return;
+    setBusy(true);
+    try {
+      await update({ billingMode });
+      toast.success(t("contract.costs.billingSaved"));
+    } catch (err) {
+      toast.error(toMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="mt-4">
+      <p className="label-mono mb-2">{t("tenancies.billingMode")}</p>
+      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t("tenancies.billingMode")}>
+        {(["COMBINED", "SEPARATE"] as const).map((m) => (
+          <Button key={m} type="button" role="radio" aria-checked={tenancy.billingMode === m} disabled={busy} variant={tenancy.billingMode === m ? "default" : "secondary"} onClick={() => void change(m)}>
+            {t(`billingMode.${m}`)}
+          </Button>
+        ))}
+      </div>
+      <p className="mt-2 text-sm text-ink-muted">{t(`tenancies.billingModeHint.${tenancy.billingMode}`)}</p>
+    </div>
+  );
+}
+
+/** Entry to the monthly costs, with the running balance so the tenant sees where they stand. */
+function MonthlyCostsLink() {
+  const { t } = useTranslation();
+  const { tenancy, isLandlord } = useTenancyContext();
+  const q = useCosts(tenancy.id);
+  const r = q.costs?.running;
+  const key = !r ? null : r.balanceCents < 0 ? "credit" : r.balanceCents > 0 ? "owes" : "even";
+  return (
+    <List className="mt-4">
+      <ListRow
+        to={`/najemi/${tenancy.id}/pogodba/stroski`}
+        title={t("contract.monthly.title")}
+        subtitle={
+          r && key ? (
+            <span className={cn(r.balanceCents < 0 && "text-primary")}>{t(`contract.monthly.running.${isLandlord ? "landlord" : "tenant"}.${key}`, { amount: formatCents(Math.abs(r.balanceCents)) })}</span>
+          ) : (
+            t("contract.monthly.linkHint")
+          )
+        }
+      />
+    </List>
+  );
+}
+
 export function BalanceText({ cents }: { cents: number }) {
   const { t } = useTranslation();
   if (cents > 0) return <>{t("contract.costs.owes", { amount: formatCents(cents) })}</>;
-  if (cents < 0) return <span className="text-primary">{t("contract.costs.refund", { amount: formatCents(-cents) })}</span>;
+  if (cents < 0) return <span className="text-primary">{t("contract.costs.credit", { amount: formatCents(-cents) })}</span>;
   return <>{t("contract.costs.even")}</>;
 }
 
@@ -513,10 +588,17 @@ function AdvancesEditor({ onDone }: { onDone: () => void }) {
     advances.advances.length ? advances.advances.map((a) => ({ costType: a.costType, amount: centsToInput(a.amountCents) })) : [{ costType: tenancy.coveredCosts.find((c) => c !== "RENT") ?? "HEATING", amount: "" }],
   );
   const [error, setError] = useState<string | null>(null);
-  const free = COST_TYPES.filter((c) => !rows.some((r) => r.costType === c));
+  // One amount for all costs (pavšal), or one per cost type.
+  const [lump, setLump] = useState(advances.advances.length === 0 || (advances.advances.length === 1 && advances.advances[0]!.costType === "OTHER"));
+  const [lumpAmount, setLumpAmount] = useState(advances.advances.length ? centsToInput(advances.totalCents) : "");
+  const free = COST_TYPES.filter((c) => c !== "RENT" && !rows.some((r) => r.costType === c));
 
   const save = useAsyncAction(async () => {
-    const items = rows.map((r) => ({ costType: r.costType, amountCents: parseAmountToCents(r.amount) }));
+    const items = lump
+      ? lumpAmount.trim()
+        ? [{ costType: "OTHER" as CostType, amountCents: parseAmountToCents(lumpAmount) }]
+        : []
+      : rows.map((r) => ({ costType: r.costType, amountCents: parseAmountToCents(r.amount) }));
     if (items.some((i) => !i.amountCents)) return setError(t("validation.amount"));
     await advances.save(items as { costType: CostType; amountCents: number }[]);
     toast.success(t("contract.costs.advancesSaved"));
@@ -525,8 +607,20 @@ function AdvancesEditor({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="flex flex-col gap-3 rounded-md border border-line bg-surface-raised p-4">
-      <p className="text-sm text-ink-muted">{t("contract.costs.advancesEditHint")}</p>
-      {rows.map((r, i) => (
+      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t("contract.costs.advanceKind")}>
+        {([true, false] as const).map((v) => (
+          <Button key={String(v)} type="button" role="radio" aria-checked={lump === v} variant={lump === v ? "default" : "secondary"} onClick={() => setLump(v)}>
+            {t(v ? "contract.costs.lumpSumMode" : "contract.costs.perTypeMode")}
+          </Button>
+        ))}
+      </div>
+      <p className="text-sm text-ink-muted">{t(lump ? "contract.costs.lumpSumHint" : "contract.costs.advancesEditHint")}</p>
+      {lump && (
+        <Field label={t("contract.costs.lumpSum")}>
+          {(p) => <MoneyInput {...p} value={lumpAmount} onChange={(e) => (setLumpAmount(e.target.value), setError(null))} placeholder="110,00" />}
+        </Field>
+      )}
+      {!lump && rows.map((r, i) => (
         <div key={i} className="grid grid-cols-[1fr_8rem_auto] items-center gap-2">
           <Select aria-label={t("contract.costs.costType")} value={r.costType} onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, costType: e.target.value as CostType } : x)))}>
             {[r.costType, ...free].map((c) => (
@@ -541,7 +635,7 @@ function AdvancesEditor({ onDone }: { onDone: () => void }) {
           </Button>
         </div>
       ))}
-      {free.length > 0 && (
+      {!lump && free.length > 0 && (
         <Button variant="ghost" className="self-start" onClick={() => setRows([...rows, { costType: free[0]!, amount: "" }])}>
           <Plus />
           {t("contract.costs.addAdvance")}
@@ -628,7 +722,7 @@ function CloseoutSection() {
       <ul className="divide-y divide-line rounded-md border border-line bg-surface-raised">
         {items.map((i) => {
           const Icon = i.state === "done" ? Check : i.state === "na" ? Minus : Circle;
-          const link = CLOSEOUT_LINK[i.key];
+          const link = i.key === "credit" && i.detail?.["settlementId"] ? `pogodba/obracun/${i.detail["settlementId"]}` : CLOSEOUT_LINK[i.key];
           // A tenancy with advances set up but not charged yet has nothing to settle so far.
           const variant = i.state === "na" && i.detail?.["configured"] ? "naConfigured" : i.state;
           const text = t(`contract.closeout.items.${i.key}.${variant}`, {

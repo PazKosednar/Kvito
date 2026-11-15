@@ -5,6 +5,7 @@ import { bus } from "../../lib/events.js";
 import { logger } from "../../lib/logger.js";
 import { prisma } from "../../lib/prisma.js";
 import { refreshChargeStatus, createCharge } from "../../modules/charges/service.js";
+import { takeOffsetCredit } from "../../modules/contract/credit.js";
 
 const MONTHS_SL = ["januar", "februar", "marec", "april", "maj", "junij", "julij", "avgust", "september", "oktober", "november", "december"];
 
@@ -31,7 +32,14 @@ export async function generateMonthlyRent(now = new Date()): Promise<number> {
       members: { some: { deletedAt: null, leftAt: null } },
       charges: { none: { rentPeriod: period } },
     },
-    select: { id: true, rentCents: true, rentDueDay: true, startDate: true },
+    select: {
+      id: true,
+      rentCents: true,
+      rentDueDay: true,
+      startDate: true,
+      billingMode: true,
+      costAdvances: { where: { deletedAt: null }, orderBy: { createdAt: "asc" }, select: { costType: true, amountCents: true } },
+    },
   });
 
   let created = 0;
@@ -40,24 +48,35 @@ export async function generateMonthlyRent(now = new Date()): Promise<number> {
     // The first month's rent is usually settled when signing; skip a due date before the tenancy starts.
     if (dueDate < t.startDate) continue;
     try {
-      await prisma.$transaction((tx) =>
-        createCharge(
+      await prisma.$transaction(async (tx) => {
+        // Pavšal: rent and cost advances in one payment – unless this month's advances already went out separately.
+        const combined =
+          t.billingMode === "COMBINED" && t.costAdvances.length > 0 && !(await tx.charge.count({ where: { tenancyId: t.id, autoKey: `advance:${period}` } }));
+        const lines = combined ? [{ costType: "RENT" as const, amountCents: t.rentCents }, ...t.costAdvances] : [];
+        const gross = lines.length ? lines.reduce((s, l) => s + l.amountCents, 0) : t.rentCents;
+        const credit = await takeOffsetCredit(tx, t.id, gross);
+        // TODO(preveri): purpose code for one payment of rent and running costs; RENT is used for now.
+        const title = combined ? `Najemnina in stroški ${MONTHS_SL[month - 1]} ${year}` : `Najemnina ${MONTHS_SL[month - 1]} ${year}`;
+        const allLines = [...(lines.length ? lines : credit.lines.length ? [{ costType: "RENT" as const, amountCents: t.rentCents }] : []), ...credit.lines];
+        await createCharge(
           tx,
           t.id,
           {
             type: "RENT",
             costType: "RENT",
-            title: `Najemnina ${MONTHS_SL[month - 1]} ${year}`,
-            amountCents: t.rentCents,
+            title,
+            amountCents: credit.netCents,
             dueDate,
             rentPeriod: period,
+            autoKey: combined ? `combined:${period}` : null,
             payTo: "LANDLORD",
             purposeCode: "RENT",
-            purpose: `Najemnina ${MONTHS_SL[month - 1]} ${year}`,
+            purpose: title,
+            lines: allLines,
           },
           null,
-        ),
-      );
+        );
+      });
       created++;
     } catch (err) {
       // P2002 = another run created it first – exactly what idempotency means.
@@ -108,7 +127,10 @@ export async function generateMonthlyAdvances(now = new Date()): Promise<number>
       OR: [{ endDate: null }, { endDate: { gte: monthStart } }],
       members: { some: { deletedAt: null, leftAt: null } },
       costAdvances: { some: { deletedAt: null } },
-      charges: { none: { autoKey } },
+      // Already part of this month's combined payment.
+      charges: { none: { autoKey: { in: [autoKey, `combined:${period}`] } } },
+      // Pavšal tenancies get their advances with the rent (one without rent still gets them here).
+      NOT: { billingMode: "COMBINED", rentCents: { gt: 0 } },
     },
     select: { id: true, rentDueDay: true, startDate: true, costAdvances: { where: { deletedAt: null }, orderBy: { createdAt: "asc" } } },
   });
@@ -120,26 +142,27 @@ export async function generateMonthlyAdvances(now = new Date()): Promise<number>
     const total = t.costAdvances.reduce((s, a) => s + a.amountCents, 0);
     const title = `Akontacija stroškov ${MONTHS_SL[month - 1]} ${year}`;
     try {
-      await prisma.$transaction((tx) =>
-        createCharge(
+      await prisma.$transaction(async (tx) => {
+        const credit = await takeOffsetCredit(tx, t.id, total);
+        await createCharge(
           tx,
           t.id,
           {
             type: "ADVANCE",
             costType: null,
             title,
-            amountCents: total,
+            amountCents: credit.netCents,
             dueDate,
             autoKey,
             payTo: "LANDLORD",
             // TODO(preveri): purpose code for cost advances; OTHR ("Drugo") is always valid.
             purposeCode: "OTHR",
             purpose: title,
-            lines: t.costAdvances.map((a) => ({ costType: a.costType, amountCents: a.amountCents })),
+            lines: [...t.costAdvances.map((a) => ({ costType: a.costType, amountCents: a.amountCents })), ...credit.lines],
           },
           null,
-        ),
-      );
+        );
+      });
       created++;
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") continue;

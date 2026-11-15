@@ -100,12 +100,21 @@ type Q = ReturnType<typeof useCharge>;
 /** Breakdown of an advance or a settlement by cost type. */
 function ChargeLines({ lines }: { lines: Charge["lines"] }) {
   const { t } = useTranslation();
+  // Credit lines carry a Slovenian label from the server; name them in the reader's language.
+  const lineLabel = (l: Charge["lines"][number]) =>
+    l.creditSettlementId
+      ? t("charges.creditLine")
+      : l.label === "Dobroimetje iz prejšnjega obračuna"
+        ? t("charges.carriedInLine")
+        : l.costType === "OTHER" && !l.label && lines.some((x) => x.costType === "RENT")
+          ? t("contract.costs.lumpSum")
+          : (l.label ?? t(`costs.${l.costType}`));
   return (
     <dl className="mt-4 divide-y divide-line rounded-md border border-line bg-surface-raised">
       {lines.map((l) => (
         <div key={l.id} className="flex items-baseline justify-between gap-4 px-4 py-2.5">
-          <dt className="text-ink-muted">{l.label ?? t(`costs.${l.costType}`)}</dt>
-          <dd className="mono text-ink">{formatCents(l.amountCents)}</dd>
+          <dt className={l.creditSettlementId ? "text-primary" : "text-ink-muted"}>{lineLabel(l)}</dt>
+          <dd className={l.creditSettlementId ? "mono text-primary" : "mono text-ink"}>{formatCents(l.amountCents)}</dd>
         </div>
       ))}
     </dl>

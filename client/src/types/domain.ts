@@ -65,8 +65,12 @@ export interface Tenancy {
   noticePeriodDays: number | null;
   rentReviewMonth: number | null;
   paymentNote: string | null;
+  /** COMBINED: rent and cost advances are one monthly payment (pavšal). */
+  billingMode: BillingMode;
   members: TenancyMember[];
 }
+
+export type BillingMode = "COMBINED" | "SEPARATE";
 
 export interface TenancyDetail extends Tenancy {
   unit: {
@@ -199,6 +203,8 @@ export interface ChargeLine {
   costType: CostType;
   label: string | null;
   amountCents: number;
+  /** Set when the line pays part of the charge with a settlement credit. */
+  creditSettlementId?: string | null;
 }
 
 export interface ChargesSummary {
@@ -397,11 +403,15 @@ export interface CostAdvance {
 }
 
 export type SettlementStatus = "DRAFT" | "SENT" | "DISPUTED" | "ACCEPTED" | "CLOSED";
+export type CreditChoice = "CARRY_OVER" | "OFFSET_NEXT" | "REFUND";
+export const CREDIT_CHOICES: CreditChoice[] = ["CARRY_OVER", "OFFSET_NEXT", "REFUND"];
 
 export interface SettlementTotals {
   advanceCents: number;
   actualCents: number;
-  /** > 0: the tenant pays the difference; < 0: the landlord returns it. */
+  /** Credit taken over from earlier settlements. */
+  carriedInCents: number;
+  /** > 0: the tenant pays the difference; < 0: the tenant is in credit. */
   balanceCents: number;
 }
 
@@ -412,7 +422,38 @@ export interface SettlementSummary {
   status: SettlementStatus;
   sentAt: string | null;
   refundedOn: string | null;
+  creditChoice: CreditChoice | null;
+  creditRemainingCents: number;
   totals: SettlementTotals;
+}
+
+/** One month of actual running costs against the advances charged in it. */
+export interface CostMonth {
+  period: string;
+  advanceCents: number;
+  costs: Partial<Record<CostType, number>>;
+  costCents: number;
+  balanceCents: number;
+}
+
+export interface CostEntry {
+  id: string;
+  period: string;
+  costType: CostType;
+  amountCents: number;
+  note: string | null;
+  attachments: Attachment[];
+}
+
+export interface CostsView {
+  from: string;
+  to: string;
+  months: (CostMonth & { lockedBy: string | null })[];
+  costTypes: CostType[];
+  totals: { advanceCents: number; costCents: number; balanceCents: number; byType: Partial<Record<CostType, number>> };
+  entries: CostEntry[];
+  running: { from: string; to: string; advanceCents: number; costCents: number; creditCents: number; balanceCents: number };
+  access: "LANDLORD" | "TENANT";
 }
 
 export interface SettlementLine {
@@ -433,7 +474,15 @@ export interface Settlement extends SettlementSummary {
   charge: { id: string; status: ChargeStatus } | null;
   lines: SettlementLine[];
   attachments: Attachment[];
+  recommendedChoice: CreditChoice | null;
+  carriedInCents: number;
+  /** Money the landlord returns: the credit when the tenant chose a refund, or what is left of it later. */
+  refundCents: number;
   refundByMember: { memberId: string; name: string; amountCents: number }[];
+  months: CostMonth[];
+  monthCostTypes: CostType[];
+  /** How the next monthly payment would look with the credit deducted. */
+  nextPayment: { period: string; beforeCents: number; afterCents: number } | null;
 }
 
 export interface RentChange {
@@ -446,7 +495,7 @@ export interface RentChange {
   createdAt: string;
 }
 
-export type CloseoutKey = "charges" | "moveOut" | "meters" | "keys" | "settlement" | "deposit";
+export type CloseoutKey = "charges" | "moveOut" | "meters" | "keys" | "settlement" | "deposit" | "credit";
 
 export interface Closeout {
   items: { key: CloseoutKey; state: "done" | "pending" | "na"; detail?: Record<string, string | number | null> }[];

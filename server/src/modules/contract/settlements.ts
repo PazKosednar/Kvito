@@ -2,23 +2,28 @@ import { Router } from "express";
 import { z } from "zod";
 import type { CostType, Prisma, PrismaClient } from "../../generated/prisma/client.js";
 import { audit } from "../../lib/audit.js";
-import { addDays, toDateOnly, todayInLjubljana } from "../../lib/dates.js";
+import { addDays, periodOf, toDateOnly, todayInLjubljana } from "../../lib/dates.js";
 import { badRequest, notFound } from "../../lib/errors.js";
 import { bus } from "../../lib/events.js";
 import { prisma } from "../../lib/prisma.js";
-import { SettlementTransitionError, nextSettlementStatus, settlementTotals, type SettlementAction } from "../../lib/settlement.js";
+import { monthsBetween, nextPeriod } from "../../lib/costs.js";
+import { CreditChoiceRequiredError, SettlementTransitionError, nextSettlementStatus, settlementTotals, type SettlementAction } from "../../lib/settlement.js";
 import { SplitError, splitAmount } from "../../lib/split.js";
-import { COST_TYPES, cents, costType, dateOnly, idParam, optionalText, positiveCents, text } from "../../lib/validation.js";
+import { COST_TYPES, dateOnly, idParam, optionalText, positiveCents, costType, text } from "../../lib/validation.js";
 import { authUserId } from "../../middleware/auth.js";
 import { validateBody } from "../../middleware/validate.js";
 import { assertTenancyAccess, assertTenancyLandlord } from "../access/access.js";
 import { attachmentDto, attachmentSelect, claimAttachments } from "../attachments/service.js";
 import { createCharge } from "../charges/service.js";
 import { postSystemMessage } from "../messages/system.js";
+import { actualByType, costMatrix } from "./costs.js";
+import { advanceLineWhere, availableCredit } from "./credit.js";
 
 type Db = PrismaClient | Prisma.TransactionClient;
 
 const MAX_SETTLEMENT_FILES = 20;
+
+const creditChoice = z.enum(["CARRY_OVER", "OFFSET_NEXT", "REFUND"]);
 
 const AdvancesBody = z.object({
   items: z
@@ -29,40 +34,79 @@ const AdvancesBody = z.object({
 const PeriodBody = z
   .object({ periodFrom: dateOnly, periodTo: dateOnly })
   .refine((b) => b.periodTo >= b.periodFrom, { message: "END_BEFORE_START", path: ["periodTo"] });
+/** Amounts come from the monthly cost entries; the settlement itself only carries notes and the period. */
 const PatchBody = z
   .object({
     periodFrom: dateOnly,
     periodTo: dateOnly,
     note: optionalText(1000),
     dueDate: dateOnly.nullable(),
+    recommendedChoice: creditChoice.nullable(),
     lines: z
-      .array(z.object({ costType: costType.exclude(["RENT"]), actualCents: cents, note: optionalText(200) }))
+      .array(z.object({ costType: costType.exclude(["RENT"]), note: optionalText(200) }))
       .max(11)
       .refine((items) => new Set(items.map((i) => i.costType)).size === items.length, "DUPLICATE_COST_TYPE"),
   })
   .partial();
+const AcceptBody = z.object({ creditChoice: creditChoice.optional() });
 const DisputeBody = z.object({ reason: text(1000) });
 const RefundedBody = z.object({ refundedOn: dateOnly });
 const AttachBody = z.object({ attachmentIds: z.array(idParam).min(1).max(10) });
 
-/** Advances charged per cost type in a period – from the lines of ADVANCE charges (paid or not: each is its own obligation). */
+/** Advances charged per cost type in a period (paid or not: each monthly charge is its own obligation). */
 async function advancesInPeriod(db: Db, tenancyId: string, from: Date, to: Date): Promise<Map<CostType, number>> {
-  const rows = await db.chargeLine.groupBy({
-    by: ["costType"],
-    where: { charge: { tenancyId, type: "ADVANCE", deletedAt: null, dueDate: { gte: from, lte: to } } },
-    _sum: { amountCents: true },
-  });
+  const rows = await db.chargeLine.groupBy({ by: ["costType"], where: advanceLineWhere(tenancyId, from, to), _sum: { amountCents: true } });
   return new Map(rows.map((r) => [r.costType, r._sum.amountCents ?? 0]));
 }
 
-/** Recomputes the advances of every line (the period may have changed, advances may have been added). */
-async function refreshAdvances(db: Db, settlementId: string) {
+/**
+ * Rebuilds the lines from the charged advances and the monthly cost entries of the period: one line per cost type
+ * that has either (or an advance set up now), in the fixed order. Notes stay with their cost type.
+ */
+async function refreshLines(db: Db, settlementId: string, notes?: Map<CostType, string | null>) {
   const s = await db.costSettlement.findUniqueOrThrow({ where: { id: settlementId }, include: { lines: true } });
-  const adv = await advancesInPeriod(db, s.tenancyId, s.periodFrom, s.periodTo);
-  for (const line of s.lines) {
-    const advanceCents = adv.get(line.costType) ?? 0;
-    if (advanceCents !== line.advanceCents) await db.settlementLine.update({ where: { id: line.id }, data: { advanceCents } });
+  const [adv, actual, active] = await Promise.all([
+    advancesInPeriod(db, s.tenancyId, s.periodFrom, s.periodTo),
+    actualByType(db, s.tenancyId, s.periodFrom, s.periodTo),
+    db.costAdvance.findMany({ where: { tenancyId: s.tenancyId, deletedAt: null }, select: { costType: true } }),
+  ]);
+  const keptNotes = new Map(s.lines.map((l) => [l.costType, l.note]));
+  for (const [t, n] of notes ?? []) keptNotes.set(t, n);
+  const types = COST_TYPES.filter((t) => adv.has(t) || actual.has(t) || active.some((a) => a.costType === t));
+  await db.settlementLine.deleteMany({ where: { settlementId } });
+  await db.settlementLine.createMany({
+    data: types.map((t, i) => ({ settlementId, costType: t, advanceCents: adv.get(t) ?? 0, actualCents: actual.get(t) ?? 0, note: keptNotes.get(t) ?? null, sortOrder: i })),
+  });
+}
+
+const CARRIED_IN_LABEL = "Dobroimetje iz prejšnjega obračuna";
+
+/** On sending, the settlement takes over whatever credit earlier settlements still hold (added on a re-send). */
+async function takeCarryIn(tx: Prisma.TransactionClient, tenancyId: string, settlementId: string, userId: string) {
+  const sources = await tx.costSettlement.findMany({
+    where: { tenancyId, deletedAt: null, status: "CLOSED", creditRemainingCents: { gt: 0 }, id: { not: settlementId } },
+    select: { id: true, creditRemainingCents: true },
+  });
+  if (!sources.length) return;
+  const total = sources.reduce((s, c) => s + c.creditRemainingCents, 0);
+  for (const src of sources) {
+    await tx.costSettlement.update({ where: { id: src.id }, data: { creditRemainingCents: 0 } });
+    await audit({ actorId: userId, entityType: "CostSettlement", entityId: src.id, action: "creditCarried", before: { creditRemainingCents: src.creditRemainingCents }, after: { toSettlementId: settlementId } }, tx);
   }
+  await tx.costSettlement.update({ where: { id: settlementId }, data: { carriedInCents: { increment: total } } });
+}
+
+/** The next monthly payment the credit would reduce: the first month without a rent charge yet. */
+async function nextPaymentPreview(tenancyId: string, creditCents: number) {
+  const tenancy = await prisma.tenancy.findUniqueOrThrow({
+    where: { id: tenancyId },
+    select: { rentCents: true, costAdvances: { where: { deletedAt: null }, select: { amountCents: true } } },
+  });
+  const beforeCents = tenancy.rentCents + tenancy.costAdvances.reduce((s, a) => s + a.amountCents, 0);
+  if (beforeCents <= 0) return null;
+  let period = periodOf(todayInLjubljana());
+  for (let i = 0; i < 3 && (await prisma.charge.count({ where: { tenancyId, rentPeriod: period, deletedAt: null } })); i++) period = nextPeriod(period);
+  return { period, beforeCents, afterCents: Math.max(0, beforeCents - creditCents) };
 }
 
 const settlementInclude = {
@@ -72,22 +116,39 @@ const settlementInclude = {
 } satisfies Prisma.CostSettlementInclude;
 
 async function settlementDto(s: Prisma.CostSettlementGetPayload<{ include: typeof settlementInclude }>) {
-  const totals = settlementTotals(s.lines);
-  // An overpayment is returned to the tenants in the tenancy's usual split.
+  const editable = s.status === "DRAFT" || s.status === "DISPUTED";
+  // Before sending, show the credit that sending would take over from earlier settlements.
+  const carriedInCents = s.carriedInCents + (editable ? await availableCredit(prisma, s.tenancyId, s.id) : 0);
+  const totals = settlementTotals(s.lines, carriedInCents);
+  const months = await costMatrix(prisma, s.tenancyId, monthsBetween(periodOf(s.periodFrom), periodOf(s.periodTo)));
+  const nextPayment = totals.balanceCents < 0 && (s.status === "SENT" || editable) ? await nextPaymentPreview(s.tenancyId, -totals.balanceCents) : null;
+  // A credit is returned to the tenants in the tenancy's usual split: the whole credit when they chose a refund,
+  // whatever is left of it when the tenancy ends.
+  const refundCents = s.creditChoice && s.creditChoice !== "REFUND" ? s.creditRemainingCents : Math.max(0, -totals.balanceCents);
   let refundByMember: { memberId: string; name: string; amountCents: number }[] = [];
-  if (totals.balanceCents < 0) {
+  if (refundCents > 0) {
     const tenancy = await prisma.tenancy.findUniqueOrThrow({
       where: { id: s.tenancyId },
       select: { splitMethod: true, members: { where: { deletedAt: null, leftAt: null }, orderBy: { joinedAt: "asc" }, include: { user: { select: { name: true, email: true } } } } },
     });
     try {
-      const parts = splitAmount(-totals.balanceCents, tenancy.members, tenancy.splitMethod);
+      const parts = splitAmount(refundCents, tenancy.members, tenancy.splitMethod);
       refundByMember = tenancy.members.map((m) => ({ memberId: m.id, name: m.user.name ?? m.user.email, amountCents: parts.get(m.id)! }));
     } catch (err) {
       if (!(err instanceof SplitError)) throw err;
     }
   }
-  return { ...s, attachments: s.attachments.map(attachmentDto), totals, refundByMember };
+  return {
+    ...s,
+    carriedInCents,
+    attachments: s.attachments.map(attachmentDto),
+    totals,
+    refundCents,
+    refundByMember,
+    months: months.months,
+    monthCostTypes: months.costTypes,
+    nextPayment,
+  };
 }
 
 async function loadSettlement(id: string, userId: string) {
@@ -153,30 +214,31 @@ export function settlementsRouter(): Router {
       include: { lines: { select: { advanceCents: true, actualCents: true } } },
     });
     res.json({
-      settlements: rows.map(({ lines, ...s }) => ({ id: s.id, periodFrom: s.periodFrom, periodTo: s.periodTo, status: s.status, sentAt: s.sentAt, refundedOn: s.refundedOn, totals: settlementTotals(lines) })),
+      settlements: rows.map(({ lines, ...s }) => ({
+        id: s.id,
+        periodFrom: s.periodFrom,
+        periodTo: s.periodTo,
+        status: s.status,
+        sentAt: s.sentAt,
+        refundedOn: s.refundedOn,
+        creditChoice: s.creditChoice,
+        creditRemainingCents: s.creditRemainingCents,
+        totals: settlementTotals(lines, s.carriedInCents),
+      })),
     });
   });
 
-  /** New draft for a period, with one line per cost type that had advances (or has one now). */
+  /** New draft for a period: lines from the advances charged and the monthly cost entries. */
   router.post("/tenancies/:id/settlements", validateBody(PeriodBody), async (req, res) => {
     const userId = authUserId(req);
     const tenancyId = idParam.parse(req.params.id);
     await assertTenancyLandlord(userId, tenancyId);
     const body = req.body as z.infer<typeof PeriodBody>;
     const id = await prisma.$transaction(async (tx) => {
-      const adv = await advancesInPeriod(tx, tenancyId, body.periodFrom, body.periodTo);
-      const active = await tx.costAdvance.findMany({ where: { tenancyId, deletedAt: null }, select: { costType: true } });
-      // Always in the same order, so the settlement reads the same every year.
-      const types = COST_TYPES.filter((t) => adv.has(t) || active.some((a) => a.costType === t));
       const s = await tx.costSettlement.create({
-        data: {
-          tenancyId,
-          periodFrom: body.periodFrom,
-          periodTo: body.periodTo,
-          createdById: userId,
-          lines: { create: types.map((t, i) => ({ costType: t, advanceCents: adv.get(t) ?? 0, actualCents: 0, sortOrder: i })) },
-        },
+        data: { tenancyId, periodFrom: body.periodFrom, periodTo: body.periodTo, createdById: userId },
       });
+      await refreshLines(tx, s.id);
       await audit({ actorId: userId, entityType: "CostSettlement", entityId: s.id, action: "create", after: { periodFrom: body.periodFrom, periodTo: body.periodTo }, ip: req.ip }, tx);
       return s.id;
     });
@@ -210,15 +272,10 @@ export function settlementsRouter(): Router {
           periodTo: to,
           ...(body.note !== undefined ? { note: body.note } : {}),
           ...(body.dueDate !== undefined ? { dueDate: body.dueDate } : {}),
+          ...(body.recommendedChoice !== undefined ? { recommendedChoice: body.recommendedChoice } : {}),
         },
       });
-      if (body.lines) {
-        await tx.settlementLine.deleteMany({ where: { settlementId: id } });
-        await tx.settlementLine.createMany({
-          data: body.lines.map((l, i) => ({ settlementId: id, costType: l.costType, advanceCents: 0, actualCents: l.actualCents, note: l.note ?? null, sortOrder: i })),
-        });
-      }
-      await refreshAdvances(tx, id);
+      await refreshLines(tx, id, body.lines ? new Map(body.lines.map((l) => [l.costType, l.note ?? null])) : undefined);
       const after = await tx.settlementLine.findMany({ where: { settlementId: id } });
       await audit(
         {
@@ -254,23 +311,33 @@ export function settlementsRouter(): Router {
   async function transition(
     req: Parameters<Parameters<typeof router.post>[1]>[0],
     action: SettlementAction,
-    extra: (s: { id: string; tenancyId: string; dueDate: Date | null; periodFrom: Date; periodTo: Date }, balanceCents: number, tx: Prisma.TransactionClient, userId: string) => Promise<Prisma.CostSettlementUpdateInput>,
+    extra: (
+      s: { id: string; tenancyId: string; dueDate: Date | null; periodFrom: Date; periodTo: Date; carriedInCents: number },
+      balanceCents: number,
+      tx: Prisma.TransactionClient,
+      userId: string,
+    ) => Promise<Prisma.CostSettlementUpdateInput>,
+    opts: { creditChoice?: "CARRY_OVER" | "OFFSET_NEXT" | "REFUND" | undefined } = {},
   ) {
     const userId = authUserId(req);
     const id = idParam.parse(req.params["id"]);
     const result = await prisma.$transaction(async (tx) => {
-      const s = await tx.costSettlement.findFirst({ where: { id, deletedAt: null }, include: { lines: true } });
-      if (!s) throw notFound();
-      const access = await assertTenancyAccess(userId, s.tenancyId);
-      if (access.role === "TENANT" && s.status === "DRAFT") throw notFound();
-      if (action === "send") await refreshAdvances(tx, id);
-      const lines = action === "send" ? await tx.settlementLine.findMany({ where: { settlementId: id } }) : s.lines;
-      const { balanceCents } = settlementTotals(lines);
+      const before = await tx.costSettlement.findFirst({ where: { id, deletedAt: null } });
+      if (!before) throw notFound();
+      const access = await assertTenancyAccess(userId, before.tenancyId);
+      if (access.role === "TENANT" && before.status === "DRAFT") throw notFound();
+      if (action === "send" && (before.status === "DRAFT" || before.status === "DISPUTED")) {
+        await refreshLines(tx, id);
+        await takeCarryIn(tx, before.tenancyId, id, userId);
+      }
+      const s = await tx.costSettlement.findUniqueOrThrow({ where: { id }, include: { lines: true } });
+      const { balanceCents } = settlementTotals(s.lines, s.carriedInCents);
       let next;
       try {
-        next = nextSettlementStatus(s.status, action, { actor: access.role, balanceCents });
+        next = nextSettlementStatus(s.status, action, { actor: access.role, balanceCents, creditChoice: opts.creditChoice ?? null });
       } catch (err) {
         if (err instanceof SettlementTransitionError) throw badRequest("TRANSITION_NOT_ALLOWED");
+        if (err instanceof CreditChoiceRequiredError) throw badRequest("CREDIT_CHOICE_REQUIRED");
         throw err;
       }
       const data = await extra(s, balanceCents, tx, userId);
@@ -295,10 +362,21 @@ export function settlementsRouter(): Router {
     res.json({ settlement: await settlementDto(s) });
   });
 
-  /** Tenant agrees. If they owe the difference, it becomes a charge with UPN QR like any other. */
-  router.post("/settlements/:id/accept", async (req, res) => {
-    const r = await transition(req, "accept", async (s, balanceCents, tx) => {
+  /**
+   * Tenant agrees. If they owe the difference, it becomes a charge with UPN QR like any other. If they are in credit,
+   * they choose: keep it until the next settlement, have it deducted from the next payments, or get it back.
+   */
+  router.post("/settlements/:id/accept", validateBody(AcceptBody), async (req, res) => {
+    const body = req.body as z.infer<typeof AcceptBody>;
+    const r = await transition(
+      req,
+      "accept",
+      async (s, balanceCents, tx) => {
       const data: Prisma.CostSettlementUpdateInput = { respondedAt: new Date() };
+      if (balanceCents < 0 && body.creditChoice) {
+        data.creditChoice = body.creditChoice;
+        data.creditRemainingCents = body.creditChoice === "REFUND" ? 0 : -balanceCents;
+      }
       if (balanceCents > 0) {
         const lines = await tx.settlementLine.findMany({ where: { settlementId: s.id }, orderBy: { sortOrder: "asc" } });
         const from = toDateOnly(s.periodFrom);
@@ -316,7 +394,10 @@ export function settlementsRouter(): Router {
             payTo: "LANDLORD",
             purposeCode: "OTHR",
             purpose: `Poračun stroškov ${from.slice(0, 4)}`,
-            lines: lines.filter((l) => l.actualCents !== l.advanceCents).map((l) => ({ costType: l.costType, amountCents: l.actualCents - l.advanceCents })),
+            lines: [
+              ...lines.filter((l) => l.actualCents !== l.advanceCents).map((l) => ({ costType: l.costType, amountCents: l.actualCents - l.advanceCents })),
+              ...(s.carriedInCents > 0 ? [{ costType: "OTHER" as const, label: CARRIED_IN_LABEL, amountCents: -s.carriedInCents }] : []),
+            ],
           },
           // Created by the system on the tenant's acceptance, so every tenant gets the usual "new charge" notice.
           null,
@@ -324,8 +405,17 @@ export function settlementsRouter(): Router {
         data.charge = { connect: { id: charge.id } };
       }
       return data;
-    });
-    await postSystemMessage(prisma, r.s.tenancyId, "SETTLEMENT_ACCEPTED", { balanceCents: r.balanceCents });
+      },
+      { creditChoice: body.creditChoice },
+    );
+    if (r.balanceCents < 0 && body.creditChoice) {
+      await audit({ actorId: r.userId, entityType: "CostSettlement", entityId: r.s.id, action: "creditChoice", after: { creditChoice: body.creditChoice, cents: -r.balanceCents }, ip: req.ip });
+    }
+    if (r.balanceCents < 0 && body.creditChoice) {
+      await postSystemMessage(prisma, r.s.tenancyId, `SETTLEMENT_CREDIT_${body.creditChoice}`, { amountCents: -r.balanceCents });
+    } else {
+      await postSystemMessage(prisma, r.s.tenancyId, "SETTLEMENT_ACCEPTED", { balanceCents: r.balanceCents });
+    }
     bus.emit("contract.activity", { tenancyId: r.s.tenancyId, actorId: r.userId, kind: "settlement.accepted", settlementId: r.s.id });
     const { s } = await loadSettlement(r.s.id, r.userId);
     res.json({ settlement: await settlementDto(s) });
@@ -340,9 +430,32 @@ export function settlementsRouter(): Router {
     res.json({ settlement: await settlementDto(s) });
   });
 
-  /** Landlord returned an overpayment (outside Kvito). */
+  /**
+   * Landlord returned money (outside Kvito): the overpayment the tenant asked back, or – typically when the tenancy
+   * ends – the credit that is still left from a settlement.
+   */
   router.post("/settlements/:id/refunded", validateBody(RefundedBody), async (req, res) => {
     const body = req.body as z.infer<typeof RefundedBody>;
+    const userId = authUserId(req);
+    const id = idParam.parse(req.params.id);
+    const current = await prisma.costSettlement.findFirst({ where: { id, deletedAt: null } });
+    if (!current) throw notFound();
+    if (current.status === "CLOSED" && current.creditRemainingCents > 0) {
+      await assertTenancyLandlord(userId, current.tenancyId);
+      const refundCents = await prisma.$transaction(async (tx) => {
+        // Re-read inside the transaction: the monthly job may have used part of the credit meanwhile.
+        const s = await tx.costSettlement.findUniqueOrThrow({ where: { id } });
+        if (s.creditRemainingCents <= 0) throw badRequest("TRANSITION_NOT_ALLOWED");
+        await tx.costSettlement.update({ where: { id }, data: { creditRemainingCents: 0, refundedOn: body.refundedOn, refundConfirmedAt: null } });
+        await audit({ actorId: userId, entityType: "CostSettlement", entityId: id, action: "creditRefunded", before: { creditRemainingCents: s.creditRemainingCents }, after: { refundedOn: body.refundedOn }, ip: req.ip }, tx);
+        return s.creditRemainingCents;
+      });
+      bus.emit("tenancy.changed", { tenancyId: current.tenancyId, what: "contract" });
+      bus.emit("contract.activity", { tenancyId: current.tenancyId, actorId: userId, kind: "settlement.refunded", settlementId: id, refundCents, refundedOn: body.refundedOn });
+      const { s } = await loadSettlement(id, userId);
+      res.json({ settlement: await settlementDto(s) });
+      return;
+    }
     const r = await transition(req, "refunded", async () => ({ refundedOn: body.refundedOn }));
     bus.emit("contract.activity", { tenancyId: r.s.tenancyId, actorId: r.userId, kind: "settlement.refunded", settlementId: r.s.id, refundCents: -r.balanceCents, refundedOn: body.refundedOn });
     const { s } = await loadSettlement(r.s.id, r.userId);

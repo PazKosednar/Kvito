@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { api } from "@/lib/api";
-import type { CostType, InvitationSummary, SplitMethod, TenancyDetail } from "@/types/domain";
+import type { BillingMode, CostType, InvitationSummary, SplitMethod, TenancyDetail } from "@/types/domain";
 import type { Role } from "@/types/user";
 import { invalidate, useQuery } from "./useQuery";
 
@@ -19,6 +19,7 @@ export interface TenancyInput {
   noticePeriodDays: number | null;
   rentReviewMonth: number | null;
   paymentNote: string | null;
+  billingMode: BillingMode;
 }
 
 /** Tenancies of the signed-in user in a role. */

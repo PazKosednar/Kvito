@@ -23,6 +23,10 @@ export type SystemEvent =
   | "SETTLEMENT_SENT"
   | "SETTLEMENT_ACCEPTED"
   | "SETTLEMENT_DISPUTED"
+  /** Accepted with a credit: what the tenant chose to do with it. */
+  | "SETTLEMENT_CREDIT_CARRY_OVER"
+  | "SETTLEMENT_CREDIT_OFFSET_NEXT"
+  | "SETTLEMENT_CREDIT_REFUND"
   | "RENT_CHANGED";
 
 export async function postSystemMessage(

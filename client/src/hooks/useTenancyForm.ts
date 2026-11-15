@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { centsToInput, parseAmountToCents } from "@/lib/money";
 import { todayInput, toDateInput } from "@/lib/dates";
-import type { CostType, SplitMethod, TenancyDetail } from "@/types/domain";
+import type { BillingMode, CostType, SplitMethod, TenancyDetail } from "@/types/domain";
 import type { TenancyInput } from "./useTenancies";
 
 export interface TenancyFormValues {
@@ -20,6 +20,7 @@ export interface TenancyFormValues {
   /** "" = no yearly review reminder, otherwise "1"–"12". */
   rentReviewMonth: string;
   paymentNote: string;
+  billingMode: BillingMode;
 }
 
 const IBAN_RE = /^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/;
@@ -41,6 +42,8 @@ export function useTenancyForm(existing: TenancyDetail | undefined, defaults: { 
     noticePeriodDays: existing?.noticePeriodDays ? String(existing.noticePeriodDays) : "",
     rentReviewMonth: existing?.rentReviewMonth ? String(existing.rentReviewMonth) : "",
     paymentNote: existing?.paymentNote ?? "",
+    // New tenancies: one payment a month for rent and costs (pavšal).
+    billingMode: existing?.billingMode ?? "COMBINED",
   }));
   const [errors, setErrors] = useState<Partial<Record<keyof TenancyFormValues, string>>>({});
 
@@ -82,6 +85,7 @@ export function useTenancyForm(existing: TenancyDetail | undefined, defaults: { 
       noticePeriodDays: notice,
       rentReviewMonth: values.rentReviewMonth ? Number(values.rentReviewMonth) : null,
       paymentNote: values.paymentNote.trim() || null,
+      billingMode: values.billingMode,
     };
   }
 

@@ -93,7 +93,7 @@ export function rentRouter(): Router {
     const tenancy = await prisma.tenancy.findUniqueOrThrow({ where: { id: tenancyId }, select: { status: true, endDate: true, depositCents: true, unitId: true } });
     const end = tenancy.endDate ?? todayInLjubljana();
 
-    const [moveOut, unpaid, deposit, lastAdvance, closedSettlements, advancesSetUp] = await Promise.all([
+    const [moveOut, unpaid, deposit, lastAdvance, closedSettlements, advancesSetUp, credit] = await Promise.all([
       prisma.handover.findFirst({
         where: { tenancyId, kind: "MOVE_OUT", deletedAt: null },
         orderBy: { handoverOn: "desc" },
@@ -105,10 +105,21 @@ export function rentRouter(): Router {
         _sum: { amountCents: true },
       }),
       prisma.deposit.findUnique({ where: { tenancyId }, select: { status: true } }),
-      prisma.charge.findFirst({ where: { tenancyId, type: "ADVANCE", deletedAt: null }, orderBy: { dueDate: "desc" }, select: { dueDate: true } }),
+      // The last charge with advances in it: a separate advance or a combined monthly payment.
+      prisma.charge.findFirst({
+        where: { tenancyId, deletedAt: null, OR: [{ type: "ADVANCE" }, { type: "RENT", autoKey: { startsWith: "combined:" } }] },
+        orderBy: { dueDate: "desc" },
+        select: { dueDate: true },
+      }),
       prisma.costSettlement.findMany({ where: { tenancyId, deletedAt: null, status: "CLOSED" }, select: { periodTo: true } }),
       prisma.costAdvance.count({ where: { tenancyId, deletedAt: null } }),
+      prisma.costSettlement.findMany({
+        where: { tenancyId, deletedAt: null, status: "CLOSED", creditRemainingCents: { gt: 0 } },
+        orderBy: { periodTo: "desc" },
+        select: { id: true, creditRemainingCents: true },
+      }),
     ]);
+    const creditCents = credit.reduce((s, c) => s + c.creditRemainingCents, 0);
     const finalReadings = moveOut?._count.meterReadings
       ? moveOut._count.meterReadings
       : await prisma.meterReading.count({ where: { unitId: tenancy.unitId, deletedAt: null, readOn: { gte: addDays(end, -FINAL_READING_WINDOW_DAYS) } } });
@@ -129,6 +140,12 @@ export function rentRouter(): Router {
         key: "deposit",
         state: !deposit && !tenancy.depositCents ? "na" : deposit?.status === "RETURNED" ? "done" : "pending",
         detail: { status: deposit?.status ?? null },
+      },
+      {
+        // Credit from settlements that is still with the landlord: returned when the tenancy ends.
+        key: "credit",
+        state: creditCents > 0 ? "pending" : "na",
+        detail: { cents: creditCents, settlementId: credit[0]?.id ?? null },
       },
     ];
     res.json({ items, ready: items.every((i) => i.state !== "pending"), status: tenancy.status, endDate: tenancy.endDate });
