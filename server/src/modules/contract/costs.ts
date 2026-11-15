@@ -2,7 +2,8 @@ import { Router } from "express";
 import { z } from "zod";
 import type { CostType, Prisma, PrismaClient } from "../../generated/prisma/client.js";
 import { audit } from "../../lib/audit.js";
-import { buildCostMatrix, isPeriod, monthsBetween, type CostMatrix } from "../../lib/costs.js";
+import { buildCostMatrix, isPeriod, monthsBetween, shiftPeriod, type CostMatrix } from "../../lib/costs.js";
+import { forecastCosts } from "../../lib/forecast.js";
 import { parseDateOnly, periodOf, todayInLjubljana } from "../../lib/dates.js";
 import { badRequest, notFound } from "../../lib/errors.js";
 import { bus } from "../../lib/events.js";
@@ -135,6 +136,35 @@ export function costsRouter(): Router {
       },
       access: access.role,
     });
+  });
+
+  /**
+   * Estimate until a month (default: a year from the start of the running window): expected costs, the balance
+   * at the end with today's advance, and the monthly advance that would make it come out even.
+   */
+  router.get("/tenancies/:id/costs/forecast", async (req, res) => {
+    const userId = authUserId(req);
+    const tenancyId = idParam.parse(req.params.id);
+    await assertTenancyAccess(userId, tenancyId);
+    const window = await runningWindow(tenancyId);
+    const today = periodOf(todayInLjubljana());
+    const defaultUntil = shiftPeriod(window.from, 11);
+    const until = typeof req.query["until"] === "string" ? period.parse(req.query["until"]) : defaultUntil;
+    if (until < window.from) throw badRequest("END_BEFORE_START");
+    if (monthsBetween(today, until).length > 24) throw badRequest("RANGE_TOO_LONG");
+
+    const tenancy = await prisma.tenancy.findUniqueOrThrow({ where: { id: tenancyId }, select: { startDate: true, costAdvances: { where: { deletedAt: null }, select: { amountCents: true } } } });
+    // Up to two years of history: enough for last year's same month.
+    const historyFrom = [periodOf(tenancy.startDate), shiftPeriod(today, -23)].sort().at(-1)!;
+    const [matrix, credit] = await Promise.all([costMatrix(prisma, tenancyId, monthsBetween(historyFrom, until < today ? today : until)), availableCredit(prisma, tenancyId)]);
+    const forecast = forecastCosts({
+      history: matrix.months,
+      windowFrom: window.from,
+      until,
+      currentAdvanceCents: tenancy.costAdvances.reduce((s, a) => s + a.amountCents, 0),
+      creditCents: credit,
+    });
+    res.json({ windowFrom: window.from, until, creditCents: credit, ...forecast });
   });
 
   /** Landlord enters (or corrects) the bill amount for a month and cost type. */

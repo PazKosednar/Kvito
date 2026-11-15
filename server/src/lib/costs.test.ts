@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CostType } from "../generated/prisma/enums.js";
-import { buildCostMatrix, monthsBetween, nextPeriod } from "./costs.js";
+import { buildCostMatrix, monthsBetween, nextPeriod, shiftPeriod } from "./costs.js";
 
 describe("months", () => {
   it("lists the months of a range, across a year end", () => {
@@ -8,6 +8,12 @@ describe("months", () => {
     expect(monthsBetween("2026-05", "2026-05")).toEqual(["2026-05"]);
     expect(monthsBetween("2026-05", "2026-04")).toEqual([]);
     expect(() => monthsBetween("2026-13", "2026-12")).toThrow();
+  });
+
+  it("shifts months across years", () => {
+    expect(shiftPeriod("2026-11", 3)).toBe("2027-02");
+    expect(shiftPeriod("2026-02", -2)).toBe("2025-12");
+    expect(shiftPeriod("2026-01", 11)).toBe("2026-12");
   });
 
   it("knows the next month", () => {

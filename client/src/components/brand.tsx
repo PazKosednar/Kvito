@@ -65,7 +65,7 @@ export function Eyebrow({ index, children, className, onPanel = false }: { index
 
 // ---------- StatusBadge ----------
 
-const STATUS_STYLE: Record<ChargeStatus, string> = {
+export const STATUS_STYLE: Record<ChargeStatus, string> = {
   OPEN: "bg-surface-sunken text-ink-muted",
   REPORTED_PAID: "border-line-strong bg-surface-raised text-ink",
   CONFIRMED: "bg-accent-soft text-primary",
@@ -73,8 +73,8 @@ const STATUS_STYLE: Record<ChargeStatus, string> = {
   DISPUTED: "bg-danger-soft text-danger",
 };
 
-function StatusIcon({ status }: { status: ChargeStatus }) {
-  const common = { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "square" as const, strokeLinejoin: "miter" as const, className: "size-3 shrink-0", "aria-hidden": true };
+export function StatusIcon({ status, className = "size-3 shrink-0" }: { status: ChargeStatus; className?: string }) {
+  const common = { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "square" as const, strokeLinejoin: "miter" as const, className, "aria-hidden": true };
   switch (status) {
     case "OPEN":
       return <svg {...common}><rect x="4.5" y="4.5" width="7" height="7" /></svg>;

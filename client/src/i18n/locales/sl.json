@@ -215,7 +215,8 @@
     "CODE_INVALID": "Koda se ne ujema ali je potekla. Vpiši zadnjo poslano kodo.",
     "CODE_TOO_MANY_ATTEMPTS": "Preveč napačnih poskusov. Zahtevaj novo kodo.",
     "CODE_RATE_LIMITED": "V zadnji uri smo poslali že 5 kod. Vpiši zadnjo prejeto ali poskusi čez eno uro.",
-    "ACCOUNT_LOCKED": "Preveč napačnih gesel. Počakaj nekaj minut ali nastavi novo geslo prek »Pozabljeno geslo?«."
+    "ACCOUNT_LOCKED": "Preveč napačnih gesel. Počakaj nekaj minut ali nastavi novo geslo prek »Pozabljeno geslo?«.",
+    "TOO_MANY_LINKS": "Imaš že 10 veljavnih povezav. Prekliči katero od njih."
   },
   "validation": {
     "invalid": "Vrednost ni pravilna.",
@@ -1328,5 +1329,116 @@
     "privacy": "Politika zasebnosti",
     "draft": "Osnutek. Besedilo še ni pravno pregledano in se lahko spremeni.",
     "version": "Različica: {{version}}"
+  },
+  "strip": {
+    "title": "Leto najema",
+    "state": {
+      "CONFIRMED": "poravnano",
+      "REPORTED_PAID": "čaka potrditev",
+      "OPEN": "odprto",
+      "OVERDUE": "zamuda",
+      "DISPUTED": "ugovor",
+      "NONE": "nič zapadlega"
+    }
+  },
+  "charts": {
+    "scale": {
+      "title": "Tehtnica obračuna",
+      "paid": "Plačano (akontacije)",
+      "paidParts": "Akontacije {{advances}} + dobroimetje {{carried}}",
+      "costs": "Dejanski stroški",
+      "credit": "V dobro {{amount}}",
+      "owes": "Doplačilo {{amount}}",
+      "even": "Brez razlike"
+    },
+    "monthly": {
+      "title": "Stroški po mesecih",
+      "costs": "Stroški",
+      "advance": "Akontacija",
+      "forecast": "Napoved",
+      "aria": "Stroški po mesecih v primerjavi z mesečno akontacijo"
+    }
+  },
+  "forecast": {
+    "title": "Napoved do {{until}}",
+    "until": "Do meseca",
+    "costsAhead": "Pričakovani stroški",
+    "balanceNow": "Stanje zdaj",
+    "endBalance": "Ob koncu ({{until}})",
+    "advice": "Da bi bil obračun izravnan, predlagamo pavšal {{suggested}} na mesec (zdaj {{current}}).",
+    "adviceFine": "Sedanji pavšal {{amount}} na mesec je primeren.",
+    "apply": "Nastavi pavšal na {{amount}}",
+    "applied": "Pavšal je {{amount}} na mesec. Velja od naslednjega mesečnega plačila.",
+    "perTypeHint": "Akontacije so določene po vrstah stroškov; uredi jih v zavihku Pogodba.",
+    "basisAverage": "Za {{months}} ni lanskih podatkov, zato je ocena povprečje dosedanjih mesecev. Pozimi so lahko stroški višji.",
+    "basisLastYear": "Ocena temelji na istih mesecih lani.",
+    "estimate": "To je ocena, ne obračun."
+  },
+  "annual": {
+    "eyebrow": "Za računovodjo",
+    "title": "Letni povzetek {{year}}",
+    "subtitle": "Prejet denar po enotah in mesecih: najemnina ločeno od povrnjenih stroškov in varščine.",
+    "kind": {
+      "rent": "Najemnina",
+      "costs": "Povrnjeni stroški",
+      "deposit": "Varščina",
+      "other": "Drugo"
+    },
+    "returned": "Vrnjeno najemnikom: varščina {{deposit}}, preplačila stroškov {{costs}}.",
+    "empty": "V tem letu ni potrjenih plačil.",
+    "tableCaption": "Prejeto po mesecih za {{unit}} v letu {{year}}",
+    "disclaimer": "Zneski so plačila, ki si jih potrdil v Kvitu, razvrščena po datumu plačila. Povzetek je pomoč pri evidenci, ne davčni obračun ali nasvet: kaj se šteje v dohodek iz oddajanja, preveri pri računovodji ali na FURS.",
+    "entryHint": "Letni povzetek loči najemnino od povrnjenih stroškov in varščine, po enotah in mesecih.",
+    "cta": "Letni povzetek"
+  },
+  "history": {
+    "menu": "Moj najemniški življenjepis",
+    "title": "Najemniški življenjepis",
+    "subtitle": "Pokaži bodočemu najemodajalcu, da plačuješ zanesljivo. Podatke so potrdili tvoji najemodajalci v Kvitu.",
+    "share": "Deli s povezavo",
+    "shareHint": "Povezava pokaže samo povzetek spodaj: brez zneskov, naslovov in e-pošte. Kadar koli jo lahko prekličeš.",
+    "validFor": "Veljavnost povezave",
+    "days_one": "{{count}} dan",
+    "days_two": "{{count}} dneva",
+    "days_few": "{{count}} dni",
+    "days_other": "{{count}} dni",
+    "create": "Ustvari povezavo",
+    "copy": "Kopiraj",
+    "copied": "Povezava je kopirana.",
+    "copyFailed": "Kopiranje ni uspelo. Označi povezavo in jo kopiraj ročno.",
+    "onlyOnce": "Povezavo vidiš samo zdaj. Če jo izgubiš, ustvari novo.",
+    "linkCreated": "Povezava z dne {{date}}",
+    "linkMeta_one": "Velja do {{date}} · odprta {{count}}-krat",
+    "linkMeta_two": "Velja do {{date}} · odprta {{count}}-krat",
+    "linkMeta_few": "Velja do {{date}} · odprta {{count}}-krat",
+    "linkMeta_other": "Velja do {{date}} · odprta {{count}}-krat",
+    "revoke": "Prekliči povezavo",
+    "confirmRevoke": "Prekličem povezavo? Kdor jo ima, je ne bo več mogel odpreti.",
+    "revoked": "Povezava je preklicana.",
+    "preview": "Tako jo vidi najemodajalec",
+    "eyebrow": "Najemniški življenjepis · Kvito ✓",
+    "verified": "Podatke so potrdili najemodajalci v aplikaciji Kvito.",
+    "months": "Mesecev najema",
+    "onTime": "Plačano v roku",
+    "confirmed": "Potrjenih plačil",
+    "landlords": "Najemodajalcev",
+    "last24": "Zadnjih 24 mesecev",
+    "state": {
+      "ON_TIME": "plačano v roku",
+      "LATE": "plačano z zamudo",
+      "OPEN": "čaka",
+      "OVERDUE": "neplačano po roku",
+      "DISPUTED": "v ugovoru",
+      "NONE": "nič zapadlega"
+    },
+    "paymentsLine": "Plačila",
+    "paymentsValue": "{{onTime}} v roku · {{late}} z zamudo · {{overdue}} odprtih po roku",
+    "depositsLine": "Varščine",
+    "depositsValue": "{{full}} vrnjenih v celoti · {{partly}} delno · {{held}} pri najemodajalcu",
+    "settlementsLine": "Potrjeni obračuni stroškov",
+    "footnote": "»V roku« pomeni plačano do roka obveznosti. Povzetek ne vsebuje zneskov, naslovov ali kontaktov.",
+    "validUntil": "Povezava velja do {{date}}.",
+    "notFoundTitle": "Povezava ne velja",
+    "notFoundBody": "Povezava je potekla ali jo je najemnik preklical. Prosi ga za novo."
   }
 }

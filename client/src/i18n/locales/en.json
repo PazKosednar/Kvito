@@ -215,7 +215,8 @@
     "CODE_INVALID": "The code doesn't match or has expired. Enter the latest code.",
     "CODE_TOO_MANY_ATTEMPTS": "Too many wrong attempts. Request a new code.",
     "CODE_RATE_LIMITED": "We've sent 5 codes in the last hour. Enter the latest one or try again in an hour.",
-    "ACCOUNT_LOCKED": "Too many wrong passwords. Wait a few minutes or set a new one via “Forgot your password?”."
+    "ACCOUNT_LOCKED": "Too many wrong passwords. Wait a few minutes or set a new one via “Forgot your password?”.",
+    "TOO_MANY_LINKS": "You already have 10 valid links. Revoke one of them."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -1296,5 +1297,112 @@
     "privacy": "Privacy policy",
     "draft": "Draft, in Slovenian only. Not yet reviewed by a lawyer and may change.",
     "version": "Version: {{version}}"
+  },
+  "strip": {
+    "title": "The year of the tenancy",
+    "state": {
+      "CONFIRMED": "settled",
+      "REPORTED_PAID": "awaiting confirmation",
+      "OPEN": "open",
+      "OVERDUE": "overdue",
+      "DISPUTED": "disputed",
+      "NONE": "nothing due"
+    }
+  },
+  "charts": {
+    "scale": {
+      "title": "Settlement balance",
+      "paid": "Paid (advances)",
+      "paidParts": "Advances {{advances}} + credit {{carried}}",
+      "costs": "Actual costs",
+      "credit": "Credit {{amount}}",
+      "owes": "To pay {{amount}}",
+      "even": "Even"
+    },
+    "monthly": {
+      "title": "Costs by month",
+      "costs": "Costs",
+      "advance": "Advance",
+      "forecast": "Estimate",
+      "aria": "Costs by month compared with the monthly advance"
+    }
+  },
+  "forecast": {
+    "title": "Estimate until {{until}}",
+    "until": "Until",
+    "costsAhead": "Expected costs",
+    "balanceNow": "Balance now",
+    "endBalance": "At the end ({{until}})",
+    "advice": "To come out even, we suggest a lump sum of {{suggested}} a month (now {{current}}).",
+    "adviceFine": "The current lump sum of {{amount}} a month fits.",
+    "apply": "Set the lump sum to {{amount}}",
+    "applied": "The lump sum is {{amount}} a month, from the next monthly payment.",
+    "perTypeHint": "Advances are set per cost type; change them in the Contract tab.",
+    "basisAverage": "There is no data from last year for {{months}}, so the estimate is the average of the months so far. Winter can cost more.",
+    "basisLastYear": "The estimate follows the same months last year.",
+    "estimate": "This is an estimate, not a settlement."
+  },
+  "annual": {
+    "eyebrow": "For your accountant",
+    "title": "Yearly summary {{year}}",
+    "subtitle": "Money received by unit and month: rent apart from reimbursed costs and the deposit.",
+    "kind": {
+      "rent": "Rent",
+      "costs": "Reimbursed costs",
+      "deposit": "Deposit",
+      "other": "Other"
+    },
+    "returned": "Paid back to tenants: deposit {{deposit}}, cost overpayments {{costs}}.",
+    "empty": "No confirmed payments in this year.",
+    "tableCaption": "Received by month for {{unit}} in {{year}}",
+    "disclaimer": "Amounts are payments you confirmed in Kvito, sorted by payment date. The summary helps with your records; it is not a tax calculation or advice – ask an accountant or FURS what counts as rental income.",
+    "entryHint": "The yearly summary separates rent from reimbursed costs and the deposit, by unit and month.",
+    "cta": "Yearly summary"
+  },
+  "history": {
+    "menu": "My renting history",
+    "title": "Renting history",
+    "subtitle": "Show a future landlord that you pay reliably. Your landlords confirmed this data in Kvito.",
+    "share": "Share with a link",
+    "shareHint": "The link shows only the summary below: no amounts, addresses or e-mail. You can revoke it any time.",
+    "validFor": "Link validity",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "create": "Create link",
+    "copy": "Copy",
+    "copied": "Link copied.",
+    "copyFailed": "Copying failed. Select the link and copy it by hand.",
+    "onlyOnce": "You see the link only now. If you lose it, create a new one.",
+    "linkCreated": "Link from {{date}}",
+    "linkMeta_one": "Valid until {{date}} · opened {{count}} time",
+    "linkMeta_other": "Valid until {{date}} · opened {{count}} times",
+    "revoke": "Revoke link",
+    "confirmRevoke": "Revoke the link? Whoever has it can no longer open it.",
+    "revoked": "Link revoked.",
+    "preview": "What a landlord sees",
+    "eyebrow": "Renting history · Kvito ✓",
+    "verified": "Confirmed by landlords in the Kvito app.",
+    "months": "Months renting",
+    "onTime": "Paid on time",
+    "confirmed": "Confirmed payments",
+    "landlords": "Landlords",
+    "last24": "Last 24 months",
+    "state": {
+      "ON_TIME": "paid on time",
+      "LATE": "paid late",
+      "OPEN": "pending",
+      "OVERDUE": "unpaid after due date",
+      "DISPUTED": "disputed",
+      "NONE": "nothing due"
+    },
+    "paymentsLine": "Payments",
+    "paymentsValue": "{{onTime}} on time · {{late}} late · {{overdue}} open after due date",
+    "depositsLine": "Deposits",
+    "depositsValue": "{{full}} returned in full · {{partly}} partly · {{held}} held",
+    "settlementsLine": "Accepted cost settlements",
+    "footnote": "“On time” means paid by the due date. The summary has no amounts, addresses or contacts.",
+    "validUntil": "This link is valid until {{date}}.",
+    "notFoundTitle": "This link is not valid",
+    "notFoundBody": "The link expired or the tenant revoked it. Ask them for a new one."
   }
 }

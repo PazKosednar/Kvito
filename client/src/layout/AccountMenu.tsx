@@ -1,4 +1,4 @@
-import { KeyRound, LogOut, Plus, ShieldCheck } from "lucide-react";
+import { BadgeCheck, KeyRound, LogOut, Plus, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -123,6 +123,12 @@ export function AccountMenu() {
         />
         <DropdownMenuSeparator />
 
+        {roles.includes("TENANT") && (
+          <DropdownMenuItem className="py-3" onSelect={() => void navigate("/moj-zivljenjepis")}>
+            <BadgeCheck />
+            {t("history.menu")}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem className="py-3" onSelect={() => void navigate("/geslo")}>
           <KeyRound />
           {t("password.menu")}

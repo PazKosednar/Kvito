@@ -14,6 +14,8 @@ import { centsToInput, formatCents, parseAmountToCents } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { COST_TYPES, type CostEntry, type CostType, type CostsView } from "@/types/domain";
 import { useTenancyContext } from "@/features/tenancies/TenancyLayout";
+import { MonthlyCostsChart } from "./charts";
+import { ForecastCard } from "./ForecastCard";
 import { CostMonthsTable, LockedLabel, formatSigned, useMonthLabel } from "./contract-ui";
 
 type Q = ReturnType<typeof useCosts>;
@@ -46,7 +48,10 @@ export function CostsPage() {
       ) : (
         <>
           {!range && <RunningBalance costs={q.costs} />}
+          {!range && <ForecastCard costs={q.costs} />}
           <RangePicker costs={q.costs} custom={!!range} onChange={setRange} />
+          {/* Without a chosen range the forecast card shows the chart (actual months + estimate). */}
+          {range && q.costs.months.some((m) => m.costCents > 0 || m.advanceCents > 0) && <MonthlyCostsChart months={q.costs.months} className="mb-6" />}
           {q.costs.costTypes.length > 0 && <CostMonthsTable months={q.costs.months} costTypes={q.costs.costTypes} className="mb-8 hidden md:block" />}
           <div className={cn("flex flex-col gap-3", !isLandlord && q.costs.costTypes.length > 0 && "md:hidden")}>
             {[...q.costs.months].reverse().map((m) => (
@@ -69,7 +74,7 @@ function RunningBalance({ costs }: { costs: CostsView }) {
   const key = r.balanceCents < 0 ? "credit" : r.balanceCents > 0 ? "owes" : "even";
   return (
     <div className="mb-6 rounded-md border border-line bg-surface-raised p-4">
-      <p className="label-mono">{t("contract.monthly.runningTitle", { from: monthLabel(r.from), to: monthLabel(r.to) })}</p>
+      <p className="label-mono">{r.from === r.to ? monthLabel(r.from) : t("contract.monthly.runningTitle", { from: monthLabel(r.from), to: monthLabel(r.to) })}</p>
       <p className={cn("mt-2 text-lg font-semibold", r.balanceCents < 0 && "text-primary")}>
         {t(`contract.monthly.running.${who}.${key}`, { amount: formatCents(Math.abs(r.balanceCents)) })}
       </p>

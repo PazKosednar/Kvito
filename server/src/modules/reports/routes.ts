@@ -5,7 +5,13 @@ import { todayInLjubljana } from "../../lib/dates.js";
 import { notFound } from "../../lib/errors.js";
 import { prisma } from "../../lib/prisma.js";
 import { authUserId } from "../../middleware/auth.js";
+import { annualCsv, loadAnnualSummary, renderAnnualPdf } from "./annual.js";
 import { loadPaymentRows, paymentsCsv, renderPaymentsPdf } from "./payments.js";
+
+const AnnualQuery = z.object({
+  year: z.coerce.number().int().min(2000).max(2100).optional(),
+  format: z.enum(["json", "csv", "pdf"]).default("json"),
+});
 
 const ExportQuery = z.object({
   year: z.coerce.number().int().min(2000).max(2100).optional(),
@@ -86,6 +92,31 @@ export function reportsRouter(): Router {
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader("Content-Disposition", `attachment; filename="kvito-prejeta-placila-${year}.csv"`);
     res.send(paymentsCsv(rows));
+  });
+
+  /** Yearly summary of received money by unit and month: rent, costs, deposit, other (JSON, CSV or PDF). */
+  router.get("/annual", async (req, res) => {
+    const userId = authUserId(req);
+    const q = AnnualQuery.parse(req.query);
+    const year = q.year ?? todayInLjubljana().getUTCFullYear();
+    const user = await prisma.user.findFirst({ where: { id: userId, deletedAt: null }, select: { name: true, email: true } });
+    if (!user) throw notFound();
+    const summary = await loadAnnualSummary(userId, year);
+    if (q.format === "json") {
+      res.json({ summary });
+      return;
+    }
+    await audit({ actorId: userId, entityType: "User", entityId: userId, action: "export.annual", after: { year, format: q.format }, ip: req.ip });
+    if (q.format === "pdf") {
+      const pdf = await renderAnnualPdf(summary, user.name ?? user.email);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="kvito-letni-povzetek-${year}.pdf"`);
+      res.send(pdf);
+      return;
+    }
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="kvito-letni-povzetek-${year}.csv"`);
+    res.send(annualCsv(summary));
   });
 
   return router;

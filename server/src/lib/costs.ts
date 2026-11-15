@@ -26,6 +26,13 @@ export function monthsBetween(from: string, to: string): string[] {
   return out;
 }
 
+/** "2026-11" shifted by n months (n may be negative): shiftPeriod("2026-11", 3) → "2027-02". */
+export function shiftPeriod(period: string, n: number): string {
+  const [y, m] = period.split("-").map(Number) as [number, number];
+  const total = y * 12 + (m - 1) + n;
+  return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, "0")}`;
+}
+
 /** "2026-11" → "2026-12". */
 export function nextPeriod(period: string): string {
   const [y, m] = period.split("-").map(Number) as [number, number];

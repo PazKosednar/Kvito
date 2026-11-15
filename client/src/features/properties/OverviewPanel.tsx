@@ -1,4 +1,4 @@
-import { Download, Loader2, Upload } from "lucide-react";
+import { Download, FileBarChart, Loader2, Upload } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -104,6 +104,15 @@ export function ExportsSection() {
             {f.toUpperCase()}
           </Button>
         ))}
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-4 rounded-md border border-line bg-surface-raised p-4">
+        <p className="min-w-0 flex-1 text-sm text-ink-muted">{t("annual.entryHint")}</p>
+        <Button asChild variant="secondary">
+          <Link to={ROUTES.annual}>
+            <FileBarChart />
+            {t("annual.cta")}
+          </Link>
+        </Button>
       </div>
     </Section>
   );

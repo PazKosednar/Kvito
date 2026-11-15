@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { api } from "@/lib/api";
-import type { Closeout, CostAdvance, CostType, CostsView, CreditChoice, DepositState, RentChange, Settlement, SettlementSummary } from "@/types/domain";
+import type { Closeout, CostAdvance, CostForecast, CostType, CostsView, CreditChoice, DepositState, RentChange, Settlement, SettlementSummary } from "@/types/domain";
 import { uploadAttachment } from "./useCharges";
 import { invalidate, useQuery } from "./useQuery";
 
@@ -160,6 +160,13 @@ export function useCosts(tenancyId: string, range?: { from: string; to: string }
   );
 
   return { ...q, costs: q.data, setEntry, attachFile, detachFile };
+}
+
+/** Estimate until a month (default: a year from the last settlement) and the suggested monthly lump sum. */
+export function useCostForecast(tenancyId: string, until?: string) {
+  const base = `/api/tenancies/${tenancyId}/costs/forecast`;
+  const q = useQuery<CostForecast>(until ? `${base}?until=${until}` : base);
+  return { ...q, forecast: q.data };
 }
 
 // ---------- Rent changes & closing ----------

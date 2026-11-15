@@ -446,7 +446,7 @@ export function settlementsRouter(): Router {
         // Re-read inside the transaction: the monthly job may have used part of the credit meanwhile.
         const s = await tx.costSettlement.findUniqueOrThrow({ where: { id } });
         if (s.creditRemainingCents <= 0) throw badRequest("TRANSITION_NOT_ALLOWED");
-        await tx.costSettlement.update({ where: { id }, data: { creditRemainingCents: 0, refundedOn: body.refundedOn, refundConfirmedAt: null } });
+        await tx.costSettlement.update({ where: { id }, data: { creditRemainingCents: 0, refundedOn: body.refundedOn, refundedCents: s.creditRemainingCents, refundConfirmedAt: null } });
         await audit({ actorId: userId, entityType: "CostSettlement", entityId: id, action: "creditRefunded", before: { creditRemainingCents: s.creditRemainingCents }, after: { refundedOn: body.refundedOn }, ip: req.ip }, tx);
         return s.creditRemainingCents;
       });
@@ -456,7 +456,7 @@ export function settlementsRouter(): Router {
       res.json({ settlement: await settlementDto(s) });
       return;
     }
-    const r = await transition(req, "refunded", async () => ({ refundedOn: body.refundedOn }));
+    const r = await transition(req, "refunded", async (_s, balanceCents) => ({ refundedOn: body.refundedOn, refundedCents: -balanceCents }));
     bus.emit("contract.activity", { tenancyId: r.s.tenancyId, actorId: r.userId, kind: "settlement.refunded", settlementId: r.s.id, refundCents: -r.balanceCents, refundedOn: body.refundedOn });
     const { s } = await loadSettlement(r.s.id, r.userId);
     res.json({ settlement: await settlementDto(s) });

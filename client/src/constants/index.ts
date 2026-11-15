@@ -19,6 +19,8 @@ export const ROUTES = {
   onboarding: "/dobrodoslica",
   notifications: "/obvestila",
   bankImport: "/izpisek",
+  annual: "/letni-povzetek",
+  history: "/moj-zivljenjepis",
   terms: "/pogoji",
   privacyPolicy: "/politika-zasebnosti",
 } as const;

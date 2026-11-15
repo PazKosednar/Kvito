@@ -436,6 +436,19 @@ export interface CostMonth {
   balanceCents: number;
 }
 
+/** Estimate of running costs until a month (GET /tenancies/:id/costs/forecast). */
+export interface CostForecast {
+  windowFrom: string;
+  until: string;
+  creditCents: number;
+  lastActual: string | null;
+  months: { period: string; costCents: number; advanceCents: number; basis: "LAST_YEAR" | "AVERAGE" | "NONE" }[];
+  balanceNowCents: number;
+  endBalanceCents: number;
+  currentAdvanceCents: number;
+  suggestedAdvanceCents: number;
+}
+
 export interface CostEntry {
   id: string;
   period: string;

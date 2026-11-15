@@ -99,6 +99,8 @@ export async function deleteAccount(userId: string, ip: string | undefined): Pro
     await tx.invitation.updateMany({ where: { inviterId: userId, acceptedAt: null, revokedAt: null }, data: { revokedAt: now } });
 
     await tx.refreshToken.deleteMany({ where: { userId } });
+    // Shared renting-history links stop working with the account.
+    await tx.tenantReference.deleteMany({ where: { userId } });
     await tx.pushSubscription.deleteMany({ where: { userId } });
     await tx.notification.deleteMany({ where: { userId } });
     await tx.loginCode.deleteMany({ where: { email: user.email } });

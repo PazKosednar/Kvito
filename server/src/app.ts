@@ -24,6 +24,7 @@ import { metersRouter } from "./modules/meters/routes.js";
 import { notificationsRouter } from "./modules/notifications/routes.js";
 import { messagesRouter } from "./modules/messages/routes.js";
 import { privacyRouter } from "./modules/users/privacy.js";
+import { referencesPublicRouter, referencesRouter } from "./modules/references/routes.js";
 import { reportsRouter } from "./modules/reports/routes.js";
 import { propertiesRouter } from "./modules/properties/routes.js";
 import { tenanciesRouter } from "./modules/tenancies/routes.js";
@@ -95,6 +96,7 @@ export function createApp(deps: AppDeps): Express {
   app.use("/api", upnRouter());
   app.use("/api", filesPublicRouter(deps));
   app.use("/api", invitationsPublicRouter());
+  app.use("/api", referencesPublicRouter());
 
   // Everything below requires a valid access token. Routers do not repeat this check.
   app.use("/api", requireAuth);
@@ -103,6 +105,7 @@ export function createApp(deps: AppDeps): Express {
   app.use("/api", invitationsRouter(deps));
   app.use("/api", propertiesRouter());
   app.use("/api", reportsRouter());
+  app.use("/api", referencesRouter());
   app.use("/api", privacyRouter());
   app.use("/api", tenanciesRouter());
   app.use("/api", chargesRouter(deps));

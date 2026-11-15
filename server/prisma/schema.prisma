@@ -124,6 +124,7 @@ model User {
   deletedAt      DateTime?
 
   refreshTokens       RefreshToken[]
+  tenantReferences    TenantReference[]
   properties          Property[]         @relation("PropertyOwner")
   memberships         TenancyMember[]
   invitationsSent     Invitation[]       @relation("InvitationInviter")
@@ -155,6 +156,23 @@ enum CodePurpose {
   VERIFY_EMAIL
   /// Lets the owner of the e-mail set a new password.
   RESET_PASSWORD
+}
+
+/// Link a tenant shares with a future landlord: a verified summary of their renting history (najemniški življenjepis).
+/// Only a hash of the token is stored; the tenant can revoke it, and it expires.
+model TenantReference {
+  id           String    @id @default(cuid())
+  userId       String
+  tokenHash    String    @unique
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  views        Int       @default(0)
+  lastViewedAt DateTime?
+  createdAt    DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 /// One-time 6-digit code sent by e-mail. Only an HMAC of the code is stored.
@@ -894,6 +912,8 @@ model CostSettlement {
   chargeId          String?          @unique
   /// Overpayment returned by the landlord (outside Kvito), and the tenant's confirmation.
   refundedOn        DateTime?        @db.Date
+  /// How much the landlord paid back (overpayment or leftover credit) – for the yearly summary.
+  refundedCents     Int?
   refundConfirmedAt DateTime?
   /// What the landlord suggests doing with a credit, and what the tenant chose on acceptance.
   recommendedChoice    CreditChoice?

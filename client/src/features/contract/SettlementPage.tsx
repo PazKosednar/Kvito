@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { CREDIT_CHOICES, type CreditChoice, type Settlement, type SettlementLine } from "@/types/domain";
 import { useTenancyContext } from "@/features/tenancies/TenancyLayout";
 import { BalanceText } from "./ContractTab";
+import { MonthlyCostsChart, SettlementScale } from "./charts";
 import { CostMonthsTable, SettlementStatusLabel, useMonthLabel } from "./contract-ui";
 
 type Q = ReturnType<typeof useSettlement>;
@@ -237,7 +238,10 @@ function SettlementEditor({ s, q }: { s: Settlement; q: Q }) {
       >
         <p className="-mt-1 mb-3 text-sm text-ink-muted">{t("contract.costs.fromMonthsHint")}</p>
         {s.monthCostTypes.length > 0 ? (
-          <CostMonthsTable months={s.months} costTypes={s.monthCostTypes} />
+          <>
+            <MonthlyCostsChart months={s.months} className="mb-4" />
+            <CostMonthsTable months={s.months} costTypes={s.monthCostTypes} />
+          </>
         ) : (
           <p className="rounded-md border border-dashed border-line p-4 text-ink-muted">
             {t("contract.costs.noMonthsYet")}{" "}
@@ -246,6 +250,7 @@ function SettlementEditor({ s, q }: { s: Settlement; q: Q }) {
             </Link>
           </p>
         )}
+        <SettlementScale totals={s.totals} className="mt-4" />
         <Totals s={s} />
       </Section>
 
@@ -360,6 +365,8 @@ function SettlementView({ s, q }: { s: Settlement; q: Q }) {
   return (
     <>
       <Header s={s} />
+      <SettlementScale totals={s.totals} className="mb-4" />
+      {s.monthCostTypes.length > 0 && <MonthlyCostsChart months={s.months} className="mb-4" />}
       <Breakdown s={s} />
       <LineNotes s={s} />
       <Totals s={s} />

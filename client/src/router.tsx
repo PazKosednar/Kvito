@@ -23,6 +23,9 @@ import { MetersTab } from "@/features/meters/MetersTab";
 import { PropertyFormPage } from "@/features/properties/PropertyFormPage";
 import { PropertyPage } from "@/features/properties/PropertyPage";
 import { ChangePasswordPage } from "@/features/account/ChangePasswordPage";
+import { MyHistoryPage } from "@/features/account/MyHistoryPage";
+import { AnnualSummaryPage } from "@/features/properties/AnnualSummaryPage";
+import { ReferencePage } from "@/pages/ReferencePage";
 import { PrivacyPage } from "@/features/account/PrivacyPage";
 import { NotificationsPage } from "@/features/notifications/NotificationsPage";
 import { InvitePage } from "@/features/tenancies/InvitePage";
@@ -39,6 +42,8 @@ export const router = createBrowserRouter([
   { path: ROUTES.login, element: <LoginPage /> },
   // Public: an invitation link must work before signing in.
   { path: "/povabilo/:token", element: <AcceptInvitePage /> },
+  // Public: a tenant's shared renting history.
+  { path: "/referenca/:token", element: <ReferencePage /> },
   // Public legal texts (linked from sign-up).
   { path: ROUTES.terms, element: <LegalPage doc="terms" /> },
   { path: ROUTES.privacyPolicy, element: <LegalPage doc="privacy" /> },
@@ -55,6 +60,8 @@ export const router = createBrowserRouter([
           { path: "obvestila", element: <NotificationsPage /> },
           { path: "zasebnost", element: <PrivacyPage /> },
           { path: "geslo", element: <ChangePasswordPage /> },
+          { path: "letni-povzetek", element: <AnnualSummaryPage /> },
+          { path: "moj-zivljenjepis", element: <MyHistoryPage /> },
           { path: "izpisek", element: <BankImportPage /> },
           { path: "nepremicnine/nova", element: <PropertyFormPage /> },
           { path: "nepremicnine/:id", element: <PropertyPage /> },

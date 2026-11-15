@@ -30,6 +30,31 @@ export function saveBlob(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
+export interface MoneyParts {
+  rent: number;
+  costs: number;
+  deposit: number;
+  other: number;
+}
+
+export interface AnnualSummary {
+  year: number;
+  units: { tenancyId: string; property: string; unit: string; tenants: string[]; months: (MoneyParts & { month: number })[]; totals: MoneyParts; returned: { depositCents: number; costsCents: number } }[];
+  totals: MoneyParts;
+  returned: { depositCents: number; costsCents: number };
+}
+
+/** Landlord: money received in a year by unit and month (rent apart from costs and deposit), with CSV/PDF. */
+export function useAnnualSummary(year: number | null) {
+  const q = useQuery<{ summary: AnnualSummary }>(year ? `/api/annual?year=${year}` : null);
+  const download = useCallback(async (format: "csv" | "pdf") => {
+    if (!year) return;
+    const blob = await apiBlob(`/api/annual?year=${year}&format=${format}`);
+    saveBlob(blob, `kvito-letni-povzetek-${year}.${format}`);
+  }, [year]);
+  return { ...q, summary: q.data?.summary, download };
+}
+
 /** Yearly export of received payments (CSV for spreadsheets, PDF for printing). */
 export function usePaymentExport() {
   const years = useQuery<{ years: number[] }>("/api/exports/years");
