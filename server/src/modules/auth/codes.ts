@@ -22,11 +22,16 @@ type Purpose = Extract<CodePurpose, "VERIFY_EMAIL" | "RESET_PASSWORD">;
 export const hashCode = (email: string, purpose: Purpose, code: string, secret = env.JWT_ACCESS_SECRET): string =>
   hmacSha256(secret, `email-code:${purpose}:${email}:${code}`);
 
-/** Creates a code (earlier unused ones of the same purpose stop working) and e-mails it. */
-export async function sendCode(email: string, purpose: Purpose, emailSender: EmailSender, locale: Locale, ip?: string): Promise<void> {
+/** Throws CODE_RATE_LIMITED when this e-mail already got too many codes of this kind in the last hour. */
+export async function assertCodeQuota(email: string, purpose: Purpose): Promise<void> {
   const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
   const recent = await prisma.loginCode.count({ where: { email, purpose, createdAt: { gte: hourAgo } } });
   if (recent >= MAX_PER_HOUR) throw tooManyRequests("CODE_RATE_LIMITED");
+}
+
+/** Creates a code (earlier unused ones of the same purpose stop working) and e-mails it. */
+export async function sendCode(email: string, purpose: Purpose, emailSender: EmailSender, locale: Locale, ip?: string): Promise<void> {
+  await assertCodeQuota(email, purpose);
   const code = randomDigits(CODE_LENGTH);
   await prisma.$transaction([
     prisma.loginCode.updateMany({ where: { email, purpose, consumedAt: null }, data: { consumedAt: new Date() } }),
@@ -43,10 +48,15 @@ export async function consumeCode(email: string, purpose: Purpose, code: string)
     orderBy: { createdAt: "desc" },
   });
   if (!row) throw badRequest("CODE_INVALID");
-  if (row.attempts >= MAX_ATTEMPTS) throw tooManyRequests("CODE_TOO_MANY_ATTEMPTS");
+  // Reserve one attempt atomically before comparing, so parallel guesses cannot exceed the limit.
+  const reserved = await prisma.loginCode.updateMany({
+    where: { id: row.id, consumedAt: null, attempts: { lt: MAX_ATTEMPTS } },
+    data: { attempts: { increment: 1 } },
+  });
+  if (reserved.count === 0) throw tooManyRequests("CODE_TOO_MANY_ATTEMPTS");
   if (!safeEqualHex(hashCode(email, purpose, code), row.codeHash)) {
-    const updated = await prisma.loginCode.update({ where: { id: row.id }, data: { attempts: { increment: 1 } } });
-    if (updated.attempts >= MAX_ATTEMPTS) {
+    const after = await prisma.loginCode.findUniqueOrThrow({ where: { id: row.id }, select: { attempts: true } });
+    if (after.attempts >= MAX_ATTEMPTS) {
       await prisma.loginCode.update({ where: { id: row.id }, data: { consumedAt: new Date() } });
       throw tooManyRequests("CODE_TOO_MANY_ATTEMPTS");
     }

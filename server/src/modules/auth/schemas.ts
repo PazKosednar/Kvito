@@ -22,7 +22,7 @@ export const RegisterBody = z.object({
 });
 
 export const EmailBody = z.object({ email });
-export const VerifyEmailBody = z.object({ email, code });
+export const VerifyEmailBody = z.object({ email, code, password: z.string().min(1).max(PASSWORD_MAX) });
 export const ResetPasswordBody = z.object({ email, code, password: newPassword });
 
 export const LoginBody = z.object({

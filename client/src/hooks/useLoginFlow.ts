@@ -54,7 +54,7 @@ export function useLoginFlow(onSuccess: () => void) {
       : mode === "register"
         ? !!name.trim() && !!e && password.length >= PASSWORD_MIN && acceptTerms
         : mode === "verify"
-          ? code.length === CODE_LENGTH
+          ? code.length === CODE_LENGTH && !!password
           : mode === "forgot"
             ? !!e
             : code.length === CODE_LENGTH && password.length >= PASSWORD_MIN;
@@ -99,7 +99,7 @@ export function useLoginFlow(onSuccess: () => void) {
             setCooldown(RESEND_COOLDOWN_S);
             return;
           case "verify":
-            await auth.verifyEmail(e, code);
+            await auth.verifyEmail(e, code, password);
             return onSuccess();
           case "forgot":
             await auth.forgotPassword(e);

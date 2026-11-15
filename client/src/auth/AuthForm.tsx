@@ -21,7 +21,8 @@ export function AuthForm({ flow }: { flow: Flow }) {
   const m = flow.mode;
   const email = flow.email.trim();
   const withEmail = m === "login" || m === "register" || m === "forgot";
-  const withPassword = m === "login" || m === "register" || m === "reset";
+  // Confirming asks for the password too (already filled in after signing up), so only the account owner can activate it.
+  const withPassword = m !== "forgot";
   const withCode = m === "verify" || m === "reset";
   const newPassword = m === "register" || m === "reset";
 

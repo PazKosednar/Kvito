@@ -52,7 +52,7 @@ export function authRouter(deps: { emailSender: EmailSender }): Router {
 
   router.post("/verify-email", loginLimiter, validateBody(VerifyEmailBody), async (req, res) => {
     const body = req.body as z.infer<typeof VerifyEmailBody>;
-    const { user, tokens } = await verifyEmail(body.email, body.code, clientMeta(req));
+    const { user, tokens } = await verifyEmail(body.email, body.code, body.password, clientMeta(req));
     await audit({ actorId: user.id, entityType: "User", entityId: user.id, action: "register", after: { termsVersion: user.termsVersion }, ip: req.ip });
     signIn(res, user, tokens);
   });

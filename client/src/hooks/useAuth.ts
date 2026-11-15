@@ -46,8 +46,8 @@ export function useAuth() {
     await api("/api/auth/register", { method: "POST", body: { ...input, acceptTerms: true, locale: screenLocale() }, auth: false });
   }, []);
 
-  const verifyEmail = useCallback(async (email: string, code: string) => {
-    const res = await api<{ accessToken: string; user: CurrentUser }>("/api/auth/verify-email", { method: "POST", body: { email, code }, auth: false });
+  const verifyEmail = useCallback(async (email: string, code: string, password: string) => {
+    const res = await api<{ accessToken: string; user: CurrentUser }>("/api/auth/verify-email", { method: "POST", body: { email, code, password }, auth: false });
     useAuthStore.getState().setSession(res.accessToken, res.user);
     return res.user;
   }, []);

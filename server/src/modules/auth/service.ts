@@ -3,7 +3,7 @@ import { badRequest, tooManyRequests } from "../../lib/errors.js";
 import { dummyHash, hashPassword, verifyPassword } from "../../lib/password.js";
 import { prisma } from "../../lib/prisma.js";
 import type { EmailSender } from "../../services/email/EmailSender.js";
-import { consumeCode, sendCode } from "./codes.js";
+import { assertCodeQuota, consumeCode, sendCode } from "./codes.js";
 import { issueSession, type ClientMeta } from "./sessions.js";
 
 export const normalizeEmail = (email: string): string => email.trim().toLowerCase();
@@ -40,6 +40,8 @@ export async function register(input: { name: string; email: string; password: s
   const existing = await prisma.user.findUnique({ where: { email }, select: { id: true, deletedAt: true, emailVerifiedAt: true } });
   if (existing?.deletedAt) throw badRequest("ACCOUNT_DELETED");
   if (existing?.emailVerifiedAt) throw badRequest("EMAIL_TAKEN");
+  // Check the code quota before changing anything.
+  await assertCodeQuota(email, "VERIFY_EMAIL");
 
   const data = {
     name: input.name,
@@ -71,11 +73,19 @@ export async function resendVerification(rawEmail: string, emailSender: EmailSen
   await sendCode(email, "VERIFY_EMAIL", emailSender, user.locale, ip);
 }
 
-/** Confirms the e-mail with the code and signs in. */
-export async function verifyEmail(rawEmail: string, code: string, meta: ClientMeta) {
+/**
+ * Confirms the e-mail with the code and signs in. The password is required too: if someone else signed up again
+ * with this unconfirmed e-mail and their own password, the code in the owner's mailbox cannot activate it for them.
+ */
+export async function verifyEmail(rawEmail: string, code: string, password: string, meta: ClientMeta) {
   const email = normalizeEmail(rawEmail);
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || user.deletedAt || user.emailVerifiedAt) throw badRequest("CODE_INVALID");
+  assertNotLocked(user);
+  if (!user.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
+    await recordFailure(user);
+    throw badRequest("INVALID_CREDENTIALS");
+  }
   await consumeCode(email, "VERIFY_EMAIL", code);
   const updated = await prisma.user.update({ where: { id: user.id }, data: { emailVerifiedAt: new Date(), lastLoginAt: new Date(), ...clearFailures } });
   const tokens = await issueSession(user.id, meta);

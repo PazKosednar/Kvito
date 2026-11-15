@@ -81,17 +81,19 @@ describe.skipIf(!hasDb)("auth flow (smoke)", () => {
     // No session before the e-mail is confirmed.
     expect((await request(app).post("/api/auth/login").send({ email, password }).expect(400)).body.error.code).toBe("EMAIL_NOT_VERIFIED");
     const wrong = mail.lastCode() === "000000" ? "111111" : "000000";
-    expect((await request(app).post("/api/auth/verify-email").send({ email, code: wrong }).expect(400)).body.error.code).toBe("CODE_INVALID");
+    expect((await request(app).post("/api/auth/verify-email").send({ email, code: wrong, password }).expect(400)).body.error.code).toBe("CODE_INVALID");
+    // The code alone is not enough: someone who re-registered this e-mail with their own password cannot use the owner's code.
+    expect((await request(app).post("/api/auth/verify-email").send({ email, code: mail.lastCode(), password: "tuje-geslo-9" }).expect(400)).body.error.code).toBe("INVALID_CREDENTIALS");
 
     await request(app).post("/api/auth/resend-verification").send({ email }).expect(202);
-    const res = await request(app).post("/api/auth/verify-email").send({ email, code: mail.lastCode() }).expect(200);
+    const res = await request(app).post("/api/auth/verify-email").send({ email, code: mail.lastCode(), password }).expect(200);
     expect(res.body.user).toMatchObject({ email, name: "Smoke Test", roles: [], locale: "en" });
     expect(res.body.user.passwordHash).toBeUndefined();
     accessToken = res.body.accessToken;
     refreshCookie = cookieFrom(res);
     expect((res.headers["set-cookie"] as unknown as string[])[0]).toMatch(/HttpOnly/i);
     // A code works once.
-    await request(app).post("/api/auth/verify-email").send({ email, code: mail.lastCode() }).expect(400);
+    await request(app).post("/api/auth/verify-email").send({ email, code: mail.lastCode(), password }).expect(400);
   });
 
   it("does not register a confirmed e-mail again", async () => {
