@@ -34,7 +34,6 @@ Strežnik se v produkciji **ne zažene**, če manjka SMTP ali S3.
 - `Postgres` (EU, volumen 5 GB) → `DATABASE_URL=${{Postgres.DATABASE_URL}}`.
 - Bucket `kvito-files` (regija `ams`) → `S3_*` kot reference `${{kvito-files.*}}`, `S3_FORCE_PATH_STYLE=false`.
 - `EMAIL_CONSOLE_IN_PRODUCTION=true`: brez SMTP gredo prijavne kode v dnevnik (Railway → Deploy Logs). **Izklopi, preden se prijavijo pravi uporabniki**, in nastavi `SMTP_*`.
-- Storitev `@kvita/client` je odveč (Railway jo je ustvaril samodejno) – izbriši jo v nadzorni plošči.
 
 ## 3. Po prvem deployu
 - Odpri `/api/health` (mora vrniti `{"ok":true}`).
