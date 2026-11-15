@@ -9,7 +9,7 @@ Ena storitev: Node strežnik streže tudi zgrajeni spletni odjemalec (PWA). Pole
    Prvi samodejni deploy takoj po povezavi repozitorija bo zato morda padel; po nastavitvi spremenljivk klikni **Redeploy**.
 3. V **Settings → Networking** ustvari domeno (`*.up.railway.app` ali lastno) in njen URL vpiši v `CLIENT_ORIGIN`.
 4. `railway.json` že vsebuje ukaze:
-   - build: `npm ci --include=dev && npm run build`
+   - build: `npm run build` (odvisnosti, tudi dev, namesti Railpack sam z `npm ci`; ne dodajaj `npm ci` v build, ker Railpack v `node_modules/.vite` priklopi predpomnilnik in `npm ci` pade z `EBUSY`; ne nastavljaj `RAILPACK_PRUNE_DEPS`, ker `prisma` iz devDependencies potrebuje migracija pred zagonom)
    - pred zagonom: `npm run db:deploy` (samo `prisma migrate deploy`, nikoli `migrate dev`)
    - zagon: `npm run start`, preverjanje zdravja: `/api/health`
    - `TODO(preveri)`: ob prvem deployu preveri v nadzorni plošči, da Railway prebere `preDeployCommand` v tej obliki.
