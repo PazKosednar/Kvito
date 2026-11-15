@@ -34,6 +34,19 @@ export async function verifyPassword(password: string, stored: string): Promise<
   return key.length === expected.length && timingSafeEqual(key, expected);
 }
 
+/**
+ * Passwords that guessing tools try first (international and Slovenian). Rejected for new passwords only;
+ * a longer breached-password check (e.g. k-anonymity lookup) can replace this later.
+ */
+const COMMON = new Set([
+  "12345678", "123456789", "1234567890", "87654321", "11111111", "00000000", "12341234", "11223344",
+  "password", "password1", "password123", "passw0rd", "qwertyui", "qwerty123", "qwertz123", "iloveyou",
+  "admin123", "administrator", "letmein1", "welcome1", "sunshine", "princess", "football", "baseball",
+  "abc12345", "abcd1234", "zaq12wsx", "1q2w3e4r", "asdfghjk", "asdf1234", "superman", "trustno1",
+  "geslo123", "geslo1234", "mojegeslo", "slovenija", "ljubljana", "maribor1", "najemnina", "kvito123",
+]);
+export const isCommonPassword = (password: string): boolean => COMMON.has(password.normalize("NFKC").toLowerCase());
+
 /** A real hash of a random password: verifying against it costs as much as a real check (no user enumeration by timing). */
 let dummy: Promise<string> | null = null;
 export const dummyHash = (): Promise<string> => (dummy ??= hashPassword(randomBytes(16).toString("hex")));

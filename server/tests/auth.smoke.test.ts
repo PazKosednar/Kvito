@@ -14,6 +14,11 @@ class CapturingEmailSender implements EmailSender {
   async send(message: EmailMessage) {
     this.sent.push(message);
   }
+  lastCode(): string {
+    const match = this.sent.at(-1)?.text.match(/\b(\d{6})\b/);
+    if (!match?.[1]) throw new Error("no code e-mailed");
+    return match[1];
+  }
 }
 
 const cookieFrom = (res: request.Response): string => {
@@ -49,30 +54,48 @@ describe.skipIf(!hasDb)("auth flow (smoke)", () => {
     await request(app).get("/api/me").expect(401);
   });
 
+  const signup = (body: object) => request(app).post("/api/auth/register").send({ acceptTerms: true, ...body });
+
   it("validates input", async () => {
-    let res = await request(app).post("/api/auth/register").send({ name: "X", email: "not-an-email", password: "dolgo-geslo" }).expect(400);
-    expect(res.body.error.code).toBe("VALIDATION_ERROR");
-    res = await request(app).post("/api/auth/register").send({ name: "X", email, password: "kratko" }).expect(400);
-    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+    const codes = async (body: object) => (await signup(body).expect(400)).body.error;
+    expect((await codes({ name: "X", email: "not-an-email", password: "dolgo-geslo" })).code).toBe("VALIDATION_ERROR");
+    expect((await codes({ name: "X", email, password: "kratko" })).details).toEqual(expect.arrayContaining([expect.objectContaining({ message: "PASSWORD_TOO_SHORT" })]));
+    expect((await codes({ name: "X", email, password: "admin123" })).details).toEqual(expect.arrayContaining([expect.objectContaining({ message: "PASSWORD_TOO_COMMON" })]));
+    const noTerms = await request(app).post("/api/auth/register").send({ name: "X", email, password: "dolgo-geslo" }).expect(400);
+    expect(noTerms.body.error.code).toBe("VALIDATION_ERROR");
   });
 
   let accessToken = "";
   let refreshCookie = "";
   const password = "Kvito-geslo-1";
 
-  it("registers with name, e-mail and password and is signed in", async () => {
-    const res = await request(app).post("/api/auth/register").send({ name: "Smoke Test", email: email.toUpperCase(), password, locale: "en" }).expect(201);
+  it("registers, but the account works only after the e-mailed code", async () => {
+    await signup({ name: "Napačno ime", email, password: "prvo-geslo-1" }).expect(202);
+    // Signing up again before confirming replaces the attempt (nobody can sit on an address).
+    await signup({ name: "Smoke Test", email: email.toUpperCase(), password, locale: "en" }).expect(202);
+    expect(mail.sent.at(-1)?.to).toBe(email);
+    const stored = await prisma.user.findUniqueOrThrow({ where: { email } });
+    expect(stored).toMatchObject({ name: "Smoke Test", emailVerifiedAt: null, termsVersion: expect.any(String) });
+    expect(stored.passwordHash).toMatch(/^scrypt\$/);
+
+    // No session before the e-mail is confirmed.
+    expect((await request(app).post("/api/auth/login").send({ email, password }).expect(400)).body.error.code).toBe("EMAIL_NOT_VERIFIED");
+    const wrong = mail.lastCode() === "000000" ? "111111" : "000000";
+    expect((await request(app).post("/api/auth/verify-email").send({ email, code: wrong }).expect(400)).body.error.code).toBe("CODE_INVALID");
+
+    await request(app).post("/api/auth/resend-verification").send({ email }).expect(202);
+    const res = await request(app).post("/api/auth/verify-email").send({ email, code: mail.lastCode() }).expect(200);
     expect(res.body.user).toMatchObject({ email, name: "Smoke Test", roles: [], locale: "en" });
     expect(res.body.user.passwordHash).toBeUndefined();
     accessToken = res.body.accessToken;
     refreshCookie = cookieFrom(res);
     expect((res.headers["set-cookie"] as unknown as string[])[0]).toMatch(/HttpOnly/i);
-    const stored = await prisma.user.findUniqueOrThrow({ where: { email } });
-    expect(stored.passwordHash).toMatch(/^scrypt\$/);
+    // A code works once.
+    await request(app).post("/api/auth/verify-email").send({ email, code: mail.lastCode() }).expect(400);
   });
 
-  it("does not register the same e-mail twice", async () => {
-    const res = await request(app).post("/api/auth/register").send({ name: "Drugi", email, password: "drugo-geslo" }).expect(400);
+  it("does not register a confirmed e-mail again", async () => {
+    const res = await signup({ name: "Drugi", email, password: "drugo-geslo" }).expect(400);
     expect(res.body.error.code).toBe("EMAIL_TAKEN");
   });
 
@@ -95,7 +118,8 @@ describe.skipIf(!hasDb)("auth flow (smoke)", () => {
       .set("Authorization", `Bearer ${accessToken}`)
       .send({ name: "Smoke Test", activeRole: "LANDLORD" })
       .expect(200);
-    expect(patched.body.user).toMatchObject({ name: "Smoke Test", roles: ["LANDLORD"], activeRole: "LANDLORD" });  });
+    expect(patched.body.user).toMatchObject({ name: "Smoke Test", roles: ["LANDLORD"], activeRole: "LANDLORD" });
+  });
 
   it("rotates refresh tokens and detects reuse", async () => {
     const first = await request(app).post("/api/auth/refresh").set("Cookie", refreshCookie).expect(200);
@@ -137,5 +161,24 @@ describe.skipIf(!hasDb)("auth flow (smoke)", () => {
     const cookie = cookieFrom(login);
     await request(app).post("/api/auth/logout").set("Cookie", cookie).expect(204);
     await request(app).post("/api/auth/refresh").set("Cookie", cookie).expect(401);
+  });
+
+  it("locks the account after five wrong passwords, also for the right one", async () => {
+    for (let i = 0; i < 5; i++) await request(app).post("/api/auth/login").send({ email, password: `napacno-${i}` }).expect(400);
+    const locked = await request(app).post("/api/auth/login").send({ email, password: "novo-geslo-2" }).expect(429);
+    expect(locked.body.error.code).toBe("ACCOUNT_LOCKED");
+  });
+
+  it("sets a new password with an e-mailed code, which also unlocks the account", async () => {
+    await request(app).post("/api/auth/forgot-password").send({ email: `nobody-${Date.now()}@kvita.test` }).expect(202); // same answer
+    const sentBefore = mail.sent.length;
+    await request(app).post("/api/auth/forgot-password").send({ email }).expect(202);
+    expect(mail.sent.length).toBe(sentBefore + 1);
+    const code = mail.lastCode();
+    await request(app).post("/api/auth/reset-password").send({ email, code, password: "12345678" }).expect(400); // too common
+    const res = await request(app).post("/api/auth/reset-password").send({ email, code, password: "tretje-geslo-3" }).expect(200);
+    expect(res.body.user.email).toBe(email);
+    await request(app).post("/api/auth/reset-password").send({ email, code, password: "cetrto-geslo-4" }).expect(400); // single use
+    await request(app).post("/api/auth/login").send({ email, password: "tretje-geslo-3" }).expect(200);
   });
 });

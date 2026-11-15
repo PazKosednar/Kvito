@@ -14,5 +14,8 @@ export const apiLimiter = rateLimit({ ...common, windowMs: 60_000, limit: 300 })
 /** New accounts per IP. */
 export const registerLimiter = rateLimit({ ...common, windowMs: 60 * 60_000, limit: 10 });
 
-/** Password attempts per IP (sign-in and password change): slows down guessing. */
+/** E-mailed codes (confirmation, forgotten password) per IP; per-e-mail limits are in the auth service. */
+export const codeLimiter = rateLimit({ ...common, windowMs: 15 * 60_000, limit: 10 });
+
+/** Password and code attempts per IP (per-account lockout is in the auth service) (sign-in and password change): slows down guessing. */
 export const loginLimiter = rateLimit({ ...common, windowMs: 15 * 60_000, limit: 20 });

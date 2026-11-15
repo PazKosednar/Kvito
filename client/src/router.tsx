@@ -31,6 +31,7 @@ import { TenancyFormPage } from "@/features/tenancies/TenancyFormPage";
 import { TenancyLayout } from "@/features/tenancies/TenancyLayout";
 import { AppShell } from "@/layout/AppShell";
 import { HomePage } from "@/pages/HomePage";
+import { LegalPage } from "@/pages/LegalPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { OnboardingPage } from "@/pages/OnboardingPage";
 
@@ -38,6 +39,9 @@ export const router = createBrowserRouter([
   { path: ROUTES.login, element: <LoginPage /> },
   // Public: an invitation link must work before signing in.
   { path: "/povabilo/:token", element: <AcceptInvitePage /> },
+  // Public legal texts (linked from sign-up).
+  { path: ROUTES.terms, element: <LegalPage doc="terms" /> },
+  { path: ROUTES.privacyPolicy, element: <LegalPage doc="privacy" /> },
   // Manual UPN QR test page (samples are only served outside production).
   { path: "/upn-test", element: <UpnTestPage /> },
   {

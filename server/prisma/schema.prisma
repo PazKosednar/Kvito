@@ -105,6 +105,14 @@ model User {
   email          String    @unique // always stored lowercased
   /// scrypt hash of the password ("scrypt$N$r$p$salt$hash"); null for accounts that have none yet.
   passwordHash   String?
+  /// Set once the person proved they own the e-mail (code). Unverified accounts cannot sign in.
+  emailVerifiedAt DateTime?
+  /// Version of the terms of use and privacy policy accepted at sign-up, and when.
+  termsVersion    String?
+  termsAcceptedAt DateTime?
+  /// Wrong passwords in a row; after a few the account is locked for a short, growing time.
+  failedLogins    Int       @default(0)
+  loginLockedUntil DateTime?
   name           String?
   phone          String?
   locale         Locale    @default(sl)
@@ -139,9 +147,21 @@ model User {
 }
 
 /// One-time login code. Only an HMAC of the code is stored.
+/// What a one-time e-mail code proves.
+enum CodePurpose {
+  /// Legacy passwordless sign-in (no longer issued).
+  LOGIN
+  /// Confirms that the person owns the e-mail of a new account.
+  VERIFY_EMAIL
+  /// Lets the owner of the e-mail set a new password.
+  RESET_PASSWORD
+}
+
+/// One-time 6-digit code sent by e-mail. Only an HMAC of the code is stored.
 model LoginCode {
-  id         String    @id @default(cuid())
+  id         String      @id @default(cuid())
   email      String
+  purpose    CodePurpose @default(LOGIN)
   codeHash   String
   attempts   Int       @default(0)
   expiresAt  DateTime

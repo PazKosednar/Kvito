@@ -41,12 +41,27 @@ export function useAuth() {
     return res.user;
   }, []);
 
+  /** Creates the account; it works after the e-mailed code is entered (verifyEmail). */
   const register = useCallback(async (input: { name: string; email: string; password: string }) => {
-    const res = await api<{ accessToken: string; user: CurrentUser }>("/api/auth/register", {
-      method: "POST",
-      body: { ...input, locale: screenLocale() },
-      auth: false,
-    });
+    await api("/api/auth/register", { method: "POST", body: { ...input, acceptTerms: true, locale: screenLocale() }, auth: false });
+  }, []);
+
+  const verifyEmail = useCallback(async (email: string, code: string) => {
+    const res = await api<{ accessToken: string; user: CurrentUser }>("/api/auth/verify-email", { method: "POST", body: { email, code }, auth: false });
+    useAuthStore.getState().setSession(res.accessToken, res.user);
+    return res.user;
+  }, []);
+
+  const resendVerification = useCallback(async (email: string) => {
+    await api("/api/auth/resend-verification", { method: "POST", body: { email }, auth: false });
+  }, []);
+
+  const forgotPassword = useCallback(async (email: string) => {
+    await api("/api/auth/forgot-password", { method: "POST", body: { email }, auth: false });
+  }, []);
+
+  const resetPassword = useCallback(async (email: string, code: string, password: string) => {
+    const res = await api<{ accessToken: string; user: CurrentUser }>("/api/auth/reset-password", { method: "POST", body: { email, code, password }, auth: false });
     useAuthStore.getState().setSession(res.accessToken, res.user);
     return res.user;
   }, []);
@@ -77,5 +92,18 @@ export function useAuth() {
     return user;
   }, []);
 
-  return { status, user, isAuthenticated: status === "authenticated", login, register, changePassword, logout, updateMe };
+  return {
+    status,
+    user,
+    isAuthenticated: status === "authenticated",
+    login,
+    register,
+    verifyEmail,
+    resendVerification,
+    forgotPassword,
+    resetPassword,
+    changePassword,
+    logout,
+    updateMe,
+  };
 }

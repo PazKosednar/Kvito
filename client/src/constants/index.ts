@@ -19,5 +19,10 @@ export const ROUTES = {
   onboarding: "/dobrodoslica",
   notifications: "/obvestila",
   bankImport: "/izpisek",
+  terms: "/pogoji",
+  privacyPolicy: "/politika-zasebnosti",
 } as const;
+
+/** Version of the terms / privacy policy shown at sign-up. Must match TERMS_VERSION in server/src/modules/auth/service.ts. */
+export const TERMS_VERSION = "2026-11-osnutek";
 

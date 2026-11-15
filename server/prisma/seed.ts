@@ -35,9 +35,11 @@ async function upsertUser(email: string, name: string, roles: ("LANDLORD" | "TEN
   const user = await prisma.user.upsert({
     where: { email },
     update: { name, roles, lastActiveRole: roles[0] ?? null },
-    create: { email, name, roles, lastActiveRole: roles[0] ?? null, passwordHash },
+    create: { email, name, roles, lastActiveRole: roles[0] ?? null, passwordHash, emailVerifiedAt: new Date() },
   });
-  if (!user.passwordHash) await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+  if (!user.passwordHash || !user.emailVerifiedAt) {
+    await prisma.user.update({ where: { id: user.id }, data: { passwordHash: user.passwordHash ?? passwordHash, emailVerifiedAt: user.emailVerifiedAt ?? new Date() } });
+  }
   return user;
 }
 

@@ -130,6 +130,34 @@ export function invitationEmail(
   return { to, subject, text, html };
 }
 
+const CODE: Record<"VERIFY_EMAIL" | "RESET_PASSWORD", Record<Locale, { subject: string; intro: string; ignore: string }>> = {
+  VERIFY_EMAIL: {
+    sl: { subject: "Potrdi e-naslov za Kvito", intro: "S to kodo potrdiš, da je e-naslov tvoj:", ignore: "Računa nisi ustvaril? To e-pošto lahko prezreš." },
+    en: { subject: "Confirm your e-mail for Kvito", intro: "Use this code to confirm the e-mail is yours:", ignore: "Didn't sign up? Just ignore this e-mail." },
+  },
+  RESET_PASSWORD: {
+    sl: { subject: "Novo geslo za Kvito", intro: "S to kodo nastaviš novo geslo:", ignore: "Novega gesla nisi zahteval? To e-pošto lahko prezreš, geslo ostane enako." },
+    en: { subject: "New password for Kvito", intro: "Use this code to set a new password:", ignore: "Didn't ask for a new password? Ignore this e-mail; your password stays the same." },
+  },
+};
+const VALID: Record<Locale, (m: number) => string> = { sl: (m) => `Koda velja ${m} minut.`, en: (m) => `Valid for ${m} minutes.` };
+
+/** 6-digit code to confirm an e-mail or to set a new password. */
+export function codeEmail(to: string, purpose: "VERIFY_EMAIL" | "RESET_PASSWORD", code: string, ttlMinutes: number, l: Locale = "sl"): EmailMessage {
+  const w = CODE[purpose][l];
+  const subject = `${w.subject}: ${code}`;
+  const text = [w.intro, "", code, VALID[l](ttlMinutes), "", w.ignore].join("\n");
+  const html = layout(
+    subject,
+    `<p style="margin:0 0 8px">${w.intro}</p>
+     <p style="margin:0 0 12px;padding:12px 16px;background:${BRAND.slip};border-radius:10px;font-size:32px;font-weight:700;letter-spacing:8px;color:${BRAND.text}">${escapeHtml(code)}</p>
+     <p style="margin:0 0 12px">${VALID[l](ttlMinutes)}</p>
+     <p style="margin:0;color:${BRAND.muted}">${w.ignore}</p>`,
+    l,
+  );
+  return { to, subject, text, html };
+}
+
 const OPEN: Record<Locale, string> = { sl: "Odpri v Kvitu", en: "Open in Kvito" };
 
 /** Generic notification (reminders, payment updates) for people who have no push set up. */

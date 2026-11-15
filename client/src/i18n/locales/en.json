@@ -37,20 +37,56 @@
       "login": "Sign in",
       "register": "Sign up"
     },
-    "loginHint": "Enter your e-mail and password.",
-    "registerTitle": "New account",
-    "registerHint": "Create an account with your e-mail and a password. You pick your role next.",
     "nameLabel": "Full name",
     "namePlaceholder": "e.g. Gaja Kuhar",
     "passwordLabel": "Password",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
-    "passwordRule": "At least {{min}} characters. Remember it – it cannot be reset.",
-    "noReset": "A forgotten password cannot be reset.",
-    "loginCta": "Sign in",
-    "registerCta": "Create account",
+    "passwordRule": "At least {{min}} characters. Avoid simple ones like 12345678.",
     "noAccount": "No account yet?",
-    "haveAccount": "Already have an account?"
+    "haveAccount": "Already have an account?",
+    "step": {
+      "login": {
+        "eyebrow": "Sign in",
+        "title": "Sign in",
+        "hint": "Enter your e-mail and password.",
+        "cta": "Sign in"
+      },
+      "register": {
+        "eyebrow": "Sign up",
+        "title": "New account",
+        "hint": "Create an account. We send a code to your e-mail to confirm it.",
+        "cta": "Create account"
+      },
+      "verify": {
+        "eyebrow": "Confirm",
+        "title": "Confirm your e-mail",
+        "hint": "We sent a code to {{email}}. Enter it and your account is ready.",
+        "cta": "Confirm and continue"
+      },
+      "forgot": {
+        "eyebrow": "Forgot password",
+        "title": "New password",
+        "hint": "Enter your account's e-mail. We'll send you a code for a new password.",
+        "cta": "Send code"
+      },
+      "reset": {
+        "eyebrow": "New password",
+        "title": "Set a new password",
+        "hint": "If there is an account for {{email}}, we sent it a code. Enter it and pick a new password.",
+        "cta": "Save password and sign in"
+      }
+    },
+    "newPasswordLabel": "New password",
+    "forgot": "Forgot your password?",
+    "backToLogin": "Back to sign in",
+    "codeLabel": "6-digit code from the e-mail",
+    "codeValidity": "The code is valid for 15 minutes. Only the latest code works.",
+    "resend": "Send a new code",
+    "resendIn": "You can request a new code in {{seconds}} s",
+    "codeResent": "We sent a new code.",
+    "devHint": "Development: no e-mail is sent. The code is in the server terminal, in the last “E-mail for {{email}}” block.",
+    "acceptTerms": "I accept the <terms>terms of use</terms> and the <privacy>privacy policy</privacy>."
   },
   "onboarding": {
     "title": "What brings you to Kvito?",
@@ -174,7 +210,12 @@
     "RANGE_TOO_LONG": "Pick at most 36 months at once.",
     "INVALID_CREDENTIALS": "The e-mail or password is not right.",
     "EMAIL_TAKEN": "An account with this e-mail already exists. Sign in instead.",
-    "WRONG_PASSWORD": "The current password is not right."
+    "WRONG_PASSWORD": "The current password is not right.",
+    "EMAIL_NOT_VERIFIED": "Your account isn't confirmed yet. We sent you a new code.",
+    "CODE_INVALID": "The code doesn't match or has expired. Enter the latest code.",
+    "CODE_TOO_MANY_ATTEMPTS": "Too many wrong attempts. Request a new code.",
+    "CODE_RATE_LIMITED": "We've sent 5 codes in the last hour. Enter the latest one or try again in an hour.",
+    "ACCOUNT_LOCKED": "Too many wrong passwords. Wait a few minutes or set a new one via “Forgot your password?”."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -194,7 +235,9 @@
     "INVALID_MONTH": "Choose a month.",
     "DUPLICATE_COST_TYPE": "List each cost only once.",
     "PASSWORD_TOO_SHORT": "Use at least 8 characters.",
-    "PASSWORD_MISMATCH": "The passwords do not match."
+    "PASSWORD_MISMATCH": "The passwords do not match.",
+    "PASSWORD_TOO_COMMON": "This password is too common. Pick another one.",
+    "TERMS_REQUIRED": "You need to accept the terms to sign up."
   },
   "tabs": {
     "details": "Details",
@@ -1247,5 +1290,11 @@
     "rule": "At least {{min}} characters.",
     "cta": "Save new password",
     "saved": "Password changed."
+  },
+  "legal": {
+    "terms": "Terms of use",
+    "privacy": "Privacy policy",
+    "draft": "Draft, in Slovenian only. Not yet reviewed by a lawyer and may change.",
+    "version": "Version: {{version}}"
   }
 }
