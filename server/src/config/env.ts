@@ -25,6 +25,11 @@ const EnvSchema = z.object({
   SMTP_USER: z.string().min(1).optional(),
   SMTP_PASS: z.string().min(1).optional(),
   MAIL_FROM: z.string().min(3).default("Kvito <obvestila@kvito.si>"),
+  /**
+   * Temporary escape hatch for a test deployment without an SMTP provider: e-mails (including login codes)
+   * are written to the server log. Never enable it once real users sign in.
+   */
+  EMAIL_CONSOLE_IN_PRODUCTION: bool.default(false),
   /** "local" = UPLOAD_DIR on disk (development). "s3" = S3-compatible EU object storage (production). */
   STORAGE_DRIVER: z.enum(["local", "s3"]).optional(),
   S3_BUCKET: z.string().min(1).optional(),
