@@ -79,12 +79,14 @@ export async function resendVerification(rawEmail: string, emailSender: EmailSen
  */
 export async function verifyEmail(rawEmail: string, code: string, password: string, meta: ClientMeta) {
   const email = normalizeEmail(rawEmail);
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user || user.deletedAt || user.emailVerifiedAt) throw badRequest("CODE_INVALID");
-  assertNotLocked(user);
-  if (!user.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
-    await recordFailure(user);
-    throw badRequest("INVALID_CREDENTIALS");
+  const found = await prisma.user.findUnique({ where: { email } });
+  const user = found && !found.deletedAt && !found.emailVerifiedAt ? found : null;
+  if (user) assertNotLocked(user);
+  // One password check and one answer in every case, so this does not tell which unconfirmed accounts exist.
+  const ok = await verifyPassword(password, user?.passwordHash ?? (await dummyHash()));
+  if (!user || !ok) {
+    if (user) await recordFailure(user);
+    throw badRequest("CODE_INVALID");
   }
   await consumeCode(email, "VERIFY_EMAIL", code);
   const updated = await prisma.user.update({ where: { id: user.id }, data: { emailVerifiedAt: new Date(), lastLoginAt: new Date(), ...clearFailures } });

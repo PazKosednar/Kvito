@@ -83,7 +83,8 @@ describe.skipIf(!hasDb)("auth flow (smoke)", () => {
     const wrong = mail.lastCode() === "000000" ? "111111" : "000000";
     expect((await request(app).post("/api/auth/verify-email").send({ email, code: wrong, password }).expect(400)).body.error.code).toBe("CODE_INVALID");
     // The code alone is not enough: someone who re-registered this e-mail with their own password cannot use the owner's code.
-    expect((await request(app).post("/api/auth/verify-email").send({ email, code: mail.lastCode(), password: "tuje-geslo-9" }).expect(400)).body.error.code).toBe("INVALID_CREDENTIALS");
+    expect((await request(app).post("/api/auth/verify-email").send({ email, code: mail.lastCode(), password: "tuje-geslo-9" }).expect(400)).body.error.code).toBe("CODE_INVALID");
+    expect((await request(app).post("/api/auth/verify-email").send({ email: `nobody-${Date.now()}@kvita.test`, code: mail.lastCode(), password }).expect(400)).body.error.code).toBe("CODE_INVALID");
 
     await request(app).post("/api/auth/resend-verification").send({ email }).expect(202);
     const res = await request(app).post("/api/auth/verify-email").send({ email, code: mail.lastCode(), password }).expect(200);
