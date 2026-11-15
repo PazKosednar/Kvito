@@ -38,9 +38,12 @@ const clearFailures = { failedLogins: 0, loginLockedUntil: null };
  */
 export async function register(input: { name: string; email: string; password: string; locale?: Locale | undefined }, emailSender: EmailSender, ip?: string, meta?: ClientMeta) {
   const email = normalizeEmail(input.email);
-  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true, deletedAt: true, emailVerifiedAt: true } });
+  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true, deletedAt: true, emailVerifiedAt: true, lastLoginAt: true } });
   if (existing?.deletedAt) throw badRequest("ACCOUNT_DELETED");
   if (existing?.emailVerifiedAt) throw badRequest("EMAIL_TAKEN");
+  // An unconfirmed account that has already been signed in to (created with SKIP_EMAIL_VERIFICATION) holds data
+  // and sessions: a new sign-up must never replace its password. Its owner confirms it by logging in instead.
+  if (existing?.lastLoginAt) throw badRequest("EMAIL_TAKEN");
 
   if (env.SKIP_EMAIL_VERIFICATION) {
     // Without the code an unconfirmed account is usable, so it must never be replaced by a second sign-up.

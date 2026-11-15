@@ -56,4 +56,17 @@ describe.skipIf(!hasDb)("auth without e-mail confirmation (SKIP_EMAIL_VERIFICATI
     expect(res.body.error.code).toBe("EMAIL_TAKEN");
     await request(app).post("/api/auth/login").send({ email, password: "drugo-geslo-9" }).expect(400);
   });
+
+  it("after the switch is off, a used unconfirmed account is still not replaced by a new sign-up", { timeout: 30_000 }, async () => {
+    env.SKIP_EMAIL_VERIFICATION = false;
+    try {
+      const res = await request(app).post("/api/auth/register").send({ name: "Vsiljivec", email, password: "drugo-geslo-9", acceptTerms: true }).expect(400);
+      expect(res.body.error.code).toBe("EMAIL_TAKEN");
+      // The owner must confirm the e-mail now.
+      const login = await request(app).post("/api/auth/login").send({ email, password }).expect(400);
+      expect(login.body.error.code).toBe("EMAIL_NOT_VERIFIED");
+    } finally {
+      env.SKIP_EMAIL_VERIFICATION = true;
+    }
+  });
 });

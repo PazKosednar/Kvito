@@ -22,6 +22,9 @@ async function main() {
 
   // TODO(preveri): choose the production SMTP provider (EU); until SMTP_HOST is set, e-mails are only printed.
   const emailSender = createEmailSender();
+  if (isProd && env.SKIP_EMAIL_VERIFICATION) {
+    logger.warn("SKIP_EMAIL_VERIFICATION=true: registracija brez potrditve e-naslova. Samo za testiranje – izklopi, preden se prijavijo pravi uporabniki!");
+  }
   const storage = createStorage(uploadDir);
   const pushSender =
     env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY
