@@ -1441,9 +1441,18 @@
     "notFoundTitle": "Povezava ne velja",
     "notFoundBody": "Povezava je potekla ali jo je najemnik preklical. Prosi ga za novo.",
     "landlordLine": "Najemodajalec {{n}}",
-    "landlordValue_one": "v Kvitu od {{date}} · {{count}} drug najemnik",
-    "landlordValue_two": "v Kvitu od {{date}} · {{count}} druga najemnika",
-    "landlordValue_few": "v Kvitu od {{date}} · {{count}} drugi najemniki",
-    "landlordValue_other": "v Kvitu od {{date}} · {{count}} drugih najemnikov"
+    "landlordValue": "v Kvitu {{age}} · {{tenants}}",
+    "age": {
+      "UNDER_1_MONTH": "manj kot mesec",
+      "1_TO_6_MONTHS": "1–6 mesecev",
+      "6_TO_12_MONTHS": "6–12 mesecev",
+      "OVER_1_YEAR": "več kot leto"
+    },
+    "tenants": {
+      "0": "brez drugih najemnikov",
+      "1-2": "1–2 druga najemnika",
+      "3-5": "3–5 drugih najemnikov",
+      "6+": "6 ali več drugih najemnikov"
+    }
   }
 }

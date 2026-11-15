@@ -125,7 +125,12 @@ describe.skipIf(!hasDb)("forecast, yearly summary and renting history", () => {
     const shown = (await request(ctx.app).get(`/api/references/${token}`).expect(200)).body.reference;
     expect(shown).toMatchObject({ name: "Tina Test", landlords: 1 });
     // The reader sees how much weight the confirmations carry.
-    expect(shown.landlordInfo).toEqual([{ since: expect.any(String), otherTenants: 0 }]);
+    // In ranges only: the landlord did not share these details.
+    expect(shown.landlordInfo).toEqual([{ accountAge: "UNDER_1_MONTH", otherTenants: "0" }]);
+    const { ageBucket, tenantBucket } = await import("../src/modules/references/routes.js");
+    const now = new Date("2026-11-15T00:00:00Z");
+    expect([10, 90, 200, 800].map((d) => ageBucket(new Date(now.getTime() - d * 86_400_000), now))).toEqual(["UNDER_1_MONTH", "1_TO_6_MONTHS", "6_TO_12_MONTHS", "OVER_1_YEAR"]);
+    expect([0, 2, 5, 6].map(tenantBucket)).toEqual(["0", "1-2", "3-5", "6+"]);
 
     // A landlord without a confirmed e-mail does not count (e.g. a second account the tenant opened herself).
     await ctx.prisma.user.update({ where: { id: landlord.user.id }, data: { emailVerifiedAt: null } });

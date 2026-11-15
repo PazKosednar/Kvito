@@ -14,10 +14,10 @@ export interface TenantHistory {
   months: { period: string; state: HistoryState }[];
 }
 
-/** How long a confirming landlord has used Kvito, and with how many other tenants. */
+/** How long a confirming landlord has used Kvito, and with how many other tenants – in ranges only. */
 export interface LandlordInfo {
-  since: string;
-  otherTenants: number;
+  accountAge: "UNDER_1_MONTH" | "1_TO_6_MONTHS" | "6_TO_12_MONTHS" | "OVER_1_YEAR";
+  otherTenants: "0" | "1-2" | "3-5" | "6+";
 }
 
 export interface SharedReference {

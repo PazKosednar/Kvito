@@ -1405,7 +1405,18 @@
     "notFoundTitle": "This link is not valid",
     "notFoundBody": "The link expired or the tenant revoked it. Ask them for a new one.",
     "landlordLine": "Landlord {{n}}",
-    "landlordValue_one": "in Kvito since {{date}} · {{count}} other tenant",
-    "landlordValue_other": "in Kvito since {{date}} · {{count}} other tenants"
+    "landlordValue": "in Kvito {{age}} · {{tenants}}",
+    "age": {
+      "UNDER_1_MONTH": "under a month",
+      "1_TO_6_MONTHS": "1–6 months",
+      "6_TO_12_MONTHS": "6–12 months",
+      "OVER_1_YEAR": "over a year"
+    },
+    "tenants": {
+      "0": "no other tenants",
+      "1-2": "1–2 other tenants",
+      "3-5": "3–5 other tenants",
+      "6+": "6 or more other tenants"
+    }
   }
 }

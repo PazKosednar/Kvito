@@ -2,7 +2,6 @@ import { Minus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { STATUS_STYLE, StatusIcon } from "@/components/brand";
 import type { HistoryState, LandlordInfo, TenantHistory } from "@/hooks/useReferences";
-import { formatDate } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 
 /** History states drawn with the charge status styles: paid in time = confirmed, paid late = waiting. */
@@ -86,7 +85,7 @@ export function HistoryView({ name, history, landlords, landlordInfo }: { name: 
         {landlordInfo.map((l, i) => (
           <li key={i} className="flex justify-between gap-4 px-4 py-3">
             <span className="text-ink-muted">{t("history.landlordLine", { n: i + 1 })}</span>
-            <span className="mono text-right">{t("history.landlordValue", { date: formatDate(l.since), count: l.otherTenants })}</span>
+            <span className="mono text-right">{t("history.landlordValue", { age: t(`history.age.${l.accountAge}`), tenants: t(`history.tenants.${l.otherTenants}`) })}</span>
           </li>
         ))}
       </ul>

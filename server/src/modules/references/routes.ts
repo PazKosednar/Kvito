@@ -20,11 +20,25 @@ import { validateBody } from "../../middleware/validate.js";
 const CreateBody = z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90)]).default(30) });
 const MAX_ACTIVE = 10;
 
-/** What the reader may want to know to weigh the confirmations: how long each landlord has used Kvito, and with how many other tenants. */
+/**
+ * What the reader needs to weigh the confirmations – deliberately coarse, because the landlord did not share it:
+ * how long they have used Kvito and with how many other tenants, in ranges only.
+ */
+export type AccountAge = "UNDER_1_MONTH" | "1_TO_6_MONTHS" | "6_TO_12_MONTHS" | "OVER_1_YEAR";
+export type TenantCount = "0" | "1-2" | "3-5" | "6+";
 export interface LandlordInfo {
-  since: Date;
-  otherTenants: number;
+  accountAge: AccountAge;
+  otherTenants: TenantCount;
 }
+
+const DAY = 86_400_000;
+export const ageBucket = (since: Date, now = new Date()): AccountAge => {
+  const days = (now.getTime() - since.getTime()) / DAY;
+  return days < 30 ? "UNDER_1_MONTH" : days < 182 ? "1_TO_6_MONTHS" : days < 365 ? "6_TO_12_MONTHS" : "OVER_1_YEAR";
+};
+export const tenantBucket = (n: number): TenantCount => (n === 0 ? "0" : n <= 2 ? "1-2" : n <= 5 ? "3-5" : "6+");
+const AGE_ORDER: AccountAge[] = ["OVER_1_YEAR", "6_TO_12_MONTHS", "1_TO_6_MONTHS", "UNDER_1_MONTH"];
+const COUNT_ORDER: TenantCount[] = ["6+", "3-5", "1-2", "0"];
 
 async function historyOf(userId: string): Promise<{ name: string; history: TenantHistory; landlords: number; landlordInfo: LandlordInfo[] }> {
   const user = await prisma.user.findFirstOrThrow({ where: { id: userId, deletedAt: null }, select: { name: true, email: true } });
@@ -77,9 +91,11 @@ async function historyOf(userId: string): Promise<{ name: string; history: Tenan
           select: { userId: true },
         }),
       ]);
-      return { since: owner.createdAt, otherTenants: others.length };
+      return { accountAge: ageBucket(owner.createdAt), otherTenants: tenantBucket(others.length) };
     }),
   );
+  // Stable order by range, so the order does not hint at which landlord is which.
+  landlordInfo.sort((a, b) => AGE_ORDER.indexOf(a.accountAge) - AGE_ORDER.indexOf(b.accountAge) || COUNT_ORDER.indexOf(a.otherTenants) - COUNT_ORDER.indexOf(b.otherTenants));
   return { name: user.name ?? user.email.split("@")[0]!, history, landlords: ownerIds.length, landlordInfo };
 }
 
