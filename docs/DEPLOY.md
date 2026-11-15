@@ -5,8 +5,8 @@ Ena storitev: Node strežnik streže tudi zgrajeni spletni odjemalec (PWA). Pole
 ## 1. Railway
 1. Nov projekt → **Deploy from GitHub repo** (repozitorij Kvito). Regija: **EU (Amsterdam)**.
 2. Dodaj **PostgreSQL**. `DATABASE_URL` v storitvi nastavi na referenco `${{Postgres.DATABASE_URL}}`.
-   Nastavi jo **pred prvim buildom** – `prisma generate` med buildom bere `prisma.config.ts`, ki brez `DATABASE_URL` pade.
-   Prvi samodejni deploy takoj po povezavi repozitorija bo zato morda padel; po nastavitvi spremenljivk klikni **Redeploy**.
+   Build deluje tudi brez nje (`prisma generate` ne potrebuje baze), migracija pred zagonom in strežnik pa jo potrebujeta.
+   Railway pri monorepu z npm workspaces sam predlaga dve storitvi (`@kvita/client`, `@kvita/server`). Potrebna je **samo ena** (koren repozitorija): strežnik streže tudi odjemalca.
 3. V **Settings → Networking** ustvari domeno (`*.up.railway.app` ali lastno) in njen URL vpiši v `CLIENT_ORIGIN`.
 4. `railway.json` že vsebuje ukaze:
    - build: `npm run build` (odvisnosti, tudi dev, namesti Railpack sam z `npm ci`; ne dodajaj `npm ci` v build, ker Railpack v `node_modules/.vite` priklopi predpomnilnik in `npm ci` pade z `EBUSY`; ne nastavljaj `RAILPACK_PRUNE_DEPS`, ker `prisma` iz devDependencies potrebuje migracija pred zagonom)
