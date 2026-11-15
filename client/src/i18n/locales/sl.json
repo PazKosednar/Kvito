@@ -55,7 +55,7 @@
       "register": {
         "eyebrow": "Registracija",
         "title": "Nov račun",
-        "hint": "Ustvari račun. Na e-naslov ti pošljemo kodo, s katero ga potrdiš.",
+        "hint": "Ustvari račun z e-naslovom in geslom. Če bo treba, ti na e-naslov pošljemo kodo za potrditev.",
         "cta": "Ustvari račun"
       },
       "verify": {

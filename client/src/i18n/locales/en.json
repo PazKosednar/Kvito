@@ -55,7 +55,7 @@
       "register": {
         "eyebrow": "Sign up",
         "title": "New account",
-        "hint": "Create an account. We send a code to your e-mail to confirm it.",
+        "hint": "Create an account with your e-mail and a password. If needed, we send a code to your e-mail to confirm it.",
         "cta": "Create account"
       },
       "verify": {

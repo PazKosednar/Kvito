@@ -11,7 +11,7 @@ Ena storitev: Node strežnik streže tudi zgrajeni spletni odjemalec (PWA). Pole
 4. `railway.json` že vsebuje ukaze:
    - build: `npm run build` (odvisnosti, tudi dev, namesti Railpack sam z `npm ci`; ne dodajaj `npm ci` v build, ker Railpack v `node_modules/.vite` priklopi predpomnilnik in `npm ci` pade z `EBUSY`; ne nastavljaj `RAILPACK_PRUNE_DEPS`, ker `prisma` iz devDependencies potrebuje migracija pred zagonom)
    - pred zagonom: `npm run db:deploy` (samo `prisma migrate deploy`, nikoli `migrate dev`)
-   - zagon: `npm run start`, preverjanje zdravja: `/api/health`
+   - zagon: `node server/dist/index.js` (neposredno, brez npm, da strežnik ob redeployu dobi SIGTERM in se lepo zapre), preverjanje zdravja: `/api/health`
    - `TODO(preveri)`: ob prvem deployu preveri v nadzorni plošči, da Railway prebere `preDeployCommand` v tej obliki.
 
 ## 2. Spremenljivke okolja
