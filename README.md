@@ -47,7 +47,7 @@ Copy-Item server\.env.example server\.env
 V `server\.env` nastavi:
 
 - `DATABASE_URL` in `DATABASE_URL_TEST` – zamenjaj `CHANGE_ME` z geslom uporabnika `postgres` (posebne znake URL-kodiraj),
-- `JWT_ACCESS_SECRET` in `OTP_PEPPER` – dve različni naključni vrednosti:
+- `JWT_ACCESS_SECRET` – naključna vrednost:
 
   ```powershell
   node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
@@ -71,18 +71,19 @@ npm install
 
 ## Prijava v razvoju
 
-Prijava je brez gesla: vpišeš e-naslov, dobiš 6-mestno kodo. **V razvoju se e-pošta ne pošilja – koda se izpiše v konzoli strežnika** (vrstica `[server]` v oknu, kjer teče `start.ps1`).
+Prijava je z e-naslovom in geslom. Nov račun ustvariš z gumbom »Registracija« (ime, e-naslov, geslo z vsaj 8 znaki); ob prvi prijavi izbereš vlogo. Geslo zamenjaš v meniju računa (»Zamenjaj geslo«). Pozabljenega gesla ni mogoče ponastaviti.
 
-Testni uporabniki iz seeda:
+Testni uporabniki iz seeda imajo vsi geslo **`kvito1234`** (samo za razvoj):
 
 | E-pošta | Vloga | Opomba |
 | --- | --- | --- |
-| `najemodajalec@kvita.test` | najemodajalec | lastnik »Hiša na Trnovem« (2 enoti) |
+| `najemodajalec@kvita.test` | najemodajalec | lastnik »Hiša na Trnovem« (3 enote) |
 | `ana@kvita.test` | najemnica | Stanovanje A, obveznosti v vseh statusih |
 | `luka@kvita.test` | najemnik | Stanovanje B, delitev 60 % |
 | `nina@kvita.test` | najemnica | Stanovanje B, delitev 40 % |
+| `gaja@kvita.test` | najemnica | Stanovanje C, pavšal in obračun z dobroimetjem |
 
-Nov e-naslov ustvari nov račun; ob prvi prijavi izbereš vlogo. Vlogo zamenjaš v meniju (ikona osebe zgoraj desno).
+Vlogo zamenjaš v meniju računa (krogec z začetnicami zgoraj desno), če imaš obe.
 
 ## Ukazi
 

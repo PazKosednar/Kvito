@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "Kvito",
-    "headline": "Rent is\nsettled.",
+    "headline": "Simple rental\nmanagement.",
     "lead": "Rent, bills and messages between landlord and tenant in one place."
   },
   "slip": {
@@ -31,22 +31,26 @@
     "title": "Sign in",
     "emailLabel": "Your e-mail",
     "emailPlaceholder": "name@example.com",
-    "emailHint": "No password needed. We'll send you a 6-digit code.",
-    "sendCode": "Send code",
-    "codeTitle": "Enter the code",
-    "codeSentTo": "We sent it to {{email}} at {{time}}.",
-    "codeSentToNoTime": "We sent it to {{email}}.",
-    "codeValidity": "The code is valid for 10 minutes. Only the latest code works.",
-    "codeLabel": "6-digit code",
-    "verify": "Sign in",
-    "resend": "Send a new code",
-    "resendIn": "You can request a new code in {{seconds}} s",
-    "changeEmail": "Use another e-mail",
-    "devHint": "Development: the code is in the server terminal, in the latest “E-mail za {{email}}” block.",
     "logout": "Sign out",
     "loggedOut": "Signed out.",
-    "stepEmail": "Sign in",
-    "stepCode": "Code"
+    "tab": {
+      "login": "Sign in",
+      "register": "Sign up"
+    },
+    "loginHint": "Enter your e-mail and password.",
+    "registerTitle": "New account",
+    "registerHint": "Create an account with your e-mail and a password. You pick your role next.",
+    "nameLabel": "Full name",
+    "namePlaceholder": "e.g. Gaja Kuhar",
+    "passwordLabel": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "passwordRule": "At least {{min}} characters. Remember it – it cannot be reset.",
+    "noReset": "A forgotten password cannot be reset.",
+    "loginCta": "Sign in",
+    "registerCta": "Create account",
+    "noAccount": "No account yet?",
+    "haveAccount": "Already have an account?"
   },
   "onboarding": {
     "title": "What brings you to Kvito?",
@@ -118,9 +122,6 @@
     "generic": "Something went wrong. Please try again.",
     "network": "Can't reach the server. Check your connection and try again.",
     "VALIDATION_ERROR": "Check what you entered. Something is missing or in the wrong format.",
-    "OTP_INVALID": "The code doesn't match or has expired. Make sure you enter the latest code.",
-    "OTP_TOO_MANY_ATTEMPTS": "Too many wrong attempts. Request a new code.",
-    "OTP_RATE_LIMITED": "We've already sent 5 codes to this e-mail in the last hour. Enter the latest one or try again in an hour.",
     "TOO_MANY_REQUESTS": "Too many requests at once. Try again in a few minutes.",
     "ACCOUNT_DELETED": "This account has been deleted.",
     "UNAUTHORIZED": "Your session expired. Please sign in again.",
@@ -170,7 +171,10 @@
     "COST_ENTRY_LOCKED": "This month is part of a settlement that was sent, so it can no longer change.",
     "CREDIT_CHOICE_REQUIRED": "Choose what should happen with the credit.",
     "MONTH_BEFORE_START": "The tenancy started later. Pick a month from the start of the tenancy on.",
-    "RANGE_TOO_LONG": "Pick at most 36 months at once."
+    "RANGE_TOO_LONG": "Pick at most 36 months at once.",
+    "INVALID_CREDENTIALS": "The e-mail or password is not right.",
+    "EMAIL_TAKEN": "An account with this e-mail already exists. Sign in instead.",
+    "WRONG_PASSWORD": "The current password is not right."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -188,7 +192,9 @@
     "INVALID_METER_VALUE": "Enter a reading, e.g. 12345 or 12345.6.",
     "noticeDays": "Enter a number of days from 1 to 730.",
     "INVALID_MONTH": "Choose a month.",
-    "DUPLICATE_COST_TYPE": "List each cost only once."
+    "DUPLICATE_COST_TYPE": "List each cost only once.",
+    "PASSWORD_TOO_SHORT": "Use at least 8 characters.",
+    "PASSWORD_MISMATCH": "The passwords do not match."
   },
   "tabs": {
     "details": "Details",
@@ -543,7 +549,20 @@
     }
   },
   "login": {
-    "eyebrow": "Renting, settled"
+    "eyebrow": "Renting, settled",
+    "scene": {
+      "flat": "Flat 2B · November",
+      "settled": "Settled",
+      "meters": "Meters",
+      "handover": "Handover",
+      "messages": "Messages"
+    },
+    "features": {
+      "rent": "Rent and utility bills",
+      "messages": "Messages and notifications",
+      "issues": "Repairs and issues",
+      "handover": "Handover, meters, contract"
+    }
   },
   "settled": {
     "thisMonth": "This month",
@@ -1216,5 +1235,17 @@
   "billingMode": {
     "COMBINED": "One payment a month",
     "SEPARATE": "Separately"
+  },
+  "password": {
+    "menu": "Change password",
+    "title": "Change password",
+    "subtitle": "You will be signed out on all other devices.",
+    "current": "Current password",
+    "next": "New password",
+    "repeat": "Repeat the new password",
+    "mismatch": "The passwords do not match.",
+    "rule": "At least {{min}} characters.",
+    "cta": "Save new password",
+    "saved": "Password changed."
   }
 }

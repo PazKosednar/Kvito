@@ -103,6 +103,8 @@ enum PaymentSource {
 model User {
   id             String    @id @default(cuid())
   email          String    @unique // always stored lowercased
+  /// scrypt hash of the password ("scrypt$N$r$p$salt$hash"); null for accounts that have none yet.
+  passwordHash   String?
   name           String?
   phone          String?
   locale         Locale    @default(sl)

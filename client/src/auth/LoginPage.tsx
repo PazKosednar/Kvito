@@ -1,18 +1,27 @@
-import { ArrowRight, Loader2 } from "lucide-react";
-import { useCallback } from "react";
+import { ArrowRight, Eye, EyeOff, KeyRound, Loader2, MessagesSquare, Receipt, Wrench } from "lucide-react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useLocation, useNavigate } from "react-router";
-import { Eyebrow, KvitaLockup, UnitsIllustration } from "@/components/brand";
+import { ApartmentScene } from "@/components/ApartmentScene";
+import { Eyebrow, KvitaLockup } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
-import { DISPLAY_TIME_ZONE, OTP_LENGTH, ROUTES } from "@/constants";
+import { ROUTES } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
-import { useLoginFlow } from "@/hooks/useLoginFlow";
+import { PASSWORD_MIN, useLoginFlow } from "@/hooks/useLoginFlow";
+import { cn } from "@/lib/utils";
+
+const FEATURES = [
+  { key: "rent", Icon: Receipt },
+  { key: "messages", Icon: MessagesSquare },
+  { key: "issues", Icon: Wrench },
+  { key: "handover", Icon: KeyRound },
+] as const;
 
 export function LoginPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
@@ -22,9 +31,7 @@ export function LoginPage() {
   const flow = useLoginFlow(onSuccess);
 
   if (isAuthenticated) return <Navigate to={from} replace />;
-
-  const email = flow.email.trim();
-  const sentTime = flow.sentAt?.toLocaleTimeString(i18n.language, { hour: "2-digit", minute: "2-digit", timeZone: DISPLAY_TIME_ZONE });
+  const register = flow.mode === "register";
 
   return (
     <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
@@ -33,134 +40,131 @@ export function LoginPage() {
         <KvitaLockup className="h-6 w-auto self-start lg:h-7" />
         <div className="mt-8 lg:mt-auto">
           <Eyebrow onPanel index="01">{t("login.eyebrow")}</Eyebrow>
-          <h1 className="mt-3 max-w-[13ch] text-[2.5rem] leading-[2.75rem] font-semibold tracking-[-0.02em] whitespace-pre-line lg:text-display">
+          <h1 className="mt-3 max-w-[13ch] text-[2.5rem] lg:max-w-[22ch] leading-[2.75rem] font-semibold tracking-[-0.02em] whitespace-pre-line lg:text-display">
             {t("app.headline")}
           </h1>
           <p className="mt-4 max-w-[40ch] text-lg leading-7 text-ink-on-panel-muted">{t("app.lead")}</p>
+          <ul className="mt-8 hidden max-w-xl grid-cols-2 border-t border-[#232327] sm:grid">
+            {FEATURES.map(({ key, Icon }) => (
+              <li key={key} className="flex items-center gap-3 border-b border-[#232327] py-3 pr-4 text-sm text-ink-on-panel">
+                <Icon className="size-4 shrink-0 text-signal" aria-hidden="true" strokeWidth={1.75} />
+                {t(`login.features.${key}`)}
+              </li>
+            ))}
+          </ul>
         </div>
-        <UnitsIllustration onPanel className="mt-6 max-w-[22rem] self-center lg:mt-auto lg:max-w-[30rem]" />
+        <ApartmentScene className="mt-6 max-w-[24rem] self-center lg:mt-auto lg:max-w-[34rem]" />
       </section>
 
       {/* Form on stone. */}
       <section className="flex px-4 pt-8 pb-[calc(2rem+env(safe-area-inset-bottom))] sm:px-8 lg:items-center lg:px-12">
         <div className="mx-auto w-full max-w-sm">
-          {flow.step === "email" ? (
-            <form
-              className="flex flex-col"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void flow.submitEmail();
-              }}
-            >
-              <Eyebrow index="01">{t("auth.stepEmail")}</Eyebrow>
-              <h2 className="mt-2 text-title font-semibold">{t("auth.title")}</h2>
-              <p className="mt-2 text-ink-muted">{t("auth.emailHint")}</p>
-
-              <Label htmlFor="email" className="mt-8 text-sm font-medium text-ink">
-                {t("auth.emailLabel")}
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                autoCapitalize="none"
-                spellCheck={false}
-                autoFocus
-                required
-                placeholder={t("auth.emailPlaceholder")}
-                value={flow.email}
-                onChange={(e) => flow.setEmail(e.target.value)}
-                aria-invalid={flow.error ? true : undefined}
-                aria-describedby={flow.error ? "login-error" : undefined}
-                className="mt-2"
-              />
-              {flow.error && (
-                <p id="login-error" role="alert" className="mt-2 text-sm text-danger">
-                  {flow.error}
-                </p>
-              )}
-              <Button type="submit" size="xl" className="mt-6" disabled={flow.pending || !email}>
-                {flow.pending ? <Loader2 className="animate-spin" /> : null}
-                {t("auth.sendCode")}
-                {!flow.pending && <ArrowRight />}
-              </Button>
-            </form>
-          ) : (
-            <form
-              className="flex flex-col"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void flow.submitCode();
-              }}
-            >
-              <Eyebrow index="02">{t("auth.stepCode")}</Eyebrow>
-              <h2 className="mt-2 text-title font-semibold">{t("auth.codeTitle")}</h2>
-              <p className="mt-2 text-ink-muted">
-                {sentTime ? t("auth.codeSentTo", { email, time: sentTime }) : t("auth.codeSentToNoTime", { email })}
-              </p>
-
-              <Label htmlFor="otp" className="mt-8 mb-2 text-sm font-medium text-ink">
-                {t("auth.codeLabel")}
-              </Label>
-              <InputOTP
-                id="otp"
-                maxLength={OTP_LENGTH}
-                inputMode="numeric"
-                pattern="^\d+$"
-                autoComplete="one-time-code"
-                autoFocus
-                value={flow.code}
-                onChange={flow.setCode}
-                onComplete={(value: string) => void flow.submitCode(value)}
-                disabled={flow.pending}
-                aria-invalid={flow.error ? true : undefined}
-                aria-describedby="otp-help"
-                containerClassName="w-full"
-              >
-                <InputOTPGroup className="grid w-full grid-cols-6 gap-2">
-                  {Array.from({ length: OTP_LENGTH }, (_, i) => (
-                    <InputOTPSlot
-                      key={i}
-                      index={i}
-                      className="h-14 w-full rounded-sm border border-line-strong bg-surface-raised font-mono text-2xl shadow-none first:rounded-sm first:border-l last:rounded-sm data-[active=true]:z-10 data-[active=true]:border-ink data-[active=true]:ring-2 data-[active=true]:ring-[var(--focus)] data-[active=true]:ring-offset-2 data-[active=true]:ring-offset-surface dark:bg-surface-raised"
-                    />
-                  ))}
-                </InputOTPGroup>
-              </InputOTP>
-
-              <p id="otp-help" className="mt-2 text-sm text-ink-muted">
-                {t("auth.codeValidity")}
-              </p>
-              {flow.error && (
-                <p role="alert" className="mt-2 text-sm font-medium text-danger">
-                  {flow.error}
-                </p>
-              )}
-
-              <Button type="submit" size="xl" className="mt-6" disabled={flow.pending || flow.code.length !== OTP_LENGTH}>
-                {flow.pending && <Loader2 className="animate-spin" />}
-                {t("auth.verify")}
-              </Button>
-
-              <div className="mt-4 flex flex-col items-start border-t border-line pt-2 text-sm">
-                {flow.cooldown > 0 ? (
-                  <p className="mono py-2 text-ink-faint" aria-live="polite">
-                    {t("auth.resendIn", { seconds: flow.cooldown })}
-                  </p>
-                ) : (
-                  <Button type="button" variant="ghost" className="-ml-4 text-primary" onClick={() => void flow.resend()} disabled={flow.pending}>
-                    {t("auth.resend")}
-                  </Button>
+          {/* Sign in / create account */}
+          <div role="tablist" aria-label={t("auth.title")} className="mb-8 grid grid-cols-2 rounded-lg bg-muted p-1">
+            {(["login", "register"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                role="tab"
+                aria-selected={flow.mode === m}
+                onClick={() => flow.setMode(m)}
+                className={cn(
+                  "h-10 rounded-md px-3 text-sm font-semibold transition-colors duration-150",
+                  flow.mode === m ? "bg-card text-foreground ring-1 ring-border" : "text-muted-foreground hover:text-foreground",
                 )}
-                <Button type="button" variant="ghost" className="-ml-4 text-ink-muted" onClick={flow.changeEmail} disabled={flow.pending}>
-                  {t("auth.changeEmail")}
-                </Button>
-              </div>
+              >
+                {t(`auth.tab.${m}`)}
+              </button>
+            ))}
+          </div>
 
-              {import.meta.env.DEV && <p className="mono mt-6 border-l-2 border-line-strong pl-3 text-ink-faint">{t("auth.devHint", { email })}</p>}
-            </form>
-          )}
+          <form
+            className="flex flex-col"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void flow.submit();
+            }}
+          >
+            <Eyebrow index={register ? "02" : "01"}>{t(register ? "auth.tab.register" : "auth.tab.login")}</Eyebrow>
+            <h2 className="mt-2 text-title font-semibold">{t(register ? "auth.registerTitle" : "auth.title")}</h2>
+            <p className="mt-2 text-ink-muted">{t(register ? "auth.registerHint" : "auth.loginHint")}</p>
+
+            {register && (
+              <>
+                <Label htmlFor="name" className="mt-8 text-sm font-medium text-ink">
+                  {t("auth.nameLabel")}
+                </Label>
+                <Input id="name" autoComplete="name" required maxLength={80} value={flow.name} onChange={(e) => flow.setName(e.target.value)} className="mt-2" placeholder={t("auth.namePlaceholder")} />
+              </>
+            )}
+
+            <Label htmlFor="email" className={cn("text-sm font-medium text-ink", register ? "mt-5" : "mt-8")}>
+              {t("auth.emailLabel")}
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              inputMode="email"
+              autoComplete={register ? "email" : "username"}
+              autoCapitalize="none"
+              spellCheck={false}
+              autoFocus={!register}
+              required
+              placeholder={t("auth.emailPlaceholder")}
+              value={flow.email}
+              onChange={(e) => flow.setEmail(e.target.value)}
+              className="mt-2"
+            />
+
+            <Label htmlFor="password" className="mt-5 text-sm font-medium text-ink">
+              {t("auth.passwordLabel")}
+            </Label>
+            <div className="relative mt-2">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete={register ? "new-password" : "current-password"}
+                required
+                minLength={register ? PASSWORD_MIN : undefined}
+                maxLength={200}
+                value={flow.password}
+                onChange={(e) => flow.setPassword(e.target.value)}
+                aria-invalid={flow.error || flow.tooShort ? true : undefined}
+                aria-describedby="password-help"
+                className="pr-12"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={t(showPassword ? "auth.hidePassword" : "auth.showPassword")}
+                aria-pressed={showPassword}
+                className="absolute top-1/2 right-1 flex size-10 -translate-y-1/2 items-center justify-center rounded-sm text-ink-muted hover:text-ink"
+              >
+                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
+            <p id="password-help" className={cn("mt-2 text-sm", flow.tooShort ? "text-danger" : "text-ink-muted")}>
+              {register ? t("auth.passwordRule", { min: PASSWORD_MIN }) : t("auth.noReset")}
+            </p>
+
+            {flow.error && (
+              <p role="alert" className="mt-2 text-sm font-medium text-danger">
+                {flow.error}
+              </p>
+            )}
+            <Button type="submit" size="xl" className="mt-6" disabled={flow.pending || !flow.canSubmit}>
+              {flow.pending && <Loader2 className="animate-spin" />}
+              {t(register ? "auth.registerCta" : "auth.loginCta")}
+              {!flow.pending && <ArrowRight />}
+            </Button>
+
+            <p className="mt-6 border-t border-line pt-4 text-sm text-ink-muted">
+              {t(register ? "auth.haveAccount" : "auth.noAccount")}{" "}
+              <button type="button" className="font-medium text-primary underline-offset-4 hover:underline" onClick={() => flow.setMode(register ? "login" : "register")}>
+                {t(register ? "auth.tab.login" : "auth.tab.register")}
+              </button>
+            </p>
+          </form>
         </div>
       </section>
     </div>

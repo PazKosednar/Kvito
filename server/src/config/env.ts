@@ -12,12 +12,8 @@ const EnvSchema = z.object({
   DATABASE_URL: z.string().min(1),
   CLIENT_ORIGIN: z.string().url().default("http://localhost:5180"),
   JWT_ACCESS_SECRET: z.string().min(32),
-  OTP_PEPPER: z.string().min(32),
   ACCESS_TOKEN_TTL_MIN: z.coerce.number().int().positive().default(15),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(30),
-  OTP_TTL_MIN: z.coerce.number().int().positive().default(10),
-  OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
-  OTP_MAX_PER_HOUR: z.coerce.number().int().positive().default(5),
   COOKIE_SECURE: bool.default(false),
   UPLOAD_DIR: z.string().default("uploads"),
   /** Serve the built web client from this server (one Railway service). Default: on in production. */

@@ -1,6 +1,6 @@
 /**
  * Smoke test of the main auth flow against the test database:
- * request code → verify → /api/me → switch role → refresh (rotation + reuse detection) → logout.
+ * register → login → /api/me → switch role → refresh (rotation + reuse detection) → change password → logout.
  */
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -13,11 +13,6 @@ class CapturingEmailSender implements EmailSender {
   sent: EmailMessage[] = [];
   async send(message: EmailMessage) {
     this.sent.push(message);
-  }
-  lastCode(): string {
-    const match = this.sent.at(-1)?.text.match(/\b(\d{6})\b/);
-    if (!match?.[1]) throw new Error("no code e-mailed");
-    return match[1];
   }
 }
 
@@ -47,7 +42,6 @@ describe.skipIf(!hasDb)("auth flow (smoke)", () => {
       await prisma.refreshToken.deleteMany({ where: { userId: user.id } });
       await prisma.user.delete({ where: { id: user.id } });
     }
-    await prisma.loginCode.deleteMany({ where: { email } });
     await prisma.$disconnect();
   });
 
@@ -56,31 +50,40 @@ describe.skipIf(!hasDb)("auth flow (smoke)", () => {
   });
 
   it("validates input", async () => {
-    const res = await request(app).post("/api/auth/request-code").send({ email: "not-an-email" }).expect(400);
+    let res = await request(app).post("/api/auth/register").send({ name: "X", email: "not-an-email", password: "dolgo-geslo" }).expect(400);
+    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+    res = await request(app).post("/api/auth/register").send({ name: "X", email, password: "kratko" }).expect(400);
     expect(res.body.error.code).toBe("VALIDATION_ERROR");
   });
 
   let accessToken = "";
   let refreshCookie = "";
+  const password = "Kvito-geslo-1";
 
-  it("logs in with an e-mailed one-time code", async () => {
-    await request(app).post("/api/auth/request-code").send({ email: email.toUpperCase() }).expect(202);
-    expect(mail.sent.at(-1)?.to).toBe(email);
-
-    const wrong = mail.lastCode() === "000000" ? "111111" : "000000";
-    const bad = await request(app).post("/api/auth/verify-code").send({ email, code: wrong }).expect(400);
-    expect(bad.body.error.code).toBe("OTP_INVALID");
-
-    const res = await request(app).post("/api/auth/verify-code").send({ email, code: mail.lastCode() }).expect(200);
-    expect(res.body.user.email).toBe(email);
-    expect(res.body.user.roles).toEqual([]);
+  it("registers with name, e-mail and password and is signed in", async () => {
+    const res = await request(app).post("/api/auth/register").send({ name: "Smoke Test", email: email.toUpperCase(), password, locale: "en" }).expect(201);
+    expect(res.body.user).toMatchObject({ email, name: "Smoke Test", roles: [], locale: "en" });
+    expect(res.body.user.passwordHash).toBeUndefined();
     accessToken = res.body.accessToken;
     refreshCookie = cookieFrom(res);
     expect((res.headers["set-cookie"] as unknown as string[])[0]).toMatch(/HttpOnly/i);
+    const stored = await prisma.user.findUniqueOrThrow({ where: { email } });
+    expect(stored.passwordHash).toMatch(/^scrypt\$/);
   });
 
-  it("does not accept the same code twice", async () => {
-    await request(app).post("/api/auth/verify-code").send({ email, code: mail.lastCode() }).expect(400);
+  it("does not register the same e-mail twice", async () => {
+    const res = await request(app).post("/api/auth/register").send({ name: "Drugi", email, password: "drugo-geslo" }).expect(400);
+    expect(res.body.error.code).toBe("EMAIL_TAKEN");
+  });
+
+  it("signs in with the password, and answers the same for a wrong password or an unknown e-mail", async () => {
+    const wrong = await request(app).post("/api/auth/login").send({ email, password: "napacno-geslo" }).expect(400);
+    expect(wrong.body.error.code).toBe("INVALID_CREDENTIALS");
+    const unknown = await request(app).post("/api/auth/login").send({ email: `nobody-${Date.now()}@kvita.test`, password }).expect(400);
+    expect(unknown.body.error.code).toBe("INVALID_CREDENTIALS");
+    const res = await request(app).post("/api/auth/login").send({ email: ` ${email.toUpperCase()} `, password }).expect(200);
+    expect(res.body.user.email).toBe(email);
+    cookieFrom(res);
   });
 
   it("returns and updates the current user", async () => {
@@ -92,8 +95,7 @@ describe.skipIf(!hasDb)("auth flow (smoke)", () => {
       .set("Authorization", `Bearer ${accessToken}`)
       .send({ name: "Smoke Test", activeRole: "LANDLORD" })
       .expect(200);
-    expect(patched.body.user).toMatchObject({ name: "Smoke Test", roles: ["LANDLORD"], activeRole: "LANDLORD" });
-  });
+    expect(patched.body.user).toMatchObject({ name: "Smoke Test", roles: ["LANDLORD"], activeRole: "LANDLORD" });  });
 
   it("rotates refresh tokens and detects reuse", async () => {
     const first = await request(app).post("/api/auth/refresh").set("Cookie", refreshCookie).expect(200);
@@ -116,21 +118,22 @@ describe.skipIf(!hasDb)("auth flow (smoke)", () => {
       .expect(403);
   });
 
-  it("locks the code after too many wrong attempts", async () => {
-    await request(app).post("/api/auth/request-code").send({ email }).expect(202);
-    const right = mail.lastCode();
-    const wrong = right === "000000" ? "111111" : "000000";
-    for (let i = 0; i < 4; i++) {
-      await request(app).post("/api/auth/verify-code").send({ email, code: wrong }).expect(400);
-    }
-    await request(app).post("/api/auth/verify-code").send({ email, code: wrong }).expect(429);
-    // Even the correct code no longer works.
-    await request(app).post("/api/auth/verify-code").send({ email, code: right }).expect(400);
+  it("changes the password: the old one stops working and other sessions end", async () => {
+    const other = cookieFrom(await request(app).post("/api/auth/login").send({ email, password }).expect(200));
+    const wrong = await request(app).post("/api/auth/change-password").set("Authorization", `Bearer ${accessToken}`).send({ currentPassword: "napacno", newPassword: "novo-geslo-2" }).expect(400);
+    expect(wrong.body.error.code).toBe("WRONG_PASSWORD");
+    await request(app).post("/api/auth/change-password").send({ currentPassword: password, newPassword: "novo-geslo-2" }).expect(401);
+
+    const res = await request(app).post("/api/auth/change-password").set("Authorization", `Bearer ${accessToken}`).send({ currentPassword: password, newPassword: "novo-geslo-2" }).expect(200);
+    expect(res.body.accessToken).toBeTypeOf("string");
+    await request(app).post("/api/auth/refresh").set("Cookie", cookieFrom(res)).expect(200); // this device stays signed in
+    await request(app).post("/api/auth/refresh").set("Cookie", other).expect(401);
+    await request(app).post("/api/auth/login").send({ email, password }).expect(400);
+    await request(app).post("/api/auth/login").send({ email, password: "novo-geslo-2" }).expect(200);
   });
 
   it("logs out", async () => {
-    await request(app).post("/api/auth/request-code").send({ email }).expect(202);
-    const login = await request(app).post("/api/auth/verify-code").send({ email, code: mail.lastCode() }).expect(200);
+    const login = await request(app).post("/api/auth/login").send({ email, password: "novo-geslo-2" }).expect(200);
     const cookie = cookieFrom(login);
     await request(app).post("/api/auth/logout").set("Cookie", cookie).expect(204);
     await request(app).post("/api/auth/refresh").set("Cookie", cookie).expect(401);

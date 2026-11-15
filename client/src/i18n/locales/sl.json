@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "Kvito",
-    "headline": "Najemnina je\nporavnana.",
+    "headline": "Preprosto upravljanje\nnajemov.",
     "lead": "Najemnina, položnice in sporočila med najemodajalcem in najemnikom na enem mestu."
   },
   "slip": {
@@ -31,22 +31,26 @@
     "title": "Prijava",
     "emailLabel": "Tvoj e-naslov",
     "emailPlaceholder": "ime@primer.si",
-    "emailHint": "Gesla ne potrebuješ. Poslali ti bomo 6-mestno kodo.",
-    "sendCode": "Pošlji kodo",
-    "codeTitle": "Vpiši kodo",
-    "codeSentTo": "Poslali smo jo na {{email}} ob {{time}}.",
-    "codeSentToNoTime": "Poslali smo jo na {{email}}.",
-    "codeValidity": "Koda velja 10 minut. Velja samo zadnja poslana koda.",
-    "codeLabel": "6-mestna koda",
-    "verify": "Prijava",
-    "resend": "Pošlji novo kodo",
-    "resendIn": "Novo kodo lahko zahtevaš čez {{seconds}} s",
-    "changeEmail": "Uporabi drug e-naslov",
-    "devHint": "Razvoj: kodo najdeš v terminalu strežnika, v zadnjem bloku »E-mail za {{email}}«.",
     "logout": "Odjava",
     "loggedOut": "Odjava uspela.",
-    "stepEmail": "Prijava",
-    "stepCode": "Koda"
+    "tab": {
+      "login": "Prijava",
+      "register": "Registracija"
+    },
+    "loginHint": "Vpiši e-naslov in geslo.",
+    "registerTitle": "Nov račun",
+    "registerHint": "Ustvari račun z e-naslovom in geslom. Vlogo izbereš v naslednjem koraku.",
+    "nameLabel": "Ime in priimek",
+    "namePlaceholder": "npr. Gaja Kuhar",
+    "passwordLabel": "Geslo",
+    "showPassword": "Pokaži geslo",
+    "hidePassword": "Skrij geslo",
+    "passwordRule": "Vsaj {{min}} znakov. Zapomni si ga, ponastavitve gesla ni.",
+    "noReset": "Pozabljenega gesla ni mogoče ponastaviti.",
+    "loginCta": "Prijava",
+    "registerCta": "Ustvari račun",
+    "noAccount": "Še nimaš računa?",
+    "haveAccount": "Že imaš račun?"
   },
   "onboarding": {
     "title": "Kaj te pripelje v Kvito?",
@@ -118,9 +122,6 @@
     "generic": "Nekaj se je zalomilo. Poskusi še enkrat.",
     "network": "Ni povezave s strežnikom. Preveri internet in poskusi znova.",
     "VALIDATION_ERROR": "Preveri vneseno. Nekaj manjka ali ni v pravi obliki.",
-    "OTP_INVALID": "Koda se ne ujema ali je potekla. Preveri, da vpisuješ zadnjo poslano kodo.",
-    "OTP_TOO_MANY_ATTEMPTS": "Preveč napačnih poskusov. Zahtevaj novo kodo.",
-    "OTP_RATE_LIMITED": "Za ta e-naslov smo v zadnji uri poslali že 5 kod. Vpiši zadnjo prejeto ali poskusi čez eno uro.",
     "TOO_MANY_REQUESTS": "Preveč zahtevkov naenkrat. Poskusi čez nekaj minut.",
     "ACCOUNT_DELETED": "Ta račun je izbrisan.",
     "UNAUTHORIZED": "Seja je potekla. Prijavi se znova.",
@@ -170,7 +171,10 @@
     "COST_ENTRY_LOCKED": "Ta mesec je že v poslanem obračunu, zato ga ne moreš več spreminjati.",
     "CREDIT_CHOICE_REQUIRED": "Izberi, kaj naj se zgodi z dobroimetjem.",
     "MONTH_BEFORE_START": "Najem se je začel kasneje. Izberi mesec od začetka najema naprej.",
-    "RANGE_TOO_LONG": "Izberi največ 36 mesecev naenkrat."
+    "RANGE_TOO_LONG": "Izberi največ 36 mesecev naenkrat.",
+    "INVALID_CREDENTIALS": "E-naslov ali geslo ni pravilno.",
+    "EMAIL_TAKEN": "Za ta e-naslov račun že obstaja. Prijavi se.",
+    "WRONG_PASSWORD": "Trenutno geslo ni pravilno."
   },
   "validation": {
     "invalid": "Vrednost ni pravilna.",
@@ -188,7 +192,9 @@
     "INVALID_METER_VALUE": "Vpiši stanje, na primer 12345 ali 12345,6.",
     "noticeDays": "Vpiši število dni, od 1 do 730.",
     "INVALID_MONTH": "Izberi mesec.",
-    "DUPLICATE_COST_TYPE": "Vsak strošek naj bo naveden samo enkrat."
+    "DUPLICATE_COST_TYPE": "Vsak strošek naj bo naveden samo enkrat.",
+    "PASSWORD_TOO_SHORT": "Geslo naj ima vsaj 8 znakov.",
+    "PASSWORD_MISMATCH": "Gesli se ne ujemata."
   },
   "tabs": {
     "details": "Podatki",
@@ -555,7 +561,20 @@
     }
   },
   "login": {
-    "eyebrow": "Najem, poravnan"
+    "eyebrow": "Najem, poravnan",
+    "scene": {
+      "flat": "Stan 2B · November",
+      "settled": "Poravnano",
+      "meters": "Števci",
+      "handover": "Prevzem",
+      "messages": "Sporočila"
+    },
+    "features": {
+      "rent": "Najemnina in položnice",
+      "messages": "Sporočila in obvestila",
+      "issues": "Okvare in popravila",
+      "handover": "Prevzem, števci, pogodba"
+    }
   },
   "settled": {
     "thisMonth": "Ta mesec",
@@ -1248,5 +1267,17 @@
   "billingMode": {
     "COMBINED": "Eno plačilo na mesec",
     "SEPARATE": "Ločeno"
+  },
+  "password": {
+    "menu": "Zamenjaj geslo",
+    "title": "Zamenjaj geslo",
+    "subtitle": "Po menjavi se odjaviš na vseh drugih napravah.",
+    "current": "Trenutno geslo",
+    "next": "Novo geslo",
+    "repeat": "Ponovi novo geslo",
+    "mismatch": "Gesli se ne ujemata.",
+    "rule": "Vsaj {{min}} znakov.",
+    "cta": "Shrani novo geslo",
+    "saved": "Geslo je zamenjano."
   }
 }

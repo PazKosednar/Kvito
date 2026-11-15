@@ -2,12 +2,14 @@ import { Router, type CookieOptions, type Request, type RequestHandler } from "e
 import { env, isProd } from "../../config/env.js";
 import { audit } from "../../lib/audit.js";
 import { forbidden, unauthorized } from "../../lib/errors.js";
+import type { z } from "zod";
+import { authUserId, requireAuth } from "../../middleware/auth.js";
 import { validateBody } from "../../middleware/validate.js";
-import { requestCodeLimiter, verifyCodeLimiter } from "../../middleware/rateLimit.js";
+import { loginLimiter, registerLimiter } from "../../middleware/rateLimit.js";
 import type { EmailSender } from "../../services/email/EmailSender.js";
 import { toMeDto } from "../users/dto.js";
-import { RequestCodeBody, VerifyCodeBody } from "./schemas.js";
-import { requestLoginCode, verifyLoginCode } from "./service.js";
+import { ChangePasswordBody, LoginBody, RegisterBody } from "./schemas.js";
+import { changePassword, login, register } from "./service.js";
 import { revokeSession, rotateSession, type ClientMeta } from "./sessions.js";
 
 export const REFRESH_COOKIE = "kvita_rt";
@@ -33,19 +35,32 @@ const requireTrustedOrigin: RequestHandler = (req, _res, next) => {
   next();
 };
 
-export function authRouter(deps: { emailSender: EmailSender }): Router {
+export function authRouter(_deps: { emailSender: EmailSender }): Router {
   const router = Router();
 
-  router.post("/request-code", requestCodeLimiter, validateBody(RequestCodeBody), async (req, res) => {
-    await requestLoginCode(req.body.email, clientMeta(req), deps.emailSender, req.body.locale);
-    res.status(202).json({ ok: true });
+  router.post("/register", registerLimiter, validateBody(RegisterBody), async (req, res) => {
+    const body = req.body as z.infer<typeof RegisterBody>;
+    const { user, tokens } = await register(body, clientMeta(req));
+    res.cookie(REFRESH_COOKIE, tokens.refreshToken, cookieOptions(tokens.refreshExpiresAt));
+    await audit({ actorId: user.id, entityType: "User", entityId: user.id, action: "register", ip: req.ip });
+    res.status(201).json({ accessToken: tokens.accessToken, user: toMeDto(user) });
   });
 
-  router.post("/verify-code", verifyCodeLimiter, validateBody(VerifyCodeBody), async (req, res) => {
-    const { user, tokens } = await verifyLoginCode(req.body.email, req.body.code, clientMeta(req), req.body.locale);
+  router.post("/login", loginLimiter, validateBody(LoginBody), async (req, res) => {
+    const body = req.body as z.infer<typeof LoginBody>;
+    const { user, tokens } = await login(body.email, body.password, clientMeta(req));
     res.cookie(REFRESH_COOKIE, tokens.refreshToken, cookieOptions(tokens.refreshExpiresAt));
     await audit({ actorId: user.id, entityType: "User", entityId: user.id, action: "login", ip: req.ip });
     res.json({ accessToken: tokens.accessToken, user: toMeDto(user) });
+  });
+
+  router.post("/change-password", loginLimiter, requireAuth, validateBody(ChangePasswordBody), async (req, res) => {
+    const userId = authUserId(req);
+    const body = req.body as z.infer<typeof ChangePasswordBody>;
+    const tokens = await changePassword(userId, body.currentPassword, body.newPassword, clientMeta(req));
+    res.cookie(REFRESH_COOKIE, tokens.refreshToken, cookieOptions(tokens.refreshExpiresAt));
+    await audit({ actorId: userId, entityType: "User", entityId: userId, action: "changePassword", ip: req.ip });
+    res.json({ accessToken: tokens.accessToken });
   });
 
   router.post("/refresh", requireTrustedOrigin, async (req, res) => {

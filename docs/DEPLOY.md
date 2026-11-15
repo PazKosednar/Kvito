@@ -19,7 +19,7 @@ Vse so opisane v [server/.env.example](../server/.env.example). Obvezne v produk
 | `NODE_ENV` | `production` |
 | `DATABASE_URL` | iz Railway Postgresa |
 | `CLIENT_ORIGIN` | javni URL, npr. `https://app.kvito.si` (brez poševnice na koncu) |
-| `JWT_ACCESS_SECRET`, `OTP_PEPPER` | vsaka svoj naključni niz (48 bajtov), glej ukaz v `.env.example` |
+| `JWT_ACCESS_SECRET` | naključni niz (48 bajtov), glej ukaz v `.env.example` |
 | `STORAGE_DRIVER=s3` + `S3_*` | shramba v EU; brez nje se datoteke ob vsakem deployu izgubijo |
 | `SMTP_*`, `MAIL_FROM` | e-pošta; brez nje uporabniki ne dobijo prijavne kode |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | neobvezno; ustvari z `npm run vapid -w server` |

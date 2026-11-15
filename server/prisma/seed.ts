@@ -6,6 +6,7 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, type ChargeStatus, type Prisma } from "../src/generated/prisma/client.js";
+import { hashPassword } from "../src/lib/password.js";
 
 const connectionString = process.env["DATABASE_URL"];
 if (!connectionString) throw new Error("DATABASE_URL is not set (server/.env)");
@@ -25,12 +26,19 @@ const DEV_IBAN = "SI56191000000123438";
 
 const utcDate = (y: number, m: number, d: number) => new Date(Date.UTC(y, m - 1, d));
 
+/** Development password of every seed user (see README). A password changed in the app is kept. */
+const SEED_PASSWORD = "kvito1234";
+let seedHash: Promise<string> | null = null;
+
 async function upsertUser(email: string, name: string, roles: ("LANDLORD" | "TENANT")[]) {
-  return prisma.user.upsert({
+  const passwordHash = await (seedHash ??= hashPassword(SEED_PASSWORD));
+  const user = await prisma.user.upsert({
     where: { email },
     update: { name, roles, lastActiveRole: roles[0] ?? null },
-    create: { email, name, roles, lastActiveRole: roles[0] ?? null },
+    create: { email, name, roles, lastActiveRole: roles[0] ?? null, passwordHash },
   });
+  if (!user.passwordHash) await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+  return user;
 }
 
 async function main() {
@@ -180,7 +188,7 @@ async function main() {
 
   const gaja = await seedPavsal(landlord.id, tenancyBase);
 
-  console.log("Seed končan. Prijava (koda se izpiše v konzolo strežnika):");
+  console.log(`Seed končan. Prijava z geslom ${SEED_PASSWORD}:`);
   for (const u of [landlord, ana, luka, nina, gaja]) console.log(`  ${u.email}  (${u.roles.join(", ")})`);
 }
 

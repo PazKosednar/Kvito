@@ -22,6 +22,7 @@ import { HandoverTab } from "@/features/handover/HandoverTab";
 import { MetersTab } from "@/features/meters/MetersTab";
 import { PropertyFormPage } from "@/features/properties/PropertyFormPage";
 import { PropertyPage } from "@/features/properties/PropertyPage";
+import { ChangePasswordPage } from "@/features/account/ChangePasswordPage";
 import { PrivacyPage } from "@/features/account/PrivacyPage";
 import { NotificationsPage } from "@/features/notifications/NotificationsPage";
 import { InvitePage } from "@/features/tenancies/InvitePage";
@@ -49,6 +50,7 @@ export const router = createBrowserRouter([
           { index: true, element: <HomePage /> },
           { path: "obvestila", element: <NotificationsPage /> },
           { path: "zasebnost", element: <PrivacyPage /> },
+          { path: "geslo", element: <ChangePasswordPage /> },
           { path: "izpisek", element: <BankImportPage /> },
           { path: "nepremicnine/nova", element: <PropertyFormPage /> },
           { path: "nepremicnine/:id", element: <PropertyPage /> },

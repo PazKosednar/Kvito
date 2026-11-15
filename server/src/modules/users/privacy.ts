@@ -104,7 +104,7 @@ export async function deleteAccount(userId: string, ip: string | undefined): Pro
     await tx.loginCode.deleteMany({ where: { email: user.email } });
     await tx.user.update({
       where: { id: userId },
-      data: { email: `deleted-${userId}@deleted.invalid`, name: DELETED_USER_NAME, phone: null, roles: [], lastActiveRole: null, deletedAt: now },
+      data: { email: `deleted-${userId}@deleted.invalid`, name: DELETED_USER_NAME, phone: null, passwordHash: null, roles: [], lastActiveRole: null, deletedAt: now },
     });
     await audit({ actorId: userId, entityType: "User", entityId: userId, action: "account.delete", ip }, tx);
   });

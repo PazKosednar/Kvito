@@ -130,39 +130,6 @@ export function invitationEmail(
   return { to, subject, text, html };
 }
 
-const LOGIN: Record<Locale, { subject: string; hi: string; code: string; valid: (m: number) => string; ignore: string }> = {
-  sl: {
-    subject: "Tvoja koda za Kvito",
-    hi: "Živjo!",
-    code: "Tvoja koda za prijavo:",
-    valid: (m) => `Velja ${m} minut.`,
-    ignore: "Kode ne potrebuješ? Potem to sporočilo kar prezri.",
-  },
-  en: {
-    subject: "Your Kvito code",
-    hi: "Hi!",
-    code: "Your sign-in code:",
-    valid: (m) => `Valid for ${m} minutes.`,
-    ignore: "Didn't ask for a code? Just ignore this e-mail.",
-  },
-};
-
-export function loginCodeEmail(to: string, code: string, ttlMinutes: number, l: Locale = "sl"): EmailMessage {
-  const w = LOGIN[l];
-  const subject = `${w.subject}: ${code}`;
-  const text = [w.hi, "", `${w.code} ${code}`, w.valid(ttlMinutes), "", w.ignore].join("\n");
-  const html = layout(
-    subject,
-    `<p style="margin:0 0 12px">${w.hi}</p>
-     <p style="margin:0 0 8px">${w.code}</p>
-     <p style="margin:0 0 12px;padding:12px 16px;background:${BRAND.slip};border-radius:10px;font-size:32px;font-weight:700;letter-spacing:8px;color:${BRAND.text}">${escapeHtml(code)}</p>
-     <p style="margin:0 0 12px">${w.valid(ttlMinutes)}</p>
-     <p style="margin:0;color:${BRAND.muted}">${w.ignore}</p>`,
-    l,
-  );
-  return { to, subject, text, html };
-}
-
 const OPEN: Record<Locale, string> = { sl: "Odpri v Kvitu", en: "Open in Kvito" };
 
 /** Generic notification (reminders, payment updates) for people who have no push set up. */

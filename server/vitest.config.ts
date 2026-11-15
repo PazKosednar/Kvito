@@ -16,7 +16,6 @@ export default defineConfig({
       DATABASE_URL: testDbUrl ?? "postgresql://unused@localhost:5432/unused",
       ...(testDbUrl ? { DATABASE_URL_TEST: testDbUrl } : {}),
       JWT_ACCESS_SECRET: "test-access-secret-that-is-at-least-32-chars",
-      OTP_PEPPER: "test-otp-pepper-that-is-at-least-32-characters",
       CLIENT_ORIGIN: "http://localhost:5180",
     },
   },

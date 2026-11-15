@@ -11,8 +11,8 @@ const common = {
 /** General API limit per IP. */
 export const apiLimiter = rateLimit({ ...common, windowMs: 60_000, limit: 300 });
 
-/** Requesting login codes per IP (per-e-mail limits are enforced in the auth service). */
-export const requestCodeLimiter = rateLimit({ ...common, windowMs: 15 * 60_000, limit: 10 });
+/** New accounts per IP. */
+export const registerLimiter = rateLimit({ ...common, windowMs: 60 * 60_000, limit: 10 });
 
-/** Verifying login codes per IP (per-code attempt limits are enforced in the auth service). */
-export const verifyCodeLimiter = rateLimit({ ...common, windowMs: 15 * 60_000, limit: 30 });
+/** Password attempts per IP (sign-in and password change): slows down guessing. */
+export const loginLimiter = rateLimit({ ...common, windowMs: 15 * 60_000, limit: 20 });

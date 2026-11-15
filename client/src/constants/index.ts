@@ -21,4 +21,3 @@ export const ROUTES = {
   bankImport: "/izpisek",
 } as const;
 
-export const OTP_LENGTH = 6;

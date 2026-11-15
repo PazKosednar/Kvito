@@ -8,7 +8,7 @@ import { closeSocket } from "@/lib/realtime";
 import i18n from "@/i18n";
 import { clearQueryCache } from "./useQuery";
 
-/** The sign-in screen's language: the code e-mail is written in it and a new account starts with it. */
+/** The sign-in screen's language: a new account starts with it. */
 const screenLocale = () => (i18n.language === "en" ? "en" : "sl");
 
 /**
@@ -35,18 +35,26 @@ export function useAuth() {
   const status = useAuthStore((s) => s.status);
   const user = useAuthStore((s) => s.user);
 
-  const requestCode = useCallback(async (email: string) => {
-    await api("/api/auth/request-code", { method: "POST", body: { email, locale: screenLocale() }, auth: false });
+  const login = useCallback(async (email: string, password: string) => {
+    const res = await api<{ accessToken: string; user: CurrentUser }>("/api/auth/login", { method: "POST", body: { email, password }, auth: false });
+    useAuthStore.getState().setSession(res.accessToken, res.user);
+    return res.user;
   }, []);
 
-  const verifyCode = useCallback(async (email: string, code: string) => {
-    const res = await api<{ accessToken: string; user: CurrentUser }>("/api/auth/verify-code", {
+  const register = useCallback(async (input: { name: string; email: string; password: string }) => {
+    const res = await api<{ accessToken: string; user: CurrentUser }>("/api/auth/register", {
       method: "POST",
-      body: { email, code, locale: screenLocale() },
+      body: { ...input, locale: screenLocale() },
       auth: false,
     });
     useAuthStore.getState().setSession(res.accessToken, res.user);
     return res.user;
+  }, []);
+
+  /** Other devices are signed out; this one gets a fresh session. */
+  const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
+    const res = await api<{ accessToken: string }>("/api/auth/change-password", { method: "POST", body: { currentPassword, newPassword } });
+    useAuthStore.getState().setAccessToken(res.accessToken);
   }, []);
 
   const logout = useCallback(async () => {
@@ -69,5 +77,5 @@ export function useAuth() {
     return user;
   }, []);
 
-  return { status, user, isAuthenticated: status === "authenticated", requestCode, verifyCode, logout, updateMe };
+  return { status, user, isAuthenticated: status === "authenticated", login, register, changePassword, logout, updateMe };
 }

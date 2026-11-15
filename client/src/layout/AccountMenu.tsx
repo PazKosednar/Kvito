@@ -1,4 +1,4 @@
-import { LogOut, Plus, ShieldCheck } from "lucide-react";
+import { KeyRound, LogOut, Plus, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -123,6 +123,10 @@ export function AccountMenu() {
         />
         <DropdownMenuSeparator />
 
+        <DropdownMenuItem className="py-3" onSelect={() => void navigate("/geslo")}>
+          <KeyRound />
+          {t("password.menu")}
+        </DropdownMenuItem>
         <DropdownMenuItem className="py-3" onSelect={() => void navigate("/zasebnost")}>
           <ShieldCheck />
           {t("privacy.menu")}
