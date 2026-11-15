@@ -5,7 +5,10 @@ Ena storitev: Node strežnik streže tudi zgrajeni spletni odjemalec (PWA). Pole
 ## 1. Railway
 1. Nov projekt → **Deploy from GitHub repo** (repozitorij Kvito). Regija: **EU (Amsterdam)**.
 2. Dodaj **PostgreSQL**. `DATABASE_URL` v storitvi nastavi na referenco `${{Postgres.DATABASE_URL}}`.
-3. `railway.json` že vsebuje ukaze:
+   Nastavi jo **pred prvim buildom** – `prisma generate` med buildom bere `prisma.config.ts`, ki brez `DATABASE_URL` pade.
+   Prvi samodejni deploy takoj po povezavi repozitorija bo zato morda padel; po nastavitvi spremenljivk klikni **Redeploy**.
+3. V **Settings → Networking** ustvari domeno (`*.up.railway.app` ali lastno) in njen URL vpiši v `CLIENT_ORIGIN`.
+4. `railway.json` že vsebuje ukaze:
    - build: `npm ci --include=dev && npm run build`
    - pred zagonom: `npm run db:deploy` (samo `prisma migrate deploy`, nikoli `migrate dev`)
    - zagon: `npm run start`, preverjanje zdravja: `/api/health`
@@ -20,7 +23,7 @@ Vse so opisane v [server/.env.example](../server/.env.example). Obvezne v produk
 | `DATABASE_URL` | iz Railway Postgresa |
 | `CLIENT_ORIGIN` | javni URL, npr. `https://app.kvito.si` (brez poševnice na koncu) |
 | `JWT_ACCESS_SECRET` | naključni niz (48 bajtov), glej ukaz v `.env.example` |
-| `STORAGE_DRIVER=s3` + `S3_*` | shramba v EU; brez nje se datoteke ob vsakem deployu izgubijo |
+| `STORAGE_DRIVER=s3` + `S3_*` | shramba v EU; brez nje se datoteke ob vsakem deployu izgubijo. Možnost: Railway **Bucket** (S3-kompatibilen) – `TODO(preveri)`: ali je bucket v EU regiji |
 | `SMTP_*`, `MAIL_FROM` | e-pošta; brez nje uporabniki ne dobijo prijavne kode |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | neobvezno; ustvari z `npm run vapid -w server` |
 
