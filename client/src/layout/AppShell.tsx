@@ -6,7 +6,6 @@ import { useOnline } from "@/hooks/useOnline";
 import { useRole } from "@/hooks/useRole";
 import { AccountMenu } from "./AccountMenu";
 import { NotificationsBell } from "./NotificationsBell";
-import { RoleSwitch } from "./RoleSwitch";
 
 /** App frame on stone: a quiet header (lockup, role eyebrow, account) and a content column. */
 export function AppShell() {
@@ -39,7 +38,6 @@ export function AppShell() {
       )}
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 pt-6 pb-[calc(3rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-8">
-        <RoleSwitch className="mb-8" />
         {/* CGP motion: opacity only, 180 ms. */}
         <div key={location.pathname} className="animate-enter flex flex-1 flex-col">
           <Outlet />

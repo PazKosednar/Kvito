@@ -17,8 +17,10 @@ import { useRole } from "@/hooks/useRole";
 import { useTheme } from "@/hooks/useTheme";
 import { initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import type { Role } from "@/types/user";
 
 const THEMES: ThemePreference[] = ["light", "dark", "system"];
+const ROLE_ORDER: Role[] = ["LANDLORD", "TENANT"];
 
 /** Small segmented choice inside the menu (keeps the menu short instead of long radio lists). */
 function Segmented<T extends string>({
@@ -56,7 +58,7 @@ function Segmented<T extends string>({
 export function AccountMenu() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const { roles, otherRole } = useRole();
+  const { roles, activeRole, otherRole } = useRole();
   const { theme, setTheme } = useTheme();
   const { changeRole, changeLanguage, signOut } = useAccountActions();
   const navigate = useNavigate();
@@ -78,6 +80,20 @@ export function AccountMenu() {
           <p className="truncate text-sm text-muted-foreground">{user.email}</p>
         </div>
         <DropdownMenuSeparator />
+
+        {/* Most people are either a landlord or a tenant, so the role lives with the account, not on every screen. */}
+        {roles.length > 1 && activeRole && (
+          <>
+            <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">{t("roles.switchLabel")}</DropdownMenuLabel>
+            <Segmented<Role>
+              label={t("roles.switchLabel")}
+              value={activeRole}
+              options={ROLE_ORDER.map((r) => ({ value: r, label: t(`roles.${r}`) }))}
+              onChange={(r) => r !== activeRole && void changeRole(r)}
+            />
+            <DropdownMenuSeparator />
+          </>
+        )}
 
         {canAddRole && otherRole && (
           <>
