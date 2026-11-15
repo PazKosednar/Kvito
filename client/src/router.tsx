@@ -8,6 +8,7 @@ import { ChargesTab } from "@/features/charges/ChargesTab";
 import { UpnTestPage } from "@/features/charges/UpnTestPage";
 import { AcceptInvitePage } from "@/features/invitations/AcceptInvitePage";
 import { BankImportPage } from "@/features/bank/BankImportPage";
+import { PaymentsPage } from "@/features/payments/PaymentsPage";
 import { ContractTab } from "@/features/contract/ContractTab";
 import { CostsPage } from "@/features/contract/CostsPage";
 import { DepositReturnPage } from "@/features/contract/DepositReturnPage";
@@ -63,6 +64,7 @@ export const router = createBrowserRouter([
           { path: "letni-povzetek", element: <AnnualSummaryPage /> },
           { path: "moj-zivljenjepis", element: <MyHistoryPage /> },
           { path: "izpisek", element: <BankImportPage /> },
+          { path: "placila", element: <PaymentsPage /> },
           { path: "nepremicnine/nova", element: <PropertyFormPage /> },
           { path: "nepremicnine/:id", element: <PropertyPage /> },
           { path: "nepremicnine/:id/uredi", element: <PropertyFormPage /> },

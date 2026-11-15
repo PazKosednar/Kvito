@@ -1,18 +1,15 @@
-import { ArrowUpRight, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Eyebrow } from "@/components/brand";
 import { ModuleTile } from "@/components/frame";
-import { IsoGlyph } from "@/components/iso";
-import { ErrorState, List, ListRow, LoadingState } from "@/components/layout-parts";
+import { ErrorState, LoadingState } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useProperties } from "@/hooks/useProperties";
-import { TenancyStatusLabel, tenantNames } from "@/features/tenancies/tenancy-ui";
-import { BankImportSection, ExportsSection, OverviewPanel, useUnitAttention } from "./OverviewPanel";
-import type { Property } from "@/types/domain";
+import { PropertyTown } from "./PropertyTown";
+import { OverviewPanel } from "./OverviewPanel";
 
-/** Landlord home: start steps when empty, otherwise every property as a framed block with its units. */
+/** Landlord home: start steps when empty, otherwise the property town (overview of every unit) on top. */
 export function LandlordHome() {
   const { t } = useTranslation();
   const toMessage = useErrorMessage();
@@ -24,9 +21,6 @@ export function LandlordHome() {
 
   return (
     <>
-      <div className="mb-6 empty:hidden">
-        <OverviewPanel />
-      </div>
       <div className="mb-4 flex items-center justify-between gap-3">
         <p className="label-mono">{t("properties.indexLabel", { count: properties.length })}</p>
         <Button asChild variant="outline">
@@ -36,69 +30,11 @@ export function LandlordHome() {
           </Link>
         </Button>
       </div>
-      <div className="flex flex-col gap-8">
-        {properties.map((p, i) => (
-          <PropertyBlock key={p.id} property={p} index={i} />
-        ))}
+      <div className="mb-4 empty:hidden">
+        <OverviewPanel />
       </div>
-      <BankImportSection />
-      <ExportsSection />
+      <PropertyTown properties={properties} />
     </>
-  );
-}
-
-function PropertyBlock({ property: p, index }: { property: Property; index: number }) {
-  const { t } = useTranslation();
-  const attention = useUnitAttention();
-  const occupied = p.units.filter((u) => u.tenancies.some((x) => x.status === "ACTIVE")).length;
-  return (
-    <section className="rounded-md border border-line bg-surface-raised">
-      <Link to={`/nepremicnine/${p.id}`} className="group grid grid-cols-[1fr_auto] items-end gap-4 rounded-t-md border-b border-line p-5 transition-colors hover:bg-surface-sunken">
-        <div className="min-w-0">
-          <Eyebrow index={String(index + 1).padStart(2, "0")}>{p.city}</Eyebrow>
-          <h2 className="mt-2 flex items-center gap-2 text-h3 font-semibold">
-            <span className="truncate">{p.name}</span>
-            <ArrowUpRight className="size-4 shrink-0 text-ink-faint transition-colors group-hover:text-primary" />
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {p.street}, {p.postalCode} {p.city}
-          </p>
-          <p className="label-mono mt-3">{t("properties.occupancy", { occupied, total: p.units.length })}</p>
-        </div>
-        <IsoGlyph name="building" lit={occupied > 0} className="hidden h-24 w-32 sm:block" />
-      </Link>
-      {p.units.length === 0 ? (
-        <Link to={`/nepremicnine/${p.id}`} className="block p-4 text-muted-foreground hover:bg-accent">
-          {t("units.emptyBody")}
-        </Link>
-      ) : (
-        <List className="border-0">
-          {p.units.map((u) => {
-            const tenancy = u.tenancies[0];
-            return (
-              <ListRow
-                key={u.id}
-                to={tenancy ? `/najemi/${tenancy.id}` : `/nepremicnine/${p.id}`}
-                title={u.name}
-                subtitle={tenancy ? tenantNames(tenancy.members) || t("tenancies.waitingForTenant") : t("units.vacant")}
-                trailing={
-                  tenancy ? (
-                    (() => {
-                      const a = attention(tenancy.id);
-                      return a ? (
-                        <span className={a.warn ? "font-mono text-xs font-medium tracking-[0.06em] text-warn uppercase" : "font-mono text-xs font-medium tracking-[0.06em] text-ink-muted uppercase"}>{a.text}</span>
-                      ) : (
-                        <TenancyStatusLabel status={tenancy.status} />
-                      );
-                    })()
-                  ) : undefined
-                }
-              />
-            );
-          })}
-        </List>
-      )}
-    </section>
   );
 }
 

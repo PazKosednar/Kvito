@@ -37,7 +37,7 @@ export function BankImportPage() {
 
   return (
     <>
-      <PageHeader back={ROUTES.home} eyebrow={t("bank.eyebrow")} title={t("bank.title")} subtitle={t("bank.subtitle")} />
+      <PageHeader back={ROUTES.payments} eyebrow={t("bank.eyebrow")} title={t("bank.title")} subtitle={t("bank.subtitle")} />
 
       <label
         className={cn(

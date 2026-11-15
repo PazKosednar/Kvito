@@ -1454,5 +1454,22 @@
       "3-5": "3–5 drugih najemnikov",
       "6+": "6 ali več drugih najemnikov"
     }
+  },
+  "town": {
+    "eyebrow": "Tvoje nepremičnine",
+    "rented": "Oddano {{rented}} / {{total}}",
+    "buildingLabel": "{{index}}. {{name}}, {{address}} – oddano {{rented}} / {{total}}",
+    "state": {
+      "settled": "Poravnano",
+      "open": "V teku",
+      "attention": "Zahteva pozornost",
+      "vacant": "Prosto"
+    }
+  },
+  "payments": {
+    "eyebrow": "Denar",
+    "title": "Plačila",
+    "subtitle": "Uvoz bančnega izpiska, izvoz prejetih plačil in letni povzetek.",
+    "menu": "Plačila in izpiski"
   }
 }

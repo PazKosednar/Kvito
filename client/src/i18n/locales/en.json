@@ -1418,5 +1418,22 @@
       "3-5": "3–5 other tenants",
       "6+": "6 or more other tenants"
     }
+  },
+  "town": {
+    "eyebrow": "Your properties",
+    "rented": "Rented {{rented}} / {{total}}",
+    "buildingLabel": "{{index}}. {{name}}, {{address}} – rented {{rented}} / {{total}}",
+    "state": {
+      "settled": "Settled",
+      "open": "In progress",
+      "attention": "Needs attention",
+      "vacant": "Vacant"
+    }
+  },
+  "payments": {
+    "eyebrow": "Money",
+    "title": "Payments",
+    "subtitle": "Bank statement import, payment exports and the annual summary.",
+    "menu": "Payments and statements"
   }
 }

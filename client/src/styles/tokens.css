@@ -33,10 +33,12 @@
   --link: var(--accent);
   --shadow-overlay: 0 12px 32px rgba(18, 18, 18, 0.14), 0 0 0 1px rgba(18, 18, 18, 0.06);
 
-  /* Logo colors (see assets/Logos/README.md): ink sheet + signal check on light surfaces. */
+  /* Logo colors (see assets/Logos/README.md). Wordmark: --logo-word letters + --logo-accent check ("v").
+     Mark (tile + check): --logo-sheet tile + --logo-check check. */
   --logo-sheet: #121212;
   --logo-check: #38e08c;
   --logo-word: #121212;
+  --logo-accent: #0a7a45;
   /* Overdue amounts on the always-dark panel (CGP warn, dark value). */
   --warn-on-panel: #f5a524;
   /* Isometric illustration accent faces (as in assets/Ilustracije). */
@@ -98,6 +100,7 @@
   --logo-sheet: #38e08c;
   --logo-check: #0c0c0d;
   --logo-word: #f2f1ec;
+  --logo-accent: #38e08c;
   --iso-left: #1f7a4d;
   --iso-right: #1f7a4d;
 
@@ -110,4 +113,5 @@
   --logo-sheet: #38e08c;
   --logo-check: #0c0c0d;
   --logo-word: #f2f1ec;
+  --logo-accent: #38e08c;
 }

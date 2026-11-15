@@ -19,6 +19,7 @@ export const ROUTES = {
   onboarding: "/dobrodoslica",
   notifications: "/obvestila",
   bankImport: "/izpisek",
+  payments: "/placila",
   annual: "/letni-povzetek",
   history: "/moj-zivljenjepis",
   terms: "/pogoji",

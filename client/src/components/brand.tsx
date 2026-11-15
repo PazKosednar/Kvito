@@ -10,37 +10,36 @@ import { formatCents } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import type { ChargeStatus } from "@/types/domain";
 
-// ---------- Logo (assets/Logos) ----------
+// ---------- Logo (assets/Logos, CGP v2) ----------
 
-const SHEET = "M4 0 H34 L48 14 V44 A4 4 0 0 1 44 48 H4 A4 4 0 0 1 0 44 V4 A4 4 0 0 1 4 0 Z";
+/** Rounded tile of the mark (48 × 48, radius 10). */
+const MARK_TILE = "M10 0H38A10 10 0 0 1 48 10V38A10 10 0 0 1 38 48H10A10 10 0 0 1 0 38V10A10 10 0 0 1 10 0Z";
+/** The oversized check of the app icon, clipped to the tile – its long stroke leaves the tile top right. */
+const MARK_CHECK =
+  "M47.93 8.87 L47.89 8.53 L47.81 8.05 L47.7 7.57 L47.57 7.1 L47.42 6.63 L47.24 6.17 L47.04 5.72 L46.82 5.29 L46.58 4.86 L46.31 4.44 L46.03 4.04 L45.73 3.66 L45.41 3.28 L45.07 2.93 L44.72 2.59 L44.34 2.27 L43.96 1.97 L43.56 1.69 L43.14 1.42 L42.78 1.22 L18.41 27.04 L9.68 18.32 L3.32 24.68 L18.59 39.96Z";
+/** Wordmark letters k, i, t, o (drawn, not typeset; 7-unit strokes on a 40-unit height). */
+const WORD_LETTERS =
+  "M7 0 L0 0 L0 40 L7 40 L7 34.5 L10.53 30.43 L18.5 40 L27.5 40 L14.91 25.38 L26.5 12 L17.5 12 L7 24Z M75 12 L75 40 L68 40 L68 12Z M75 0 L75 7 L68 7 L68 0Z M98 19 L98 12 L90 12 L90 2 L83 2 L83 12 L78 12 L78 19 L83 19 L83 40 L90 40 L90 19Z M101 26a14 14 0 1 0 28 0a14 14 0 1 0 -28 0Z M108 26a7 7 0 1 1 14 0a7 7 0 1 1 -14 0Z";
+/** The "v" of the wordmark is a check – "everything is settled". */
+const WORD_CHECK = "M42.1 39.89 L62.87 10 L57.13 6 L41.9 27.91 L34.81 18.41 L29.19 22.59Z";
 
-/** The mark: a sheet with a cut corner and a heavy check – "everything is settled". Min. 16 px. */
+/** The mark: a rounded tile with the oversized check of the app icon. For small spaces (loader, banner, avatar). Min. 16 px. */
 export function KvitaMark({ className, title }: { className?: string; title?: string }) {
   return (
     <svg viewBox="0 0 48 48" className={cn("size-7 shrink-0", className)} role={title ? "img" : undefined} aria-hidden={title ? undefined : true}>
       {title && <title>{title}</title>}
-      <path d={SHEET} fill="var(--logo-sheet)" />
-      <polyline points="12,25 20,33 33,18" fill="none" stroke="var(--logo-check)" strokeWidth="7" strokeLinecap="square" strokeLinejoin="miter" />
+      <path d={MARK_TILE} fill="var(--logo-sheet)" />
+      <path d={MARK_CHECK} fill="var(--logo-check)" />
     </svg>
   );
 }
 
-/** Mark + KVITO wordmark (drawn from straight 8 px strokes; the O is a square ring like the I and T). Colors follow the theme or `.on-panel`. Min. width 96 px. */
+/** The logo: lowercase "kvito" wordmark whose "v" is a check. Colors follow the theme or `.on-panel`. Min. height 16 px. */
 export function KvitaLockup({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 220 48" className={cn("h-6 w-auto", className)} role="img" aria-label="Kvito">
-      <path d={SHEET} fill="var(--logo-sheet)" />
-      <polyline points="12,25 20,33 33,18" fill="none" stroke="var(--logo-check)" strokeWidth="7" strokeLinecap="square" strokeLinejoin="miter" />
-      <g transform="translate(64 4)" fill="var(--logo-word)">
-        <rect x="0" y="0" width="8" height="40" />
-        <polygon points="8,13 19,0 30,0 8,25" />
-        <polygon points="12,19 30,40 20,40 7,25" />
-        <polygon points="36,0 45,0 52,28 59,0 68,0 57,40 47,40" />
-        <rect x="74" y="0" width="8" height="40" />
-        <rect x="88" y="0" width="30" height="8" />
-        <rect x="99" y="0" width="8" height="40" />
-        <path d="M124 0H156V40H124Z M132 8V32H148V8Z" fillRule="evenodd" />
-      </g>
+    <svg viewBox="0 0 129 40" className={cn("h-6 w-auto", className)} role="img" aria-label="Kvito">
+      <path d={WORD_LETTERS} fill="var(--logo-word)" fillRule="evenodd" />
+      <path d={WORD_CHECK} fill="var(--logo-accent)" />
     </svg>
   );
 }

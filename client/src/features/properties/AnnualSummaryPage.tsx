@@ -40,7 +40,7 @@ export function AnnualSummaryPage() {
   const s = q.summary;
   return (
     <>
-      <PageHeader back={ROUTES.home} eyebrow={t("annual.eyebrow")} title={t("annual.title", { year: selected })} subtitle={t("annual.subtitle")} />
+      <PageHeader back={ROUTES.payments} eyebrow={t("annual.eyebrow")} title={t("annual.title", { year: selected })} subtitle={t("annual.subtitle")} />
       <div className="mb-8 flex flex-wrap items-center gap-3">
         <Select aria-label={t("exports.year")} className="w-28" value={selected} onChange={(e) => setYear(Number(e.target.value))}>
           {(years.length ? years : [selected]).map((y) => (

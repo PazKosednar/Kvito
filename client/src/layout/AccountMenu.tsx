@@ -1,4 +1,4 @@
-import { BadgeCheck, KeyRound, LogOut, Plus, ShieldCheck } from "lucide-react";
+import { BadgeCheck, KeyRound, LogOut, Plus, ShieldCheck, Wallet } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SUPPORTED_LOCALES, type Locale } from "@/constants";
+import { ROUTES, SUPPORTED_LOCALES, type Locale } from "@/constants";
 import type { ThemePreference } from "@/contexts/ThemeContext";
 import { useAccountActions } from "@/hooks/useAccountActions";
 import { useAuth } from "@/hooks/useAuth";
@@ -127,6 +127,12 @@ export function AccountMenu() {
           <DropdownMenuItem className="py-3" onSelect={() => void navigate("/moj-zivljenjepis")}>
             <BadgeCheck />
             {t("history.menu")}
+          </DropdownMenuItem>
+        )}
+        {activeRole === "LANDLORD" && (
+          <DropdownMenuItem className="py-3" onSelect={() => void navigate(ROUTES.payments)}>
+            <Wallet />
+            {t("payments.menu")}
           </DropdownMenuItem>
         )}
         <DropdownMenuItem className="py-3" onSelect={() => void navigate("/geslo")}>

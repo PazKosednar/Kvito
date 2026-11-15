@@ -1,4 +1,4 @@
-import { Download, FileBarChart, Loader2, Upload } from "lucide-react";
+import { ArrowRight, Download, FileBarChart, Loader2, Upload } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -21,6 +21,12 @@ export function OverviewPanel() {
   return (
     <PanelSummary
       eyebrow={t("overview.eyebrow")}
+      action={
+        <Link to={ROUTES.payments} className="inline-flex min-h-11 items-center gap-1 font-mono text-[11px] font-medium tracking-[0.08em] text-ink-on-panel-muted uppercase transition-colors duration-150 hover:text-ink-on-panel">
+          {t("payments.title")}
+          <ArrowRight className="size-3.5" aria-hidden="true" />
+        </Link>
+      }
       items={[
         {
           label: t("overview.overdue"),
@@ -50,10 +56,10 @@ export function useUnitAttention() {
 
 /** Yearly list of received payments for the accountant. */
 /** Entry to matching incoming payments from a bank statement. */
-export function BankImportSection() {
+export function BankImportSection({ className = "mt-10" }: { className?: string }) {
   const { t } = useTranslation();
   return (
-    <Section title={t("bank.title")} className="mt-10">
+    <Section title={t("bank.title")} className={className}>
       <div className="flex flex-wrap items-center gap-4 rounded-md border border-line bg-surface-raised p-4">
         <p className="min-w-0 flex-1 text-sm text-ink-muted">{t("bank.entryHint")}</p>
         <Button asChild variant="secondary">
