@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Building2, House, Loader2, type LucideIcon } from "lucide-react";
+import { BriefcaseBusiness, Building2, House, HousePlus, Loader2, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
@@ -12,6 +12,7 @@ import type { PropertyType } from "@/types/domain";
 
 const TYPES: { value: PropertyType; icon: LucideIcon }[] = [
   { value: "HOUSE", icon: House },
+  { value: "MULTI_UNIT_HOUSE", icon: HousePlus },
   { value: "APARTMENT", icon: Building2 },
   { value: "COMMERCIAL", icon: BriefcaseBusiness },
 ];
@@ -65,7 +66,7 @@ function PropertyForm({ id, initial }: { id: string | undefined; initial: Proper
       >
         <fieldset>
           <legend className="mb-2 text-sm font-medium">{t("properties.type")}</legend>
-          <div role="radiogroup" aria-label={t("properties.type")} className="grid grid-cols-3 gap-2">
+          <div role="radiogroup" aria-label={t("properties.type")} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {TYPES.map(({ value, icon: Icon }) => {
               const on = v.type === value;
               return (

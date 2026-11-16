@@ -10,8 +10,9 @@ import type { Property } from "@/types/domain";
 /**
  * The landlord's properties as a small isometric town on the panel (CGP line art, follows the theme):
  * one building per property, one window per unit, lit by the unit's state.
- * The building follows the property type: a gabled house, an apartment block (only the landlord's
- * flats light up among the neighbours') or a low commercial building with ribbon windows and a shutter door.
+ * The building follows the property type: a small gabled house, a larger gabled multi-unit house with a front
+ * entrance, an apartment block (in both of those only the landlord's flats light up among the neighbours')
+ * or a low commercial building with ribbon windows and a shutter door.
  */
 
 const C = Math.cos(Math.PI / 6);
@@ -40,7 +41,9 @@ interface Shape {
   h: number;
   /** Gable roof height above the walls (house only; 0 = flat roof with parapet). */
   roof: number;
-  door: [number, number, number]; // on the right face: y0, y1, z1
+  door: [number, number, number] | null; // on the right face: y0, y1, z1
+  /** Main entrance on the front face (multi-unit house): x0, x1, z1. */
+  frontDoor: [number, number, number] | null;
   /** Roller shutter (commercial): horizontal slats on the door. */
   shutter: boolean;
   windows: Win[]; // front-left face, one per unit
@@ -63,6 +66,7 @@ function seeded(id: string) {
 
 function shapeFor(b: TownBuilding): Shape {
   if (b.type === "HOUSE") return houseShape(b);
+  if (b.type === "MULTI_UNIT_HOUSE") return multiUnitHouseShape(b);
   if (b.type === "COMMERCIAL") return commercialShape(b);
   return blockShape(b);
 }
@@ -101,7 +105,7 @@ function blockShape(b: TownBuilding): Shape {
       { x0: 17, x1: 24, z0, z1: z0 + 10 },
     ];
   }).flat();
-  return { w: cols * cell + 12, d, h: floors * floorH + 6, roof: 0, door: [10, 18, 13], shutter: false, windows, side };
+  return { w: cols * cell + 12, d, h: floors * floorH + 6, roof: 0, door: [10, 18, 13], frontDoor: null, shutter: false, windows, side };
 }
 
 /**
@@ -131,7 +135,47 @@ function houseShape(b: TownBuilding): Shape {
     ];
   }).flat();
   // Roof taller than half the depth, so the front slope hides the back of the roof.
-  return { w: cols * cell + 12, d, h: floors * floorH + 2, roof: d / 2 + 5, door: [11, 19, 13], shutter: false, windows, side };
+  return { w: cols * cell + 12, d, h: floors * floorH + 2, roof: d / 2 + 5, door: [11, 19, 13], frontDoor: null, shutter: false, windows, side };
+}
+
+/**
+ * Multi-unit house (dvo-/tristanovanjska hiša): three floors under a gable roof, a front entrance in the middle
+ * of the ground floor. Like a block, the landlord may own only some flats: theirs light up, the rest stay dark.
+ */
+function multiUnitHouseShape(b: TownBuilding): Shape {
+  const n = b.units.length;
+  const rnd = seeded(b.id);
+  const cols = 3;
+  const cell = 17;
+  const floorH = 18;
+  const doorCol = 1;
+  // Ground-floor middle is the entrance, so it has no window.
+  const free = (floors: number) => cols * floors - 1;
+  let floors = 3;
+  while (free(floors) < n) floors += 1;
+  const slots: { col: number; floor: number }[] = [];
+  for (let f = 0; f < floors; f++) for (let c = 0; c < cols; c++) if (!(f === 0 && c === doorCol)) slots.push({ col: c, floor: f });
+  const order = slots.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [order[i], order[j]] = [order[j]!, order[i]!];
+  }
+  const owner = new Map(order.slice(0, n).map((slot, u) => [slot, u]));
+  const windows: Win[] = slots.map(({ col, floor }, i) => {
+    const x0 = 6 + col * cell + 3;
+    const z0 = floor * floorH + 5;
+    return { x0, x1: x0 + 10, z0, z1: z0 + 10, unit: owner.get(i) ?? null };
+  });
+  const d = 32;
+  const side = Array.from({ length: floors }, (_, f) => {
+    const z0 = f * floorH + 5;
+    return [
+      { x0: 5, x1: 12, z0, z1: z0 + 10 },
+      { x0: 20, x1: 27, z0, z1: z0 + 10 },
+    ];
+  }).flat();
+  const dx = 6 + doorCol * cell + 3;
+  return { w: cols * cell + 12, d, h: floors * floorH + 2, roof: d / 2 + 5, door: null, frontDoor: [dx, dx + 11, 14], shutter: false, windows, side };
 }
 
 /**
@@ -156,7 +200,7 @@ function commercialShape(b: TownBuilding): Shape {
     const z0 = (f + 1) * floorH + 6;
     return [{ x0: 4, x1: 30, z0, z1: z0 + 7 }];
   }).flat();
-  return { w: cols * cell + 12, d, h: floors * floorH + 6, roof: 0, door: [7, 27, 13], shutter: true, windows, side };
+  return { w: cols * cell + 12, d, h: floors * floorH + 6, roof: 0, door: [7, 27, 13], frontDoor: null, shutter: true, windows, side };
 }
 
 interface Placed {
@@ -212,6 +256,7 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
   const face = cn("fill-[var(--panel)] transition-colors duration-200 stroke-[var(--panel-edge)] group-hover:stroke-ink-on-panel-muted group-focus-visible:stroke-signal");
   const dash = empty ? "3 3" : undefined;
   const [lx, ly] = proj([bx + w + 6, by + d + 6, 0]);
+  const door = s.door ?? [0, 0, 0];
 
   return (
     <g className="group">
@@ -222,7 +267,10 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
       <g strokeWidth="1" strokeLinejoin="round" strokeDasharray={dash}>
         <polygon className={face} points={P([[0, d, 0], [w, d, 0], [w, d, h], [0, d, h]])} />
         <polygon className={face} points={P([[w, 0, 0], [w, d, 0], [w, d, h], [w, 0, h]])} />
-        <polygon className={face} points={P([[w, s.door[0], 0], [w, s.door[1], 0], [w, s.door[1], s.door[2]], [w, s.door[0], s.door[2]]])} />
+        {s.door && <polygon className={face} points={P([[w, s.door[0], 0], [w, s.door[1], 0], [w, s.door[1], s.door[2]], [w, s.door[0], s.door[2]]])} />}
+        {s.frontDoor && (
+          <polygon className={face} points={P([[s.frontDoor[0], d, 0], [s.frontDoor[1], d, 0], [s.frontDoor[1], d, s.frontDoor[2]], [s.frontDoor[0], d, s.frontDoor[2]]])} />
+        )}
         {s.roof > 0 ? (
           <>
             {/* Gable roof along the front: back slope (mostly hidden), front slope, gable on the right. */}
@@ -239,8 +287,9 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
       </g>
       {/* Roller shutter slats (commercial). */}
       {s.shutter &&
+        s.door &&
         [3, 6, 9].map((z) => (
-          <polyline key={`sh${z}`} className="fill-none stroke-[var(--panel-edge-faint)]" strokeWidth="1" points={P([[w, s.door[0], z], [w, s.door[1], z]])} />
+          <polyline key={`sh${z}`} className="fill-none stroke-[var(--panel-edge-faint)]" strokeWidth="1" points={P([[w, door[0], z], [w, door[1], z]])} />
         ))}
       {/* Neighbours' flats on the side: dark, just for scale. */}
       {s.side.map((win, i) => (

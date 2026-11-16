@@ -259,12 +259,14 @@
     "type": "Property type",
     "types": {
       "HOUSE": "House",
+      "MULTI_UNIT_HOUSE": "Multi-unit house",
       "APARTMENT": "Flat",
       "COMMERCIAL": "Commercial"
     },
     "typeHints": {
-      "HOUSE": "A detached or terraced house. Rent out the whole house, a floor or rooms.",
-      "APARTMENT": "A flat in an apartment block or multi-unit building.",
+      "HOUSE": "A single-family house (detached or terraced). Rent out the whole house, a floor or rooms.",
+      "MULTI_UNIT_HOUSE": "A house with several flats, e.g. a two- or three-flat house.",
+      "APARTMENT": "A flat in an apartment block.",
       "COMMERCIAL": "An office, warehouse, shop or other commercial space."
     },
     "editTitle": "Edit property",

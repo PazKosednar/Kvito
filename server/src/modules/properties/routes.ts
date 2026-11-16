@@ -10,7 +10,7 @@ import { assertPropertyOwner, assertUnitOwner } from "../access/access.js";
 
 const PropertyBody = z.object({
   // Optional (no default) so a PATCH without it keeps the stored type; the DB default is APARTMENT.
-  type: z.enum(["HOUSE", "APARTMENT", "COMMERCIAL"]).optional(),
+  type: z.enum(["HOUSE", "MULTI_UNIT_HOUSE", "APARTMENT", "COMMERCIAL"]).optional(),
   name: text(80),
   street: text(80),
   postalCode: z.string().trim().regex(/^\d{4}$/, "INVALID_POSTAL_CODE"),

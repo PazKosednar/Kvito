@@ -213,9 +213,10 @@ model RefreshToken {
 
 /// What kind of property it is; drives the drawing on the landlord's home screen.
 enum PropertyType {
-  HOUSE // hiša
+  HOUSE // hiša (enodružinska)
   APARTMENT // stanovanje (v bloku)
   COMMERCIAL // poslovni prostor (pisarna, skladišče, lokal …)
+  MULTI_UNIT_HOUSE // večstanovanjska hiša (added last so the DB enum order matches)
 }
 
 model Property {

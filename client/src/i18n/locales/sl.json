@@ -259,12 +259,14 @@
     "type": "Vrsta nepremičnine",
     "types": {
       "HOUSE": "Hiša",
+      "MULTI_UNIT_HOUSE": "Večstanovanjska hiša",
       "APARTMENT": "Stanovanje",
       "COMMERCIAL": "Poslovni prostor"
     },
     "typeHints": {
-      "HOUSE": "Samostojna ali vrstna hiša. Oddajaš lahko celo hišo, etažo ali sobe.",
-      "APARTMENT": "Stanovanje v bloku ali večstanovanjski stavbi.",
+      "HOUSE": "Enodružinska hiša (samostojna ali vrstna). Oddajaš lahko celo hišo, etažo ali sobe.",
+      "MULTI_UNIT_HOUSE": "Hiša z več stanovanji, na primer dvo- ali tristanovanjska hiša.",
+      "APARTMENT": "Stanovanje v bloku.",
       "COMMERCIAL": "Pisarna, skladišče, lokal ali drug poslovni prostor."
     },
     "editTitle": "Uredi nepremičnino",

@@ -97,8 +97,8 @@ export interface Unit {
   tenancies: Tenancy[];
 }
 
-/** Mirrors server PropertyType: hiša, stanovanje (v bloku), poslovni prostor. */
-export type PropertyType = "HOUSE" | "APARTMENT" | "COMMERCIAL";
+/** Mirrors server PropertyType: hiša, večstanovanjska hiša, stanovanje (v bloku), poslovni prostor. */
+export type PropertyType = "HOUSE" | "MULTI_UNIT_HOUSE" | "APARTMENT" | "COMMERCIAL";
 
 export interface Property {
   id: string;

@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "PropertyType" ADD VALUE 'MULTI_UNIT_HOUSE';
