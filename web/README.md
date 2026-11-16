@@ -23,13 +23,17 @@ npm start
 
 ## Railway (ločena storitev)
 
-1. V projektu aplikacije: **New → GitHub Repo** (isti repozitorij Kvito), regija EU.
-2. **Settings → Source → Root Directory:** `web`
-3. **Settings → Config-as-code:** `web/railway.json` (zagon `node server.mjs`, preverjanje `/health`, gradnja samo ob spremembah v `web/**`).
-4. **Variables:** `APP_URL` = javni naslov aplikacije brez poševnice na koncu (privzeto `https://kvitaserver-production.up.railway.app`; kasneje npr. `https://app.kvito.si`).
-5. **Settings → Networking:** ustvari domeno (kasneje `kvito.si` / `www.kvito.si`).
+Postavljeno v projektu `eloquent-dream` kot storitev **`kvito-web`** (EU, `europe-west4`), domena
+`https://kvito-web-production.up.railway.app`. Nastavitve so v storitvi (Railway za nove storitve ne bere več `railway.json`;
+`web/railway.json` je zapis istih vrednosti):
 
-Storitev aplikacije (koren repozitorija) nima `watchPatterns`, zato se ob spremembah v `web/` lahko na novo zgradi tudi aplikacija. `TODO(preveri)`: po želji ji v korenskem `railway.json` dodaj `watchPatterns`, ki izključi `web/**`.
+- Source: repozitorij Kvito, veja `main`, **Root Directory** `/web`
+- Start: `node server.mjs`, healthcheck `/health`, restart ON_FAILURE (5)
+- Watch paths: `/web/**` – gradi se samo ob spremembah strani
+- Variables: `APP_URL` (javni naslov aplikacije brez poševnice na koncu; kasneje npr. `https://app.kvito.si`), `PORT=8080`, `NODE_ENV=production`
+
+Aplikacija (`@kvita/server`) ima svoje watch paths (`/server/**`, `/client/**` …), zato spremembe v `web/` aplikacije ne zgradijo znova.
+Lastna domena (`kvito.si` / `www.kvito.si`): Settings → Networking → Custom Domain, nato DNS zapisi pri registrarju.
 
 ## Odprto
 
