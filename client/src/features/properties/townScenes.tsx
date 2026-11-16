@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { proj, pts, seeded, type Pt, type TownRow } from "./townGeometry";
+import type { CSSProperties, ReactNode } from "react";
+import { C, proj, pts, seeded, type Pt, type TownRow } from "./townGeometry";
 
 /**
  * Surroundings for the property town (a per-device choice, see useTownScene).
@@ -108,6 +108,24 @@ function Car({ x, y }: { x: number; y: number }) {
   );
 }
 
+/**
+ * A car driving along the road (x direction) from `x` by `dx`, looping. CSS animation (.kv-drive) so it stops
+ * with prefers-reduced-motion; fades in and out at the ends of the road. `phase` (0–1) spreads cars along the lane.
+ */
+function DrivingCar({ x, y, dx, seconds, phase }: { x: number; y: number; dx: number; seconds: number; phase: number }) {
+  const style = {
+    "--kv-dx": `${(dx * C).toFixed(1)}px`,
+    "--kv-dy": `${(dx / 2).toFixed(1)}px`,
+    animationDuration: `${seconds}s`,
+    animationDelay: `${(-seconds * phase).toFixed(2)}s`,
+  } as CSSProperties;
+  return (
+    <g className="kv-drive" style={style}>
+      <Car x={x} y={y} />
+    </g>
+  );
+}
+
 const lineX = (x0: number, x1: number, y: number, z = 0) => pts([[x0, y, z], [x1, y, z]]);
 
 // ---------- Scenes ----------
@@ -169,8 +187,14 @@ function city(rows: TownRow[], L: SceneLayers) {
       front.push(<polyline key={`z${i}`} points={pts([[cx + i * 4, curbA + 2, 0], [cx + i * 4, curbB - 2, 0]])} fill="none" stroke={FAINT} strokeWidth="2" />);
     }
     for (let x = r.x0 - 6, i = 0; x <= r.x1 + 6; x += 48, i++) front.push(<Lamp key={`lp${i}`} x={x} y={curbA - 2} />);
-    front.push(<Car key="c1" x={r.x0 + (r.x1 - r.x0) * 0.2} y={curbA + 3} />);
-    front.push(<Car key="c2" x={r.x0 + (r.x1 - r.x0) * 0.7} y={curbA + 15} />);
+    // Traffic: near lane drives right, far lane drives left; drawn near lane first (it is further back).
+    const len = x1 - x0 - 14;
+    const near = 16 + Math.round(rnd() * 4);
+    const far = 20 + Math.round(rnd() * 4);
+    front.push(<DrivingCar key="c1" x={x0} y={curbA + 3} dx={len} seconds={near} phase={0.15} />);
+    front.push(<DrivingCar key="c2" x={x0} y={curbA + 3} dx={len} seconds={near} phase={0.65} />);
+    front.push(<DrivingCar key="c3" x={x1 - 14} y={curbA + 15} dx={-len} seconds={far} phase={0.35} />);
+    front.push(<DrivingCar key="c4" x={x1 - 14} y={curbA + 15} dx={-len} seconds={far} phase={0.85} />);
     L.front.set(r.index, front);
     L.extent.push([x0, r.y0 - 32, 0], [x1, r.y0 - 32, 0], [x0, curbB + 4, 0], [x1, curbB + 4, 0], [r.x0, r.y0 - 30, 66]);
   }

@@ -181,6 +181,33 @@
 .animate-enter {
   animation: kvita-fade 180ms ease-out both;
 }
+/* Town "city" scene: cars driving along the road (decoration only; distance via --kv-dx / --kv-dy). */
+@keyframes kv-drive {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  94% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--kv-dx), var(--kv-dy));
+    opacity: 0;
+  }
+}
+.kv-drive {
+  animation: kv-drive linear infinite;
+}
+/* Reduced motion: freeze instead of removing, so the negative delays keep the cars spread along the road. */
+@media (prefers-reduced-motion: reduce) {
+  .kv-drive {
+    animation-play-state: paused;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-enter {
     animation: none;
