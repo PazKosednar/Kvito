@@ -38,7 +38,7 @@
       "register": "Sign up"
     },
     "nameLabel": "Full name",
-    "namePlaceholder": "e.g. Gaja Kuhar",
+    "namePlaceholder": "e.g. Jane Doe",
     "passwordLabel": "Password",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
