@@ -1449,6 +1449,20 @@
       "city": "City",
       "countryside": "Countryside"
     },
+    "time": {
+      "label": "Time of day",
+      "auto": "Automatic",
+      "day": "Day",
+      "night": "Night"
+    },
+    "season": {
+      "label": "Season",
+      "auto": "Automatic",
+      "spring": "Spring",
+      "summer": "Summer",
+      "autumn": "Autumn",
+      "winter": "Winter"
+    },
     "state": {
       "settled": "Settled",
       "open": "In progress",

@@ -10,6 +10,8 @@ export const DISPLAY_TIME_ZONE = "Europe/Ljubljana";
 export const STORAGE_KEYS = {
   theme: "kvita-theme",
   townScene: "kvita-town-scene",
+  townDayTime: "kvita-town-daytime",
+  townSeason: "kvita-town-season",
   locale: "kvita-locale",
   iosHintDismissed: "kvita-ios-hint-dismissed",
 } as const;

@@ -1485,6 +1485,20 @@
       "city": "Mesto",
       "countryside": "Podeželje"
     },
+    "time": {
+      "label": "Čas dneva",
+      "auto": "Samodejno",
+      "day": "Dan",
+      "night": "Noč"
+    },
+    "season": {
+      "label": "Letni čas",
+      "auto": "Samodejno",
+      "spring": "Pomlad",
+      "summer": "Poletje",
+      "autumn": "Jesen",
+      "winter": "Zima"
+    },
     "state": {
       "settled": "Poravnano",
       "open": "V teku",

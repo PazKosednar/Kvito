@@ -53,6 +53,10 @@
   --warn-on-panel: #8f4500;
   /* Green used for text/marks on the panel; on light stone the bright signal is too faint, so accent is used. */
   --signal-on-panel: #0a7a45;
+  /* Town decoration only (never a status): lit neighbours' windows and lamps at night, snow, night tint. */
+  --night-glow: #efe3c2;
+  --snow: #ffffff;
+  --night-tint: rgb(30 32 52 / 0.06);
   /* Isometric illustration accent faces (as in assets/Ilustracije). */
   --iso-left: #0a7a45;
   --iso-right: #0b6b3d;
@@ -127,6 +131,9 @@
   --ink-on-panel-muted: #a8a69f;
   --warn-on-panel: #f5a524;
   --signal-on-panel: #38e08c;
+  --night-glow: #3d3628;
+  --snow: #dcdbd5;
+  --night-tint: rgb(0 0 0 / 0.28);
 
   --destructive-foreground: #0c0c0d;
   --warning-foreground: #0c0c0d;

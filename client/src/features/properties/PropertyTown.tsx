@@ -1,4 +1,5 @@
 import { ArrowRight, Car, ChevronDown, CircleCheck, Clock, Square, SquareDashed, Trees, TriangleAlert, Wheat, type LucideIcon } from "lucide-react";
+import { useContext, useId } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -9,14 +10,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePropertyTown, type TownBuilding, type UnitState } from "@/hooks/usePropertyTown";
+import { DAY_TIME_CHOICES, SEASON_CHOICES, useTownAmbient, type DayTimeChoice, type SeasonChoice } from "@/hooks/useTownAmbient";
 import { useTownScene } from "@/hooks/useTownScene";
 import { cn } from "@/lib/utils";
 import type { Property } from "@/types/domain";
 import { proj, seeded, type Pt, type TownRow } from "./townGeometry";
-import { sceneLayers, TOWN_SCENES, type TownScene } from "./townScenes";
+import { sceneLayers, Shrub, TOWN_SCENES, TownAmbientContext, type TownScene } from "./townScenes";
 
 /**
  * The landlord's properties as a small isometric town on the panel (CGP line art, follows the theme):
@@ -310,6 +313,14 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
   const face = cn("fill-[var(--panel)] transition-colors duration-200 stroke-[var(--panel-edge)] group-hover:stroke-ink-on-panel-muted group-focus-visible:stroke-signal");
   const dash = empty ? "3 3" : undefined;
   const door = s.door ?? [0, 0, 0];
+  const { dayTime, season } = useContext(TownAmbientContext);
+  const night = dayTime === "night";
+  const winter = season === "winter";
+  // At night some of the other windows are lit (decoration, never a status); the same ones every time.
+  const salt = Math.floor(seeded(`glow-${b.id}`)() * 1000);
+  const glow = (i: number) => night && (Math.imul(i + salt, 2654435761) >>> 0) % 100 < 55;
+  const dark = "fill-none stroke-[var(--panel-edge-faint)]";
+  const lit = "fill-[var(--night-glow)] stroke-[var(--panel-edge-faint)]";
 
   return (
     <g className="group">
@@ -346,7 +357,11 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
         ) : (
           <>
             <polygon className={face} points={P([[0, 0, h], [w, 0, h], [w, d, h], [0, d, h]])} />
-            <polygon className="fill-none stroke-[var(--panel-edge)]" strokeOpacity="0.6" points={P([[3, 3, h], [w - 3, 3, h], [w - 3, d - 3, h], [3, d - 3, h]])} />
+            <polygon
+              className={winter ? "fill-[var(--snow)] stroke-[var(--panel-edge)]" : "fill-none stroke-[var(--panel-edge)]"}
+              strokeOpacity={winter ? undefined : "0.6"}
+              points={P([[3, 3, h], [w - 3, 3, h], [w - 3, d - 3, h], [3, d - 3, h]])}
+            />
           </>
         )}
       </g>
@@ -358,10 +373,10 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
         ))}
       {/* Neighbours' flats on the side: dark, just for scale. */}
       {s.side.map((win, i) => (
-        <polygon key={`s${i}`} className="fill-none stroke-[var(--panel-edge-faint)]" strokeWidth="1" points={P([[w, win.x0, win.z0], [w, win.x1, win.z0], [w, win.x1, win.z1], [w, win.x0, win.z1]])} />
+        <polygon key={`s${i}`} className={glow(100 + i) ? lit : dark} strokeWidth="1" points={P([[w, win.x0, win.z0], [w, win.x1, win.z0], [w, win.x1, win.z1], [w, win.x0, win.z1]])} />
       ))}
       {s.windows.map((win, i) =>
-        win.unit == null ? <polygon key={`n${i}`} className="fill-none stroke-[var(--panel-edge-faint)]" strokeWidth="1" points={winPts(win)} /> : null,
+        win.unit == null ? <polygon key={`n${i}`} className={glow(i) ? lit : dark} strokeWidth="1" points={winPts(win)} /> : null,
       )}
     </Link>
       {/* The landlord's own flats: each window opens its tenancy. */}
@@ -381,8 +396,24 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
           </Link>
         );
       })}
+      {/* Garden along the facade: one bush per three months paid on time (reward, decoration only). */}
+      {gardenSpots(s, b.garden ?? 0).map((x) => (
+        <g key={`g${x}`} aria-hidden="true" className="pointer-events-none" strokeWidth="1">
+          <Shrub x={bx + x} y={by + d + 3.2} s={0.7} />
+        </g>
+      ))}
     </g>
   );
+}
+
+/** x positions (along the facade) for the reward bushes, keeping the front door clear. */
+function gardenSpots(s: Shape, count: number): number[] {
+  const spots: number[] = [];
+  for (let x = 5; x <= s.w - 4 && spots.length < count; x += 8) {
+    if (s.frontDoor && x > s.frontDoor[0] - 5 && x < s.frontDoor[1] + 5) continue;
+    spots.push(x);
+  }
+  return spots;
 }
 
 /**
@@ -390,6 +421,7 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
  * Order: back slope (mostly hidden), gable wall, attic window, chimney (behind the ridge), front slope, edges.
  */
 function GableRoof({ s, P, face }: { s: Shape; P: (pts: Pt[]) => string; face: string }) {
+  const snow = useContext(TownAmbientContext).season === "winter";
   const { w, d, h, roof: r, eave: e } = s;
   const drop = e * (r / (d / 2)); // the slope continues down over the overhang
   const ze = h - drop;
@@ -412,11 +444,79 @@ function GableRoof({ s, P, face }: { s: Shape; P: (pts: Pt[]) => string; face: s
         </>
       )}
       <polygon className={face} points={P([[-e, d + e, ze], [w + e, d + e, ze], [w + e, d / 2, ridge], [-e, d / 2, ridge]])} />
+      {snow && <RoofSnow s={s} P={P} />}
       {/* Fascia along the front eave and barge boards on the gable end. */}
       <polygon className={face} points={P([[-e, d + e, ze], [w + e, d + e, ze], [w + e, d + e, ze - t], [-e, d + e, ze - t]])} />
       <polygon className={face} points={P([[w + e, d + e, ze], [w + e, d / 2, ridge], [w + e, d / 2, ridge - t], [w + e, d + e, ze - t]])} />
       <polygon className={face} points={P([[w + e, -e, ze], [w + e, d / 2, ridge], [w + e, d / 2, ridge - t], [w + e, -e, ze - t]])} />
     </>
+  );
+}
+
+/** Snow on the upper part of the front roof slope, with a soft wavy lower edge. */
+function RoofSnow({ s, P }: { s: Shape; P: (pts: Pt[]) => string }) {
+  const { w, d, h, roof: r, eave: e } = s;
+  const ridge = h + r;
+  // Point on the front slope at depth fraction f (0 = ridge, 1 = eave).
+  const at = (x: number, f: number): Pt => [x, d / 2 + (d / 2 + e) * f, ridge - (r + e * (r / (d / 2))) * f];
+  const lower: Pt[] = [];
+  const steps = Math.max(4, Math.round((w + 2 * e) / 6));
+  for (let i = steps; i >= 0; i--) {
+    const x = -e + ((w + 2 * e) * i) / steps;
+    lower.push(at(x, i % 2 ? 0.5 : 0.58));
+  }
+  return <polygon className="fill-[var(--snow)] stroke-[var(--panel-edge)]" strokeLinejoin="round" points={P([at(-e, 0), at(w + e, 0), ...lower])} />;
+}
+
+/** Sky: sun by day; moon, stars and a faint tint by night; snowflakes are drawn separately on top. */
+function Sky({ box }: { box: Box }) {
+  const { dayTime } = useContext(TownAmbientContext);
+  const cx = box.x0 + Math.min(46, box.w * 0.1);
+  const cy = box.y0 + 30;
+  if (dayTime === "day") {
+    return (
+      <g aria-hidden="true" stroke="var(--panel-edge-faint)" fill="none">
+        <circle cx={cx} cy={cy} r={7} />
+        {Array.from({ length: 8 }, (_, i) => {
+          const a = (i * Math.PI) / 4;
+          return <line key={i} x1={cx + Math.cos(a) * 10} y1={cy + Math.sin(a) * 10} x2={cx + Math.cos(a) * 13} y2={cy + Math.sin(a) * 13} />;
+        })}
+      </g>
+    );
+  }
+  const rnd = seeded(`stars-${Math.round(box.w)}`);
+  const stars = Array.from({ length: 16 }, () => [box.x0 + rnd() * box.w, box.y0 + 8 + rnd() * box.h * 0.32, rnd()] as const);
+  return (
+    <g aria-hidden="true">
+      {stars.map(([x, y, k], i) =>
+        k > 0.6 ? (
+          <path key={i} d={`M${x - 2.2},${y}H${x + 2.2}M${x},${y - 2.2}V${y + 2.2}`} stroke="var(--panel-edge)" strokeWidth="0.8" />
+        ) : (
+          <circle key={i} cx={x} cy={y} r={0.9} fill="var(--panel-edge)" />
+        ),
+      )}
+      <path
+        d={`M${cx},${cy - 8} A8,8 0 1,0 ${cx},${cy + 8} A6,8 0 1,1 ${cx},${cy - 8} Z`}
+        fill="var(--night-glow)"
+        stroke="var(--panel-edge)"
+        strokeLinejoin="round"
+      />
+    </g>
+  );
+}
+
+/** Winter: a light snowfall over the whole canvas (static dots). */
+function Snowfall({ box }: { box: Box }) {
+  const { season } = useContext(TownAmbientContext);
+  if (season !== "winter") return null;
+  const rnd = seeded(`snow-${Math.round(box.w)}-${Math.round(box.h)}`);
+  const flakes = Array.from({ length: Math.round((box.w * box.h) / 2600) }, () => [box.x0 + rnd() * box.w, box.y0 + rnd() * box.h] as const);
+  return (
+    <g aria-hidden="true" className="pointer-events-none">
+      {flakes.map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r={1.1} fill="var(--snow)" stroke="var(--panel-edge-faint)" strokeWidth="0.6" />
+      ))}
+    </g>
   );
 }
 
@@ -483,7 +583,9 @@ function bounds(placed: Placed[], extra: Pt[] = []) {
   return { x0, y0, w: x1 - x0, h: y1 - y0 };
 }
 
-function Ground({ box }: { box: { x0: number; y0: number; w: number; h: number } }) {
+type Box = { x0: number; y0: number; w: number; h: number };
+
+function Ground({ box }: { box: Box }) {
   // Isometric lattice covering the canvas: lines along x and y at z = 0.
   const step = 14;
   const lines: ReactNode[] = [];
@@ -513,7 +615,15 @@ const LEGEND: { state: UnitState; icon: ReactNode }[] = [
 const SCENE_ICONS: Record<TownScene, LucideIcon> = { none: SquareDashed, park: Trees, city: Car, countryside: Wheat };
 
 /** Small dropdown in the corner of the scene: which surroundings to draw around the buildings. */
-function ScenePicker({ scene, onChange }: { scene: TownScene; onChange: (s: TownScene) => void }) {
+function ScenePicker({
+  scene,
+  onChange,
+  ambient,
+}: {
+  scene: TownScene;
+  onChange: (s: TownScene) => void;
+  ambient: ReturnType<typeof useTownAmbient>;
+}) {
   const { t } = useTranslation();
   const Icon = SCENE_ICONS[scene];
   return (
@@ -526,7 +636,7 @@ function ScenePicker({ scene, onChange }: { scene: TownScene; onChange: (s: Town
         {t(`town.scene.${scene}`)}
         <ChevronDown className="size-3" aria-hidden="true" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={4} className="w-44 rounded-md p-1.5">
+      <DropdownMenuContent align="end" sideOffset={4} className="max-h-[70vh] w-48 overflow-y-auto rounded-md p-1.5">
         <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">{t("town.scene.label")}</DropdownMenuLabel>
         <DropdownMenuRadioGroup value={scene} onValueChange={(v) => onChange(v as TownScene)}>
           {TOWN_SCENES.map((v) => {
@@ -539,50 +649,63 @@ function ScenePicker({ scene, onChange }: { scene: TownScene; onChange: (s: Town
             );
           })}
         </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">{t("town.time.label")}</DropdownMenuLabel>
+        <DropdownMenuRadioGroup value={ambient.dayTimeChoice} onValueChange={(v) => ambient.setDayTime(v as DayTimeChoice)}>
+          {DAY_TIME_CHOICES.map((v) => (
+            <DropdownMenuRadioItem key={v} value={v} className="min-h-10">
+              {t(`town.time.${v}`)}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">{t("town.season.label")}</DropdownMenuLabel>
+        <DropdownMenuRadioGroup value={ambient.seasonChoice} onValueChange={(v) => ambient.setSeason(v as SeasonChoice)}>
+          {SEASON_CHOICES.map((v) => (
+            <DropdownMenuRadioItem key={v} value={v} className="min-h-10">
+              {t(`town.season.${v}`)}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
-export function PropertyTown({ properties }: { properties: Property[] }) {
+/**
+ * The town drawing itself (shared by the landlord's overview and the tenant's own building):
+ * buildings, surroundings, day/night and season, plus the small picker in the corner.
+ */
+export function TownCanvas({ buildings, label, picker = true, className }: { buildings: TownBuilding[]; label: string; picker?: boolean; className?: string }) {
   const { t } = useTranslation();
-  const town = usePropertyTown(properties);
   const { scene, setScene } = useTownScene();
-  const { placed, rows } = layout(town.buildings);
+  const ambient = useTownAmbient();
+  const { placed, rows } = layout(buildings);
   const decor = sceneLayers(scene, rows);
   const box = bounds(placed, decor.extent);
   const stateLabel = (s: UnitState) => t(`town.state.${s}`);
+  const fadeId = `kv-town-fade-${useId().replace(/:/g, "")}`;
 
   return (
-    <section aria-labelledby="town-title" className="on-panel overflow-hidden rounded-md bg-panel">
-      <div className="flex items-start justify-between gap-3 px-5 pt-5 sm:px-6">
-        <Eyebrow onPanel>
-          <span id="town-title">{t("town.eyebrow")}</span>
-        </Eyebrow>
-        <p className="font-mono text-[11px] leading-4 font-medium tracking-[0.08em] uppercase">
-          {town.allSettled ? (
-            <span className="text-signal">Kvito ✓</span>
-          ) : (
-            <span className="text-ink-on-panel-muted">{t("town.rented", { rented: town.rented, total: town.total })}</span>
-          )}
-        </p>
-      </div>
-
-      <div className="relative">
-        <ScenePicker scene={scene} onChange={setScene} />
-        <svg viewBox={`${box.x0} ${box.y0} ${box.w} ${box.h}`} className="mx-auto block h-auto max-h-80 w-full select-none" role="group" aria-label={t("town.eyebrow")}>
+    <div className={cn("relative", className)}>
+      {picker && <ScenePicker scene={scene} onChange={setScene} ambient={ambient} />}
+      <TownAmbientContext.Provider value={{ dayTime: ambient.dayTime, season: ambient.season }}>
+        <svg viewBox={`${box.x0} ${box.y0} ${box.w} ${box.h}`} className="mx-auto block h-auto max-h-80 w-full select-none" role="group" aria-label={label}>
           <defs>
-            <radialGradient id="kv-town-fade-g" cx="50%" cy="55%" r="60%">
+            <radialGradient id={`${fadeId}-g`} cx="50%" cy="55%" r="60%">
               <stop offset="0.5" stopColor="#fff" />
               <stop offset="1" stopColor="#000" />
             </radialGradient>
-            <mask id="kv-town-fade">
-              <rect x={box.x0} y={box.y0} width={box.w} height={box.h} fill="url(#kv-town-fade-g)" />
+            <mask id={fadeId}>
+              <rect x={box.x0} y={box.y0} width={box.w} height={box.h} fill={`url(#${fadeId}-g)`} />
             </mask>
           </defs>
-          <g mask="url(#kv-town-fade)">
+          <g mask={`url(#${fadeId})`}>
             <Ground box={box} />
+            {/* Night: a faint tint that fades out towards the edges together with the ground grid. */}
+            {ambient.dayTime === "night" && <rect x={box.x0} y={box.y0} width={box.w} height={box.h} fill="var(--night-tint)" />}
           </g>
+          <Sky box={box} />
           {/* Painter's order per row: surroundings behind, each building followed by the decoration in the gap to its right, then the front. */}
           {rows.map((r) => (
             <g key={r.index}>
@@ -611,13 +734,39 @@ export function PropertyTown({ properties }: { properties: Property[] }) {
               </g>
             </g>
           ))}
+          <Snowfall box={box} />
           <g aria-hidden="true" className="pointer-events-none">
             {placed.map((p) => (
               <IndexLabel key={p.b.id} p={p} />
             ))}
           </g>
         </svg>
+      </TownAmbientContext.Provider>
+    </div>
+  );
+}
+
+export function PropertyTown({ properties }: { properties: Property[] }) {
+  const { t } = useTranslation();
+  const town = usePropertyTown(properties);
+  const stateLabel = (s: UnitState) => t(`town.state.${s}`);
+
+  return (
+    <section aria-labelledby="town-title" className="on-panel overflow-hidden rounded-md bg-panel">
+      <div className="flex items-start justify-between gap-3 px-5 pt-5 sm:px-6">
+        <Eyebrow onPanel>
+          <span id="town-title">{t("town.eyebrow")}</span>
+        </Eyebrow>
+        <p className="font-mono text-[11px] leading-4 font-medium tracking-[0.08em] uppercase">
+          {town.allSettled ? (
+            <span className="text-signal">Kvito ✓</span>
+          ) : (
+            <span className="text-ink-on-panel-muted">{t("town.rented", { rented: town.rented, total: town.total })}</span>
+          )}
+        </p>
       </div>
+
+      <TownCanvas buildings={town.buildings} label={t("town.eyebrow")} />
 
       <ol className="border-t border-ink-on-panel/15">
         {town.buildings.map((b, i) => {

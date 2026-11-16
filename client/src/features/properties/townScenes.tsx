@@ -1,5 +1,10 @@
-import type { CSSProperties, ReactNode } from "react";
+import { createContext, useContext, type CSSProperties, type ReactNode } from "react";
+import type { DayTime, Season } from "./townAmbient";
 import { C, proj, pts, seeded, type Pt, type TownRow } from "./townGeometry";
+
+/** Time of day and season for everything drawn in the town (trees, lamps, roofs, windows). */
+export const TownAmbientContext = createContext<{ dayTime: DayTime; season: Season }>({ dayTime: "day", season: "summer" });
+const useAmbient = () => useContext(TownAmbientContext);
 
 /**
  * Surroundings for the property town (a per-device choice, see useTownScene).
@@ -27,19 +32,44 @@ const FILL = "var(--panel)";
 
 // ---------- Elements ----------
 
-function Tree({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
+/** Deciduous tree by season: blossom in spring, full crown in summer, sparse crown and fallen leaves in autumn, bare in winter. */
+export function Tree({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
+  const { season } = useAmbient();
   const [gx, gy] = proj([x, y, 0]);
   const [tx, ty] = proj([x, y, 9 * s]);
+  const cy = ty - 6 * s;
+  const r = 7 * s;
+  if (season === "winter") {
+    return (
+      <g>
+        <ellipse cx={gx} cy={gy} rx={6 * s} ry={3 * s} fill="var(--snow)" stroke={FAINT} />
+        <line x1={gx} y1={gy} x2={tx} y2={cy - r * 0.6} stroke={EDGE} />
+        <polyline points={`${tx - r * 0.8},${cy - r * 0.5} ${tx},${ty} ${tx + r * 0.8},${cy - r * 0.7}`} fill="none" stroke={EDGE} strokeLinejoin="round" />
+        <polyline points={`${tx - r * 0.5},${cy - r * 0.9} ${tx},${cy - r * 0.1} ${tx + r * 0.45},${cy - r * 1.05}`} fill="none" stroke={EDGE} strokeLinejoin="round" />
+      </g>
+    );
+  }
   return (
     <g>
       <ellipse cx={gx} cy={gy} rx={6 * s} ry={3 * s} fill="none" stroke={FAINT} />
+      {season === "autumn" &&
+        [-5, -2, 2, 5.5].map((dx, i) => <circle key={i} cx={gx + dx * s} cy={gy + (i % 2 ? 1.2 : -0.8) * s} r={0.9} fill={EDGE} />)}
       <line x1={gx} y1={gy} x2={tx} y2={ty} stroke={EDGE} />
-      <circle cx={tx} cy={ty - 6 * s} r={7 * s} fill={FILL} stroke={EDGE} />
+      <circle cx={tx} cy={cy} r={r} fill={FILL} stroke={EDGE} strokeDasharray={season === "autumn" ? "3 2" : undefined} />
+      {season === "spring" &&
+        [
+          [-3, -2],
+          [2.5, -3.5],
+          [3, 1.5],
+          [-1, 3],
+          [0, -0.5],
+        ].map(([dx, dy], i) => <circle key={i} cx={tx + dx! * s} cy={cy + dy! * s} r={1} fill="none" stroke={EDGE} />)}
     </g>
   );
 }
 
 function Pine({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
+  const winter = useAmbient().season === "winter";
   const [gx, gy] = proj([x, y, 0]);
   const top = gy - 26 * s;
   return (
@@ -48,15 +78,26 @@ function Pine({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
       <line x1={gx} y1={gy} x2={gx} y2={gy - 5 * s} stroke={EDGE} />
       <polygon points={`${gx - 7 * s},${gy - 5 * s} ${gx},${top + 8 * s} ${gx + 7 * s},${gy - 5 * s}`} fill={FILL} stroke={EDGE} strokeLinejoin="round" />
       <polygon points={`${gx - 5 * s},${gy - 13 * s} ${gx},${top} ${gx + 5 * s},${gy - 13 * s}`} fill={FILL} stroke={EDGE} strokeLinejoin="round" />
+      {winter && <polygon points={`${gx - 2.4 * s},${top + 5 * s} ${gx},${top} ${gx + 2.4 * s},${top + 5 * s}`} fill="var(--snow)" stroke={EDGE} strokeLinejoin="round" />}
     </g>
   );
 }
 
 /** Low bush: a cluster of three small crowns. */
-function Shrub({ x, y }: { x: number; y: number }) {
+export function Shrub({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
+  const winter = useAmbient().season === "winter";
   const [cx, cy] = proj([x, y, 0]);
+  if (s !== 1) {
+    return (
+      <g fill={winter ? "var(--snow)" : FILL} stroke={EDGE}>
+        <circle cx={cx - 2.2 * s} cy={cy - 2 * s} r={2.2 * s} />
+        <circle cx={cx + 2.2 * s} cy={cy - 2 * s} r={2.2 * s} />
+        <circle cx={cx} cy={cy - 3.6 * s} r={2.4 * s} />
+      </g>
+    );
+  }
   return (
-    <g fill={FILL} stroke={EDGE}>
+    <g fill={winter ? "var(--snow)" : FILL} stroke={EDGE}>
       <circle cx={cx - 3.5} cy={cy - 3} r={3.2} />
       <circle cx={cx + 3.5} cy={cy - 3} r={3.2} />
       <circle cx={cx} cy={cy - 5.5} r={3.6} />
@@ -76,13 +117,20 @@ function Bench({ x, y }: { x: number; y: number }) {
 }
 
 function Lamp({ x, y }: { x: number; y: number }) {
+  const night = useAmbient().dayTime === "night";
   const [gx, gy] = proj([x, y, 0]);
   const [tx, ty] = proj([x, y, 20]);
   return (
     <g>
+      {night && (
+        <>
+          <ellipse cx={gx + 4} cy={gy + 1} rx={9} ry={4.5} fill="var(--night-glow)" opacity={0.7} />
+          <circle cx={tx + 4.5} cy={ty + 3} r={6} fill="var(--night-glow)" opacity={0.8} />
+        </>
+      )}
       <line x1={gx} y1={gy} x2={tx} y2={ty} stroke={EDGE} />
       <line x1={tx} y1={ty} x2={tx + 4} y2={ty + 1.5} stroke={EDGE} />
-      <circle cx={tx + 4.5} cy={ty + 3} r={1.8} className="fill-ink-on-panel-muted" />
+      <circle cx={tx + 4.5} cy={ty + 3} r={1.8} className={night ? "fill-ink-on-panel stroke-[var(--panel-edge)]" : "fill-ink-on-panel-muted"} />
     </g>
   );
 }

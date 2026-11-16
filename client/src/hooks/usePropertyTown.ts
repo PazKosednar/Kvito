@@ -20,6 +20,8 @@ export interface TownBuilding {
   id: string;
   /** Drawn as a house, an apartment block or a commercial building. */
   type: PropertyType;
+  /** Reward bushes along the facade (one per three months paid on time). */
+  garden?: number;
   name: string;
   address: string;
   to: string;
