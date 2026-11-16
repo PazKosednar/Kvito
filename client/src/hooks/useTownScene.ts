@@ -5,7 +5,8 @@ import { storage } from "@/lib/storage";
 
 function read(): TownScene {
   const saved = storage.get(STORAGE_KEYS.townScene);
-  return (TOWN_SCENES as string[]).includes(saved ?? "") ? (saved as TownScene) : "none";
+  // City is the default surroundings; a choice made on this device wins.
+  return (TOWN_SCENES as string[]).includes(saved ?? "") ? (saved as TownScene) : "city";
 }
 
 /** Surroundings of the property town (park, city, countryside …). Stored per device, like the theme. */

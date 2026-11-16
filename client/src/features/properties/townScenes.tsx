@@ -24,6 +24,11 @@ export interface SceneLayers {
   front: Map<number, ReactNode[]>;
   /** Extra world points the canvas must include. */
   extent: Pt[];
+  /**
+   * Things that move (cars, walkers, tractor, sheep). Drawn in a separate light overlay <svg> on top, so their
+   * animation repaints only that overlay and not the whole town (smooth on phones).
+   */
+  moving: ReactNode[];
 }
 
 const EDGE = "var(--panel-edge)";
@@ -157,19 +162,77 @@ function Car({ x, y }: { x: number; y: number }) {
 }
 
 /**
- * A car driving along the road (x direction) from `x` by `dx`, looping. CSS animation (.kv-drive) so it stops
- * with prefers-reduced-motion; fades in and out at the ends of the road. `phase` (0–1) spreads cars along the lane.
+ * Moves its children along the world x axis by `dx`. "loop": drives through and fades in/out at the ends
+ * (.kv-drive); "shuttle": back and forth with easing (.kv-shuttle). CSS animations, so they pause with
+ * prefers-reduced-motion. `phase` (0–1) spreads several movers along their way.
  */
-function DrivingCar({ x, y, dx, seconds, phase }: { x: number; y: number; dx: number; seconds: number; phase: number }) {
+function Mover({ dx, seconds, phase, mode = "loop", children }: { dx: number; seconds: number; phase: number; mode?: "loop" | "shuttle"; children: ReactNode }) {
   const style = {
-    "--kv-dx": `${(dx * C).toFixed(1)}px`,
-    "--kv-dy": `${(dx / 2).toFixed(1)}px`,
+    "--kv-dx": `${(dx * C).toFixed(2)}px`,
+    "--kv-dy": `${(dx / 2).toFixed(2)}px`,
     animationDuration: `${seconds}s`,
     animationDelay: `${(-seconds * phase).toFixed(2)}s`,
   } as CSSProperties;
   return (
-    <g className="kv-drive" style={style}>
-      <Car x={x} y={y} />
+    <g className={mode === "loop" ? "kv-drive" : "kv-shuttle"} style={style}>
+      {children}
+    </g>
+  );
+}
+
+/** A small walking person (line art) at world x, y; bobs gently while walking. */
+function Walker({ x, y, step }: { x: number; y: number; step: number }) {
+  const [gx, gy] = proj([x, y, 0]);
+  return (
+    <g className="kv-bob" style={{ animationDuration: `${step}s` }} stroke={EDGE} strokeLinecap="round">
+      <line x1={gx - 1} y1={gy} x2={gx} y2={gy - 3.4} />
+      <line x1={gx + 1} y1={gy} x2={gx} y2={gy - 3.4} />
+      <line x1={gx} y1={gy - 3.4} x2={gx} y2={gy - 7.2} />
+      <line x1={gx - 1.5} y1={gy - 4.6} x2={gx + 1.5} y2={gy - 5.8} />
+      <circle cx={gx} cy={gy - 8.8} r={1.5} fill={FILL} />
+    </g>
+  );
+}
+
+/** A small dog trotting next to its owner. */
+function Dog({ x, y }: { x: number; y: number }) {
+  const [gx, gy] = proj([x, y, 0]);
+  return (
+    <g className="kv-bob" style={{ animationDuration: "0.32s" }} stroke={EDGE} strokeLinecap="round">
+      <line x1={gx - 1.6} y1={gy} x2={gx - 1.4} y2={gy - 2} />
+      <line x1={gx + 1.4} y1={gy} x2={gx + 1.6} y2={gy - 2} />
+      <ellipse cx={gx} cy={gy - 2.6} rx={2.4} ry={1.1} fill={FILL} />
+      <circle cx={gx + 2.6} cy={gy - 3.6} r={1} fill={FILL} />
+    </g>
+  );
+}
+
+/** Tractor (line art): body, cab, a big rear and a small front wheel, exhaust. */
+function Tractor({ x, y }: { x: number; y: number }) {
+  const [rx, ry] = proj([x + 7, y + 5.2, 3]);
+  const [fx, fy] = proj([x + 1.5, y + 5.2, 1.7]);
+  const [ex, ey] = proj([x + 2, y + 2.5, 4.5]);
+  return (
+    <g>
+      <Box x={x} y={y} z={1.5} w={10} d={5} h={3} />
+      <Box x={x + 5.5} y={y} z={4.5} w={4.5} d={5} h={4.5} />
+      <line x1={ex} y1={ey} x2={ex} y2={ey - 4} stroke={EDGE} strokeLinecap="round" />
+      <circle cx={rx} cy={ry} r={3.2} fill={FILL} stroke={EDGE} />
+      <circle cx={rx} cy={ry} r={1} fill="none" stroke={FAINT} />
+      <circle cx={fx} cy={fy} r={1.7} fill={FILL} stroke={EDGE} />
+    </g>
+  );
+}
+
+/** Grazing sheep: woolly body, dark head, two legs. */
+function Sheep({ x, y }: { x: number; y: number }) {
+  const [gx, gy] = proj([x, y, 0]);
+  return (
+    <g stroke={EDGE} strokeLinecap="round">
+      <line x1={gx - 1.4} y1={gy} x2={gx - 1.4} y2={gy - 1.8} />
+      <line x1={gx + 1.4} y1={gy} x2={gx + 1.4} y2={gy - 1.8} />
+      <ellipse cx={gx} cy={gy - 3.2} rx={3.2} ry={2} fill={FILL} />
+      <ellipse cx={gx + 3.3} cy={gy - 2.6} rx={1.2} ry={0.9} className="fill-ink-on-panel-muted" stroke="none" />
     </g>
   );
 }
@@ -206,6 +269,22 @@ function park(rows: TownRow[], L: SceneLayers) {
     for (let x = r.x0 + 10, i = 0; x <= r.x1 - 6; x += 72, i++) if (!nearLabel(r, x, 22)) front.push(<Bench key={`be${i}`} x={x} y={r.y1 + 22} />);
     for (let x = r.x0 + 14, i = 0; x <= r.x1 + 14; x += 46, i++) if (!nearLabel(r, x, 32)) front.push(<Tree key={`ft${i}`} x={x} y={r.y1 + 32} s={0.8} />);
     L.front.set(r.index, front);
+    // People strolling along the path in both directions (one with a dog); slow, spread out.
+    const px0 = r.x0 - 16;
+    const len = r.x1 - r.x0 + 32;
+    const walk = (len / 9) | 0; // ~9 world units per second
+    L.moving.push(
+      <Mover key={`w1-${r.index}`} dx={len} seconds={walk} phase={0.1}>
+        <Walker x={px0} y={r.y1 + 15} step={0.5} />
+      </Mover>,
+      <Mover key={`w2-${r.index}`} dx={len} seconds={walk * 1.25} phase={0.6}>
+        <Walker x={px0} y={r.y1 + 15} step={0.56} />
+        <Dog x={px0 + 4} y={r.y1 + 15} />
+      </Mover>,
+      <Mover key={`w3-${r.index}`} dx={-len} seconds={walk * 1.1} phase={0.35}>
+        <Walker x={px0 + len} y={r.y1 + 18} step={0.52} />
+      </Mover>,
+    );
     L.extent.push([r.x0 - 22, r.y0 - 22, 0], [r.x1 + 22, r.y0 - 22, 0], [r.x0 - 22, r.y1 + 40, 0], [r.x1 + 22, r.y1 + 40, 0], [r.x0, r.y0 - 20, 34]);
   }
 }
@@ -242,11 +321,21 @@ function city(rows: TownRow[], L: SceneLayers) {
     const len = x1 - x0 - 14;
     const near = 16 + Math.round(rnd() * 4);
     const far = 20 + Math.round(rnd() * 4);
-    front.push(<DrivingCar key="c1" x={x0} y={curbA + 3} dx={len} seconds={near} phase={0.15} />);
-    front.push(<DrivingCar key="c2" x={x0} y={curbA + 3} dx={len} seconds={near} phase={0.65} />);
-    front.push(<DrivingCar key="c3" x={x1 - 14} y={curbA + 15} dx={-len} seconds={far} phase={0.35} />);
-    front.push(<DrivingCar key="c4" x={x1 - 14} y={curbA + 15} dx={-len} seconds={far} phase={0.85} />);
     L.front.set(r.index, front);
+    L.moving.push(
+      <Mover key={`c1-${r.index}`} dx={len} seconds={near} phase={0.15}>
+        <Car x={x0} y={curbA + 3} />
+      </Mover>,
+      <Mover key={`c2-${r.index}`} dx={len} seconds={near} phase={0.65}>
+        <Car x={x0} y={curbA + 3} />
+      </Mover>,
+      <Mover key={`c3-${r.index}`} dx={-len} seconds={far} phase={0.35}>
+        <Car x={x1 - 14} y={curbA + 15} />
+      </Mover>,
+      <Mover key={`c4-${r.index}`} dx={-len} seconds={far} phase={0.85}>
+        <Car x={x1 - 14} y={curbA + 15} />
+      </Mover>,
+    );
     L.extent.push([x0, r.y0 - 32, 0], [x1, r.y0 - 32, 0], [x0, curbB + 4, 0], [x1, curbB + 4, 0], [r.x0, r.y0 - 30, 66]);
   }
 }
@@ -266,11 +355,38 @@ function countryside(rows: TownRow[], L: SceneLayers) {
     const front: ReactNode[] = [];
     const y0 = fy + 8;
     const y1 = fy + 30;
+    // Parcels in front: ploughed fields (one with a tractor going back and forth) and a fenced pasture with sheep.
+    let tractor = false;
     for (let x = fx0, i = 0; x <= fx1 - 20; i++) {
       const w = Math.min(34 + Math.round(rnd() * 18), fx1 - x);
-      front.push(<polygon key={`f${i}`} points={pts([[x, y0, 0], [x + w, y0, 0], [x + w, y1, 0], [x, y1, 0]])} fill="none" stroke={FAINT} />);
-      if (i % 2 === 0) for (let y = y0 + 4; y < y1; y += 4) front.push(<polyline key={`f${i}-${y}`} points={lineX(x + 2, x + w - 2, y)} fill="none" stroke={FAINT} />);
-      else for (let px = x + 4; px < x + w; px += 5) front.push(<polyline key={`f${i}-${px}`} points={pts([[px, y0 + 2, 0], [px, y1 - 2, 0]])} fill="none" stroke={FAINT} />);
+      const pasture = i % 3 === 1;
+      front.push(<polygon key={`f${i}`} points={pts([[x, y0, 0], [x + w, y0, 0], [x + w, y1, 0], [x, y1, 0]])} fill="none" stroke={pasture ? EDGE : FAINT} />);
+      if (pasture) {
+        for (let k = 0; k < 6; k++) {
+          const [gx, gy] = proj([x + 4 + rnd() * (w - 8), y0 + 3 + rnd() * (y1 - y0 - 6), 0]);
+          front.push(<path key={`g${i}-${k}`} d={`M${gx - 1},${gy}l1,-2l1,2`} fill="none" stroke={FAINT} />);
+        }
+        const flock = Math.min(4, Math.max(2, Math.floor(w / 12)));
+        for (let k = 0; k < flock; k++) {
+          const sx = x + 6 + ((w - 14) * (k + 0.5)) / flock;
+          const sy = y0 + 6 + ((k * 7) % (y1 - y0 - 10));
+          L.moving.push(
+            <Mover key={`s${r.index}-${i}-${k}`} dx={3 + (k % 2) * 2} seconds={7 + k * 1.7} phase={k * 0.3} mode="shuttle">
+              <Sheep x={sx} y={sy} />
+            </Mover>,
+          );
+        }
+      } else if (i % 2 === 0) {
+        for (let y = y0 + 4; y < y1; y += 4) front.push(<polyline key={`f${i}-${y}`} points={lineX(x + 2, x + w - 2, y)} fill="none" stroke={FAINT} />);
+        if (!tractor && w >= 30) {
+          tractor = true;
+          L.moving.push(
+            <Mover key={`t${r.index}`} dx={w - 16} seconds={9 + w / 8} phase={0.2} mode="shuttle">
+              <Tractor x={x + 3} y={(y0 + y1) / 2 - 2.5} />
+            </Mover>,
+          );
+        }
+      } else for (let px = x + 4; px < x + w; px += 5) front.push(<polyline key={`f${i}-${px}`} points={pts([[px, y0 + 2, 0], [px, y1 - 2, 0]])} fill="none" stroke={FAINT} />);
       x += w + 6;
     }
     front.push(
@@ -285,7 +401,7 @@ function countryside(rows: TownRow[], L: SceneLayers) {
 }
 
 export function sceneLayers(scene: TownScene, rows: TownRow[]): SceneLayers {
-  const L: SceneLayers = { back: new Map(), gap: new Map(), front: new Map(), extent: [] };
+  const L: SceneLayers = { back: new Map(), gap: new Map(), front: new Map(), extent: [], moving: [] };
   if (scene === "park") park(rows, L);
   else if (scene === "city") city(rows, L);
   else if (scene === "countryside") countryside(rows, L);

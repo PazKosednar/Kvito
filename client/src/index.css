@@ -200,10 +200,38 @@
 }
 .kv-drive {
   animation: kv-drive linear infinite;
+  will-change: transform, opacity;
+}
+/* Back and forth (tractor, grazing sheep). */
+@keyframes kv-shuttle {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(var(--kv-dx), var(--kv-dy));
+  }
+}
+.kv-shuttle {
+  animation: kv-shuttle ease-in-out infinite alternate;
+  will-change: transform;
+}
+/* Walking step: a tiny up and down. */
+@keyframes kv-bob {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(0, -0.6px);
+  }
+}
+.kv-bob {
+  animation: kv-bob ease-in-out infinite alternate;
 }
 /* Reduced motion: freeze instead of removing, so the negative delays keep the cars spread along the road. */
 @media (prefers-reduced-motion: reduce) {
-  .kv-drive {
+  .kv-drive,
+  .kv-shuttle,
+  .kv-bob {
     animation-play-state: paused;
   }
 }

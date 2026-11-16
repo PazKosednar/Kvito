@@ -875,6 +875,18 @@ export function TownCanvas({
             </g>
           )}
         </svg>
+        {/* Moving things on their own light layer: only this overlay repaints while they move (smooth). */}
+        {decor.moving.length > 0 && (
+          <svg
+            viewBox={`${box.x0} ${box.y0} ${box.w} ${box.h}`}
+            className="pointer-events-none absolute inset-0 h-full w-full [will-change:transform]"
+            aria-hidden="true"
+            strokeWidth="1"
+            strokeLinejoin="round"
+          >
+            {decor.moving}
+          </svg>
+        )}
       </TownAmbientContext.Provider>
     </div>
   );
