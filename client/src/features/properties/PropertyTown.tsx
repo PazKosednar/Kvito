@@ -1,14 +1,22 @@
-import { ArrowRight, CircleCheck, Clock, Square, TriangleAlert } from "lucide-react";
+import { ArrowRight, Car, ChevronDown, CircleCheck, Clock, Square, SquareDashed, Trees, TriangleAlert, Wheat, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Eyebrow } from "@/components/brand";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { usePropertyTown, type TownBuilding, type UnitState } from "@/hooks/usePropertyTown";
 import { useTownScene } from "@/hooks/useTownScene";
 import { cn } from "@/lib/utils";
 import type { Property } from "@/types/domain";
 import { proj, seeded, type Pt, type TownRow } from "./townGeometry";
-import { sceneLayers, TOWN_SCENES } from "./townScenes";
+import { sceneLayers, TOWN_SCENES, type TownScene } from "./townScenes";
 
 /**
  * The landlord's properties as a small isometric town on the panel (CGP line art, follows the theme):
@@ -408,6 +416,40 @@ const LEGEND: { state: UnitState; icon: ReactNode }[] = [
   { state: "vacant", icon: <Square className="size-3.5 text-ink-on-panel-muted" aria-hidden="true" /> },
 ];
 
+const SCENE_ICONS: Record<TownScene, LucideIcon> = { none: SquareDashed, park: Trees, city: Car, countryside: Wheat };
+
+/** Small dropdown in the corner of the scene: which surroundings to draw around the buildings. */
+function ScenePicker({ scene, onChange }: { scene: TownScene; onChange: (s: TownScene) => void }) {
+  const { t } = useTranslation();
+  const Icon = SCENE_ICONS[scene];
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={`${t("town.scene.label")}: ${t(`town.scene.${scene}`)}`}
+        className="absolute top-1 right-3 z-10 inline-flex min-h-9 items-center gap-1.5 rounded-xs px-2 font-mono text-[11px] leading-4 tracking-[0.06em] text-ink-on-panel-muted uppercase transition-colors duration-150 hover:bg-ink-on-panel/5 hover:text-ink-on-panel focus-visible:outline-2 sm:right-4"
+      >
+        <Icon className="size-3.5" aria-hidden="true" />
+        {t(`town.scene.${scene}`)}
+        <ChevronDown className="size-3" aria-hidden="true" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" sideOffset={4} className="w-44 rounded-md p-1.5">
+        <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">{t("town.scene.label")}</DropdownMenuLabel>
+        <DropdownMenuRadioGroup value={scene} onValueChange={(v) => onChange(v as TownScene)}>
+          {TOWN_SCENES.map((v) => {
+            const ItemIcon = SCENE_ICONS[v];
+            return (
+              <DropdownMenuRadioItem key={v} value={v} className="min-h-11">
+                <ItemIcon aria-hidden="true" />
+                {t(`town.scene.${v}`)}
+              </DropdownMenuRadioItem>
+            );
+          })}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export function PropertyTown({ properties }: { properties: Property[] }) {
   const { t } = useTranslation();
   const town = usePropertyTown(properties);
@@ -432,72 +474,56 @@ export function PropertyTown({ properties }: { properties: Property[] }) {
         </p>
       </div>
 
-      <div role="radiogroup" aria-label={t("town.scene.label")} className="flex flex-wrap items-center gap-1 px-4 pt-2 sm:px-5">
-        <span className="px-1 font-mono text-[10px] leading-4 tracking-[0.08em] text-ink-on-panel-muted uppercase">{t("town.scene.label")}</span>
-        {TOWN_SCENES.map((v) => (
-          <button
-            key={v}
-            type="button"
-            role="radio"
-            aria-checked={scene === v}
-            onClick={() => setScene(v)}
-            className={cn(
-              "min-h-8 rounded-xs px-2 font-mono text-[11px] leading-4 tracking-[0.06em] uppercase transition-colors duration-150",
-              scene === v ? "bg-ink-on-panel/10 text-ink-on-panel" : "text-ink-on-panel-muted hover:text-ink-on-panel",
-            )}
-          >
-            {t(`town.scene.${v}`)}
-          </button>
-        ))}
-      </div>
-
-      <svg viewBox={`${box.x0} ${box.y0} ${box.w} ${box.h}`} className="mx-auto block h-auto max-h-80 w-full select-none" role="group" aria-label={t("town.eyebrow")}>
-        <defs>
-          <radialGradient id="kv-town-fade-g" cx="50%" cy="55%" r="60%">
-            <stop offset="0.5" stopColor="#fff" />
-            <stop offset="1" stopColor="#000" />
-          </radialGradient>
-          <mask id="kv-town-fade">
-            <rect x={box.x0} y={box.y0} width={box.w} height={box.h} fill="url(#kv-town-fade-g)" />
-          </mask>
-        </defs>
-        <g mask="url(#kv-town-fade)">
-          <Ground box={box} />
-        </g>
-        {/* Painter's order per row: surroundings behind, each building followed by the decoration in the gap to its right, then the front. */}
-        {rows.map((r) => (
-          <g key={r.index}>
-            <g aria-hidden="true" className="pointer-events-none" strokeWidth="1">
-              {decor.back.get(r.index)}
-            </g>
-            {placed
-              .filter((p) => p.row === r.index)
-              .map((p) => {
-                const rented = p.b.units.filter((u) => u.state !== "vacant").length;
-                return (
-                  <g key={p.b.id}>
-                    <Building
-                      p={p}
-                      label={t("town.buildingLabel", { index: p.index + 1, name: p.b.name, address: p.b.address, rented, total: p.b.units.length })}
-                      windowTitle={(name, state) => `${name}: ${stateLabel(state)}`}
-                    />
-                    <g aria-hidden="true" className="pointer-events-none" strokeWidth="1">
-                      {decor.gap.get(p.index)}
-                    </g>
-                  </g>
-                );
-              })}
-            <g aria-hidden="true" className="pointer-events-none" strokeWidth="1">
-              {decor.front.get(r.index)}
-            </g>
+      <div className="relative">
+        <ScenePicker scene={scene} onChange={setScene} />
+        <svg viewBox={`${box.x0} ${box.y0} ${box.w} ${box.h}`} className="mx-auto block h-auto max-h-80 w-full select-none" role="group" aria-label={t("town.eyebrow")}>
+          <defs>
+            <radialGradient id="kv-town-fade-g" cx="50%" cy="55%" r="60%">
+              <stop offset="0.5" stopColor="#fff" />
+              <stop offset="1" stopColor="#000" />
+            </radialGradient>
+            <mask id="kv-town-fade">
+              <rect x={box.x0} y={box.y0} width={box.w} height={box.h} fill="url(#kv-town-fade-g)" />
+            </mask>
+          </defs>
+          <g mask="url(#kv-town-fade)">
+            <Ground box={box} />
           </g>
-        ))}
-        <g aria-hidden="true" className="pointer-events-none">
-          {placed.map((p) => (
-            <IndexLabel key={p.b.id} p={p} />
+          {/* Painter's order per row: surroundings behind, each building followed by the decoration in the gap to its right, then the front. */}
+          {rows.map((r) => (
+            <g key={r.index}>
+              <g aria-hidden="true" className="pointer-events-none" strokeWidth="1">
+                {decor.back.get(r.index)}
+              </g>
+              {placed
+                .filter((p) => p.row === r.index)
+                .map((p) => {
+                  const rented = p.b.units.filter((u) => u.state !== "vacant").length;
+                  return (
+                    <g key={p.b.id}>
+                      <Building
+                        p={p}
+                        label={t("town.buildingLabel", { index: p.index + 1, name: p.b.name, address: p.b.address, rented, total: p.b.units.length })}
+                        windowTitle={(name, state) => `${name}: ${stateLabel(state)}`}
+                      />
+                      <g aria-hidden="true" className="pointer-events-none" strokeWidth="1">
+                        {decor.gap.get(p.index)}
+                      </g>
+                    </g>
+                  );
+                })}
+              <g aria-hidden="true" className="pointer-events-none" strokeWidth="1">
+                {decor.front.get(r.index)}
+              </g>
+            </g>
           ))}
-        </g>
-      </svg>
+          <g aria-hidden="true" className="pointer-events-none">
+            {placed.map((p) => (
+              <IndexLabel key={p.b.id} p={p} />
+            ))}
+          </g>
+        </svg>
+      </div>
 
       <ol className="border-t border-ink-on-panel/15">
         {town.buildings.map((b, i) => {
