@@ -179,9 +179,10 @@ export function SettledBanner({ period, children, className }: { period?: ReactN
 // ---------- Illustration (assets/Ilustracije) ----------
 
 /** The isometric building of units with one unit in signal green – "your flat is kvita". */
-export function UnitsIllustration({ className, onPanel = false }: { className?: string; onPanel?: boolean }) {
+// `onPanel` is kept for callers; the panel now follows the theme, so it no longer forces the dark variant.
+export function UnitsIllustration({ className }: { className?: string; onPanel?: boolean }) {
   const { resolvedTheme } = useTheme();
-  const dark = onPanel || resolvedTheme === "dark";
+  const dark = resolvedTheme === "dark";
   return (
     <img
       src={dark ? "/illustrations/kvita-enote-dark.svg" : "/illustrations/kvita-enote-light.svg"}

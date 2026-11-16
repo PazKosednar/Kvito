@@ -8,14 +8,14 @@ import { cn } from "@/lib/utils";
 import type { Property } from "@/types/domain";
 
 /**
- * The landlord's properties as a small isometric town on the dark panel (CGP line art):
+ * The landlord's properties as a small isometric town on the panel (CGP line art, follows the theme):
  * one building per property, one window per unit, lit by the unit's state.
  * Every property is an apartment block; only the landlord's own flats light up.
  */
 
 const C = Math.cos(Math.PI / 6);
-const EDGE = "#4a4a50";
-const GRID = "#1f1f23";
+const EDGE = "var(--panel-edge)";
+const GRID = "var(--panel-scene-grid)";
 const PER_ROW = 5;
 const GAP = 26;
 const MIN_W = 440;
@@ -137,7 +137,7 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
   const P = (pts: Pt[]) => poly(pts, bx, by);
   const winPts = (win: Win) => P([[win.x0, d, win.z0], [win.x1, d, win.z0], [win.x1, d, win.z1], [win.x0, d, win.z1]]);
   const empty = b.units.length === 0;
-  const face = cn("fill-[var(--panel)] transition-colors duration-200 stroke-[#4a4a50] group-hover:stroke-ink-on-panel-muted group-focus-visible:stroke-signal");
+  const face = cn("fill-[var(--panel)] transition-colors duration-200 stroke-[var(--panel-edge)] group-hover:stroke-ink-on-panel-muted group-focus-visible:stroke-signal");
   const dash = empty ? "3 3" : undefined;
   const [lx, ly] = proj([bx + w + 6, by + d + 6, 0]);
 
@@ -152,14 +152,14 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
         <polygon className={face} points={P([[w, 0, 0], [w, d, 0], [w, d, h], [w, 0, h]])} />
         <polygon className={face} points={P([[w, s.door[0], 0], [w, s.door[1], 0], [w, s.door[1], s.door[2]], [w, s.door[0], s.door[2]]])} />
         <polygon className={face} points={P([[0, 0, h], [w, 0, h], [w, d, h], [0, d, h]])} />
-        <polygon className="fill-none stroke-[#4a4a50]" strokeOpacity="0.6" points={P([[3, 3, h], [w - 3, 3, h], [w - 3, d - 3, h], [3, d - 3, h]])} />
+        <polygon className="fill-none stroke-[var(--panel-edge)]" strokeOpacity="0.6" points={P([[3, 3, h], [w - 3, 3, h], [w - 3, d - 3, h], [3, d - 3, h]])} />
       </g>
       {/* Neighbours' flats on the side: dark, just for scale. */}
       {s.side.map((win, i) => (
-        <polygon key={`s${i}`} className="fill-none stroke-[#2e2e33]" strokeWidth="1" points={P([[w, win.x0, win.z0], [w, win.x1, win.z0], [w, win.x1, win.z1], [w, win.x0, win.z1]])} />
+        <polygon key={`s${i}`} className="fill-none stroke-[var(--panel-edge-faint)]" strokeWidth="1" points={P([[w, win.x0, win.z0], [w, win.x1, win.z0], [w, win.x1, win.z1], [w, win.x0, win.z1]])} />
       ))}
       {s.windows.map((win, i) =>
-        win.unit == null ? <polygon key={`n${i}`} className="fill-none stroke-[#2e2e33]" strokeWidth="1" points={winPts(win)} /> : null,
+        win.unit == null ? <polygon key={`n${i}`} className="fill-none stroke-[var(--panel-edge-faint)]" strokeWidth="1" points={winPts(win)} /> : null,
       )}
       <text
         x={lx}

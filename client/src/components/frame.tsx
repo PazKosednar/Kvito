@@ -64,7 +64,7 @@ export function ModuleTile({
   return <div className={cls}>{inner}</div>;
 }
 
-/** Summary on the always-dark panel (CGP: panel is for hero, summaries and "Kvito ✓"). */
+/** Summary on the panel (CGP: panel is for hero, summaries and "Kvito ✓"). */
 export function PanelSummary({
   eyebrow,
   items,

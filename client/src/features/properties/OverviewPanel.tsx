@@ -12,7 +12,7 @@ import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useOverview, usePaymentExport } from "@/hooks/useReports";
 import { formatCents } from "@/lib/money";
 
-/** The landlord's money at a glance, on the dark panel. Shown above the properties. */
+/** The landlord's money at a glance, on the panel. Shown above the properties. */
 export function OverviewPanel() {
   const { t } = useTranslation();
   const { totals } = useOverview();

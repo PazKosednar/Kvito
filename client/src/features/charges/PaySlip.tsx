@@ -52,7 +52,7 @@ export function PaySlip({ chargeId, shareId }: { chargeId: string; shareId: stri
           {payment.qrSvg ? (
             <div className="relative w-full max-w-[220px] rounded-sm border border-line-strong bg-white p-3 sm:max-w-[168px]">
               <div className="[&_svg]:block [&_svg]:h-auto [&_svg]:w-full" role="img" aria-label={t("pay.qrLabel")} dangerouslySetInnerHTML={{ __html: payment.qrSvg }} />
-              <span className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 rounded-xs bg-panel px-1.5 py-0.5 font-mono text-[10px] leading-4 tracking-[0.08em] text-ink-on-panel uppercase">
+              <span className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 rounded-xs border border-line-strong bg-panel px-1.5 py-0.5 font-mono text-[10px] leading-4 tracking-[0.08em] text-ink-on-panel uppercase">
                 UPN QR
               </span>
             </div>

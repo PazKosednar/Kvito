@@ -30,7 +30,7 @@ export function LoginPage() {
 
   return (
     <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-      {/* Hero on the always-dark panel (CGP). */}
+      {/* Hero on the panel (CGP; follows the theme). */}
       <section className="on-panel kv-grid-panel flex flex-col px-4 pt-[calc(1.25rem+env(safe-area-inset-top))] pb-8 sm:px-8 lg:px-12 lg:py-10">
         <KvitaLockup className="h-6 w-auto self-start lg:h-7" />
         <div className="mt-8 lg:mt-auto">
@@ -39,9 +39,9 @@ export function LoginPage() {
             {t("app.headline")}
           </h1>
           <p className="mt-4 max-w-[40ch] text-lg leading-7 text-ink-on-panel-muted">{t("app.lead")}</p>
-          <ul className="mt-8 hidden max-w-xl grid-cols-2 border-t border-[#232327] sm:grid">
+          <ul className="mt-8 hidden max-w-xl grid-cols-2 border-t border-[var(--panel-line)] sm:grid">
             {FEATURES.map(({ key, Icon }) => (
-              <li key={key} className="flex items-center gap-3 border-b border-[#232327] py-3 pr-4 text-sm text-ink-on-panel">
+              <li key={key} className="flex items-center gap-3 border-b border-[var(--panel-line)] py-3 pr-4 text-sm text-ink-on-panel">
                 <Icon className="size-4 shrink-0 text-signal" aria-hidden="true" strokeWidth={1.75} />
                 {t(`login.features.${key}`)}
               </li>

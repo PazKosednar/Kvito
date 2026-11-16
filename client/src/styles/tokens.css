@@ -13,15 +13,12 @@
   --surface: #eeece7;
   --surface-raised: #f8f7f4;
   --surface-sunken: #e4e1da;
-  --panel: #0c0c0d;
   --grid: #dcd9d2;
   --line: #d6d2ca;
   --line-strong: #8a857b;
   --ink: #121212;
   --ink-muted: #55514a;
   --ink-faint: #66625a;
-  --ink-on-panel: #f2f1ec;
-  --ink-on-panel-muted: #a8a69f;
   --accent: #0a7a45;
   --on-accent: #ffffff;
   --accent-soft: #e0f3e7;
@@ -40,8 +37,22 @@
   --logo-check: #38e08c;
   --logo-word: #121212;
   --logo-accent: #0a7a45;
-  /* Overdue amounts on the always-dark panel (CGP warn, dark value). */
-  --warn-on-panel: #f5a524;
+
+  /* ---- Panel (hero, summaries, "Kvito ✓", property town) – follows the theme ----
+     Light: a raised stone card with a thin outline and dark line art; dark: graphite as before. */
+  --panel: #f8f7f4;
+  --panel-border: #d6d2ca;
+  --panel-grid: rgb(18 18 18 / 0.05);
+  --panel-line: #d6d2ca;
+  --panel-raised: #ffffff;
+  --panel-edge: #8a857b;
+  --panel-edge-faint: #c9c5bc;
+  --panel-scene-grid: #e4e1da;
+  --ink-on-panel: #121212;
+  --ink-on-panel-muted: #55514a;
+  --warn-on-panel: #8f4500;
+  /* Green used for text/marks on the panel; on light stone the bright signal is too faint, so accent is used. */
+  --signal-on-panel: #0a7a45;
   /* Isometric illustration accent faces (as in assets/Ilustracije). */
   --iso-left: #0a7a45;
   --iso-right: #0b6b3d;
@@ -82,7 +93,6 @@
   --surface: #0c0c0d;
   --surface-raised: #161618;
   --surface-sunken: #08080a;
-  --panel: #111113;
   --grid: #1a1a1d;
   --line: #232327;
   --line-strong: #6a6a71;
@@ -105,14 +115,27 @@
   --iso-left: #1f7a4d;
   --iso-right: #1f7a4d;
 
+  --panel: #111113;
+  --panel-border: transparent;
+  --panel-grid: rgb(255 255 255 / 0.05);
+  --panel-line: #232327;
+  --panel-raised: #161618;
+  --panel-edge: #4a4a50;
+  --panel-edge-faint: #2e2e33;
+  --panel-scene-grid: #1f1f23;
+  --ink-on-panel: #f2f1ec;
+  --ink-on-panel-muted: #a8a69f;
+  --warn-on-panel: #f5a524;
+  --signal-on-panel: #38e08c;
+
   --destructive-foreground: #0c0c0d;
   --warning-foreground: #0c0c0d;
 }
 
-/* The panel is dark in both themes; logo inside it uses the dark lockup. */
+/* Panel follows the theme. Inside it "signal" is the legible green for that theme;
+   the outline separates the light panel from the stone background (transparent in dark). */
 .on-panel {
-  --logo-sheet: #38e08c;
-  --logo-check: #0c0c0d;
-  --logo-word: #f2f1ec;
-  --logo-accent: #38e08c;
+  --signal: var(--signal-on-panel);
+  outline: 1px solid var(--panel-border);
+  outline-offset: -1px;
 }

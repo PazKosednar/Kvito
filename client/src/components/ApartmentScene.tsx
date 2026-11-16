@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 /**
  * Login hero illustration: an isometric apartment house in 1 px wireframe (CGP "Ilustracije"),
  * one flat lit in signal green, with blueprint-style callouts for what Kvito manages
- * (rent, meters, handover, messages). Drawn for the always-dark panel; transparent background
+ * (rent, meters, handover, messages). Drawn for the panel (colors follow the theme); transparent background
  * so the panel grid shows through.
  */
 
@@ -17,8 +17,8 @@ const D = 80; // y – front-left face
 const H = 150; // wall height, 3 floors of 50
 const R = 40; // roof rise
 
-const EDGE = "#4a4a50";
-const GRID = "#232327";
+const EDGE = "var(--panel-edge)";
+const GRID = "var(--panel-line)";
 
 const p = (x: number, y: number, z: number) => `${(OX + (x - y) * C).toFixed(1)},${(OY + (x + y) * 0.5 - z).toFixed(1)}`;
 const poly = (...pts: [number, number, number][]) => `M${pts.map((q) => p(...q)).join(" L")} Z`;
@@ -61,7 +61,7 @@ function Callout({ from, elbow, to, label, anchor = "start" }: { from: [number, 
   return (
     <g>
       <polyline points={[from, elbow, to].map((q) => q.join(",")).join(" ")} fill="none" stroke={EDGE} strokeWidth="1" />
-      <circle cx={from[0]} cy={from[1]} r="2.5" fill="#a8a69f" />
+      <circle cx={from[0]} cy={from[1]} r="2.5" fill="var(--ink-on-panel-muted)" />
       <text
         x={to[0] + (anchor === "start" ? 6 : -6)}
         y={to[1] + 3.5}
@@ -131,7 +131,7 @@ export function ApartmentScene({ className }: { className?: string }) {
       <polyline points={`${lit.join(",")} 196,146 172,146`} fill="none" stroke="var(--signal)" strokeWidth="1" />
       <circle cx={lit[0]} cy={lit[1]} r="2.5" className="fill-signal" />
       <g>
-        <rect x="14" y="106" width="158" height="80" rx="6" fill="#161618" stroke={EDGE} strokeWidth="1" />
+        <rect x="14" y="106" width="158" height="80" rx="6" fill="var(--panel-raised)" stroke={EDGE} strokeWidth="1" />
         <text x="28" y="127" className="fill-ink-on-panel-muted font-mono" fontSize="9.5" letterSpacing="0.08em">
           {t("login.scene.flat").toUpperCase()}
         </text>
