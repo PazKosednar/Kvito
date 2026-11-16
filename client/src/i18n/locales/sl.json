@@ -134,8 +134,9 @@
   },
   "theme": {
     "label": "Videz",
-    "dark": "Temen",
-    "light": "Svetel"
+    "light": "Svetla",
+    "dark": "Temna",
+    "system": "Sistemsko"
   },
   "language": {
     "label": "Jezik",

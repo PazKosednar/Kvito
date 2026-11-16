@@ -6,6 +6,7 @@ import { useOnline } from "@/hooks/useOnline";
 import { useRole } from "@/hooks/useRole";
 import { AccountMenu } from "./AccountMenu";
 import { NotificationsBell } from "./NotificationsBell";
+import { ThemeMenu } from "./ThemeMenu";
 
 /** App frame on stone: a quiet header (lockup, role eyebrow, account) and a content column. */
 export function AppShell() {
@@ -25,6 +26,7 @@ export function AppShell() {
             <Eyebrow className="hidden truncate sm:inline-flex">{t(`frame.role.${activeRole}`)}</Eyebrow>
           )}
           <div className="ml-auto flex items-center gap-1">
+            <ThemeMenu />
             <NotificationsBell />
             <AccountMenu />
           </div>

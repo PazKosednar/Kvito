@@ -10,16 +10,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ROUTES, SUPPORTED_LOCALES, type Locale } from "@/constants";
-import type { ThemePreference } from "@/contexts/ThemeContext";
 import { useAccountActions } from "@/hooks/useAccountActions";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
-import { useTheme } from "@/hooks/useTheme";
 import { initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/types/user";
 
-const THEMES: ThemePreference[] = ["dark", "light"];
 const ROLE_ORDER: Role[] = ["LANDLORD", "TENANT"];
 
 /** Small segmented choice inside the menu (keeps the menu short instead of long radio lists). */
@@ -59,7 +56,6 @@ export function AccountMenu() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { roles, activeRole, otherRole } = useRole();
-  const { theme, setTheme } = useTheme();
   const { changeRole, changeLanguage, signOut } = useAccountActions();
   const navigate = useNavigate();
   if (!user) return null;
@@ -105,13 +101,6 @@ export function AccountMenu() {
           </>
         )}
 
-        <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">{t("theme.label")}</DropdownMenuLabel>
-        <Segmented
-          label={t("theme.label")}
-          value={theme}
-          options={THEMES.map((v) => ({ value: v, label: t(`theme.${v}`) }))}
-          onChange={setTheme}
-        />
         <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
           {t("language.label")}
         </DropdownMenuLabel>
