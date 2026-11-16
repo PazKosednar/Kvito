@@ -19,7 +19,7 @@ import { initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/types/user";
 
-const THEMES: ThemePreference[] = ["light", "dark", "system"];
+const THEMES: ThemePreference[] = ["dark", "light"];
 const ROLE_ORDER: Role[] = ["LANDLORD", "TENANT"];
 
 /** Small segmented choice inside the menu (keeps the menu short instead of long radio lists). */

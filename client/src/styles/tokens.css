@@ -4,7 +4,8 @@
  * This is the ONLY place colors are defined. The CGP names are kept 1:1 (--surface, --ink, --accent …);
  * the shadcn/Tailwind names below are aliases so components keep working.
  *
- * Themes: Kamen (light, default) on :root, Grafit (dark) on .dark.
+ * Themes: Grafit (dark, default in the app) on .dark, Kamen (light, optional) on :root.
+ * The app adds .dark unless the user chose light (public/theme-init.js, ThemeContext); the OS setting is ignored.
  */
 
 :root {

@@ -4,8 +4,8 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-// Brand primary for browser UI chrome; keep in sync with --background in src/styles/tokens.css.
-const THEME_COLOR = "#eeece7";
+// Brand primary for browser UI chrome; keep in sync with --surface of the default (dark) theme in src/styles/tokens.css.
+const THEME_COLOR = "#0c0c0d";
 
 export default defineConfig({
   plugins: [
@@ -25,7 +25,7 @@ export default defineConfig({
         display: "standalone",
         orientation: "portrait",
         theme_color: THEME_COLOR,
-        background_color: "#eeece7",
+        background_color: THEME_COLOR,
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],

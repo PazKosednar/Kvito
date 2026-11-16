@@ -2,46 +2,39 @@ import { createContext, useCallback, useEffect, useMemo, useState, type ReactNod
 import { STORAGE_KEYS } from "@/constants";
 import { storage } from "@/lib/storage";
 
-export type ThemePreference = "light" | "dark" | "system";
+export type ThemePreference = "dark" | "light";
 
 export interface ThemeContextValue {
   theme: ThemePreference;
-  resolvedTheme: "light" | "dark";
+  resolvedTheme: ThemePreference;
   setTheme: (theme: ThemePreference) => void;
 }
 
 export const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const media = () => window.matchMedia("(prefers-color-scheme: dark)");
+// Browser UI chrome color per theme; keep in sync with --surface in src/styles/tokens.css and public/theme-init.js.
+const THEME_COLORS: Record<ThemePreference, string> = { dark: "#0c0c0d", light: "#eeece7" };
 
 function readPreference(): ThemePreference {
-  const saved = storage.get(STORAGE_KEYS.theme);
-  // CGP: Kamen (light) is the default theme; Grafit (dark) or "system" only when chosen.
-  return saved === "dark" || saved === "system" ? saved : "light";
+  // Grafit (dark) is the primary theme regardless of the OS setting; Kamen (light) only when chosen.
+  // A previously saved "system" preference falls back to dark.
+  return storage.get(STORAGE_KEYS.theme) === "light" ? "light" : "dark";
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemePreference>(readPreference);
-  const [systemDark, setSystemDark] = useState(() => media().matches);
 
   useEffect(() => {
-    const mq = media();
-    const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-
-  const resolvedTheme = theme === "system" ? (systemDark ? "dark" : "light") : theme;
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
-  }, [resolvedTheme]);
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLORS[theme]);
+  }, [theme]);
 
   const setTheme = useCallback((next: ThemePreference) => {
     storage.set(STORAGE_KEYS.theme, next);
     setThemeState(next);
   }, []);
 
-  const value = useMemo(() => ({ theme, resolvedTheme, setTheme }), [theme, resolvedTheme, setTheme]);
+  // resolvedTheme is kept for consumers; without a "system" option it always equals theme.
+  const value = useMemo(() => ({ theme, resolvedTheme: theme, setTheme }), [theme, setTheme]);
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

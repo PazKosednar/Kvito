@@ -134,9 +134,8 @@
   },
   "theme": {
     "label": "Appearance",
-    "light": "Light",
     "dark": "Dark",
-    "system": "Auto"
+    "light": "Light"
   },
   "language": {
     "label": "Language",
