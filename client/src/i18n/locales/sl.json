@@ -1478,6 +1478,13 @@
     "eyebrow": "Tvoje nepremičnine",
     "rented": "Oddano {{rented}} / {{total}}",
     "buildingLabel": "{{index}}. {{name}}, {{address}} – oddano {{rented}} / {{total}}",
+    "scene": {
+      "label": "Okolica",
+      "none": "Brez",
+      "park": "Park",
+      "city": "Mesto",
+      "countryside": "Podeželje"
+    },
     "state": {
       "settled": "Poravnano",
       "open": "V teku",

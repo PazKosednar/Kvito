@@ -4,8 +4,11 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Eyebrow } from "@/components/brand";
 import { usePropertyTown, type TownBuilding, type UnitState } from "@/hooks/usePropertyTown";
+import { useTownScene } from "@/hooks/useTownScene";
 import { cn } from "@/lib/utils";
 import type { Property } from "@/types/domain";
+import { proj, seeded, type Pt, type TownRow } from "./townGeometry";
+import { sceneLayers, TOWN_SCENES } from "./townScenes";
 
 /**
  * The landlord's properties as a small isometric town on the panel (CGP line art, follows the theme):
@@ -15,7 +18,6 @@ import type { Property } from "@/types/domain";
  * or a low commercial building with ribbon windows and a shutter door.
  */
 
-const C = Math.cos(Math.PI / 6);
 const EDGE = "var(--panel-edge)";
 const GRID = "var(--panel-scene-grid)";
 const PER_ROW = 5;
@@ -23,8 +25,6 @@ const GAP = 26;
 const MIN_W = 440;
 const MIN_H = 170;
 
-type Pt = readonly [number, number, number];
-const proj = ([x, y, z]: Pt): [number, number] => [(x - y) * C, (x + y) / 2 - z];
 
 interface Win {
   x0: number;
@@ -52,17 +52,6 @@ interface Shape {
 
 /** Highest point of the shape (walls + roof). */
 const topOf = (s: Shape) => s.h + s.roof;
-
-/** Small deterministic PRNG so every building keeps its look between renders. */
-function seeded(id: string) {
-  let h = 2166136261;
-  for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619);
-  return () => {
-    h = Math.imul(h ^ (h >>> 15), 2246822507);
-    h = Math.imul(h ^ (h >>> 13), 3266489909);
-    return ((h ^= h >>> 16) >>> 0) / 4294967296;
-  };
-}
 
 function shapeFor(b: TownBuilding): Shape {
   if (b.type === "HOUSE") return houseShape(b);
@@ -211,8 +200,9 @@ interface Placed {
   index: number;
 }
 
-function layout(buildings: TownBuilding[]): { placed: (Placed & { row: number })[] } {
+function layout(buildings: TownBuilding[]): { placed: (Placed & { row: number })[]; rows: TownRow[] } {
   const placed: (Placed & { row: number })[] = [];
+  const rows: TownRow[] = [];
   let by = 0;
   for (let r = 0; r * PER_ROW < buildings.length; r++) {
     const row = buildings.slice(r * PER_ROW, r * PER_ROW + PER_ROW);
@@ -226,12 +216,21 @@ function layout(buildings: TownBuilding[]): { placed: (Placed & { row: number })
       const next = shapes[i + 1];
       bx += s.w + Math.max(GAP, (next?.d ?? 0) + 8);
     });
+    const inRow = placed.slice(r * PER_ROW);
+    rows.push({
+      index: r,
+      x0: 0,
+      x1: Math.max(...inRow.map((q) => q.bx + q.s.w)),
+      y0: by,
+      y1: by + depth,
+      gaps: inRow.slice(0, -1).map((q, i) => ({ after: q.index, x0: q.bx + q.s.w + 6, x1: inRow[i + 1]!.bx - 6 })),
+    });
     // The next row stands in front: move it forward far enough that its roofs stay below this row's plots.
     const next = buildings.slice((r + 1) * PER_ROW, (r + 2) * PER_ROW).map(shapeFor);
     const tallest = next.length ? Math.max(...next.map(topOf)) : 0;
     by += depth + GAP + 2 * tallest;
   }
-  return { placed };
+  return { placed, rows };
 }
 
 const poly = (pts: Pt[], bx: number, by: number) =>
@@ -255,7 +254,6 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
   const empty = b.units.length === 0;
   const face = cn("fill-[var(--panel)] transition-colors duration-200 stroke-[var(--panel-edge)] group-hover:stroke-ink-on-panel-muted group-focus-visible:stroke-signal");
   const dash = empty ? "3 3" : undefined;
-  const [lx, ly] = proj([bx + w + 6, by + d + 6, 0]);
   const door = s.door ?? [0, 0, 0];
 
   return (
@@ -298,16 +296,6 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
       {s.windows.map((win, i) =>
         win.unit == null ? <polygon key={`n${i}`} className="fill-none stroke-[var(--panel-edge-faint)]" strokeWidth="1" points={winPts(win)} /> : null,
       )}
-      <text
-        x={lx}
-        y={ly + 14}
-        textAnchor="middle"
-        fontSize="9"
-        letterSpacing="0.08em"
-        className="fill-ink-on-panel-muted font-mono transition-colors duration-200 group-hover:fill-ink-on-panel group-focus-visible:fill-signal"
-      >
-        {String(p.index + 1).padStart(2, "0")}
-      </text>
     </Link>
       {/* The landlord's own flats: each window opens its tenancy. */}
       {s.windows.map((win) => {
@@ -330,9 +318,35 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
   );
 }
 
-function bounds(placed: Placed[]) {
+/** Index number under each building; drawn on top of the surroundings, with a halo in the panel color. */
+function IndexLabel({ p }: { p: Placed }) {
+  const [lx, ly] = proj([p.bx + p.s.w + 6, p.by + p.s.d + 6, 0]);
+  return (
+    <text
+      x={lx}
+      y={ly + 14}
+      textAnchor="middle"
+      fontSize="9"
+      letterSpacing="0.08em"
+      stroke="var(--panel)"
+      strokeWidth="3"
+      strokeLinejoin="round"
+      paintOrder="stroke"
+      className="fill-ink-on-panel-muted font-mono"
+    >
+      {String(p.index + 1).padStart(2, "0")}
+    </text>
+  );
+}
+
+function bounds(placed: Placed[], extra: Pt[] = []) {
   const xs: number[] = [];
   const ys: number[] = [];
+  for (const pt of extra) {
+    const [x, y] = proj(pt);
+    xs.push(x);
+    ys.push(y);
+  }
   for (const { s, bx, by } of placed) {
     for (const pt of [
       [bx - 6, by - 6, 0],
@@ -397,8 +411,10 @@ const LEGEND: { state: UnitState; icon: ReactNode }[] = [
 export function PropertyTown({ properties }: { properties: Property[] }) {
   const { t } = useTranslation();
   const town = usePropertyTown(properties);
-  const { placed } = layout(town.buildings);
-  const box = bounds(placed);
+  const { scene, setScene } = useTownScene();
+  const { placed, rows } = layout(town.buildings);
+  const decor = sceneLayers(scene, rows);
+  const box = bounds(placed, decor.extent);
   const stateLabel = (s: UnitState) => t(`town.state.${s}`);
 
   return (
@@ -416,6 +432,25 @@ export function PropertyTown({ properties }: { properties: Property[] }) {
         </p>
       </div>
 
+      <div role="radiogroup" aria-label={t("town.scene.label")} className="flex flex-wrap items-center gap-1 px-4 pt-2 sm:px-5">
+        <span className="px-1 font-mono text-[10px] leading-4 tracking-[0.08em] text-ink-on-panel-muted uppercase">{t("town.scene.label")}</span>
+        {TOWN_SCENES.map((v) => (
+          <button
+            key={v}
+            type="button"
+            role="radio"
+            aria-checked={scene === v}
+            onClick={() => setScene(v)}
+            className={cn(
+              "min-h-8 rounded-xs px-2 font-mono text-[11px] leading-4 tracking-[0.06em] uppercase transition-colors duration-150",
+              scene === v ? "bg-ink-on-panel/10 text-ink-on-panel" : "text-ink-on-panel-muted hover:text-ink-on-panel",
+            )}
+          >
+            {t(`town.scene.${v}`)}
+          </button>
+        ))}
+      </div>
+
       <svg viewBox={`${box.x0} ${box.y0} ${box.w} ${box.h}`} className="mx-auto block h-auto max-h-80 w-full select-none" role="group" aria-label={t("town.eyebrow")}>
         <defs>
           <radialGradient id="kv-town-fade-g" cx="50%" cy="55%" r="60%">
@@ -429,17 +464,39 @@ export function PropertyTown({ properties }: { properties: Property[] }) {
         <g mask="url(#kv-town-fade)">
           <Ground box={box} />
         </g>
-        {placed.map((p) => {
-          const rented = p.b.units.filter((u) => u.state !== "vacant").length;
-          return (
-            <Building
-              key={p.b.id}
-              p={p}
-              label={t("town.buildingLabel", { index: p.index + 1, name: p.b.name, address: p.b.address, rented, total: p.b.units.length })}
-              windowTitle={(name, state) => `${name}: ${stateLabel(state)}`}
-            />
-          );
-        })}
+        {/* Painter's order per row: surroundings behind, each building followed by the decoration in the gap to its right, then the front. */}
+        {rows.map((r) => (
+          <g key={r.index}>
+            <g aria-hidden="true" className="pointer-events-none" strokeWidth="1">
+              {decor.back.get(r.index)}
+            </g>
+            {placed
+              .filter((p) => p.row === r.index)
+              .map((p) => {
+                const rented = p.b.units.filter((u) => u.state !== "vacant").length;
+                return (
+                  <g key={p.b.id}>
+                    <Building
+                      p={p}
+                      label={t("town.buildingLabel", { index: p.index + 1, name: p.b.name, address: p.b.address, rented, total: p.b.units.length })}
+                      windowTitle={(name, state) => `${name}: ${stateLabel(state)}`}
+                    />
+                    <g aria-hidden="true" className="pointer-events-none" strokeWidth="1">
+                      {decor.gap.get(p.index)}
+                    </g>
+                  </g>
+                );
+              })}
+            <g aria-hidden="true" className="pointer-events-none" strokeWidth="1">
+              {decor.front.get(r.index)}
+            </g>
+          </g>
+        ))}
+        <g aria-hidden="true" className="pointer-events-none">
+          {placed.map((p) => (
+            <IndexLabel key={p.b.id} p={p} />
+          ))}
+        </g>
       </svg>
 
       <ol className="border-t border-ink-on-panel/15">

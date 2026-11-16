@@ -1442,6 +1442,13 @@
     "eyebrow": "Your properties",
     "rented": "Rented {{rented}} / {{total}}",
     "buildingLabel": "{{index}}. {{name}}, {{address}} – rented {{rented}} / {{total}}",
+    "scene": {
+      "label": "Surroundings",
+      "none": "None",
+      "park": "Park",
+      "city": "City",
+      "countryside": "Countryside"
+    },
     "state": {
       "settled": "Settled",
       "open": "In progress",
