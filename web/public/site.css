@@ -246,33 +246,55 @@ h3 {
   height: 20px;
 }
 
-/* ---------- Header: floating bar (a floating layer, so it may use shadow-overlay) ---------- */
+/* ---------- Header: floating graphite bar ----------
+ * Always dark (Grafit) in both themes, rounded and inset from the edges, so the grid shows around it.
+ * Larger radius than CGP's 6 px on purpose (owner's choice for the floating bar only). Floating layer → may use a shadow.
+ */
 .site-header {
   position: fixed;
-  top: 12px;
+  top: 18px;
   left: 0;
   right: 0;
   z-index: 20;
   pointer-events: none;
 }
+.site-header .wrap {
+  max-width: 1080px;
+}
 .header-row {
+  /* Grafit tokens scoped to the bar, so everything inside reads light-on-dark in either theme. */
+  --ink: #f2f1ec;
+  --ink-muted: #a8a69f;
+  --line: #2a2a2f;
+  --line-strong: #6a6a71;
+  --surface-raised: #161618;
+  --surface-sunken: rgb(255 255 255 / 0.07);
+  --accent: #38e08c;
+  --on-accent: #0c0c0d;
+  --focus: #38e08c;
+  --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   gap: 20px;
-  height: 56px;
-  padding: 0 8px 0 16px;
-  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  height: 60px;
+  padding: 0 10px 0 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgb(12 12 13 / 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--ink);
   pointer-events: auto;
-  transition: background-color 180ms ease-out, border-color 180ms ease-out, box-shadow 180ms ease-out;
+  transition: box-shadow 180ms ease-out;
 }
-/* After scrolling a bit: more solid, with the overlay shadow so it lifts off the content. */
+.header-row .btn {
+  border-radius: 10px;
+}
+.header-row .icon-btn {
+  border-radius: 10px;
+}
+/* After scrolling a bit: the overlay shadow lifts it off the content. */
 .site-header.scrolled .header-row {
-  border-color: var(--line);
-  background: color-mix(in srgb, var(--surface-raised) 90%, transparent);
   box-shadow: var(--shadow-overlay);
 }
 .brand .logo {
@@ -313,15 +335,15 @@ h3 {
 }
 .mobile-panel {
   position: absolute;
-  right: -8px;
-  top: 52px;
+  right: -10px;
+  top: 58px;
   display: flex;
   flex-direction: column;
   gap: 4px;
   width: min(280px, calc(100vw - 32px));
   padding: 8px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 14px;
   background: var(--surface-raised);
   box-shadow: var(--shadow-overlay);
 }
@@ -364,7 +386,7 @@ h3 {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
   align-items: center;
   gap: 48px;
-  padding-top: 160px;
+  padding-top: 168px;
   padding-bottom: 88px;
 }
 .cta-row {
@@ -773,6 +795,14 @@ h3 {
 @media (max-width: 767px) {
   :root {
     --gutter: 16px;
+  }
+  .site-header {
+    top: 12px;
+  }
+  .header-row {
+    height: 56px;
+    padding-left: 16px;
+    border-radius: 14px;
   }
   .hide-sm {
     display: none;
