@@ -277,9 +277,9 @@ h3 {
   align-items: center;
   gap: 20px;
   height: 60px;
-  padding: 0 10px 0 20px;
+  padding: 0 8px 0 24px;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 999px; /* capsule: fully rounded ends (owner's choice for the floating bar only) */
   background: rgb(12 12 13 / 0.94);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -287,11 +287,10 @@ h3 {
   pointer-events: auto;
   transition: box-shadow 180ms ease-out;
 }
-.header-row .btn {
-  border-radius: 10px;
-}
-.header-row .icon-btn {
-  border-radius: 10px;
+.header-row .btn,
+.header-row .icon-btn,
+.header-row .nav a {
+  border-radius: 999px;
 }
 /* After scrolling a bit: the overlay shadow lifts it off the content. */
 .site-header.scrolled .header-row {
@@ -343,7 +342,7 @@ h3 {
   width: min(280px, calc(100vw - 32px));
   padding: 8px;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 20px;
   background: var(--surface-raised);
   box-shadow: var(--shadow-overlay);
 }
@@ -801,8 +800,7 @@ h3 {
   }
   .header-row {
     height: 56px;
-    padding-left: 16px;
-    border-radius: 14px;
+    padding-left: 18px;
   }
   .hide-sm {
     display: none;

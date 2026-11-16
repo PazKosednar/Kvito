@@ -1,5 +1,6 @@
 // Kvito website – tiny static server without dependencies (Railway service separate from the app).
 // Serves ./public, fills {{APP_URL}} in HTML from the APP_URL environment variable, sets cache and security headers.
+import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize, resolve } from "node:path";
@@ -33,8 +34,29 @@ const SECURITY = {
 
 const htmlCache = new Map();
 
+// Short content hash per asset, so each change gets a new URL (?v=…) and browsers never keep an old copy.
+const versions = new Map();
+async function version(path) {
+  if (!versions.has(path)) {
+    try {
+      versions.set(path, createHash("sha1").update(await readFile(join(ROOT, path))).digest("hex").slice(0, 10));
+    } catch {
+      versions.set(path, "");
+    }
+  }
+  return versions.get(path);
+}
+
 async function loadHtml(file) {
-  if (!htmlCache.has(file)) htmlCache.set(file, (await readFile(file, "utf8")).replaceAll("{{APP_URL}}", APP_URL));
+  if (!htmlCache.has(file)) {
+    let html = (await readFile(file, "utf8")).replaceAll("{{APP_URL}}", APP_URL);
+    const refs = [...new Set([...html.matchAll(/(?:href|src)="(\/[^"?#]+\.(?:css|js|webp|svg|png))"/g)].map((m) => m[1]))];
+    for (const ref of refs) {
+      const v = await version(ref);
+      if (v) html = html.replaceAll(`"${ref}"`, `"${ref}?v=${v}"`);
+    }
+    htmlCache.set(file, html);
+  }
   return htmlCache.get(file);
 }
 
@@ -72,8 +94,9 @@ const server = createServer(async (req, res) => {
     }
     const isHtml = extname(file) === ".html";
     const body = isHtml ? await loadHtml(file) : await readFile(file);
-    // HTML always fresh; images, styles and scripts may be cached for a day.
-    const cache = isHtml ? "no-cache" : "public, max-age=86400";
+    // HTML always fresh. Assets requested with ?v=<hash> never change → cache for a year; without it, revalidate.
+    const versioned = /[?&]v=[0-9a-f]+/.test(req.url || "");
+    const cache = isHtml || !versioned ? "no-cache" : "public, max-age=31536000, immutable";
     res.writeHead(200, { "Content-Type": type, "Cache-Control": cache, ...SECURITY });
     res.end(req.method === "HEAD" ? undefined : body);
   } catch (err) {
