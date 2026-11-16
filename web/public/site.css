@@ -717,7 +717,47 @@ h3 {
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 1000px) {
+/* Tablet (iPad portrait and landscape): the same layout as desktop, just a little tighter. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .header-row {
+    gap: 10px;
+    padding-left: 12px;
+  }
+  .nav {
+    gap: 0;
+    margin-left: 0;
+  }
+  .nav a {
+    padding: 8px 7px;
+    font-size: 14px;
+  }
+  .header-actions {
+    gap: 4px;
+  }
+  .header-actions .btn {
+    padding: 0 12px;
+    font-size: 14px;
+  }
+  .hero-grid {
+    gap: 32px;
+    padding-top: 136px;
+    padding-bottom: 72px;
+  }
+  .split {
+    gap: 32px;
+  }
+  .features .card {
+    padding: 20px;
+  }
+  .card-pad {
+    padding: 22px;
+  }
+  .phone-hero {
+    width: 34%;
+  }
+}
+/* Phone: one column, menu behind the button. */
+@media (max-width: 767px) {
   .nav {
     display: none;
   }
@@ -729,11 +769,8 @@ h3 {
     padding-top: 120px;
     padding-bottom: 72px;
   }
-  .features {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
-@media (max-width: 720px) {
+@media (max-width: 767px) {
   :root {
     --gutter: 16px;
   }
