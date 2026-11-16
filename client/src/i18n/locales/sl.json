@@ -271,7 +271,12 @@
     },
     "editTitle": "Uredi nepremičnino",
     "name": "Ime",
-    "nameHint": "Kako ji praviš, na primer »Blok na Viču«.",
+    "nameHints": {
+      "HOUSE": "Kako ji praviš, na primer »Hiša v Radencih«.",
+      "MULTI_UNIT_HOUSE": "Kako ji praviš, na primer »Tristanovanjska hiša na Lentu«.",
+      "APARTMENT": "Kako mu praviš, na primer »Stanovanje na Viču«.",
+      "COMMERCIAL": "Kako mu praviš, na primer »Pisarna v centru« ali »Skladišče Tezno«."
+    },
     "street": "Ulica in hišna številka",
     "postalCode": "Pošta",
     "city": "Kraj",

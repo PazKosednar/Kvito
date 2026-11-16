@@ -89,7 +89,7 @@ function PropertyForm({ id, initial }: { id: string | undefined; initial: Proper
           </div>
           <p className="mt-2 text-sm text-muted-foreground">{t(`properties.typeHints.${v.type}`)}</p>
         </fieldset>
-        <Field label={t("properties.name")} hint={t("properties.nameHint")} error={save.fieldErrors["name"]}>
+        <Field label={t("properties.name")} hint={t(`properties.nameHints.${v.type}`)} error={save.fieldErrors["name"]}>
           {(p) => <TextInput {...p} value={v.name} onChange={set("name")} required maxLength={80} autoFocus={!id} />}
         </Field>
         <Field label={t("properties.street")} error={save.fieldErrors["street"]}>

@@ -271,7 +271,12 @@
     },
     "editTitle": "Edit property",
     "name": "Name",
-    "nameHint": "What you call it, e.g. “Building in Vič”.",
+    "nameHints": {
+      "HOUSE": "What you call it, e.g. “House in Radenci”.",
+      "MULTI_UNIT_HOUSE": "What you call it, e.g. “Three-flat house on Lent”.",
+      "APARTMENT": "What you call it, e.g. “Flat in Vič”.",
+      "COMMERCIAL": "What you call it, e.g. “Office in the centre” or “Tezno warehouse”."
+    },
     "street": "Street and number",
     "postalCode": "Postcode",
     "city": "Town",
