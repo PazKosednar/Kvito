@@ -54,12 +54,25 @@ interface Shape {
   frontDoor: [number, number, number] | null;
   /** Roller shutter (commercial): horizontal slats on the door. */
   shutter: boolean;
+  /** Roof overhang beyond the walls (gable roofs). */
+  eave: number;
+  /** Chimney position on the roof (x, behind the ridge), or null. */
+  chimney: number | null;
+  /** Small attic window in the gable (right face). */
+  gableWindow: boolean;
+  /** Canopy and step at the front door. */
+  canopy: boolean;
+  /** Window sills and a plinth line on the walls. */
+  sills: boolean;
   windows: Win[]; // front-left face, one per unit
   side: Omit<Win, "unit">[]; // right face, decorative
 }
 
 /** Highest point of the shape (walls + roof). */
-const topOf = (s: Shape) => s.h + s.roof;
+const topOf = (s: Shape) => s.h + s.roof + (s.chimney != null ? 8 : 0);
+
+/** Defaults for the optional details, so each shape only names what it uses. */
+const PLAIN = { eave: 0, chimney: null, gableWindow: false, canopy: false, sills: false } as const;
 
 function shapeFor(b: TownBuilding): Shape {
   if (b.type === "HOUSE") return houseShape(b);
@@ -102,37 +115,58 @@ function blockShape(b: TownBuilding): Shape {
       { x0: 17, x1: 24, z0, z1: z0 + 10 },
     ];
   }).flat();
-  return { w: cols * cell + 12, d, h: floors * floorH + 6, roof: 0, door: [10, 18, 13], frontDoor: null, shutter: false, windows, side };
+  return { w: cols * cell + 12, d, h: floors * floorH + 6, roof: 0, door: [10, 18, 13], frontDoor: null, shutter: false, ...PLAIN, windows, side };
 }
 
 /**
- * House: two floors (more only if needed) under a gable roof. The landlord owns the whole house,
- * so windows light up in order from the ground floor; spare windows stay dark.
+ * Single-family house: ground floor and upper floor under a gable roof with eaves and a chimney.
+ * Front door in the middle of the ground floor (canopy and step), windows with sills, an attic window in the gable.
+ * The landlord owns the whole house, so windows light up in order from the ground floor; spare windows stay dark.
  */
 function houseShape(b: TownBuilding): Shape {
   const n = b.units.length;
-  const cols = n <= 2 ? 2 : 3;
-  const floors = Math.max(2, Math.ceil(n / cols));
+  const cols = 3;
+  const doorCol = 1;
   const cell = 18;
   const floorH = 18;
-  const windows: Win[] = Array.from({ length: cols * floors }, (_, i) => {
-    const col = i % cols;
-    const floor = Math.floor(i / cols);
-    const x0 = 6 + col * cell + 4;
-    const z0 = floor * floorH + 5;
-    return { x0, x1: x0 + 10, z0, z1: z0 + 10, unit: i < n ? i : null };
-  });
+  let floors = 2;
+  while (cols * floors - 1 < n) floors += 1;
+  const windows: Win[] = [];
+  for (let f = 0; f < floors; f++) {
+    for (let c = 0; c < cols; c++) {
+      if (f === 0 && c === doorCol) continue;
+      const x0 = 6 + c * cell + 4;
+      const z0 = f * floorH + 6;
+      windows.push({ x0, x1: x0 + 10, z0, z1: z0 + 10, unit: windows.length < n ? windows.length : null });
+    }
+  }
   const d = 30;
-  // Gable side: windows on the upper floors only (the door is on the ground floor).
-  const side = Array.from({ length: floors - 1 }, (_, f) => {
-    const z0 = (f + 1) * floorH + 5;
+  const side = Array.from({ length: floors }, (_, f) => {
+    const z0 = f * floorH + 6;
     return [
       { x0: 5, x1: 12, z0, z1: z0 + 10 },
       { x0: 18, x1: 25, z0, z1: z0 + 10 },
     ];
   }).flat();
-  // Roof taller than half the depth, so the front slope hides the back of the roof.
-  return { w: cols * cell + 12, d, h: floors * floorH + 2, roof: d / 2 + 5, door: [11, 19, 13], frontDoor: null, shutter: false, windows, side };
+  const w = cols * cell + 12;
+  const dx = 6 + doorCol * cell + 4;
+  // Walls a little above the top windows so the eaves don't cut them; roof taller than half the depth.
+  return {
+    w,
+    d,
+    h: floors * floorH + 5,
+    roof: d / 2 + 5,
+    door: null,
+    frontDoor: [dx, dx + 10, 15],
+    shutter: false,
+    eave: 3,
+    chimney: Math.round(w * 0.68),
+    gableWindow: true,
+    canopy: true,
+    sills: true,
+    windows,
+    side,
+  };
 }
 
 /**
@@ -172,7 +206,20 @@ function multiUnitHouseShape(b: TownBuilding): Shape {
     ];
   }).flat();
   const dx = 6 + doorCol * cell + 3;
-  return { w: cols * cell + 12, d, h: floors * floorH + 2, roof: d / 2 + 5, door: null, frontDoor: [dx, dx + 11, 14], shutter: false, windows, side };
+  return {
+    w: cols * cell + 12,
+    d,
+    h: floors * floorH + 5,
+    roof: d / 2 + 5,
+    door: null,
+    frontDoor: [dx, dx + 11, 14],
+    shutter: false,
+    ...PLAIN,
+    eave: 3,
+    sills: true,
+    windows,
+    side,
+  };
 }
 
 /**
@@ -197,7 +244,7 @@ function commercialShape(b: TownBuilding): Shape {
     const z0 = (f + 1) * floorH + 6;
     return [{ x0: 4, x1: 30, z0, z1: z0 + 7 }];
   }).flat();
-  return { w: cols * cell + 12, d, h: floors * floorH + 6, roof: 0, door: [7, 27, 13], frontDoor: null, shutter: true, windows, side };
+  return { w: cols * cell + 12, d, h: floors * floorH + 6, roof: 0, door: [7, 27, 13], frontDoor: null, shutter: true, ...PLAIN, windows, side };
 }
 
 interface Placed {
@@ -277,13 +324,25 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
         {s.frontDoor && (
           <polygon className={face} points={P([[s.frontDoor[0], d, 0], [s.frontDoor[1], d, 0], [s.frontDoor[1], d, s.frontDoor[2]], [s.frontDoor[0], d, s.frontDoor[2]]])} />
         )}
-        {s.roof > 0 ? (
+        {s.sills && (
           <>
-            {/* Gable roof along the front: back slope (mostly hidden), front slope, gable on the right. */}
-            <polygon className={face} points={P([[0, 0, h], [w, 0, h], [w, d / 2, h + s.roof], [0, d / 2, h + s.roof]])} />
-            <polygon className={face} points={P([[0, d, h], [w, d, h], [w, d / 2, h + s.roof], [0, d / 2, h + s.roof]])} />
-            <polygon className={face} points={P([[w, 0, h], [w, d, h], [w, d / 2, h + s.roof]])} />
+            {/* Plinth along the bottom of the walls. */}
+            <polyline className="fill-none stroke-[var(--panel-edge-faint)]" points={P([[0, d, 3], [w, d, 3], [w, 0, 3]])} />
+            {s.windows.map((win, i) => (
+              <polyline key={`sl${i}`} className="fill-none stroke-[var(--panel-edge)]" points={P([[win.x0 - 1, d, win.z0 - 1.5], [win.x1 + 1, d, win.z0 - 1.5]])} />
+            ))}
           </>
+        )}
+        {s.canopy && s.frontDoor && (
+          <>
+            {/* Step and canopy at the front door. */}
+            <polygon className={face} points={P([[s.frontDoor[0] - 2, d + 3, 0], [s.frontDoor[1] + 2, d + 3, 0], [s.frontDoor[1] + 2, d + 3, 1.5], [s.frontDoor[0] - 2, d + 3, 1.5]])} />
+            <polygon className={face} points={P([[s.frontDoor[0] - 2, d, 1.5], [s.frontDoor[1] + 2, d, 1.5], [s.frontDoor[1] + 2, d + 3, 1.5], [s.frontDoor[0] - 2, d + 3, 1.5]])} />
+            <polygon className={face} points={P([[s.frontDoor[0] - 2, d, s.frontDoor[2] + 2], [s.frontDoor[1] + 2, d, s.frontDoor[2] + 2], [s.frontDoor[1] + 2, d + 4, s.frontDoor[2] + 1], [s.frontDoor[0] - 2, d + 4, s.frontDoor[2] + 1]])} />
+          </>
+        )}
+        {s.roof > 0 ? (
+          <GableRoof s={s} P={P} face={face} />
         ) : (
           <>
             <polygon className={face} points={P([[0, 0, h], [w, 0, h], [w, d, h], [0, d, h]])} />
@@ -323,6 +382,41 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
         );
       })}
     </g>
+  );
+}
+
+/**
+ * Gable roof along the front, with eaves (overhang `e`) and barge boards; optional chimney and attic window.
+ * Order: back slope (mostly hidden), gable wall, attic window, chimney (behind the ridge), front slope, edges.
+ */
+function GableRoof({ s, P, face }: { s: Shape; P: (pts: Pt[]) => string; face: string }) {
+  const { w, d, h, roof: r, eave: e } = s;
+  const drop = e * (r / (d / 2)); // the slope continues down over the overhang
+  const ze = h - drop;
+  const t = 1.6; // board thickness
+  const ridge = h + r;
+  const cx = s.chimney;
+  return (
+    <>
+      <polygon className={face} points={P([[-e, -e, ze], [w + e, -e, ze], [w + e, d / 2, ridge], [-e, d / 2, ridge]])} />
+      <polygon className={face} points={P([[w, 0, h], [w, d, h], [w, d / 2, ridge]])} />
+      {s.gableWindow && (
+        <polygon className="fill-none stroke-[var(--panel-edge-faint)]" points={P([[w, d / 2 - 3, h + 4], [w, d / 2 + 3, h + 4], [w, d / 2 + 3, h + 10], [w, d / 2 - 3, h + 10]])} />
+      )}
+      {cx != null && (
+        <>
+          {/* Chimney straddling the back of the ridge: lower part is hidden by the front slope. */}
+          <polygon className={face} points={P([[cx, d / 2 - 1, ridge - 6], [cx + 5, d / 2 - 1, ridge - 6], [cx + 5, d / 2 - 1, ridge + 8], [cx, d / 2 - 1, ridge + 8]])} />
+          <polygon className={face} points={P([[cx + 5, d / 2 - 6, ridge - 6], [cx + 5, d / 2 - 1, ridge - 6], [cx + 5, d / 2 - 1, ridge + 8], [cx + 5, d / 2 - 6, ridge + 8]])} />
+          <polygon className={face} points={P([[cx - 0.5, d / 2 - 6.5, ridge + 8], [cx + 5.5, d / 2 - 6.5, ridge + 8], [cx + 5.5, d / 2 - 0.5, ridge + 8], [cx - 0.5, d / 2 - 0.5, ridge + 8]])} />
+        </>
+      )}
+      <polygon className={face} points={P([[-e, d + e, ze], [w + e, d + e, ze], [w + e, d / 2, ridge], [-e, d / 2, ridge]])} />
+      {/* Fascia along the front eave and barge boards on the gable end. */}
+      <polygon className={face} points={P([[-e, d + e, ze], [w + e, d + e, ze], [w + e, d + e, ze - t], [-e, d + e, ze - t]])} />
+      <polygon className={face} points={P([[w + e, d + e, ze], [w + e, d / 2, ridge], [w + e, d / 2, ridge - t], [w + e, d + e, ze - t]])} />
+      <polygon className={face} points={P([[w + e, -e, ze], [w + e, d / 2, ridge], [w + e, d / 2, ridge - t], [w + e, -e, ze - t]])} />
+    </>
   );
 }
 
