@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="sl" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Kvito – najemnina, položnice in sporočila na enem mestu</title>
+    <meta name="description" content="Kvito poveže najemodajalca in najemnika: obveznosti, plačila z UPN QR, delitev stroškov, sporočila, okvare in primopredaja na enem mestu." />
+    <meta name="theme-color" content="#0c0c0d" />
+    <meta property="og:title" content="Kvito – najem, poravnan" />
+    <meta property="og:description" content="Najemnina, položnice in sporočila med najemodajalcem in najemnikom na enem mestu." />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="sl_SI" />
+    <link rel="icon" href="/img/kvito-app-icon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/tokens.css" />
+    <link rel="stylesheet" href="/site.css" />
+    <script src="/theme.js"></script>
+  </head>
+  <body>
+    <!-- Icons: lucide (ISC license) -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="sprite" aria-hidden="true"><symbol id="i-qr-code" viewBox="0 0 24 24"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></symbol><symbol id="i-split" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 9 6-6"/></symbol><symbol id="i-scan-line" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></symbol><symbol id="i-landmark" viewBox="0 0 24 24"><path d="M10 18v-7"/><path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/><path d="M6 18v-7"/></symbol><symbol id="i-message-circle" viewBox="0 0 24 24"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></symbol><symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol><symbol id="i-key-round" viewBox="0 0 24 24"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></symbol><symbol id="i-file-text" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol><symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-badge-check" viewBox="0 0 24 24"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m16 9-5.5 5.5L8 12"/></symbol><symbol id="i-sprout" viewBox="0 0 24 24"><path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/><path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/><path d="M5 21h14"/></symbol><symbol id="i-house" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></symbol><symbol id="i-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></symbol><symbol id="i-monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></symbol><symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M12 17V7"/><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/></symbol><symbol id="i-calendar-clock" viewBox="0 0 24 24"><path d="M16 14v2.2l1.6 1"/><path d="M16 2v3"/><path d="M21 7.338V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h2.338"/><path d="M3 9h5.859"/><path d="M8 2v3"/><circle cx="16" cy="16" r="6"/></symbol><symbol id="i-building-2" viewBox="0 0 24 24"><path d="M10 12h4"/><path d="M10 8h4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"/><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/></symbol></svg>
+    <a class="skip" href="#vsebina">Preskoči na vsebino</a>
+
+    <header class="site-header">
+      <div class="wrap header-row">
+        <a href="#" class="brand" aria-label="Kvito – na vrh">
+          <img class="logo only-light" src="/img/kvito-wordmark-light.svg" alt="Kvito" width="78" height="24" />
+          <img class="logo only-dark" src="/img/kvito-wordmark-dark.svg" alt="Kvito" width="78" height="24" />
+        </a>
+        <nav class="nav" aria-label="Glavni meni">
+          <a href="#funkcije">Funkcije</a>
+          <a href="#za-oba">Za oba</a>
+          <a href="#kako">Kako deluje</a>
+          <a href="#cenik">Cenik</a>
+          <a href="#vprasanja">Vprašanja</a>
+        </nav>
+        <div class="header-actions">
+          <button type="button" class="icon-btn" id="theme-toggle" aria-label="Preklopi temo">
+            <svg class="icon only-dark" aria-hidden="true"><use href="#i-moon" /></svg>
+            <svg class="icon only-light" aria-hidden="true"><use href="#i-sun" /></svg>
+          </button>
+          <a class="btn btn-ghost hide-sm" href="{{APP_URL}}/prijava">Prijava</a>
+          <a class="btn btn-primary hide-sm" href="{{APP_URL}}/prijava">Začni brezplačno</a>
+          <details class="mobile-nav">
+            <summary class="icon-btn" aria-label="Meni"><svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg></summary>
+            <div class="mobile-panel">
+              <a href="#funkcije">Funkcije</a>
+              <a href="#za-oba">Za oba</a>
+              <a href="#kako">Kako deluje</a>
+              <a href="#cenik">Cenik</a>
+              <a href="#vprasanja">Vprašanja</a>
+              <a class="btn btn-ghost" href="{{APP_URL}}/prijava">Prijava</a>
+              <a class="btn btn-primary" href="{{APP_URL}}/prijava">Začni brezplačno</a>
+            </div>
+          </details>
+        </div>
+      </div>
+    </header>
+
+    <main id="vsebina">
+      <!-- Hero -->
+      <section class="hero">
+        <div class="wrap hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="idx">01</span> Najem, poravnan</p>
+            <h1>Najemnina, položnice in sporočila na enem mestu.</h1>
+            <p class="lead">
+              Kvito poveže najemodajalca in najemnika. Ti vpišeš obveznosti, najemnik jih plača z UPN QR v svoji banki. Ko je vse potrjeno, je najem
+              <span class="settled">Kvito ✓</span>
+            </p>
+            <div class="cta-row">
+              <a class="btn btn-primary btn-lg" href="{{APP_URL}}/prijava">Začni brezplačno <svg class="icon" aria-hidden="true"><use href="#i-arrow-right" /></svg></a>
+              <a class="btn btn-secondary btn-lg" href="#funkcije">Poglej funkcije</a>
+            </div>
+            <ul class="chips" aria-label="Na kratko">
+              <li><svg class="icon" aria-hidden="true"><use href="#i-qr-code" /></svg>UPN QR</li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-check" /></svg>V slovenščini in evrih</li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-shield-check" /></svg>Strežniki v EU</li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-smartphone" /></svg>Telefon in računalnik</li>
+            </ul>
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <figure class="browser">
+              <div class="browser-bar"><span></span><span></span><span></span></div>
+              <img class="only-dark" src="/img/landlord-desktop-dark.webp" alt="" width="1600" height="1075" fetchpriority="high" />
+              <img class="only-light" src="/img/landlord-desktop-light.webp" alt="" width="1600" height="1075" />
+            </figure>
+            <figure class="phone phone-hero">
+              <img class="only-dark" src="/img/tenant-pay-dark.webp" alt="" width="640" height="1385" />
+              <img class="only-light" src="/img/tenant-pay-light.webp" alt="" width="640" height="1385" />
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section id="funkcije" class="section">
+        <div class="wrap">
+          <p class="eyebrow"><span class="idx">02</span> Funkcije</p>
+          <h2>Vse, kar se zgodi med najemodajalcem in najemnikom.</h2>
+          <p class="section-lead">Brez tabel, brez dopisovanja po treh aplikacijah in brez iskanja položnic po predalih.</p>
+          <ul class="features">
+            <li class="card">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-qr-code" /></svg>
+              <h3>Plačilo z UPN QR</h3>
+              <p>Najemnik dobi plačilni nalog s QR kodo in podatki za kopiranje. Plača v svoji banki, v dveh dotikih.</p>
+            </li>
+            <li class="card">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-badge-check" /></svg>
+              <h3>Javi in potrdi</h3>
+              <p>Najemnik tapne »Plačal sem«, ti plačilo potrdiš. Oba vidita isto stanje, brez ugibanja.</p>
+            </li>
+            <li class="card">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-split" /></svg>
+              <h3>Delitev stroškov</h3>
+              <p>Elektriko, vodo in ogrevanje razdeliš med sostanovalce. Akontacije, obračun in napoved stroškov.</p>
+            </li>
+            <li class="card">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-scan-line" /></svg>
+              <h3>Položnica v obveznost</h3>
+              <p>Slikaj položnico. Kvito prebere UPN QR kar na tvoji napravi in izpolni znesek, rok in sklic.</p>
+            </li>
+            <li class="card">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-landmark" /></svg>
+              <h3>Bančni izpisek</h3>
+              <p>Uvozi izpisek (CAMT ali CSV). Kvito plačila poveže z obveznostmi po sklicu.</p>
+            </li>
+            <li class="card">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-message-circle" /></svg>
+              <h3>Sporočila in obvestila</h3>
+              <p>Pogovor ob najemu, ne v zasebnem klepetu. Obvestila na telefon, ko se kaj zgodi.</p>
+            </li>
+            <li class="card">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-wrench" /></svg>
+              <h3>Okvare</h3>
+              <p>Najemnik prijavi okvaro s fotografijo. Ti vidiš, kaj je odprto, kaj v teku in kaj rešeno.</p>
+            </li>
+            <li class="card">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-key-round" /></svg>
+              <h3>Primopredaja in števci</h3>
+              <p>Ob vselitvi in izselitvi zapišeta stanje in števce. Oba potrdita, nobenih presenečenj.</p>
+            </li>
+            <li class="card">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-file-text" /></svg>
+              <h3>Letni povzetek</h3>
+              <p>Prejet denar po enotah in mesecih, najemnina ločeno od stroškov in varščine. Za računovodjo.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- For both -->
+      <section id="za-oba" class="section section-alt">
+        <div class="wrap">
+          <p class="eyebrow"><span class="idx">03</span> Za oba</p>
+          <h2>Ena aplikacija, dve strani najema.</h2>
+          <p class="section-lead">Večina orodij je samo za najemodajalca. Kvito je skupen prostor: vsak vidi svoje, oba vidita isto resnico.</p>
+          <div class="two-col">
+            <div class="card card-pad">
+              <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-house" /></svg> Za najemodajalca</p>
+              <ul class="checks">
+                <li>Vse nepremičnine in enote na enem pregledu</li>
+                <li>Najemnina se vsak mesec pripravi sama</li>
+                <li>Vidiš, kaj je plačano, kaj čaka potrditev in kaj zamuja</li>
+                <li>Varščina, obračun stroškov in vračilo ob koncu najema</li>
+                <li>Izvoz prejetih plačil in letni povzetek</li>
+              </ul>
+            </div>
+            <div class="card card-pad">
+              <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg> Za najemnika</p>
+              <ul class="checks">
+                <li>Plačilni podatki v največ dveh dotikih</li>
+                <li>Jasno, koliko je tvoj del pri skupnih stroških</li>
+                <li>Okvare, sporočila in dokumenti na enem mestu</li>
+                <li>Pregled celega leta najema po mesecih</li>
+                <li>Najemniški življenjepis za naslednjega najemodajalca</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section id="kako" class="section">
+        <div class="wrap">
+          <p class="eyebrow"><span class="idx">04</span> Kako deluje</p>
+          <h2>Trije koraki do mirnega najema.</h2>
+          <ol class="steps">
+            <li class="card card-pad">
+              <span class="step-no">01</span>
+              <h3>Dodaj nepremičnino</h3>
+              <p>Hiša, večstanovanjska hiša, stanovanje ali poslovni prostor. Nato enote, ki jih oddajaš.</p>
+            </li>
+            <li class="card card-pad">
+              <span class="step-no">02</span>
+              <h3>Vpiši najem in povabi najemnika</h3>
+              <p>Pogoje vpišeš enkrat. Najemnika povabiš s povezavo, ki jo pošlješ ali pokažeš kot QR kodo.</p>
+            </li>
+            <li class="card card-pad">
+              <span class="step-no">03</span>
+              <h3>Najemnik plača, ti potrdiš</h3>
+              <p>Kvito vsak mesec pripravi najemnino. Ko je vse potrjeno, je najem <span class="settled">Kvito ✓</span></p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Town -->
+      <section class="section section-alt">
+        <div class="wrap split">
+          <div>
+            <p class="eyebrow"><span class="idx">05</span> Tvoje mestece</p>
+            <h2>Nepremičnine, kot jih še nisi videl.</h2>
+            <p class="section-lead">Vsaka nepremičnina je stavba, vsaka enota okno. Okno pove stanje: poravnano, v teku, zahteva pozornost ali prosto.</p>
+            <ul class="checks">
+              <li>Dan in noč po pravi uri, letni časi</li>
+              <li>Okolica po izbiri: mesto, park ali podeželje</li>
+              <li>Za plačila brez zamude pred hišo zrastejo grmi</li>
+              <li>Najemnik vidi svoj dom in samo svoje okno</li>
+            </ul>
+          </div>
+          <figure class="panel-figure">
+            <img class="only-dark" src="/img/town-dark.webp" alt="Mestece nepremičnin v aplikaciji Kvito: hiša, poslovna stavba, blok in večstanovanjska hiša ob cesti" width="1200" height="592" loading="lazy" />
+            <img class="only-light" src="/img/town-light.webp" alt="Mestece nepremičnin v aplikaciji Kvito: hiša, poslovna stavba, blok in večstanovanjska hiša ob cesti" width="1200" height="592" loading="lazy" />
+          </figure>
+        </div>
+      </section>
+
+      <!-- Phone and desktop -->
+      <section id="aplikacija" class="section">
+        <div class="wrap">
+          <p class="eyebrow"><span class="idx">06</span> Na telefonu in računalniku</p>
+          <h2>Odpreš v brskalniku. Na telefonu kot aplikacija.</h2>
+          <p class="section-lead">Kvito dodaš na začetni zaslon in se odpre kot aplikacija, z obvestili. Aplikaciji za App Store in Google Play pripravljamo.</p>
+          <div class="phones">
+            <figure class="phone">
+              <img class="only-dark" src="/img/tenant-home-dark.webp" alt="Najemnikov pregled leta in obveznosti" width="640" height="1385" loading="lazy" />
+              <img class="only-light" src="/img/tenant-home-light.webp" alt="Najemnikov pregled leta in obveznosti" width="640" height="1385" loading="lazy" />
+              <figcaption>Leto najema na en pogled</figcaption>
+            </figure>
+            <figure class="phone">
+              <img class="only-dark" src="/img/tenant-pay-dark.webp" alt="Plačilni nalog z UPN QR kodo" width="640" height="1385" loading="lazy" />
+              <img class="only-light" src="/img/tenant-pay-light.webp" alt="Plačilni nalog z UPN QR kodo" width="640" height="1385" loading="lazy" />
+              <figcaption>Plačilo z UPN QR</figcaption>
+            </figure>
+            <figure class="phone">
+              <img class="only-dark" src="/img/messages-dark.webp" alt="Sporočila med najemodajalcem in najemnikom" width="640" height="1385" loading="lazy" />
+              <img class="only-light" src="/img/messages-light.webp" alt="Sporočila med najemodajalcem in najemnikom" width="640" height="1385" loading="lazy" />
+              <figcaption>Sporočila ob najemu</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pricing -->
+      <section id="cenik" class="section section-alt">
+        <div class="wrap">
+          <p class="eyebrow"><span class="idx">07</span> Cenik</p>
+          <h2>Med testiranjem brezplačno.</h2>
+          <p class="section-lead">Kvito je v testnem obdobju. Uporabljaš ga brez plačila in brez kartice.</p>
+          <div class="pricing">
+            <div class="card card-pad price-card">
+              <p class="eyebrow">Testno obdobje</p>
+              <p class="price"><span class="amount">0,00 €</span> <span class="per">/ mesec</span></p>
+              <ul class="checks">
+                <li>Vse funkcije za najemodajalca in najemnika</li>
+                <li>Brez kartice in brez obveznosti</li>
+                <li>Plačila z UPN QR, delitev stroškov, sporočila</li>
+                <li>Okvare, števci, primopredaja in dokumenti</li>
+              </ul>
+              <a class="btn btn-primary btn-lg btn-block" href="{{APP_URL}}/prijava">Začni brezplačno</a>
+            </div>
+            <div class="card card-pad price-note">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-calendar-clock" /></svg>
+              <h3>Kaj pride po testnem obdobju?</h3>
+              <p>Cenik za čas po testiranju še pripravljamo. Objavimo ga tukaj, preden testno obdobje mine.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section id="vprasanja" class="section">
+        <div class="wrap narrow">
+          <p class="eyebrow"><span class="idx">08</span> Vprašanja</p>
+          <h2>Pogosta vprašanja</h2>
+          <div class="faq">
+            <details>
+              <summary>Ali Kvito prejme ali posreduje moj denar?</summary>
+              <p>Ne. Najemnik plača neposredno na tvoj račun, v svoji banki, z UPN QR kodo ali s podatki za plačilo. Kvito pokaže, kaj je treba plačati in kdo je že plačal.</p>
+            </details>
+            <details>
+              <summary>Ali mora imeti najemnik svoj račun?</summary>
+              <p>Da. Povabiš ga s povezavo, ki jo pošlješ ali pokažeš kot QR kodo. Ob sprejemu povabila si ustvari račun in vidi samo svoj najem.</p>
+            </details>
+            <details>
+              <summary>Kaj če si stanovanje deli več najemnikov?</summary>
+              <p>Stroške razdeliš med sostanovalce. Vsak vidi svoj del in ga plača sam.</p>
+            </details>
+            <details>
+              <summary>Kje so moji podatki?</summary>
+              <p>Na strežnikih v Evropski uniji. Najemnik vidi samo podatke svojega najema. Svoje podatke lahko kadar koli izvoziš ali izbrišeš.</p>
+            </details>
+            <details>
+              <summary>Ali Kvito pripravi davčno napoved?</summary>
+              <p>Ne. Letni povzetek loči najemnino od povrnjenih stroškov in varščine, po enotah in mesecih. Je pomoč pri evidenci, ne davčni obračun. Kaj se šteje v dohodek iz oddajanja, preveri pri računovodji ali na FURS.</p>
+            </details>
+            <details>
+              <summary>Ali obstaja aplikacija za telefon?</summary>
+              <p>Kvito deluje v brskalniku. Na telefonu ga dodaš na začetni zaslon in se odpre kot aplikacija. Na iPhonu obvestila delujejo, ko je Kvito dodan na začetni zaslon.</p>
+            </details>
+            <details>
+              <summary>Koliko stane?</summary>
+              <p>Med testnim obdobjem je brezplačen. Cenik za čas po testiranju objavimo na tej strani.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- Final CTA -->
+      <section class="section">
+        <div class="wrap">
+          <div class="cta-panel">
+            <div>
+              <p class="eyebrow"><span class="idx">09</span> Začni</p>
+              <h2>Začni z eno nepremičnino.</h2>
+              <p class="section-lead">Pogoje vpišeš enkrat. Kvito pa vsak mesec pripravi najemnino in pove, ko je vse <span class="settled">Kvito ✓</span></p>
+            </div>
+            <a class="btn btn-primary btn-lg" href="{{APP_URL}}/prijava">Začni brezplačno <svg class="icon" aria-hidden="true"><use href="#i-arrow-right" /></svg></a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-grid">
+        <div>
+          <img class="logo only-light" src="/img/kvito-wordmark-light.svg" alt="Kvito" width="78" height="24" />
+          <img class="logo only-dark" src="/img/kvito-wordmark-dark.svg" alt="Kvito" width="78" height="24" />
+          <p class="footer-tag">Najem, poravnan. Za najemodajalce in najemnike v Sloveniji.</p>
+        </div>
+        <nav aria-label="Stran">
+          <p class="eyebrow">Stran</p>
+          <a href="#funkcije">Funkcije</a>
+          <a href="#za-oba">Za oba</a>
+          <a href="#cenik">Cenik</a>
+          <a href="#vprasanja">Vprašanja</a>
+        </nav>
+        <nav aria-label="Aplikacija">
+          <p class="eyebrow">Aplikacija</p>
+          <a href="{{APP_URL}}/prijava">Prijava</a>
+          <a href="{{APP_URL}}/prijava">Nov račun</a>
+          <a href="{{APP_URL}}/pogoji">Pogoji uporabe</a>
+          <a href="{{APP_URL}}/politika-zasebnosti">Politika zasebnosti</a>
+        </nav>
+      </div>
+      <div class="wrap footer-bottom">
+        <p>© <span id="year">2026</span> Kvito</p>
+      </div>
+    </footer>
+    <script src="/site.js" defer></script>
+  </body>
+</html>

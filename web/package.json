@@ -1,0 +1,14 @@
+{
+  "name": "@kvito/web",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Kvito – predstavitvena spletna stran (ločena od aplikacije).",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs"
+  }
+}
