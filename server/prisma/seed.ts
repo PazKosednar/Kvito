@@ -55,6 +55,7 @@ async function main() {
     create: {
       id: ID.property,
       ownerId: landlord.id,
+      type: "HOUSE",
       name: "Hiša na Trnovem",
       street: "Trnovska ulica 1",
       postalCode: "1000",

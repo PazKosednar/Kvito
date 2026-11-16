@@ -101,27 +101,27 @@ enum PaymentSource {
 // ---------- Users & auth ----------
 
 model User {
-  id             String    @id @default(cuid())
-  email          String    @unique // always stored lowercased
+  id               String    @id @default(cuid())
+  email            String    @unique // always stored lowercased
   /// scrypt hash of the password ("scrypt$N$r$p$salt$hash"); null for accounts that have none yet.
-  passwordHash   String?
+  passwordHash     String?
   /// Set once the person proved they own the e-mail (code). Unverified accounts cannot sign in.
-  emailVerifiedAt DateTime?
+  emailVerifiedAt  DateTime?
   /// Version of the terms of use and privacy policy accepted at sign-up, and when.
-  termsVersion    String?
-  termsAcceptedAt DateTime?
+  termsVersion     String?
+  termsAcceptedAt  DateTime?
   /// Wrong passwords in a row; after a few the account is locked for a short, growing time.
-  failedLogins    Int       @default(0)
+  failedLogins     Int       @default(0)
   loginLockedUntil DateTime?
-  name           String?
-  phone          String?
-  locale         Locale    @default(sl)
-  roles          Role[]    @default([])
-  lastActiveRole Role?
-  lastLoginAt    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
+  name             String?
+  phone            String?
+  locale           Locale    @default(sl)
+  roles            Role[]    @default([])
+  lastActiveRole   Role?
+  lastLoginAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
 
   refreshTokens       RefreshToken[]
   tenantReferences    TenantReference[]
@@ -181,11 +181,11 @@ model LoginCode {
   email      String
   purpose    CodePurpose @default(LOGIN)
   codeHash   String
-  attempts   Int       @default(0)
+  attempts   Int         @default(0)
   expiresAt  DateTime
   consumedAt DateTime?
   ip         String?
-  createdAt  DateTime  @default(now())
+  createdAt  DateTime    @default(now())
 
   @@index([email, createdAt])
 }
@@ -211,17 +211,25 @@ model RefreshToken {
 
 // ---------- Properties & tenancies ----------
 
+/// What kind of property it is; drives the drawing on the landlord's home screen.
+enum PropertyType {
+  HOUSE // hiša
+  APARTMENT // stanovanje (v bloku)
+  COMMERCIAL // poslovni prostor (pisarna, skladišče, lokal …)
+}
+
 model Property {
-  id         String    @id @default(cuid())
+  id         String       @id @default(cuid())
   ownerId    String
+  type       PropertyType @default(APARTMENT)
   name       String
   street     String
   postalCode String
   city       String
-  country    String    @default("SI")
+  country    String       @default("SI")
   notes      String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
   deletedAt  DateTime?
 
   owner User   @relation("PropertyOwner", fields: [ownerId], references: [id])
@@ -801,12 +809,12 @@ model PushSubscription {
 
 /// Breakdown of a charge by cost type (monthly advances, settlements).
 model ChargeLine {
-  id          String   @id @default(cuid())
-  chargeId    String
-  costType    CostType
-  label       String?
-  amountCents Int
-  sortOrder   Int      @default(0)
+  id                 String   @id @default(cuid())
+  chargeId           String
+  costType           CostType
+  label              String?
+  amountCents        Int
+  sortOrder          Int      @default(0)
   /// Set on a negative line that pays part of the charge with a settlement's credit (pobot dobroimetja).
   creditSettlementId String?
 
@@ -897,35 +905,35 @@ enum SettlementStatus {
 }
 
 model CostSettlement {
-  id                String           @id @default(cuid())
-  tenancyId         String
-  periodFrom        DateTime         @db.Date
-  periodTo          DateTime         @db.Date
-  status            SettlementStatus @default(DRAFT)
-  note              String?
+  id                   String           @id @default(cuid())
+  tenancyId            String
+  periodFrom           DateTime         @db.Date
+  periodTo             DateTime         @db.Date
+  status               SettlementStatus @default(DRAFT)
+  note                 String?
   /// Due date of the additional payment when the tenant owes the difference.
-  dueDate           DateTime?        @db.Date
-  sentAt            DateTime?
-  respondedAt       DateTime?
-  disputeReason     String?
+  dueDate              DateTime?        @db.Date
+  sentAt               DateTime?
+  respondedAt          DateTime?
+  disputeReason        String?
   /// Charge created on acceptance when the tenant owes the difference.
-  chargeId          String?          @unique
+  chargeId             String?          @unique
   /// Overpayment returned by the landlord (outside Kvito), and the tenant's confirmation.
-  refundedOn        DateTime?        @db.Date
+  refundedOn           DateTime?        @db.Date
   /// How much the landlord paid back (overpayment or leftover credit) – for the yearly summary.
-  refundedCents     Int?
-  refundConfirmedAt DateTime?
+  refundedCents        Int?
+  refundConfirmedAt    DateTime?
   /// What the landlord suggests doing with a credit, and what the tenant chose on acceptance.
   recommendedChoice    CreditChoice?
   creditChoice         CreditChoice?
   /// Credit not used yet (carried over or being offset against the next charges).
-  creditRemainingCents Int           @default(0)
+  creditRemainingCents Int              @default(0)
   /// Credit taken over from earlier settlements when this one was sent.
-  carriedInCents       Int           @default(0)
-  createdById       String
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  deletedAt         DateTime?
+  carriedInCents       Int              @default(0)
+  createdById          String
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  deletedAt            DateTime?
 
   tenancy     Tenancy          @relation(fields: [tenancyId], references: [id])
   charge      Charge?          @relation(fields: [chargeId], references: [id])

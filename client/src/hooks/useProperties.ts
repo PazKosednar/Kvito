@@ -1,9 +1,10 @@
 import { useCallback } from "react";
 import { api } from "@/lib/api";
-import type { Property, Unit } from "@/types/domain";
+import type { Property, PropertyType, Unit } from "@/types/domain";
 import { invalidate, useQuery } from "./useQuery";
 
 export interface PropertyInput {
+  type: PropertyType;
   name: string;
   street: string;
   postalCode: string;

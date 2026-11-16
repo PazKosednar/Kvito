@@ -9,6 +9,8 @@ import { validateBody } from "../../middleware/validate.js";
 import { assertPropertyOwner, assertUnitOwner } from "../access/access.js";
 
 const PropertyBody = z.object({
+  // Optional (no default) so a PATCH without it keeps the stored type; the DB default is APARTMENT.
+  type: z.enum(["HOUSE", "APARTMENT", "COMMERCIAL"]).optional(),
   name: text(80),
   street: text(80),
   postalCode: z.string().trim().regex(/^\d{4}$/, "INVALID_POSTAL_CODE"),
@@ -64,7 +66,7 @@ export function propertiesRouter(): Router {
           data: { roles: [...user.roles, "LANDLORD"], lastActiveRole: user.lastActiveRole ?? "LANDLORD" },
         });
       }
-      await audit({ actorId: userId, entityType: "Property", entityId: created.id, action: "create", after: { name: created.name, city: created.city }, ip: req.ip }, tx);
+      await audit({ actorId: userId, entityType: "Property", entityId: created.id, action: "create", after: { name: created.name, city: created.city, type: created.type }, ip: req.ip }, tx);
       return created;
     });
     res.status(201).json({ property });

@@ -255,7 +255,18 @@
     "add": "Add a property",
     "addFirst": "Add your first property",
     "newTitle": "New property",
-    "newSubtitle": "The house or building you rent out. You'll add flats in the next step.",
+    "newSubtitle": "The house, flat or commercial space you rent out. You'll add units in the next step.",
+    "type": "Property type",
+    "types": {
+      "HOUSE": "House",
+      "APARTMENT": "Flat",
+      "COMMERCIAL": "Commercial"
+    },
+    "typeHints": {
+      "HOUSE": "A detached or terraced house. Rent out the whole house, a floor or rooms.",
+      "APARTMENT": "A flat in an apartment block or multi-unit building.",
+      "COMMERCIAL": "An office, warehouse, shop or other commercial space."
+    },
     "editTitle": "Edit property",
     "name": "Name",
     "nameHint": "What you call it, e.g. “Building in Vič”.",

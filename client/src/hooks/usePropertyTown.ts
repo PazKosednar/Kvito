@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useOverview } from "@/hooks/useReports";
-import type { Property } from "@/types/domain";
+import type { Property, PropertyType } from "@/types/domain";
 
 /**
  * State of one unit in the town illustration:
@@ -18,6 +18,8 @@ export interface TownUnit {
 
 export interface TownBuilding {
   id: string;
+  /** Drawn as a house, an apartment block or a commercial building. */
+  type: PropertyType;
   name: string;
   address: string;
   to: string;
@@ -32,6 +34,7 @@ export function usePropertyTown(properties: Property[]) {
     const counts: Record<UnitState, number> = { settled: 0, open: 0, attention: 0, vacant: 0 };
     const buildings: TownBuilding[] = properties.map((p) => ({
       id: p.id,
+      type: p.type ?? "APARTMENT",
       name: p.name,
       address: `${p.street}, ${p.city}`,
       to: `/nepremicnine/${p.id}`,

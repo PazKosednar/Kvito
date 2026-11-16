@@ -10,7 +10,8 @@ import type { Property } from "@/types/domain";
 /**
  * The landlord's properties as a small isometric town on the panel (CGP line art, follows the theme):
  * one building per property, one window per unit, lit by the unit's state.
- * Every property is an apartment block; only the landlord's own flats light up.
+ * The building follows the property type: a gabled house, an apartment block (only the landlord's
+ * flats light up among the neighbours') or a low commercial building with ribbon windows and a shutter door.
  */
 
 const C = Math.cos(Math.PI / 6);
@@ -35,11 +36,19 @@ interface Win {
 interface Shape {
   w: number;
   d: number;
+  /** Wall height (eaves for a house). */
   h: number;
+  /** Gable roof height above the walls (house only; 0 = flat roof with parapet). */
+  roof: number;
   door: [number, number, number]; // on the right face: y0, y1, z1
-  windows: Win[]; // front-left face, one per flat
+  /** Roller shutter (commercial): horizontal slats on the door. */
+  shutter: boolean;
+  windows: Win[]; // front-left face, one per unit
   side: Omit<Win, "unit">[]; // right face, decorative
 }
+
+/** Highest point of the shape (walls + roof). */
+const topOf = (s: Shape) => s.h + s.roof;
 
 /** Small deterministic PRNG so every building keeps its look between renders. */
 function seeded(id: string) {
@@ -52,12 +61,18 @@ function seeded(id: string) {
   };
 }
 
+function shapeFor(b: TownBuilding): Shape {
+  if (b.type === "HOUSE") return houseShape(b);
+  if (b.type === "COMMERCIAL") return commercialShape(b);
+  return blockShape(b);
+}
+
 /**
- * Always an apartment block: the landlord usually owns only some flats in it.
+ * Apartment block: the landlord usually owns only some flats in it.
  * The block has more flats than the landlord's units; only theirs light up (one window per unit),
  * spread over the facade, the rest stay dark.
  */
-function shapeFor(b: TownBuilding): Shape {
+function blockShape(b: TownBuilding): Shape {
   const n = b.units.length;
   const rnd = seeded(b.id);
   const cols = n <= 12 ? 3 : 4;
@@ -86,7 +101,62 @@ function shapeFor(b: TownBuilding): Shape {
       { x0: 17, x1: 24, z0, z1: z0 + 10 },
     ];
   }).flat();
-  return { w: cols * cell + 12, d, h: floors * floorH + 6, door: [10, 18, 13], windows, side };
+  return { w: cols * cell + 12, d, h: floors * floorH + 6, roof: 0, door: [10, 18, 13], shutter: false, windows, side };
+}
+
+/**
+ * House: two floors (more only if needed) under a gable roof. The landlord owns the whole house,
+ * so windows light up in order from the ground floor; spare windows stay dark.
+ */
+function houseShape(b: TownBuilding): Shape {
+  const n = b.units.length;
+  const cols = n <= 2 ? 2 : 3;
+  const floors = Math.max(2, Math.ceil(n / cols));
+  const cell = 18;
+  const floorH = 18;
+  const windows: Win[] = Array.from({ length: cols * floors }, (_, i) => {
+    const col = i % cols;
+    const floor = Math.floor(i / cols);
+    const x0 = 6 + col * cell + 4;
+    const z0 = floor * floorH + 5;
+    return { x0, x1: x0 + 10, z0, z1: z0 + 10, unit: i < n ? i : null };
+  });
+  const d = 30;
+  // Gable side: windows on the upper floors only (the door is on the ground floor).
+  const side = Array.from({ length: floors - 1 }, (_, f) => {
+    const z0 = (f + 1) * floorH + 5;
+    return [
+      { x0: 5, x1: 12, z0, z1: z0 + 10 },
+      { x0: 18, x1: 25, z0, z1: z0 + 10 },
+    ];
+  }).flat();
+  // Roof taller than half the depth, so the front slope hides the back of the roof.
+  return { w: cols * cell + 12, d, h: floors * floorH + 2, roof: d / 2 + 5, door: [11, 19, 13], shutter: false, windows, side };
+}
+
+/**
+ * Commercial building (office, warehouse, shop): wide and low, ribbon windows (one per unit, in order),
+ * a flat roof with parapet and a large roller-shutter door on the side.
+ */
+function commercialShape(b: TownBuilding): Shape {
+  const n = b.units.length;
+  const cols = Math.min(4, Math.max(2, n));
+  const floors = Math.max(2, Math.ceil(n / cols));
+  const cell = 22;
+  const floorH = 16;
+  const windows: Win[] = Array.from({ length: cols * floors }, (_, i) => {
+    const col = i % cols;
+    const floor = Math.floor(i / cols);
+    const x0 = 6 + col * cell + 2;
+    const z0 = floor * floorH + 6;
+    return { x0, x1: x0 + 18, z0, z1: z0 + 7, unit: i < n ? i : null };
+  });
+  const d = 34;
+  const side = Array.from({ length: floors - 1 }, (_, f) => {
+    const z0 = (f + 1) * floorH + 6;
+    return [{ x0: 4, x1: 30, z0, z1: z0 + 7 }];
+  }).flat();
+  return { w: cols * cell + 12, d, h: floors * floorH + 6, roof: 0, door: [7, 27, 13], shutter: true, windows, side };
 }
 
 interface Placed {
@@ -108,11 +178,13 @@ function layout(buildings: TownBuilding[]): { placed: (Placed & { row: number })
     row.forEach((b, i) => {
       const s = shapes[i]!;
       placed.push({ b, s, bx, by: by + (depth - s.d), index: r * PER_ROW + i, row: r });
-      bx += s.w + GAP;
+      // The next building's front-left face reaches back by its depth; keep that clear of this one's side (door).
+      const next = shapes[i + 1];
+      bx += s.w + Math.max(GAP, (next?.d ?? 0) + 8);
     });
     // The next row stands in front: move it forward far enough that its roofs stay below this row's plots.
     const next = buildings.slice((r + 1) * PER_ROW, (r + 2) * PER_ROW).map(shapeFor);
-    const tallest = next.length ? Math.max(...next.map((s) => s.h)) : 0;
+    const tallest = next.length ? Math.max(...next.map(topOf)) : 0;
     by += depth + GAP + 2 * tallest;
   }
   return { placed };
@@ -151,9 +223,25 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
         <polygon className={face} points={P([[0, d, 0], [w, d, 0], [w, d, h], [0, d, h]])} />
         <polygon className={face} points={P([[w, 0, 0], [w, d, 0], [w, d, h], [w, 0, h]])} />
         <polygon className={face} points={P([[w, s.door[0], 0], [w, s.door[1], 0], [w, s.door[1], s.door[2]], [w, s.door[0], s.door[2]]])} />
-        <polygon className={face} points={P([[0, 0, h], [w, 0, h], [w, d, h], [0, d, h]])} />
-        <polygon className="fill-none stroke-[var(--panel-edge)]" strokeOpacity="0.6" points={P([[3, 3, h], [w - 3, 3, h], [w - 3, d - 3, h], [3, d - 3, h]])} />
+        {s.roof > 0 ? (
+          <>
+            {/* Gable roof along the front: back slope (mostly hidden), front slope, gable on the right. */}
+            <polygon className={face} points={P([[0, 0, h], [w, 0, h], [w, d / 2, h + s.roof], [0, d / 2, h + s.roof]])} />
+            <polygon className={face} points={P([[0, d, h], [w, d, h], [w, d / 2, h + s.roof], [0, d / 2, h + s.roof]])} />
+            <polygon className={face} points={P([[w, 0, h], [w, d, h], [w, d / 2, h + s.roof]])} />
+          </>
+        ) : (
+          <>
+            <polygon className={face} points={P([[0, 0, h], [w, 0, h], [w, d, h], [0, d, h]])} />
+            <polygon className="fill-none stroke-[var(--panel-edge)]" strokeOpacity="0.6" points={P([[3, 3, h], [w - 3, 3, h], [w - 3, d - 3, h], [3, d - 3, h]])} />
+          </>
+        )}
       </g>
+      {/* Roller shutter slats (commercial). */}
+      {s.shutter &&
+        [3, 6, 9].map((z) => (
+          <polyline key={`sh${z}`} className="fill-none stroke-[var(--panel-edge-faint)]" strokeWidth="1" points={P([[w, s.door[0], z], [w, s.door[1], z]])} />
+        ))}
       {/* Neighbours' flats on the side: dark, just for scale. */}
       {s.side.map((win, i) => (
         <polygon key={`s${i}`} className="fill-none stroke-[var(--panel-edge-faint)]" strokeWidth="1" points={P([[w, win.x0, win.z0], [w, win.x1, win.z0], [w, win.x1, win.z1], [w, win.x0, win.z1]])} />
@@ -203,6 +291,7 @@ function bounds(placed: Placed[]) {
       [bx - 6, by + s.d + 6, 0],
       [bx + s.w + 6, by + s.d + 6, 0],
       [bx, by, s.h],
+      [bx, by + s.d / 2, topOf(s)],
     ] as Pt[]) {
       const [x, y] = proj(pt);
       xs.push(x);

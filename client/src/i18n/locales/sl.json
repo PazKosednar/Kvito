@@ -255,7 +255,18 @@
     "add": "Dodaj nepremičnino",
     "addFirst": "Dodaj prvo nepremičnino",
     "newTitle": "Nova nepremičnina",
-    "newSubtitle": "Hiša ali blok, v katerem oddajaš. Stanovanja dodaš v naslednjem koraku.",
+    "newSubtitle": "Hiša, stanovanje ali poslovni prostor, ki ga oddajaš. Enote dodaš v naslednjem koraku.",
+    "type": "Vrsta nepremičnine",
+    "types": {
+      "HOUSE": "Hiša",
+      "APARTMENT": "Stanovanje",
+      "COMMERCIAL": "Poslovni prostor"
+    },
+    "typeHints": {
+      "HOUSE": "Samostojna ali vrstna hiša. Oddajaš lahko celo hišo, etažo ali sobe.",
+      "APARTMENT": "Stanovanje v bloku ali večstanovanjski stavbi.",
+      "COMMERCIAL": "Pisarna, skladišče, lokal ali drug poslovni prostor."
+    },
     "editTitle": "Uredi nepremičnino",
     "name": "Ime",
     "nameHint": "Kako ji praviš, na primer »Blok na Viču«.",
