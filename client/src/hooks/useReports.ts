@@ -14,8 +14,8 @@ export interface OverviewRow {
 
 /** Landlord overview: totals and one row per tenancy. */
 export function useOverview(enabled = true) {
-  const q = useQuery<{ totals: OverviewRow; byTenancy: Record<string, OverviewRow> }>(enabled ? "/api/overview" : null);
-  return { ...q, totals: q.data?.totals, byTenancy: q.data?.byTenancy ?? {} };
+  const q = useQuery<{ totals: OverviewRow; byTenancy: Record<string, OverviewRow>; onTimeMonths?: Record<string, number> }>(enabled ? "/api/overview" : null);
+  return { ...q, totals: q.data?.totals, byTenancy: q.data?.byTenancy ?? {}, onTimeMonths: q.data?.onTimeMonths ?? {} };
 }
 
 /** Saves a blob through a temporary link (works the same in browsers and in a Capacitor webview). */

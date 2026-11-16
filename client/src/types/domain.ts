@@ -79,6 +79,7 @@ export interface TenancyDetail extends Tenancy {
     floor: string | null;
     property: {
       id: string;
+      type: PropertyType;
       name: string;
       street: string;
       postalCode: string;

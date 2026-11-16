@@ -17,6 +17,7 @@ import { useTenancyContext } from "@/features/tenancies/TenancyLayout";
 import { useMonthStrip } from "@/hooks/useMonthStrip";
 import { ChargeStatusPill, DueText } from "./charge-ui";
 import { MonthStrip } from "./MonthStrip";
+import { TenantHomeScene, tenantWindowState } from "@/features/tenancies/TenantHomeScene";
 
 const UNPAID: ChargeStatus[] = ["OVERDUE", "OPEN", "DISPUTED"];
 const byDueAsc = (a: { dueDate: string }, b: { dueDate: string }) => a.dueDate.localeCompare(b.dueDate);
@@ -61,6 +62,7 @@ function TenantCharges({ charges, memberId, kvita }: { charges: Charge[]; member
   const waiting = mine.filter((x) => x.share.status === "REPORTED_PAID");
   const settled = mine.filter((x) => x.share.status === "CONFIRMED");
   const open = (id: string) => void navigate(`/najemi/${tenancy.id}/obveznosti/${id}`);
+  const homeState = tenantWindowState(mine.map((x) => x.share.status));
   // Each month by the tenant's own share.
   const strip = useMonthStrip(charges, (c) => c.shares.find((s) => s.memberId === memberId)?.status ?? null, tenancy.startDate);
 
@@ -82,6 +84,8 @@ function TenantCharges({ charges, memberId, kvita }: { charges: Charge[]; member
   return (
     <>
       {kvita && toPay.length === 0 && waiting.length === 0 && <SettledBanner className="mb-8" />}
+      {/* Your home: on top when nothing is to pay, otherwise below the payments (payment data stays first). */}
+      {mine.length > 0 && toPay.length === 0 && <TenantHomeScene state={homeState} className="mb-8" />}
       {mine.length > 0 && <MonthStrip {...strip} className="mb-8" />}
 
       {mine.length === 0 && (
@@ -119,6 +123,7 @@ function TenantCharges({ charges, memberId, kvita }: { charges: Charge[]; member
           </div>
         </Section>
       )}
+      {toPay.length > 0 && <TenantHomeScene state={homeState} className="mt-8" />}
 
       {waiting.length > 0 && (
         <Section title={t("charges.waiting")}>

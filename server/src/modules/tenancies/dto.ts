@@ -10,6 +10,7 @@ export const tenancyInclude = {
       property: {
         select: {
           id: true,
+          type: true,
           name: true,
           street: true,
           postalCode: true,

@@ -1442,6 +1442,12 @@
     "eyebrow": "Your properties",
     "rented": "Rented {{rented}} / {{total}}",
     "buildingLabel": "{{index}}. {{name}}, {{address}} – rented {{rented}} / {{total}}",
+    "home": "Your home",
+    "onTime_one": "{{count}} month paid on time",
+    "onTime_other": "{{count}} months paid on time",
+    "gardenHint_one": "{{count}} month paid on time. Every 3 months a bush grows in front of the house.",
+    "gardenHint_other": "{{count}} months paid on time. Every 3 months a bush grows in front of the house.",
+    "gardenHintEmpty": "Every 3 months paid on time, a bush grows in front of the house.",
     "scene": {
       "label": "Surroundings",
       "none": "None",

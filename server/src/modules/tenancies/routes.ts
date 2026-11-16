@@ -8,6 +8,7 @@ import { authUserId } from "../../middleware/auth.js";
 import { validateBody } from "../../middleware/validate.js";
 import { assertTenancyAccess, assertTenancyLandlord, assertUnitOwner } from "../access/access.js";
 import { tenancyInclude } from "./dto.js";
+import { onTimeMonthsByTenancy } from "../reports/on-time.js";
 
 const billingMode = z.enum(["COMBINED", "SEPARATE"]);
 
@@ -123,7 +124,8 @@ export function tenanciesRouter(): Router {
     const id = idParam.parse(req.params.id);
     const access = await assertTenancyAccess(authUserId(req), id);
     const tenancy = await prisma.tenancy.findUniqueOrThrow({ where: { id }, include: tenancyInclude });
-    res.json({ tenancy, access: access.role, memberId: access.memberId });
+    const onTimeMonths = (await onTimeMonthsByTenancy({ id }))[id] ?? 0;
+    res.json({ tenancy, access: access.role, memberId: access.memberId, onTimeMonths });
   });
 
   router.patch("/tenancies/:id", validateBody(TenancyPatch), async (req, res) => {

@@ -29,7 +29,7 @@ export function useTenancies(as: Role | null) {
 }
 
 export function useTenancy(id: string | undefined) {
-  const q = useQuery<{ tenancy: TenancyDetail; access: Role; memberId: string | null }>(
+  const q = useQuery<{ tenancy: TenancyDetail; access: Role; memberId: string | null; onTimeMonths?: number }>(
     id ? `/api/tenancies/${id}` : null,
   );
 
@@ -63,6 +63,8 @@ export function useTenancy(id: string | undefined) {
     access: q.data?.access,
     memberId: q.data?.memberId ?? null,
     isLandlord: q.data?.access === "LANDLORD",
+    /** Months paid on time (the town's reward garden). */
+    onTimeMonths: q.data?.onTimeMonths ?? 0,
     update,
     updateMember,
     removeMember,

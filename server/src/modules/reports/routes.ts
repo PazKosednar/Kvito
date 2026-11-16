@@ -6,6 +6,7 @@ import { notFound } from "../../lib/errors.js";
 import { prisma } from "../../lib/prisma.js";
 import { authUserId } from "../../middleware/auth.js";
 import { annualCsv, loadAnnualSummary, renderAnnualPdf } from "./annual.js";
+import { onTimeMonthsByTenancy } from "./on-time.js";
 import { loadPaymentRows, paymentsCsv, renderPaymentsPdf } from "./payments.js";
 
 const AnnualQuery = z.object({
@@ -56,7 +57,9 @@ export function reportsRouter(): Router {
         } else r.disputedCount++;
       }
     }
-    res.json({ totals, byTenancy });
+    // Reward garden in the town: months paid on time per active tenancy.
+    const onTimeMonths = await onTimeMonthsByTenancy({ deletedAt: null, status: "ACTIVE", unit: { deletedAt: null, property: { ownerId: userId, deletedAt: null } } });
+    res.json({ totals, byTenancy, onTimeMonths });
   });
 
   /** Years in which the landlord has confirmed payments, newest first (for the export picker). */

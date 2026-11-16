@@ -541,7 +541,7 @@ function IndexLabel({ p }: { p: Placed }) {
   );
 }
 
-function bounds(placed: Placed[], extra: Pt[] = []) {
+function bounds(placed: Placed[], extra: Pt[] = [], minW = MIN_W, minH = MIN_H) {
   const xs: number[] = [];
   const ys: number[] = [];
   for (const pt of extra) {
@@ -570,13 +570,13 @@ function bounds(placed: Placed[], extra: Pt[] = []) {
   let y0 = Math.min(...ys) - pad;
   let y1 = Math.max(...ys) + pad;
   // A single building would otherwise be blown up (thick lines, huge type); keep a minimum canvas and center it.
-  if (x1 - x0 < MIN_W) {
-    const e = (MIN_W - (x1 - x0)) / 2;
+  if (x1 - x0 < minW) {
+    const e = (minW - (x1 - x0)) / 2;
     x0 -= e;
     x1 += e;
   }
-  if (y1 - y0 < MIN_H) {
-    const e = (MIN_H - (y1 - y0)) / 2;
+  if (y1 - y0 < minH) {
+    const e = (minH - (y1 - y0)) / 2;
     y0 -= e;
     y1 += e;
   }
@@ -676,13 +676,29 @@ function ScenePicker({
  * The town drawing itself (shared by the landlord's overview and the tenant's own building):
  * buildings, surroundings, day/night and season, plus the small picker in the corner.
  */
-export function TownCanvas({ buildings, label, picker = true, className }: { buildings: TownBuilding[]; label: string; picker?: boolean; className?: string }) {
+export function TownCanvas({
+  buildings,
+  label,
+  picker = true,
+  showIndex = true,
+  compact = false,
+  className,
+}: {
+  buildings: TownBuilding[];
+  label: string;
+  picker?: boolean;
+  /** Number under each building (01, 02 …); off when there is only the tenant's own building. */
+  showIndex?: boolean;
+  /** Tighter minimum canvas (a single building drawn larger). */
+  compact?: boolean;
+  className?: string;
+}) {
   const { t } = useTranslation();
   const { scene, setScene } = useTownScene();
   const ambient = useTownAmbient();
   const { placed, rows } = layout(buildings);
   const decor = sceneLayers(scene, rows);
-  const box = bounds(placed, decor.extent);
+  const box = compact ? bounds(placed, decor.extent, 260, 150) : bounds(placed, decor.extent);
   const stateLabel = (s: UnitState) => t(`town.state.${s}`);
   const fadeId = `kv-town-fade-${useId().replace(/:/g, "")}`;
 
@@ -720,7 +736,12 @@ export function TownCanvas({ buildings, label, picker = true, className }: { bui
                     <g key={p.b.id}>
                       <Building
                         p={p}
-                        label={t("town.buildingLabel", { index: p.index + 1, name: p.b.name, address: p.b.address, rented, total: p.b.units.length })}
+                        label={[
+                          t("town.buildingLabel", { index: p.index + 1, name: p.b.name, address: p.b.address, rented, total: p.b.units.length }),
+                          p.b.onTimeMonths ? t("town.onTime", { count: p.b.onTimeMonths }) : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
                         windowTitle={(name, state) => `${name}: ${stateLabel(state)}`}
                       />
                       <g aria-hidden="true" className="pointer-events-none" strokeWidth="1">
@@ -735,11 +756,13 @@ export function TownCanvas({ buildings, label, picker = true, className }: { bui
             </g>
           ))}
           <Snowfall box={box} />
-          <g aria-hidden="true" className="pointer-events-none">
-            {placed.map((p) => (
-              <IndexLabel key={p.b.id} p={p} />
-            ))}
-          </g>
+          {showIndex && (
+            <g aria-hidden="true" className="pointer-events-none">
+              {placed.map((p) => (
+                <IndexLabel key={p.b.id} p={p} />
+              ))}
+            </g>
+          )}
         </svg>
       </TownAmbientContext.Provider>
     </div>
