@@ -22,7 +22,7 @@
 }
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 80px;
+  scroll-padding-top: 96px;
   -webkit-text-size-adjust: 100%;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -246,21 +246,34 @@ h3 {
   height: 20px;
 }
 
-/* ---------- Header ---------- */
+/* ---------- Header: floating bar (a floating layer, so it may use shadow-overlay) ---------- */
 .site-header {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  top: 12px;
+  left: 0;
+  right: 0;
   z-index: 20;
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
 }
 .header-row {
   display: flex;
   align-items: center;
-  gap: 24px;
-  height: 64px;
+  gap: 20px;
+  height: 56px;
+  padding: 0 8px 0 16px;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  pointer-events: auto;
+  transition: background-color 180ms ease-out, border-color 180ms ease-out, box-shadow 180ms ease-out;
+}
+/* After scrolling a bit: more solid, with the overlay shadow so it lifts off the content. */
+.site-header.scrolled .header-row {
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--surface-raised) 90%, transparent);
+  box-shadow: var(--shadow-overlay);
 }
 .brand .logo {
   height: 22px;
@@ -300,8 +313,8 @@ h3 {
 }
 .mobile-panel {
   position: absolute;
-  right: 0;
-  top: 48px;
+  right: -8px;
+  top: 52px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -351,7 +364,7 @@ h3 {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
   align-items: center;
   gap: 48px;
-  padding-top: 88px;
+  padding-top: 160px;
   padding-bottom: 88px;
 }
 .cta-row {
@@ -423,6 +436,9 @@ h3 {
 /* ---------- Sections ---------- */
 .section {
   padding: 96px 0;
+}
+.section-first {
+  padding-top: 160px;
 }
 .section-alt {
   border-top: 1px solid var(--line);
@@ -710,7 +726,7 @@ h3 {
     grid-template-columns: 1fr;
   }
   .hero-grid {
-    padding-top: 56px;
+    padding-top: 120px;
     padding-bottom: 72px;
   }
   .features {
