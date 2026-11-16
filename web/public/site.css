@@ -444,18 +444,18 @@ h3 {
 /* Phone mockup: the screenshot sits in the screen area, the frame image (with the island) lies on top. */
 .device {
   position: relative;
-  aspect-ratio: 356 / 724;
+  aspect-ratio: 720 / 1466;
 }
 .device-screen {
   position: absolute;
-  left: 5.056%;
-  top: 2.072%;
-  width: 89.607%;
-  height: 95.856%;
+  left: 5.059%;
+  top: 2.104%;
+  width: 89.841%;
+  height: 95.792%;
   overflow: hidden;
-  border-radius: 11.6% / 5.33%;
-  /* Status bar strip under the island, in the app's background colour. */
-  padding-top: 11%;
+  border-radius: 10.9% / 5.02%;
+  /* Status bar strip under the island (padding % is of the device width), in the app's background colour. */
+  padding-top: 11.5%;
   background: var(--surface);
 }
 .device-screen img {
