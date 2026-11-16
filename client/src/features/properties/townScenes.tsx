@@ -174,6 +174,15 @@ function DrivingCar({ x, y, dx, seconds, phase }: { x: number; y: number; dx: nu
   );
 }
 
+/**
+ * True when an item standing `dy` in front of the row at `x` would cover a building's index label
+ * (labels sit at the front-right corner of each building's plot).
+ */
+function nearLabel(r: TownRow, x: number, dy: number) {
+  const labels = [...r.gaps.map((g) => g.x0), r.x1 + 6];
+  return labels.some((lx) => Math.abs(x - (lx + dy - 6)) < 13);
+}
+
 const lineX = (x0: number, x1: number, y: number, z = 0) => pts([[x0, y, z], [x1, y, z]]);
 
 // ---------- Scenes ----------
@@ -181,27 +190,21 @@ const lineX = (x0: number, x1: number, y: number, z = 0) => pts([[x0, y, z], [x1
 function park(rows: TownRow[], L: SceneLayers) {
   for (const r of rows) {
     const rnd = seeded(`park-${r.index}`);
+    // Calm and sparse: a few trees behind, one tree per gap, a path with benches and an even row of trees in front.
     const back: ReactNode[] = [];
-    for (let x = r.x0 - 8, i = 0; x <= r.x1 + 8; x += 26, i++) {
-      const jx = x + (rnd() - 0.5) * 8;
-      const jy = r.y0 - 14 - rnd() * 6;
-      back.push(i % 3 === 1 ? <Pine key={`b${i}`} x={jx} y={jy} /> : <Tree key={`b${i}`} x={jx} y={jy} s={0.9 + rnd() * 0.25} />);
+    for (let x = r.x0 - 6, i = 0; x <= r.x1 + 8; x += 44, i++) {
+      const jx = x + (rnd() - 0.5) * 6;
+      back.push(i % 2 ? <Pine key={`b${i}`} x={jx} y={r.y0 - 14} /> : <Tree key={`b${i}`} x={jx} y={r.y0 - 14} />);
     }
     L.back.set(r.index, back);
-    for (const g of r.gaps) {
-      const mid = (g.x0 + g.x1) / 2;
-      L.gap.set(g.after, [<Tree key="t" x={mid} y={r.y0 + (r.y1 - r.y0) * 0.35} s={0.85} />, <Shrub key="s" x={mid - 2} y={r.y1 - 2} />]);
-    }
+    for (const g of r.gaps) L.gap.set(g.after, [<Tree key="t" x={(g.x0 + g.x1) / 2} y={r.y0 + (r.y1 - r.y0) * 0.35} s={0.85} />]);
     const front: ReactNode[] = [
       // Gravel path along the front.
       <polyline key="p1" points={lineX(r.x0 - 16, r.x1 + 16, r.y1 + 12)} fill="none" stroke={FAINT} />,
       <polyline key="p2" points={lineX(r.x0 - 16, r.x1 + 16, r.y1 + 20)} fill="none" stroke={FAINT} />,
     ];
-    for (let x = r.x0 + 10, i = 0; x <= r.x1 - 6; x += 64, i++) front.push(<Bench key={`be${i}`} x={x} y={r.y1 + 22} />);
-    for (let x = r.x0 - 4, i = 0; x <= r.x1 + 10; x += 34, i++) {
-      const jx = x + 20 + (rnd() - 0.5) * 10;
-      front.push(i % 2 ? <Shrub key={`fs${i}`} x={jx} y={r.y1 + 32} /> : <Tree key={`ft${i}`} x={jx} y={r.y1 + 34} s={0.8} />);
-    }
+    for (let x = r.x0 + 10, i = 0; x <= r.x1 - 6; x += 72, i++) if (!nearLabel(r, x, 22)) front.push(<Bench key={`be${i}`} x={x} y={r.y1 + 22} />);
+    for (let x = r.x0 + 14, i = 0; x <= r.x1 + 14; x += 46, i++) if (!nearLabel(r, x, 32)) front.push(<Tree key={`ft${i}`} x={x} y={r.y1 + 32} s={0.8} />);
     L.front.set(r.index, front);
     L.extent.push([r.x0 - 22, r.y0 - 22, 0], [r.x1 + 22, r.y0 - 22, 0], [r.x0 - 22, r.y1 + 40, 0], [r.x1 + 22, r.y1 + 40, 0], [r.x0, r.y0 - 20, 34]);
   }
@@ -234,7 +237,7 @@ function city(rows: TownRow[], L: SceneLayers) {
     for (let i = 0; i < 5; i++) {
       front.push(<polyline key={`z${i}`} points={pts([[cx + i * 4, curbA + 2, 0], [cx + i * 4, curbB - 2, 0]])} fill="none" stroke={FAINT} strokeWidth="2" />);
     }
-    for (let x = r.x0 - 6, i = 0; x <= r.x1 + 6; x += 48, i++) front.push(<Lamp key={`lp${i}`} x={x} y={curbA - 2} />);
+    for (let x = r.x0 - 6, i = 0; x <= r.x1 + 6; x += 48, i++) if (!nearLabel(r, x, 10)) front.push(<Lamp key={`lp${i}`} x={x} y={curbA - 2} />);
     // Traffic: near lane drives right, far lane drives left; drawn near lane first (it is further back).
     const len = x1 - x0 - 14;
     const near = 16 + Math.round(rnd() * 4);

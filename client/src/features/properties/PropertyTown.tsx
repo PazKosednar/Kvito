@@ -29,7 +29,6 @@ import { sceneLayers, Shrub, TOWN_SCENES, TownAmbientContext, type TownScene } f
  * or a low commercial building with ribbon windows and a shutter door.
  */
 
-const EDGE = "var(--panel-edge)";
 const GRID = "var(--panel-scene-grid)";
 const PER_ROW = 5;
 const GAP = 26;
@@ -308,9 +307,7 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
     win.planeX != null
       ? P([[win.planeX, win.x0, win.z0], [win.planeX, win.x1, win.z0], [win.planeX, win.x1, win.z1], [win.planeX, win.x0, win.z1]])
       : P([[win.x0, d, win.z0], [win.x1, d, win.z0], [win.x1, d, win.z1], [win.x0, d, win.z1]]);
-  const empty = b.units.length === 0;
   const face = cn("fill-[var(--panel)] transition-colors duration-200 stroke-[var(--panel-edge)] group-hover:stroke-ink-on-panel-muted group-focus-visible:stroke-signal");
-  const dash = empty ? "3 3" : undefined;
   const door = s.door ?? [0, 0, 0];
   const { dayTime, season } = useContext(TownAmbientContext);
   const night = dayTime === "night";
@@ -326,8 +323,15 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
     <Link to={b.to} aria-label={label} className="outline-none">
       <title>{label}</title>
       {/* Plot. */}
-      <polygon points={P([[-6, -6, 0], [w + 6, -6, 0], [w + 6, d + 6, 0], [-6, d + 6, 0]])} fill="none" stroke={EDGE} strokeOpacity="0.45" strokeDasharray="2 3" />
-      <g strokeWidth="1" strokeLinejoin="round" strokeDasharray={dash}>
+      {/* Plot: a quiet solid footprint (the house's steps reach a bit further out). */}
+      <polygon
+        points={P([[-4, -4, 0], [w + (s.cottage ? 11 : 4), -4, 0], [w + (s.cottage ? 11 : 4), d + 4, 0], [-4, d + 4, 0]])}
+        fill="none"
+        className="stroke-[var(--panel-edge-faint)]"
+        strokeWidth="1"
+        strokeLinejoin="round"
+      />
+      <g strokeWidth="1" strokeLinejoin="round" strokeLinecap="round">
         {s.cottage ? (
           <Cottage s={s} P={P} face={face} />
         ) : (
@@ -578,7 +582,7 @@ function RoofSnow({ s, P }: { s: Shape; P: (pts: Pt[]) => string }) {
 function Sky({ box }: { box: Box }) {
   const { dayTime } = useContext(TownAmbientContext);
   const cx = box.x0 + Math.min(46, box.w * 0.1);
-  const cy = box.y0 + 30;
+  const cy = box.y0 + 18;
   if (dayTime === "day") {
     return (
       <g aria-hidden="true" stroke="var(--panel-edge-faint)" fill="none">
@@ -673,7 +677,8 @@ function bounds(placed: Placed[], extra: Pt[] = [], minW = MIN_W, minH = MIN_H) 
   const pad = 14;
   let x0 = Math.min(...xs) - pad;
   let x1 = Math.max(...xs) + pad;
-  let y0 = Math.min(...ys) - pad;
+  // Extra band on top for the sky (sun, moon, stars), so they never sit on a roof.
+  let y0 = Math.min(...ys) - pad - 26;
   let y1 = Math.max(...ys) + pad;
   // A single building would otherwise be blown up (thick lines, huge type); keep a minimum canvas and center it.
   if (x1 - x0 < minW) {
