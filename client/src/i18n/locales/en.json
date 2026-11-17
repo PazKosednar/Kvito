@@ -866,6 +866,8 @@
     "eyebrow": "Overview",
     "title": "Notifications",
     "markAllRead": "Mark all read",
+    "latest": "Latest notifications",
+    "seeAll": "All notifications",
     "empty": "Nothing yet. When something happens, you'll see it here.",
     "bellUnread_one": "Notifications, {{count}} unread",
     "bellUnread_other": "Notifications, {{count}} unread",

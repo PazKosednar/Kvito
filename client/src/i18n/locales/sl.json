@@ -882,6 +882,8 @@
     "eyebrow": "Pregled",
     "title": "Obvestila",
     "markAllRead": "Vse prebrano",
+    "latest": "Zadnja obvestila",
+    "seeAll": "Vsa obvestila",
     "empty": "Zaenkrat ni obvestil. Ko se bo kaj zgodilo, bo to tukaj.",
     "bellUnread_one": "Obvestila, {{count}} neprebrano",
     "bellUnread_two": "Obvestila, {{count}} neprebrani",
