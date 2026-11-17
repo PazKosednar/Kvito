@@ -33,7 +33,10 @@ export function LoginPage() {
       {/* Hero on the panel (CGP; follows the theme). */}
       <section className="on-panel kv-grid-panel flex flex-col px-4 pt-[calc(1.25rem+env(safe-area-inset-top))] pb-8 sm:px-8 lg:px-12 lg:py-10">
         <KvitaLockup className="h-6 w-auto self-start lg:h-7" />
-        <div className="mt-8 lg:mt-auto lg:pt-10">
+        {/* Desktop spacing: free height above text : between text and house : below house = 2 : 1 : 1,
+            i.e. the house sits halfway between "right under the text" and "at the very bottom". */}
+        <div aria-hidden="true" className="hidden lg:block lg:grow-[2]" />
+        <div className="mt-8 lg:mt-0 lg:pt-10">
           <Eyebrow onPanel index="01">{t("login.eyebrow")}</Eyebrow>
           <h1 className="mt-3 max-w-[13ch] text-[2.5rem] lg:max-w-[22ch] leading-[2.75rem] font-semibold tracking-[-0.02em] whitespace-pre-line lg:text-display lg:leading-[1.05]">
             {t("app.headline")}
@@ -48,8 +51,9 @@ export function LoginPage() {
             ))}
           </ul>
         </div>
-        {/* Text and house sit together in the middle of the panel (house right under the text, not at the bottom). */}
-        <ApartmentScene className="mt-6 max-w-[24rem] self-center lg:mt-10 lg:mb-auto lg:max-w-[min(34rem,62dvh)]" />
+        <div aria-hidden="true" className="hidden lg:block lg:min-h-10 lg:grow" />
+        <ApartmentScene className="mt-6 max-w-[24rem] self-center lg:mt-0 lg:max-w-[min(34rem,62dvh)]" />
+        <div aria-hidden="true" className="hidden lg:block lg:grow" />
       </section>
 
       {/* Form on stone. */}
