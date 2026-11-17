@@ -1,5 +1,5 @@
 import { ArrowRight, Car, ChevronDown, CircleCheck, Clock, Square, SquareDashed, Trees, TriangleAlert, Wheat, type LucideIcon } from "lucide-react";
-import { useContext, useId } from "react";
+import { useContext, useId, useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -299,7 +299,20 @@ const WINDOW_CLASS: Record<UnitState, string> = {
   vacant: "fill-[var(--panel)] stroke-ink-on-panel-muted",
 };
 
-function Building({ p, label, windowTitle }: { p: Placed; label: string; windowTitle: (name: string, state: UnitState) => string }) {
+function Building({
+  p,
+  label,
+  windowTitle,
+  highlighted = false,
+  onHover,
+}: {
+  p: Placed;
+  label: string;
+  windowTitle: (name: string, state: UnitState) => string;
+  /** Outlined because its row in the list below is hovered or focused. */
+  highlighted?: boolean;
+  onHover?: (id: string | null) => void;
+}) {
   const { s, bx, by, b } = p;
   const { w, d, h } = s;
   const P = (pts: Pt[]) => poly(pts, bx, by);
@@ -307,7 +320,10 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
     win.planeX != null
       ? P([[win.planeX, win.x0, win.z0], [win.planeX, win.x1, win.z0], [win.planeX, win.x1, win.z1], [win.planeX, win.x0, win.z1]])
       : P([[win.x0, d, win.z0], [win.x1, d, win.z0], [win.x1, d, win.z1], [win.x0, d, win.z1]]);
-  const face = cn("fill-[var(--panel)] transition-colors duration-200 stroke-[var(--panel-edge)] group-hover:stroke-ink-on-panel-muted group-focus-visible:stroke-signal");
+  const face = cn(
+    "fill-[var(--panel)] transition-colors duration-200 group-focus-visible:stroke-signal",
+    highlighted ? "stroke-ink-on-panel" : "stroke-[var(--panel-edge)] group-hover:stroke-ink-on-panel-muted",
+  );
   const door = s.door ?? [0, 0, 0];
   const { dayTime, season } = useContext(TownAmbientContext);
   const night = dayTime === "night";
@@ -319,7 +335,7 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
   const lit = "fill-[var(--night-glow)] stroke-[var(--panel-edge-faint)]";
 
   return (
-    <g className="group">
+    <g className="group" onMouseEnter={() => onHover?.(b.id)} onMouseLeave={() => onHover?.(null)}>
     <Link to={b.to} aria-label={label} className="outline-none">
       <title>{label}</title>
       {/* Plot. */}
@@ -327,11 +343,11 @@ function Building({ p, label, windowTitle }: { p: Placed; label: string; windowT
       <polygon
         points={P([[-4, -4, 0], [w + (s.cottage ? 11 : 4), -4, 0], [w + (s.cottage ? 11 : 4), d + 4, 0], [-4, d + 4, 0]])}
         fill="none"
-        className="stroke-[var(--panel-edge-faint)]"
+        className={cn("transition-colors duration-200", highlighted ? "stroke-ink-on-panel-muted" : "stroke-[var(--panel-edge-faint)]")}
         strokeWidth="1"
         strokeLinejoin="round"
       />
-      <g strokeWidth="1" strokeLinejoin="round" strokeLinecap="round">
+      <g strokeWidth={highlighted ? 1.6 : 1} strokeLinejoin="round" strokeLinecap="round">
         {s.cottage ? (
           <Cottage s={s} P={P} face={face} />
         ) : (
@@ -631,7 +647,7 @@ function Snowfall({ box }: { box: Box }) {
 }
 
 /** Index number under each building; drawn on top of the surroundings, with a halo in the panel color. */
-function IndexLabel({ p }: { p: Placed }) {
+function IndexLabel({ p, highlighted = false }: { p: Placed; highlighted?: boolean }) {
   const [lx, ly] = proj([p.bx + p.s.w + 6, p.by + p.s.d + 6, 0]);
   return (
     <text
@@ -644,7 +660,8 @@ function IndexLabel({ p }: { p: Placed }) {
       strokeWidth="3"
       strokeLinejoin="round"
       paintOrder="stroke"
-      className="fill-ink-on-panel-muted font-mono"
+      fontWeight={highlighted ? 600 : undefined}
+      className={cn("font-mono transition-colors duration-200", highlighted ? "fill-ink-on-panel" : "fill-ink-on-panel-muted")}
     >
       {String(p.index + 1).padStart(2, "0")}
     </text>
@@ -794,6 +811,8 @@ export function TownCanvas({
   showIndex = true,
   compact = false,
   className,
+  highlightId = null,
+  onHighlight,
 }: {
   buildings: TownBuilding[];
   label: string;
@@ -803,6 +822,9 @@ export function TownCanvas({
   /** Tighter minimum canvas (a single building drawn larger). */
   compact?: boolean;
   className?: string;
+  /** Building to outline (its row in a list is hovered or focused). */
+  highlightId?: string | null;
+  onHighlight?: (id: string | null) => void;
 }) {
   const { t } = useTranslation();
   const { scene, setScene } = useTownScene();
@@ -854,6 +876,8 @@ export function TownCanvas({
                           .filter(Boolean)
                           .join(" · ")}
                         windowTitle={(name, state) => `${name}: ${stateLabel(state)}`}
+                        highlighted={p.b.id === highlightId}
+                        onHover={onHighlight}
                       />
                       <g aria-hidden="true" className="pointer-events-none" strokeWidth="1">
                         {decor.gap.get(p.index)}
@@ -870,7 +894,7 @@ export function TownCanvas({
           {showIndex && (
             <g aria-hidden="true" className="pointer-events-none">
               {placed.map((p) => (
-                <IndexLabel key={p.b.id} p={p} />
+                <IndexLabel key={p.b.id} p={p} highlighted={p.b.id === highlightId} />
               ))}
             </g>
           )}
@@ -896,6 +920,8 @@ export function PropertyTown({ properties }: { properties: Property[] }) {
   const { t } = useTranslation();
   const town = usePropertyTown(properties);
   const stateLabel = (s: UnitState) => t(`town.state.${s}`);
+  // Hovering or focusing a row outlines that building in the picture (and hovering a building marks its row).
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   return (
     <section aria-labelledby="town-title" className="on-panel overflow-hidden rounded-md bg-panel">
@@ -912,7 +938,7 @@ export function PropertyTown({ properties }: { properties: Property[] }) {
         </p>
       </div>
 
-      <TownCanvas buildings={town.buildings} label={t("town.eyebrow")} />
+      <TownCanvas buildings={town.buildings} label={t("town.eyebrow")} highlightId={highlightId} onHighlight={setHighlightId} />
 
       <ol className="border-t border-ink-on-panel/15">
         {town.buildings.map((b, i) => {
@@ -920,7 +946,17 @@ export function PropertyTown({ properties }: { properties: Property[] }) {
           const attention = b.units.some((u) => u.state === "attention");
           return (
             <li key={b.id} className="border-b border-ink-on-panel/10 last:border-b-0">
-              <Link to={b.to} className="group flex min-h-14 items-center gap-4 px-5 py-3 transition-colors duration-150 hover:bg-ink-on-panel/5 sm:px-6">
+              <Link
+                to={b.to}
+                onMouseEnter={() => setHighlightId(b.id)}
+                onMouseLeave={() => setHighlightId(null)}
+                onFocus={() => setHighlightId(b.id)}
+                onBlur={() => setHighlightId(null)}
+                className={cn(
+                  "group flex min-h-14 items-center gap-4 px-5 py-3 transition-colors duration-150 hover:bg-ink-on-panel/5 sm:px-6",
+                  highlightId === b.id && "bg-ink-on-panel/5",
+                )}
+              >
                 <span className="font-mono text-[11px] font-medium tracking-[0.08em] text-ink-on-panel-muted">{String(i + 1).padStart(2, "0")}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium text-ink-on-panel">{b.name}</span>
