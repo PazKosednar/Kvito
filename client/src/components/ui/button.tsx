@@ -14,6 +14,8 @@ const buttonVariants = cva(
       variant: {
         default: "bg-primary text-primary-foreground hover:brightness-[1.08]",
         destructive: "bg-danger text-white hover:brightness-[1.08] dark:text-surface",
+        // Reddish, for actions with consequences that still ask first (e.g. "Zaključi najem").
+        "danger-soft": "border-danger/40 bg-danger-soft text-danger hover:border-danger",
         outline: "border-line-strong bg-surface-raised text-ink hover:border-ink",
         secondary: "border-line-strong bg-surface-raised text-ink hover:border-ink",
         ghost: "text-ink hover:bg-surface-sunken",

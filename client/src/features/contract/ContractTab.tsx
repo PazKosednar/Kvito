@@ -1,10 +1,18 @@
-import { Check, Circle, Loader2, Minus, Pencil, Plus, X } from "lucide-react";
+import { Check, Circle, Loader2, Minus, Pencil, Plus, TriangleAlert, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Field, MoneyInput, Select, Textarea, TextInput } from "@/components/form";
 import { ErrorState, Facts, FormError, List, ListRow, LoadingState, Section } from "@/components/layout-parts";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { useAdvances, useCloseout, useCosts, useDeposit, useRentChanges, useSettlements } from "@/hooks/useContract";
@@ -701,18 +709,24 @@ function CloseoutSection() {
   const toMessage = useErrorMessage();
   const { tenancy, isLandlord, update } = useTenancyContext();
   const q = useCloseout(tenancy.id);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [ending, setEnding] = useState(false);
   const nearEnd = tenancy.status === "ENDED" || (tenancy.endDate != null && daysUntil(tenancy.endDate) <= 90);
   if (!isLandlord && !nearEnd) return null;
   if (q.loading || !q.closeout) return null;
   const { items, ready } = q.closeout;
 
+  // Runs only after the landlord confirms in the dialog.
   const end = async () => {
-    if (!window.confirm(t(ready ? "tenancies.confirmEnd" : "contract.closeout.confirmEndNotReady"))) return;
+    setEnding(true);
     try {
       await update({ status: "ENDED" });
       toast.success(t("tenancies.ended"));
+      setConfirmOpen(false);
     } catch (err) {
       toast.error(toMessage(err));
+    } finally {
+      setEnding(false);
     }
   };
 
@@ -747,9 +761,46 @@ function CloseoutSection() {
         })}
       </ul>
       {isLandlord && tenancy.status === "ACTIVE" && (
-        <Button variant={ready ? "default" : "ghost"} className={cn("mt-4", !ready && "text-muted-foreground")} onClick={() => void end()}>
-          {t("tenancies.endTenancy")}
-        </Button>
+        <>
+          {/* Reddish: closing a tenancy has consequences; nothing happens before the dialog is confirmed. */}
+          <Button variant="danger-soft" className="mt-4" onClick={() => setConfirmOpen(true)}>
+            {t("tenancies.endTenancy")}
+          </Button>
+          <AlertDialog open={confirmOpen} onOpenChange={(o) => !ending && setConfirmOpen(o)}>
+            <AlertDialogContent>
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-sm bg-danger-soft text-danger">
+                  <TriangleAlert className="size-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <AlertDialogTitle>{t("tenancies.confirmEndTitle")}</AlertDialogTitle>
+                  <AlertDialogDescription>{t("tenancies.confirmEnd")}</AlertDialogDescription>
+                  {!ready && <p className="mt-2 text-sm font-medium text-warn">{t("tenancies.confirmEndMissing")}</p>}
+                </div>
+              </div>
+              <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <AlertDialogCancel asChild>
+                  <Button variant="outline" disabled={ending}>
+                    {t("common.cancel")}
+                  </Button>
+                </AlertDialogCancel>
+                <AlertDialogAction asChild>
+                  <Button
+                    variant="destructive"
+                    disabled={ending}
+                    onClick={(e) => {
+                      e.preventDefault(); // keep the dialog open until the request finishes
+                      void end();
+                    }}
+                  >
+                    {ending && <Loader2 className="animate-spin" aria-hidden="true" />}
+                    {t("tenancies.endTenancyConfirm")}
+                  </Button>
+                </AlertDialogAction>
+              </div>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
       )}
     </Section>
   );

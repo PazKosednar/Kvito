@@ -358,7 +358,10 @@
     "removeMember": "Odstrani najemnika",
     "confirmRemoveMember": "Odstranim {{name}} iz najema?",
     "endTenancy": "Zaključi najem",
-    "confirmEnd": "Zaključim najem? Nove najemnine se ne bodo več ustvarjale.",
+    "confirmEnd": "Nove najemnine se ne bodo več ustvarjale. Najem bo označen kot zaključen.",
+    "confirmEndTitle": "Res želiš zaključiti najem?",
+    "confirmEndMissing": "Pri zaključku najema še nekaj manjka – preveri seznam zgoraj.",
+    "endTenancyConfirm": "Da, zaključi najem",
     "ended": "Najem je zaključen.",
     "status": {
       "label": "Stanje",

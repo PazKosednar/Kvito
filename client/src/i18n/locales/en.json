@@ -354,7 +354,10 @@
     "removeMember": "Remove tenant",
     "confirmRemoveMember": "Remove {{name}} from the tenancy?",
     "endTenancy": "End tenancy",
-    "confirmEnd": "End the tenancy? No new rent will be created.",
+    "confirmEnd": "No new rent will be created. The tenancy will be marked as ended.",
+    "confirmEndTitle": "Do you really want to end the tenancy?",
+    "confirmEndMissing": "Something is still missing for closing the tenancy – check the list above.",
+    "endTenancyConfirm": "Yes, end the tenancy",
     "ended": "Tenancy ended.",
     "status": {
       "label": "Status",
