@@ -347,7 +347,7 @@ function Building({
         strokeWidth="1"
         strokeLinejoin="round"
       />
-      <g strokeWidth={highlighted ? 1.6 : 1} strokeLinejoin="round" strokeLinecap="round">
+      <g strokeWidth={highlighted ? 1.25 : 1} strokeLinejoin="round" strokeLinecap="round">
         {s.cottage ? (
           <Cottage s={s} P={P} face={face} />
         ) : (
