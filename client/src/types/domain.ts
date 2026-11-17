@@ -342,6 +342,22 @@ export interface HandoverItem {
   attachments: Attachment[];
 }
 
+/** Before and after (move-in vs move-out), see server lib/handover-compare. */
+export type ItemChange = "SAME" | "BETTER" | "WORSE" | "NEW" | "NOT_CHECKED";
+export interface HandoverCompareRow {
+  room: string;
+  name: string;
+  before: HandoverItem | null;
+  after: HandoverItem | null;
+  change: ItemChange;
+}
+export interface HandoverCompare {
+  moveIn: { id: string; status: HandoverStatus; handoverOn: string } | null;
+  moveOut: { id: string; status: HandoverStatus; handoverOn: string } | null;
+  rows: HandoverCompareRow[];
+  summary: Record<ItemChange, number>;
+}
+
 export interface HandoverSummary {
   id: string;
   kind: HandoverKind;

@@ -18,6 +18,7 @@ import { IssuePage } from "@/features/issues/IssuePage";
 import { IssuesTab } from "@/features/issues/IssuesTab";
 import { MessagesTab } from "@/features/messages/MessagesTab";
 import { DocumentsTab } from "@/features/documents/DocumentsTab";
+import { HandoverComparePage } from "@/features/handover/HandoverComparePage";
 import { HandoverPage } from "@/features/handover/HandoverPage";
 import { HandoverTab } from "@/features/handover/HandoverTab";
 import { MetersTab } from "@/features/meters/MetersTab";
@@ -89,6 +90,7 @@ export const router = createBrowserRouter([
               { path: "stevci", element: <MetersTab /> },
               { path: "dokumenti", element: <DocumentsTab /> },
               { path: "primopredaja", element: <HandoverTab /> },
+              { path: "primopredaja/primerjava", element: <HandoverComparePage /> },
               { path: "primopredaja/:handoverId", element: <HandoverPage /> },
               { path: "podatki", element: <TenancyDetailsTab /> },
             ],

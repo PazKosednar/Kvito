@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { api, apiBlob } from "@/lib/api";
 import type {
+  HandoverCompare,
   DocumentCategory,
   DocumentVisibility,
   Handover,
@@ -94,20 +95,29 @@ export function useHandovers(tenancyId: string | undefined) {
   const q = useQuery<{ handovers: HandoverSummary[] }>(path);
   const create = useCallback(
     async (kind: HandoverKind, handoverOn: string) => {
-      const { handover } = await api<{ handover: { id: string } }>(path!, { method: "POST", body: { kind, handoverOn } });
-      await invalidate(path!);
-      return handover;
+      const { handover, copiedItems } = await api<{ handover: { id: string }; copiedItems: number }>(path!, { method: "POST", body: { kind, handoverOn } });
+      await invalidate(path!, `${path}/compare`);
+      return { ...handover, copiedItems };
     },
     [path],
   );
   return { ...q, handovers: q.data?.handovers, create };
 }
 
+/** Latest move-in vs latest move-out, item by item. */
+export function useHandoverCompare(tenancyId: string | undefined) {
+  const q = useQuery<HandoverCompare>(tenancyId ? `/api/tenancies/${tenancyId}/handovers/compare` : null);
+  return { ...q, compare: q.data };
+}
+
 export function useHandover(id: string | undefined) {
   const path = id ? `/api/handovers/${id}` : null;
   const q = useQuery<{ handover: Handover; access: Role }>(path);
   const tenancyId = q.data?.handover.tenancyId;
-  const refresh = useCallback(() => invalidate(path!, `/api/tenancies/${tenancyId}/handovers`, `/api/tenancies/${tenancyId}/meters`), [path, tenancyId]);
+  const refresh = useCallback(
+    () => invalidate(path!, `/api/tenancies/${tenancyId}/handovers`, `/api/tenancies/${tenancyId}/handovers/compare`, `/api/tenancies/${tenancyId}/meters`),
+    [path, tenancyId],
+  );
 
   const update = useCallback(
     async (input: { keysCount?: number | null; keysNote?: string | null; notes?: string | null; handoverOn?: string }) => {
@@ -130,6 +140,14 @@ export function useHandover(id: string | undefined) {
       await refresh();
     },
     [path, refresh],
+  );
+  const addPhotos = useCallback(
+    async (itemId: string, photos: File[]) => {
+      const att = await Promise.all(photos.map((f) => uploadAttachment(tenancyId!, f, "HANDOVER")));
+      await api(`${path}/items/${itemId}/photos`, { method: "POST", body: { attachmentIds: att.map((a) => a.id) } });
+      await refresh();
+    },
+    [path, tenancyId, refresh],
   );
   const removeItem = useCallback(
     async (itemId: string) => {
@@ -177,6 +195,7 @@ export function useHandover(id: string | undefined) {
     isLandlord: q.data?.access === "LANDLORD",
     update,
     addItem,
+    addPhotos,
     updateItem,
     removeItem,
     addReading,

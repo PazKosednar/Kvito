@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import type { Prisma } from "../../generated/prisma/client.js";
 import { audit } from "../../lib/audit.js";
+import { compareHandovers, summarize } from "../../lib/handover-compare.js";
 import { badRequest, notFound } from "../../lib/errors.js";
 import { bus } from "../../lib/events.js";
 import { prisma } from "../../lib/prisma.js";
@@ -34,6 +35,13 @@ const ItemBody = z.object({
   attachmentIds: z.array(idParam).max(6).optional(),
 });
 const ItemPatch = z.object({ room: text(60), name: text(80), condition: z.enum(CONDITIONS), note: optionalText(500) }).partial();
+const PhotosBody = z.object({ attachmentIds: z.array(idParam).min(1).max(6) });
+/** Most photos one item may have (move-in and move-out each). */
+const MAX_ITEM_PHOTOS = 12;
+
+/** Latest (by date) non-deleted handover of a kind. */
+const latestOfKind = (tenancyId: string, kind: "MOVE_IN" | "MOVE_OUT") =>
+  prisma.handover.findFirst({ where: { tenancyId, kind, deletedAt: null }, orderBy: [{ handoverOn: "desc" }, { createdAt: "desc" }], include: handoverInclude });
 
 export const handoverInclude = {
   items: {
@@ -85,9 +93,30 @@ export function handoversRouter(deps: { storage: Storage }): Router {
     const tenancyId = idParam.parse(req.params.id);
     await assertTenancyLandlord(userId, tenancyId);
     const body = req.body as z.infer<typeof CreateBody>;
-    const handover = await prisma.handover.create({ data: { tenancyId, kind: body.kind, handoverOn: body.handoverOn, createdById: userId } });
-    await audit({ actorId: userId, entityType: "Handover", entityId: handover.id, action: "create", after: { kind: body.kind }, ip: req.ip });
-    res.status(201).json({ handover });
+    // A move-out starts with the rooms and items of the move-in, so the same things get checked and photographed again.
+    const moveIn = body.kind === "MOVE_OUT" ? await latestOfKind(tenancyId, "MOVE_IN") : null;
+    const handover = await prisma.handover.create({
+      data: {
+        tenancyId,
+        kind: body.kind,
+        handoverOn: body.handoverOn,
+        createdById: userId,
+        items: moveIn ? { create: moveIn.items.map((i, n) => ({ room: i.room, name: i.name, sortOrder: n })) } : undefined,
+      },
+    });
+    await audit({ actorId: userId, entityType: "Handover", entityId: handover.id, action: "create", after: { kind: body.kind, copiedItems: moveIn?.items.length ?? 0 }, ip: req.ip });
+    res.status(201).json({ handover, copiedItems: moveIn?.items.length ?? 0 });
+  });
+
+  // Before and after: latest move-in vs latest move-out, item by item.
+  router.get("/tenancies/:id/handovers/compare", async (req, res) => {
+    const tenancyId = idParam.parse(req.params.id);
+    await assertTenancyAccess(authUserId(req), tenancyId);
+    const [moveIn, moveOut] = await Promise.all([latestOfKind(tenancyId, "MOVE_IN"), latestOfKind(tenancyId, "MOVE_OUT")]);
+    const items = (h: typeof moveIn) => (h ? handoverDto(h).items : []);
+    const rows = compareHandovers(items(moveIn), items(moveOut));
+    const head = (h: typeof moveIn) => (h ? { id: h.id, status: h.status, handoverOn: h.handoverOn } : null);
+    res.json({ moveIn: head(moveIn), moveOut: head(moveOut), rows, summary: summarize(rows) });
   });
 
   router.get("/handovers/:id", async (req, res) => {
@@ -121,6 +150,23 @@ export function handoversRouter(deps: { storage: Storage }): Router {
     const item = await prisma.handoverItem.findFirst({ where: { id: idParam.parse(req.params.itemId), handoverId: h.id, deletedAt: null } });
     if (!item) throw notFound();
     res.json({ item: await prisma.handoverItem.update({ where: { id: item.id }, data: req.body as z.infer<typeof ItemPatch> }) });
+  });
+
+  // Add photos to an existing item (e.g. items carried over from the move-in).
+  router.post("/handovers/:id/items/:itemId/photos", validateBody(PhotosBody), async (req, res) => {
+    const userId = authUserId(req);
+    const { h } = await load(userId, idParam.parse(req.params.id), "edit");
+    const item = await prisma.handoverItem.findFirst({
+      where: { id: idParam.parse(req.params.itemId), handoverId: h.id, deletedAt: null },
+      include: { _count: { select: { attachments: { where: { deletedAt: null } } } } },
+    });
+    if (!item) throw notFound();
+    const body = req.body as z.infer<typeof PhotosBody>;
+    if (item._count.attachments + body.attachmentIds.length > MAX_ITEM_PHOTOS) throw badRequest("TOO_MANY_PHOTOS");
+    await prisma.$transaction((tx) =>
+      claimAttachments(tx, body.attachmentIds, { tenancyId: h.tenancyId, uploadedById: userId, kinds: ["HANDOVER"], link: { handoverItemId: item.id } }),
+    );
+    res.status(201).json({ ok: true });
   });
 
   router.delete("/handovers/:id/items/:itemId", async (req, res) => {

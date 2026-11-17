@@ -10,12 +10,13 @@ import { ErrorState, FormError, LoadingState, PageHeader, Section } from "@/comp
 import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
-import { useHandover } from "@/hooks/usePhase4";
+import { useHandover, useHandoverCompare } from "@/hooks/usePhase4";
 import { formatDate, formatDateTime } from "@/lib/dates";
-import { METER_UNITS, type HandoverItem, type ItemCondition } from "@/types/domain";
+import { METER_UNITS, type HandoverCompareRow, type HandoverItem, type ItemCondition } from "@/types/domain";
 import { ReadingForm } from "@/features/meters/ReadingForm";
 import { useTenancyContext } from "@/features/tenancies/TenancyLayout";
 import { ConditionLabel, HandoverStatusBadge, useRoomSuggestions } from "./handover-ui";
+import { ChangeLabel } from "./HandoverComparePage";
 
 const CONDITIONS: ItemCondition[] = ["GOOD", "WORN", "DAMAGED", "MISSING"];
 
@@ -27,6 +28,8 @@ export function HandoverPage() {
   const q = useHandover(handoverId);
   const [addingReading, setAddingReading] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  // At move-out, each item shows how it was at move-in (same room + name).
+  const cmp = useHandoverCompare(q.handover?.kind === "MOVE_OUT" ? tenancy.id : undefined);
 
   if (q.loading) return <LoadingState />;
   if (q.error || !q.handover) return <ErrorState message={toMessage(q.error)} onRetry={() => void q.reload()} />;
@@ -168,7 +171,13 @@ export function HandoverPage() {
                 {h.items
                   .filter((i) => i.room === room)
                   .map((item) => (
-                    <ItemRow key={item.id} item={item} editable={editable} q={q} />
+                    <ItemRow
+                      key={item.id}
+                      item={item}
+                      editable={editable}
+                      q={q}
+                      reference={h.kind === "MOVE_OUT" ? cmp.compare?.rows.find((r) => r.after?.id === item.id) : undefined}
+                    />
                   ))}
               </ul>
             </Card>
@@ -215,9 +224,24 @@ function KeysForm({ keysCount, keysNote, onSave }: { keysCount: number | null; k
   );
 }
 
-function ItemRow({ item, editable, q }: { item: HandoverItem; editable: boolean; q: ReturnType<typeof useHandover> }) {
+function ItemRow({
+  item,
+  editable,
+  q,
+  reference,
+}: {
+  item: HandoverItem;
+  editable: boolean;
+  q: ReturnType<typeof useHandover>;
+  reference?: HandoverCompareRow;
+}) {
   const { t } = useTranslation();
   const toMessage = useErrorMessage();
+  const [photos, setPhotos] = useState<File[]>([]);
+  const upload = useAsyncAction(async () => {
+    await q.addPhotos(item.id, photos);
+    setPhotos([]);
+  });
   const change = async (fn: () => Promise<void>) => {
     try {
       await fn();
@@ -253,6 +277,34 @@ function ItemRow({ item, editable, q }: { item: HandoverItem; editable: boolean;
       </div>
       {item.note && <p className="text-sm text-ink-muted">{item.note}</p>}
       <AttachmentList files={item.attachments} />
+      {editable && (
+        <div className="flex flex-col gap-2">
+          <PendingFiles files={photos} onRemove={(i) => setPhotos(photos.filter((_, j) => j !== i))} />
+          <div className="flex flex-wrap items-center gap-2">
+            <FilePickerButton images label={t("issues.addPhotos")} onPick={(f) => setPhotos([...photos, ...f].slice(0, 6))} />
+            {photos.length > 0 && (
+              <Button size="sm" disabled={upload.pending} onClick={() => void upload.run()}>
+                {upload.pending && <Loader2 className="animate-spin" />}
+                {t("handover.savePhotos", { count: photos.length })}
+              </Button>
+            )}
+          </div>
+          <FormError message={upload.error} />
+        </div>
+      )}
+      {reference?.before && (
+        <div className="mt-1 flex flex-col gap-2 rounded-sm border border-dashed border-line p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="font-mono text-[11px] tracking-[0.08em] text-ink-faint uppercase">{t("handover.atMoveIn")}</span>
+            <span className="flex items-center gap-2">
+              <ConditionLabel condition={reference.before.condition} />
+              {reference.change !== "SAME" && <ChangeLabel change={reference.change} />}
+            </span>
+          </div>
+          {reference.before.note && <p className="text-sm text-ink-muted">{reference.before.note}</p>}
+          <AttachmentList files={reference.before.attachments} />
+        </div>
+      )}
     </li>
   );
 }

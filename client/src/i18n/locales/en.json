@@ -217,7 +217,8 @@
     "CODE_TOO_MANY_ATTEMPTS": "Too many wrong attempts. Request a new code.",
     "CODE_RATE_LIMITED": "We've sent 5 codes in the last hour. Enter the latest one or try again in an hour.",
     "ACCOUNT_LOCKED": "Too many wrong passwords. Wait a few minutes or set a new one via “Forgot your password?”.",
-    "TOO_MANY_LINKS": "You already have 10 valid links. Revoke one of them."
+    "TOO_MANY_LINKS": "You already have 10 valid links. Revoke one of them.",
+    "TOO_MANY_PHOTOS": "An item can have at most 12 photos."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -863,7 +864,34 @@
       "Toilet",
       "Balcony",
       "Cellar"
-    ]
+    ],
+    "copiedFromMoveIn_one": "{{count}} item was carried over from the move-in. Photograph it the same way.",
+    "copiedFromMoveIn_other": "{{count}} items were carried over from the move-in. Photograph them the same way.",
+    "moveOutCopyHint": "Rooms and items are carried over from the move-in record, so you photograph the same things.",
+    "atMoveIn": "At move-in",
+    "savePhotos_one": "Save {{count}} photo",
+    "savePhotos_other": "Save {{count}} photos",
+    "compare": {
+      "title": "Before and after",
+      "teaser": "Move-in and move-out side by side, with photos.",
+      "summary": "Comparison",
+      "needBoth": "You need a move-in record and a move-out record to compare.",
+      "filter": "Show",
+      "onlyChanges": "Changes · {{count}}",
+      "all": "All · {{count}}",
+      "noChanges": "No changes. Everything is as it was at move-in.",
+      "noPhoto": "No photo",
+      "notRecorded": "Not in the record",
+      "depositHint": "You can take the deteriorations into account when returning the deposit.",
+      "toDeposit": "Open deposit return",
+      "change": {
+        "SAME": "Same",
+        "BETTER": "Better",
+        "WORSE": "Worse",
+        "NEW": "New",
+        "NOT_CHECKED": "Not checked"
+      }
+    }
   },
   "notifications": {
     "eyebrow": "Overview",

@@ -217,7 +217,8 @@
     "CODE_TOO_MANY_ATTEMPTS": "Preveč napačnih poskusov. Zahtevaj novo kodo.",
     "CODE_RATE_LIMITED": "V zadnji uri smo poslali že 5 kod. Vpiši zadnjo prejeto ali poskusi čez eno uro.",
     "ACCOUNT_LOCKED": "Preveč napačnih gesel. Počakaj nekaj minut ali nastavi novo geslo prek »Pozabljeno geslo?«.",
-    "TOO_MANY_LINKS": "Imaš že 10 veljavnih povezav. Prekliči katero od njih."
+    "TOO_MANY_LINKS": "Imaš že 10 veljavnih povezav. Prekliči katero od njih.",
+    "TOO_MANY_PHOTOS": "Postavka ima lahko največ 12 fotografij."
   },
   "validation": {
     "invalid": "Vrednost ni pravilna.",
@@ -879,7 +880,38 @@
       "Stranišče",
       "Balkon",
       "Klet"
-    ]
+    ],
+    "copiedFromMoveIn_one": "Iz vselitve je prenesena {{count}} postavka. Posnemi jo enako kot ob vselitvi.",
+    "copiedFromMoveIn_two": "Iz vselitve sta preneseni {{count}} postavki. Posnemi ju enako kot ob vselitvi.",
+    "copiedFromMoveIn_few": "Iz vselitve so prenesene {{count}} postavke. Posnemi jih enako kot ob vselitvi.",
+    "copiedFromMoveIn_other": "Iz vselitve je prenesenih {{count}} postavk. Posnemi jih enako kot ob vselitvi.",
+    "moveOutCopyHint": "Prostori in oprema se prenesejo iz zapisnika o vselitvi, da posnameš iste stvari.",
+    "atMoveIn": "Ob vselitvi",
+    "savePhotos_one": "Shrani {{count}} fotografijo",
+    "savePhotos_two": "Shrani {{count}} fotografiji",
+    "savePhotos_few": "Shrani {{count}} fotografije",
+    "savePhotos_other": "Shrani {{count}} fotografij",
+    "compare": {
+      "title": "Prej in potem",
+      "teaser": "Vselitev in izselitev drug ob drugem, s fotografijami.",
+      "summary": "Primerjava",
+      "needBoth": "Za primerjavo potrebuješ zapisnik o vselitvi in zapisnik o izselitvi.",
+      "filter": "Prikaz",
+      "onlyChanges": "Spremembe · {{count}}",
+      "all": "Vse · {{count}}",
+      "noChanges": "Ni sprememb. Vse je v enakem stanju kot ob vselitvi.",
+      "noPhoto": "Brez fotografije",
+      "notRecorded": "Ni v zapisniku",
+      "depositHint": "Poslabšanja lahko upoštevaš pri vračilu varščine.",
+      "toDeposit": "Odpri vračilo varščine",
+      "change": {
+        "SAME": "Enako",
+        "BETTER": "Bolje",
+        "WORSE": "Slabše",
+        "NEW": "Novo",
+        "NOT_CHECKED": "Ni preverjeno"
+      }
+    }
   },
   "notifications": {
     "eyebrow": "Pregled",
