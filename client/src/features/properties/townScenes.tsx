@@ -429,13 +429,15 @@ function city(rows: TownRow[], L: SceneLayers) {
     const span = r.x1 - r.x0;
     const by = r.y0 - 30;
     if (span > 120) back.push(<Stadium key="stadium" cx={r.x0 + span * 0.62} cy={r.y0 - 92} rx={44} ry={30} />);
-    const towerAt = [r.x0 + span * 0.18, r.x0 + span * 0.82];
+    // One tower on the left; the right side stays low so the stadium behind it is in view.
+    const towerAt = [r.x0 + span * 0.18];
+    const stadium: [number, number] | null = span > 120 ? [r.x0 + span * 0.62 - 50, r.x0 + span * 0.62 + 50] : null;
     const craneAt = r.x0 + span * 0.42;
     let crane = false;
     for (let x = r.x0 - 14, i = 0; x <= r.x1 + 6; i++) {
       const t = towerAt.findIndex((tx) => tx >= x && tx < x + 30);
       if (t >= 0) {
-        back.push(<Tower key={`t${i}`} x={x} y={by - 2} h={t === 0 ? 112 : 96} />);
+        back.push(<Tower key={`t${i}`} x={x} y={by - 2} h={112} />);
         towerAt.splice(t, 1);
         x += 22;
         continue;
@@ -447,7 +449,8 @@ function city(rows: TownRow[], L: SceneLayers) {
         continue;
       }
       const w = 20 + Math.round(rnd() * 12);
-      const h = 26 + Math.round(rnd() * 30);
+      const low = stadium != null && x + w > stadium[0] && x < stadium[1];
+      const h = low ? 18 + Math.round(rnd() * 8) : 26 + Math.round(rnd() * 30);
       back.push(<Box key={`k${i}`} x={x} y={by} w={w} d={16} h={h} faint />);
       if (rnd() > 0.6) back.push(<Box key={`k${i}r`} x={x + w / 2 - 3} y={by + 5} z={h} w={6} d={6} h={5} faint />);
       x += w + 6;
