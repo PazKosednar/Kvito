@@ -6,6 +6,7 @@ import { badRequest } from "../../lib/errors.js";
 import { prisma } from "../../lib/prisma.js";
 import { dateOnly, idParam } from "../../lib/validation.js";
 import { authUserId } from "../../middleware/auth.js";
+import { uploadLimiter } from "../../middleware/rateLimit.js";
 import { validateBody } from "../../middleware/validate.js";
 import { transitionShare } from "../charges/service.js";
 
@@ -58,7 +59,7 @@ async function ownShares(landlordId: string, refNos: number[]) {
 export function bankRouter(): Router {
   const router = Router();
 
-  router.post("/bank-import/preview", express.raw({ type: () => true, limit: MAX_STATEMENT_BYTES }), async (req, res) => {
+  router.post("/bank-import/preview", uploadLimiter, express.raw({ type: () => true, limit: MAX_STATEMENT_BYTES }), async (req, res) => {
     const userId = authUserId(req);
     if (!Buffer.isBuffer(req.body) || !req.body.length) throw badRequest("STATEMENT_EMPTY");
     let parsed: { format: "camt" | "csv"; entries: BankEntry[] };

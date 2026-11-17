@@ -9,6 +9,7 @@ import { prisma } from "../../lib/prisma.js";
 import { estimateRentalTax, filingDeadline, rateOptions } from "../../lib/rental-tax.js";
 import { dateOnly, idParam, optionalText, positiveCents, text } from "../../lib/validation.js";
 import { authUserId } from "../../middleware/auth.js";
+import { uploadLimiter } from "../../middleware/rateLimit.js";
 import { validateBody } from "../../middleware/validate.js";
 import type { Storage } from "../../services/storage/Storage.js";
 import { assertPropertyOwner } from "../access/access.js";
@@ -182,7 +183,7 @@ export function expensesRouter(deps: { storage: Storage }): Router {
   });
 
   /** Upload a receipt (raw bytes in the body), linked to an expense when it is saved. Only for landlords. */
-  router.post("/expenses/attachments", express.raw({ type: () => true, limit: MAX_UPLOAD_BYTES }), async (req, res) => {
+  router.post("/expenses/attachments", uploadLimiter, express.raw({ type: () => true, limit: MAX_UPLOAD_BYTES }), async (req, res) => {
     const userId = authUserId(req);
     const owns = await prisma.property.count({ where: { ownerId: userId, deletedAt: null } });
     if (!owns) throw notFound();

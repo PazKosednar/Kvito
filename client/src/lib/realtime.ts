@@ -24,6 +24,14 @@ export function getSocket(): Socket | null {
   socket.on("connect_error", (err) => {
     if (err.message === "UNAUTHORIZED") void refreshAccessToken().then((t) => t && socket?.connect());
   });
+  // The server closes a socket when its access token expires; Socket.IO does not reconnect by itself after a
+  // server-side disconnect, so get a fresh token and connect again (rooms are re-joined on "connect").
+  socket.on("disconnect", (reason) => {
+    if (reason !== "io server disconnect") return;
+    void refreshAccessToken()
+      .then((t) => t && socket?.connect())
+      .catch(() => undefined); // offline: screens keep polling until the next sign-in or reload
+  });
   return socket;
 }
 

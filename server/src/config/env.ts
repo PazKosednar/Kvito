@@ -63,7 +63,16 @@ function loadEnv(): Env {
     const issues = parsed.error.issues.map((i) => `  - ${i.path.join(".")}: ${i.message}`).join("\n");
     throw new Error(`Invalid environment configuration (see server/.env.example):\n${issues}`);
   }
-  return parsed.data;
+  const data = parsed.data;
+  if (data.NODE_ENV === "production") {
+    // Mistakes that silently weaken a live deployment are refused at start-up instead.
+    const problems: string[] = [];
+    if (!data.CLIENT_ORIGIN.startsWith("https://")) problems.push("CLIENT_ORIGIN must be an https:// address in production");
+    if (/change[_-]?me/i.test(data.JWT_ACCESS_SECRET)) problems.push("JWT_ACCESS_SECRET is still the placeholder from .env.example");
+    if (new Set(data.JWT_ACCESS_SECRET).size < 12) problems.push("JWT_ACCESS_SECRET is not random enough (generate it as described in .env.example)");
+    if (problems.length) throw new Error(`Unsafe production configuration:\n${problems.map((p) => `  - ${p}`).join("\n")}`);
+  }
+  return data;
 }
 
 export const env = loadEnv();

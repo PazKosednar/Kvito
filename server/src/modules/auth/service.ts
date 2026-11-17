@@ -5,7 +5,7 @@ import { dummyHash, hashPassword, verifyPassword } from "../../lib/password.js";
 import { prisma } from "../../lib/prisma.js";
 import type { EmailSender } from "../../services/email/EmailSender.js";
 import { assertCodeQuota, consumeCode, sendCode } from "./codes.js";
-import { issueSession, type ClientMeta } from "./sessions.js";
+import { issueSession, sessionsCutoff, type ClientMeta } from "./sessions.js";
 
 export const normalizeEmail = (email: string): string => email.trim().toLowerCase();
 
@@ -157,7 +157,7 @@ export async function resetPassword(rawEmail: string, code: string, newPassword:
   await consumeCode(email, "RESET_PASSWORD", code);
   const passwordHash = await hashPassword(newPassword);
   const [updated] = await prisma.$transaction([
-    prisma.user.update({ where: { id: user.id }, data: { passwordHash, emailVerifiedAt: user.emailVerifiedAt ?? new Date(), lastLoginAt: new Date(), ...clearFailures } }),
+    prisma.user.update({ where: { id: user.id }, data: { passwordHash, emailVerifiedAt: user.emailVerifiedAt ?? new Date(), lastLoginAt: new Date(), sessionsValidFrom: sessionsCutoff(), ...clearFailures } }),
     prisma.refreshToken.updateMany({ where: { userId: user.id, revokedAt: null }, data: { revokedAt: new Date() } }),
   ]);
   const tokens = await issueSession(user.id, meta);
@@ -174,7 +174,7 @@ export async function changePassword(userId: string, currentPassword: string, ne
   }
   const passwordHash = await hashPassword(newPassword);
   await prisma.$transaction([
-    prisma.user.update({ where: { id: userId }, data: { passwordHash, ...clearFailures } }),
+    prisma.user.update({ where: { id: userId }, data: { passwordHash, sessionsValidFrom: sessionsCutoff(), ...clearFailures } }),
     prisma.refreshToken.updateMany({ where: { userId, revokedAt: null }, data: { revokedAt: new Date() } }),
   ]);
   return issueSession(userId, meta);

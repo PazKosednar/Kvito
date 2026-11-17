@@ -5,7 +5,7 @@ import { bus } from "../lib/events.js";
 import { logger } from "../lib/logger.js";
 import { prisma } from "../lib/prisma.js";
 import { assertTenancyAccess } from "../modules/access/access.js";
-import { verifyAccessToken } from "../modules/auth/tokens.js";
+import { verifySession } from "../modules/auth/sessions.js";
 import { messageDto, messageInclude } from "../modules/messages/routes.js";
 
 const room = (tenancyId: string) => `t:${tenancyId}`;
@@ -23,13 +23,20 @@ export function attachRealtime(http: HttpServer): Server {
 
   io.use(async (socket, next) => {
     const token = (socket.handshake.auth as { token?: unknown }).token;
-    const userId = typeof token === "string" ? await verifyAccessToken(token) : null;
-    if (!userId) return next(new Error("UNAUTHORIZED"));
-    socket.data.userId = userId;
+    const claims = typeof token === "string" ? await verifySession(token) : null;
+    if (!claims) return next(new Error("UNAUTHORIZED"));
+    socket.data.userId = claims.userId;
+    socket.data.tokenExp = claims.exp;
     next();
   });
 
   io.on("connection", (socket) => {
+    // A socket must not outlive its access token: when the token expires the connection is closed and the
+    // client reconnects with a fresh one (which fails after logout, password change or account deletion).
+    const msLeft = (socket.data.tokenExp as number) * 1000 - Date.now();
+    const expiry = setTimeout(() => socket.disconnect(true), Math.min(Math.max(0, msLeft), 2 ** 31 - 1));
+    socket.on("disconnect", () => clearTimeout(expiry));
+
     socket.on("join", async (tenancyId: unknown, ack?: (ok: boolean) => void) => {
       if (typeof tenancyId !== "string" || tenancyId.length > 64) return ack?.(false);
       try {

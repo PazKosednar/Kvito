@@ -11,6 +11,9 @@ const common = {
 /** General API limit per IP. */
 export const apiLimiter = rateLimit({ ...common, windowMs: 60_000, limit: 300 });
 
+/** File uploads per IP (each up to 10 MB): keeps one client from filling the storage. */
+export const uploadLimiter = rateLimit({ ...common, windowMs: 10 * 60_000, limit: 60 });
+
 /** New accounts per IP. */
 export const registerLimiter = rateLimit({ ...common, windowMs: 60 * 60_000, limit: 10 });
 

@@ -2,7 +2,7 @@ import { env } from "../../config/env.js";
 import { randomToken, sha256 } from "../../lib/crypto.js";
 import { unauthorized } from "../../lib/errors.js";
 import { prisma } from "../../lib/prisma.js";
-import { signAccessToken } from "./tokens.js";
+import { signAccessToken, verifyAccessClaims, type AccessClaims } from "./tokens.js";
 
 export interface ClientMeta {
   ip?: string | undefined;
@@ -84,4 +84,24 @@ export async function revokeSession(refreshToken: string): Promise<void> {
     where: { familyId: existing.familyId, revokedAt: null },
     data: { revokedAt: new Date() },
   });
+}
+
+/**
+ * "Sign out everywhere" moment for User.sessionsValidFrom, rounded down to the whole second because a token's
+ * `iat` has second precision: the fresh token issued right after the change must still pass.
+ */
+export const sessionsCutoff = (now = Date.now()): Date => new Date(Math.floor(now / 1000) * 1000);
+
+/**
+ * Full access-token check used by the API and the realtime layer: a valid signature is not enough –
+ * the account must still exist and the token must not predate a password change/reset.
+ * Without this a stolen access token would keep working until it expires even after the owner reacted.
+ */
+export async function verifySession(token: string): Promise<AccessClaims | null> {
+  const claims = await verifyAccessClaims(token);
+  if (!claims) return null;
+  const user = await prisma.user.findUnique({ where: { id: claims.userId }, select: { deletedAt: true, sessionsValidFrom: true } });
+  if (!user || user.deletedAt) return null;
+  if (user.sessionsValidFrom && claims.iat * 1000 < user.sessionsValidFrom.getTime()) return null;
+  return claims;
 }

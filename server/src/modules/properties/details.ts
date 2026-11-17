@@ -7,6 +7,7 @@ import { cleanFileName, extensionFor, MAX_UPLOAD_BYTES, sniffMime } from "../../
 import { prisma } from "../../lib/prisma.js";
 import { idParam, optionalText, text } from "../../lib/validation.js";
 import { authUserId } from "../../middleware/auth.js";
+import { uploadLimiter } from "../../middleware/rateLimit.js";
 import { validateBody } from "../../middleware/validate.js";
 import type { Storage } from "../../services/storage/Storage.js";
 import { assertPropertyOwner, assertUnitOwner } from "../access/access.js";
@@ -142,7 +143,7 @@ export function propertyDetailsRouter(deps: { storage: Storage }): Router {
   });
 
   /** Upload a photo (raw bytes) to a property's gallery, or with ?unitId= to one of its units. */
-  router.post("/properties/:id/photos", express.raw({ type: () => true, limit: MAX_UPLOAD_BYTES }), async (req, res) => {
+  router.post("/properties/:id/photos", uploadLimiter, express.raw({ type: () => true, limit: MAX_UPLOAD_BYTES }), async (req, res) => {
     const propertyId = idParam.parse(req.params.id);
     const userId = authUserId(req);
     await assertPropertyOwner(userId, propertyId);
