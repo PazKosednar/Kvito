@@ -14,11 +14,14 @@ export function AppShell() {
   const { activeRole } = useRole();
   const location = useLocation();
   const online = useOnline();
+  // Landlord overview gets a wider single column on large screens (bigger town); every other page stays narrow.
+  const wide = activeRole === "LANDLORD" && location.pathname === ROUTES.home;
+  const column = wide ? "max-w-3xl lg:max-w-5xl" : "max-w-3xl";
 
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-20 border-b border-line bg-surface/95 pt-[env(safe-area-inset-top)] backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-3xl items-center gap-4 px-4 sm:px-6">
+        <div className={`mx-auto flex h-16 w-full ${column} items-center gap-4 px-4 sm:px-6`}>
           <Link to={ROUTES.home} aria-label={t("app.name")}>
             <KvitaLockup className="h-5" />
           </Link>
@@ -39,7 +42,7 @@ export function AppShell() {
         </p>
       )}
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 pt-6 pb-[calc(3rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-8">
+      <main className={`mx-auto flex w-full ${column} flex-1 flex-col px-4 pt-6 pb-[calc(3rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-8`}>
         {/* CGP motion: opacity only, 180 ms. */}
         <div key={location.pathname} className="animate-enter flex flex-1 flex-col">
           <Outlet />

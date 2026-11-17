@@ -817,7 +817,7 @@ export function TownCanvas({
     <div className={cn("relative", className)}>
       {picker && <ScenePicker scene={scene} onChange={setScene} ambient={ambient} />}
       <TownAmbientContext.Provider value={{ dayTime: ambient.dayTime, season: ambient.season }}>
-        <svg viewBox={`${box.x0} ${box.y0} ${box.w} ${box.h}`} className="mx-auto block h-auto max-h-80 w-full select-none" role="group" aria-label={label}>
+        <svg viewBox={`${box.x0} ${box.y0} ${box.w} ${box.h}`} className="mx-auto block h-auto max-h-80 w-full select-none lg:max-h-[30rem]" role="group" aria-label={label}>
           <defs>
             <radialGradient id={`${fadeId}-g`} cx="50%" cy="55%" r="60%">
               <stop offset="0.5" stopColor="#fff" />
