@@ -22,6 +22,8 @@ export interface SceneLayers {
   gap: Map<number, ReactNode[]>;
   /** Per row: drawn after the row's buildings. */
   front: Map<number, ReactNode[]>;
+  /** Deep backdrop behind the first row (hills, landmarks), drawn before everything else, deepest first. */
+  far: ReactNode[];
   /** Extra world points the canvas must include. */
   extent: Pt[];
   /**
@@ -73,9 +75,9 @@ export function Tree({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
   );
 }
 
-function Pine({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
+function Pine({ x, y, z = 0, s = 1 }: { x: number; y: number; z?: number; s?: number }) {
   const winter = useAmbient().season === "winter";
-  const [gx, gy] = proj([x, y, 0]);
+  const [gx, gy] = proj([x, y, z]);
   const top = gy - 26 * s;
   return (
     <g>
@@ -279,14 +281,32 @@ function Car({ x, y }: { x: number; y: number }) {
  * prefers-reduced-motion. `phase` (0–1) spreads several movers along their way.
  */
 function Mover({ dx, seconds, phase, mode = "loop", children }: { dx: number; seconds: number; phase: number; mode?: "loop" | "shuttle"; children: ReactNode }) {
+  return (
+    <Drift sx={dx * C} sy={dx / 2} seconds={seconds} phase={phase} mode={mode}>
+      {children}
+    </Drift>
+  );
+}
+
+/** Like Mover, but by a screen offset (sx, sy) – for things in the sky or moving up a slope. */
+function Drift({ sx, sy, seconds, phase, mode = "loop", children }: { sx: number; sy: number; seconds: number; phase: number; mode?: "loop" | "shuttle"; children: ReactNode }) {
   const style = {
-    "--kv-dx": `${(dx * C).toFixed(2)}px`,
-    "--kv-dy": `${(dx / 2).toFixed(2)}px`,
+    "--kv-dx": `${sx.toFixed(2)}px`,
+    "--kv-dy": `${sy.toFixed(2)}px`,
     animationDuration: `${seconds}s`,
     animationDelay: `${(-seconds * phase).toFixed(2)}s`,
   } as CSSProperties;
   return (
     <g className={mode === "loop" ? "kv-drive" : "kv-shuttle"} style={style}>
+      {children}
+    </g>
+  );
+}
+
+/** Slow rotation around its own centre (ferris wheel, klopotec, mill wheel); the content must be symmetric. */
+function Spin({ seconds, reverse = false, children }: { seconds: number; reverse?: boolean; children: ReactNode }) {
+  return (
+    <g className="kv-spin" style={{ animationDuration: `${seconds}s`, animationDirection: reverse ? "reverse" : undefined }}>
       {children}
     </g>
   );
@@ -537,9 +557,709 @@ function countryside(rows: TownRow[], L: SceneLayers) {
 }
 
 export function sceneLayers(scene: TownScene, rows: TownRow[]): SceneLayers {
-  const L: SceneLayers = { back: new Map(), gap: new Map(), front: new Map(), extent: [], moving: [] };
-  if (scene === "park") park(rows, L);
-  else if (scene === "city") city(rows, L);
-  else if (scene === "countryside") countryside(rows, L);
+  const L: SceneLayers = { back: new Map(), gap: new Map(), front: new Map(), far: [], extent: [], moving: [] };
+  if (rows.length === 0) return L;
+  // The deep backdrop needs a row of a few buildings; a single home (the tenant's view) would be dwarfed by it.
+  const deep = Math.max(...rows.map((r) => r.x1 - r.x0)) >= 120;
+  if (scene === "park") {
+    park(rows, L);
+    if (deep) parkBackdrop(rows, L);
+  } else if (scene === "city") {
+    city(rows, L);
+    if (deep) cityBackdrop(rows, L);
+  } else if (scene === "countryside") {
+    countryside(rows, L);
+    if (deep) countryBackdrop(rows, L);
+  }
   return L;
+}
+
+
+// ---------- Deep backdrop: several layers behind the first row ----------
+//
+// Placement: `B.at(f, D, z)` is the world point in the same screen column as the fraction f (0 = left end,
+// 1 = right end) of the first row's back edge, D world units further back, at height z. Everything stays behind
+// the landlord's own buildings; deeper layers rise higher and are drawn with lighter lines. The left part of the
+// sky stays free for the sun and moon, so the deepest layers sit towards the right, where the canvas has room.
+
+interface Backdrop {
+  at: (f: number, D: number, z?: number) => Pt;
+  /** Screen x of the fraction f on the first row. */
+  sx: (f: number) => number;
+}
+
+function backdrop(rows: TownRow[]): Backdrop {
+  const X0 = Math.min(...rows.map((r) => r.x0));
+  const X1 = Math.max(...rows.map((r) => r.x1));
+  const Y0 = rows[0]!.y0;
+  const W = Math.max(X1 - X0, 200);
+  const XM = (X0 + X1) / 2;
+  const at = (f: number, D: number, z = 0): Pt => [XM + (f - 0.5) * W - D, Y0 - D, z];
+  return { at, sx: (f) => proj(at(f, 0))[0] };
+}
+
+/**
+ * Reserves the sky lane above everything pushed to the extent so far (and buildings up to `tallest`);
+ * returns its screen y. Call after the backdrop's own extent points.
+ */
+function skyLane(B: Backdrop, L: SceneLayers, tallest: number, room = 18): number {
+  const top = Math.min(...L.extent.map((p) => proj(p)[1]), proj(B.at(0, 0, tallest))[1]);
+  const y = top - 6;
+  // A world point above the middle of the row whose screen y is the top of the lane.
+  const [x, w] = B.at(0.5, 0);
+  L.extent.push([x, w, proj([x, w, 0])[1] - (y - room)]);
+  return y;
+}
+
+/** Layer tone: deeper layers get lighter lines (fills stay opaque, so they still hide what is behind). */
+function Layer({ depth, children }: { depth: "near" | "mid" | "far"; children: ReactNode }) {
+  return <g strokeOpacity={depth === "far" ? 0.5 : depth === "mid" ? 0.72 : 0.92}>{children}</g>;
+}
+
+const lerp = (a: Pt, b: Pt, t: number): Pt => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+
+/**
+ * Faceted mountain: a pyramid on a square base (front and right faces visible), the right face hatched for shade,
+ * a snow cap on the top `snow` share of its height (bigger in winter). `cairn` adds a tiny shelter on the summit.
+ */
+function Peak({ x, y, r, h, snow = 0, cairn = false }: { x: number; y: number; r: number; h: number; snow?: number; cairn?: boolean }) {
+  const winter = useAmbient().season === "winter";
+  const A: Pt = [x, y, h];
+  const Lc: Pt = [x - r, y + r, 0];
+  const F: Pt = [x + r, y + r, 0];
+  const R: Pt = [x + r, y - r, 0];
+  const s = winter ? Math.max(snow, 0.42) : snow;
+  const a = lerp(A, Lc, s);
+  const b = lerp(A, F, s);
+  const c = lerp(A, R, s);
+  const m1 = lerp(lerp(a, b, 0.5), A, 0.4);
+  const m2 = lerp(lerp(b, c, 0.5), A, 0.4);
+  const [tx, ty] = proj(A);
+  return (
+    <g stroke={EDGE} strokeLinejoin="round">
+      <polygon points={pts([Lc, F, A])} fill={FILL} />
+      <polygon points={pts([F, R, A])} fill={FILL} />
+      {[0.3, 0.55, 0.8].map((k) => (
+        <polyline key={k} points={pts([lerp(A, lerp(F, R, k), 0.15), lerp(F, R, k)])} fill="none" strokeOpacity={0.45} />
+      ))}
+      {s > 0 && (
+        <>
+          <polygon points={pts([a, m1, b, m2, c, A])} fill={winter ? "var(--snow)" : FILL} />
+          <polyline points={pts([A, b])} fill="none" />
+        </>
+      )}
+      {cairn && <rect x={tx - 1} y={ty - 3.4} width={2} height={3.4} fill={FILL} strokeWidth="0.8" />}
+    </g>
+  );
+}
+
+/** Mountains drawn from the back to the front. */
+function Range({ peaks }: { peaks: { x: number; y: number; r: number; h: number; snow?: number; cairn?: boolean }[] }) {
+  return (
+    <g>
+      {[...peaks]
+        .sort((p, q) => p.x + p.y - (q.x + q.y))
+        .map((p, i) => (
+          <Peak key={i} {...p} />
+        ))}
+    </g>
+  );
+}
+
+/** Point on the visible (front) side of a dome hill: k = share of its height, a = angle around it. */
+const hillPt = (x: number, y: number, R: number, H: number, k: number, a: number): Pt => {
+  const r = R * Math.sqrt(Math.max(0, 1 - k * k));
+  return [x + r * Math.cos(a), y + r * Math.sin(a), k * H];
+};
+
+/** Soft dome hill (a half spheroid): filled outline, and optional contour lines (terraces, rows of vines). */
+function Hill({
+  x,
+  y,
+  R,
+  H,
+  contours = [],
+  dash,
+  trees = 0,
+}: {
+  x: number;
+  y: number;
+  R: number;
+  H: number;
+  contours?: number[];
+  dash?: string;
+  /** Tiny trees scattered on the visible side (they make a far dome read as a wooded hill). */
+  trees?: number;
+}) {
+  const winter = useAmbient().season === "winter";
+  const rnd = seeded(`hill-${Math.round(x)}-${Math.round(y)}`);
+  const dots = Array.from({ length: trees }, () => proj(hillPt(x, y, R, H, 0.15 + rnd() * 0.8, -Math.PI / 4 + 0.25 + rnd() * (Math.PI - 0.5)))).sort((p, q) => p[1] - q[1]);
+  const [cx, cy] = proj([x, y, 0]);
+  const rx = R * Math.SQRT2 * C;
+  const ry = R * Math.SQRT1_2;
+  const top = Math.sqrt(ry * ry + H * H);
+  return (
+    <g>
+      <path d={`M${cx - rx},${cy} A${rx},${top} 0 0 1 ${cx + rx},${cy} A${rx},${ry} 0 0 1 ${cx - rx},${cy} Z`} fill={FILL} stroke="none" />
+      <path d={`M${cx - rx},${cy} A${rx},${top} 0 0 1 ${cx + rx},${cy}`} fill="none" stroke={EDGE} />
+      <path d={`M${cx + rx},${cy} A${rx},${ry} 0 0 1 ${cx - rx},${cy}`} fill="none" stroke={EDGE} strokeOpacity={0.4} />
+      {contours.map((k) => {
+        const r = Math.sqrt(1 - k * k);
+        const a = rx * r;
+        const b = ry * r;
+        return <path key={k} d={`M${cx - a},${cy - k * H} A${a},${b} 0 0 0 ${cx + a},${cy - k * H}`} fill="none" stroke={EDGE} strokeDasharray={dash} />;
+      })}
+      {dots.map(([tx, ty], i) => (
+        <g key={`t${i}`} stroke={EDGE}>
+          <line x1={tx} y1={ty} x2={tx} y2={ty - 2.2} />
+          <circle cx={tx} cy={ty - 3.6} r={1.8} fill={winter ? "var(--snow)" : FILL} />
+        </g>
+      ))}
+    </g>
+  );
+}
+
+/** Small church: nave, bell tower with a pointed spire; windows lit at night. */
+function Church({ x, y, z = 0, s = 1 }: { x: number; y: number; z?: number; s?: number }) {
+  const night = useAmbient().dayTime === "night";
+  const [px, py] = proj([x + 1.5 * s, y + 4 * s, z + 15 * s]);
+  const [sx, sy] = proj([x + 1.5 * s, y + 1.5 * s, z + 22 * s]);
+  const [wx, wy] = proj([x + 7 * s, y + 6 * s, z + 3 * s]);
+  return (
+    <g>
+      <Box x={x + 3 * s} y={y} z={z} w={9 * s} d={6 * s} h={6 * s} />
+      <polygon points={pts([[x + 3 * s, y + 3 * s, z + 9 * s], [x + 12 * s, y + 3 * s, z + 9 * s], [x + 12 * s, y + 6 * s, z + 6 * s], [x + 3 * s, y + 6 * s, z + 6 * s]])} fill={FILL} stroke={EDGE} strokeLinejoin="round" />
+      <Box x={x} y={y + 1 * s} z={z} w={3 * s} d={3 * s} h={15 * s} />
+      <polygon points={`${px - 2.6 * s},${py} ${sx},${sy} ${px + 2.6 * s},${py}`} fill={FILL} stroke={EDGE} strokeLinejoin="round" />
+      {night && <rect x={wx - 1} y={wy - 2} width={2} height={2.6} fill="var(--night-glow)" />}
+    </g>
+  );
+}
+
+/** Wooden lookout tower: four slanting legs with braces, a platform and a pyramid roof. */
+function LookoutTower({ x, y, z, h = 22 }: { x: number; y: number; z: number; h?: number }) {
+  const legs: [Pt, Pt][] = [
+    [[x - 3, y - 3, z], [x - 1.6, y - 1.6, z + h]],
+    [[x + 3, y - 3, z], [x + 1.6, y - 1.6, z + h]],
+    [[x + 3, y + 3, z], [x + 1.6, y + 1.6, z + h]],
+    [[x - 3, y + 3, z], [x - 1.6, y + 1.6, z + h]],
+  ];
+  const [rx, ry] = proj([x, y, z + h + 9]);
+  const [ax, ay] = proj([x - 3, y + 3, z + h + 4]);
+  const [bx, by] = proj([x + 3, y + 3, z + h + 4]);
+  const [cx, cy] = proj([x + 3, y - 3, z + h + 4]);
+  return (
+    <g stroke={EDGE} fill="none" strokeLinejoin="round">
+      {legs.map(([a, b], i) => (
+        <polyline key={i} points={pts([a, b])} />
+      ))}
+      <polyline points={pts([[x - 2.6, y + 2.6, z + h * 0.35], [x + 2.6, y + 2.6, z + h * 0.65], [x + 2.6, y - 2.6, z + h * 0.35]])} />
+      <Box x={x - 3} y={y - 3} z={z + h} w={6} d={6} h={4} />
+      <polygon points={`${ax},${ay} ${rx},${ry} ${bx},${by}`} fill={FILL} />
+      <polygon points={`${bx},${by} ${rx},${ry} ${cx},${cy}`} fill={FILL} />
+    </g>
+  );
+}
+
+/** Mountain lake with an island, a tiny church on it (a nod to Bled), a pier and two swans. */
+function Lake({ cx, cy, rx, ry }: { cx: number; cy: number; rx: number; ry: number }) {
+  const winter = useAmbient().season === "winter";
+  const swan = (x: number, y: number, flip: number, k: number) => {
+    const [gx, gy] = proj([x, y, 0]);
+    return (
+      <g key={k} stroke={EDGE} strokeLinecap="round" strokeLinejoin="round">
+        <path d={`M${gx - 3 * flip},${gy - 1} q${3 * flip},2 ${6 * flip},0 l${-1.2 * flip},-1.4 z`} fill={FILL} />
+        <path d={`M${gx + 2.4 * flip},${gy - 1.6} q${0.6 * flip},-3 ${-0.6 * flip},-4.4 l${1.6 * flip},0.2`} fill="none" />
+      </g>
+    );
+  };
+  return (
+    <g>
+      <polygon points={pts(ring(cx, cy, rx, ry, 0))} fill={FILL} stroke={EDGE} strokeLinejoin="round" />
+      {!winter && (
+        <>
+          <polyline points={pts(ring(cx, cy, rx * 0.82, ry * 0.78, 0, Math.PI * 0.15, Math.PI * 0.85, 18))} fill="none" stroke={EDGE} strokeDasharray="2 4" />
+          <polyline points={pts(ring(cx, cy, rx * 0.6, ry * 0.55, 0, Math.PI * 1.1, Math.PI * 1.6, 12))} fill="none" stroke={EDGE} strokeDasharray="2 4" />
+        </>
+      )}
+      {/* Pier on the near shore. */}
+      <polygon points={pts([[cx - rx * 0.55, cy + ry * 0.62, 0.8], [cx - rx * 0.55 + 3, cy + ry * 0.62, 0.8], [cx - rx * 0.55 + 3, cy + ry * 0.2, 0.8], [cx - rx * 0.55, cy + ry * 0.2, 0.8]])} fill={FILL} stroke={EDGE} />
+      {/* Island with its church and two trees. */}
+      <polygon points={pts(ring(cx + rx * 0.2, cy - ry * 0.15, 7, 5, 1.2, 0, Math.PI * 2, 20))} fill={FILL} stroke={EDGE} />
+      <Pine x={cx + rx * 0.2 - 4} y={cy - ry * 0.15 - 2} z={1.2} s={0.42} />
+      <Church x={cx + rx * 0.2 - 2} y={cy - ry * 0.15 - 2} z={1.2} s={0.42} />
+      {!winter && [swan(cx - rx * 0.3, cy + ry * 0.25, 1, 1), swan(cx + rx * 0.55, cy + ry * 0.3, -1, 2)]}
+    </g>
+  );
+}
+
+/** Paraglider: a wide arched wing split into cells, lines down to the pilot sitting in the harness. */
+function Paraglider({ x, y }: { x: number; y: number }) {
+  const cells = [-12, -7.2, -2.4, 2.4, 7.2, 12];
+  const arc = (dx: number) => y - 5 + (dx * dx) / 30;
+  return (
+    <g stroke={EDGE} strokeLinecap="round" strokeLinejoin="round">
+      <path d={`M${x - 14},${arc(-14)} Q${x},${y - 12} ${x + 14},${arc(14)} L${x + 13},${arc(14) + 2.6} Q${x},${y - 8.6} ${x - 13},${arc(-14) + 2.6} Z`} fill={FILL} />
+      {cells.slice(1, -1).map((d) => (
+        <line key={d} x1={x + d} y1={arc(d) - 3.2 + Math.abs(d) * 0.05} x2={x + d * 0.94} y2={arc(d) - 0.6 + Math.abs(d) * 0.05} />
+      ))}
+      <path d={`M${x - 13},${arc(-14) + 2.6} L${x - 1},${y + 9} M${x - 4.8},${y - 6.4} L${x - 0.6},${y + 9} M${x + 4.8},${y - 6.4} L${x + 0.6},${y + 9} M${x + 13},${arc(14) + 2.6} L${x + 1},${y + 9}`} fill="none" strokeOpacity={0.6} />
+      <circle cx={x} cy={y + 10.4} r={1.3} fill={FILL} />
+      <path d={`M${x - 1},${y + 12} l0.6,2.6 l2.4,0`} fill="none" />
+    </g>
+  );
+}
+
+/** A small flock of birds (a few "v" strokes) that flap their wings. */
+function Birds({ x, y, n = 5 }: { x: number; y: number; n?: number }) {
+  return (
+    <g stroke={EDGE} fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {Array.from({ length: n }, (_, i) => {
+        const bx = x + (i % 2 ? -1 : 1) * Math.ceil(i / 2) * 6;
+        const by = y + Math.ceil(i / 2) * 4;
+        return (
+          <g key={i} className="kv-flap" style={{ animationDuration: `${0.5 + (i % 3) * 0.08}s` }}>
+            <path d={`M${bx - 3},${by - 1.2} Q${bx - 1.5},${by - 2} ${bx},${by} Q${bx + 1.5},${by - 2} ${bx + 3},${by - 1.2}`} />
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+/** Castle on its hill: walls, a tall tower with a flag, a funicular with a cabin going up and down. */
+function Castle({ x, y, z }: { x: number; y: number; z: number }) {
+  const night = useAmbient().dayTime === "night";
+  const [fx, fy] = proj([x + 25.5, y + 3.5, z + 22]);
+  const crenels = Array.from({ length: 7 }, (_, i) => x + 1 + i * 3.4);
+  return (
+    <g>
+      <Box x={x} y={y} z={z} w={24} d={12} h={8} />
+      {crenels.map((cx, i) => (
+        <Box key={i} x={cx} y={y + 11} z={z + 8} w={1.6} d={1} h={1.6} />
+      ))}
+      <Box x={x + 23} y={y + 1} z={z} w={6} d={6} h={18} />
+      <Box x={x + 22.5} y={y + 0.5} z={z + 18} w={7} d={7} h={2} />
+      <line x1={fx} y1={fy} x2={fx} y2={fy - 9} stroke={EDGE} />
+      <path d={`M${fx},${fy - 9} l6,1.5 l-6,1.5 z`} fill={FILL} stroke={EDGE} strokeLinejoin="round" />
+      {night &&
+        [4, 9, 14, 19].map((wx) => {
+          const [a, b] = proj([x + wx, y + 12, z + 4]);
+          return <rect key={wx} x={a - 0.8} y={b - 1.6} width={1.6} height={2.2} fill="var(--night-glow)" />;
+        })}
+    </g>
+  );
+}
+
+/** Ferris wheel facing the viewer: two legs, a slowly turning wheel with cabins (lit at night). */
+function FerrisWheel({ x, y, r = 16 }: { x: number; y: number; r?: number }) {
+  const night = useAmbient().dayTime === "night";
+  const [hx, hy] = proj([x, y, r + 4]);
+  const [lx, ly] = proj([x - 7, y + 3, 0]);
+  const [qx, qy] = proj([x + 7, y - 3, 0]);
+  const cabins = Array.from({ length: 10 }, (_, i) => (i * Math.PI * 2) / 10);
+  return (
+    <g strokeLinejoin="round">
+      <polyline points={`${lx},${ly} ${hx},${hy} ${qx},${qy}`} fill="none" stroke={EDGE} />
+      <Spin seconds={60}>
+        <circle cx={hx} cy={hy} r={r} fill="none" stroke={EDGE} />
+        <circle cx={hx} cy={hy} r={r * 0.82} fill="none" stroke={EDGE} strokeDasharray="1 2.5" />
+        {cabins.map((a, i) => (
+          <line key={`s${i}`} x1={hx} y1={hy} x2={hx + Math.cos(a) * r} y2={hy + Math.sin(a) * r} stroke={EDGE} />
+        ))}
+        {cabins.map((a, i) => (
+          <circle key={`c${i}`} cx={hx + Math.cos(a) * r} cy={hy + Math.sin(a) * r} r={1.9} fill={night ? "var(--night-glow)" : FILL} stroke={EDGE} />
+        ))}
+      </Spin>
+      <circle cx={hx} cy={hy} r={1.6} fill={FILL} stroke={EDGE} />
+    </g>
+  );
+}
+
+/** Hot-air balloon: envelope with gores, ropes and a basket; the burner glows at night. */
+function Balloon({ x, y }: { x: number; y: number }) {
+  const night = useAmbient().dayTime === "night";
+  return (
+    <g stroke={EDGE} strokeLinejoin="round" strokeLinecap="round">
+      {night && <circle cx={x} cy={y + 9} r={3.5} fill="var(--night-glow)" stroke="none" opacity={0.9} />}
+      <path d={`M${x - 3},${y + 8} C${x - 12},${y + 1} ${x - 10},${y - 13} ${x},${y - 13} C${x + 10},${y - 13} ${x + 12},${y + 1} ${x + 3},${y + 8} Z`} fill={FILL} />
+      <path d={`M${x},${y - 13} C${x - 4},${y - 8} ${x - 3},${y + 3} ${x - 1},${y + 8} M${x},${y - 13} C${x + 4},${y - 8} ${x + 3},${y + 3} ${x + 1},${y + 8}`} fill="none" stroke={EDGE} />
+      <path d={`M${x - 9.6},${y - 4} Q${x},${y - 1.5} ${x + 9.6},${y - 4}`} fill="none" stroke={EDGE} />
+      <line x1={x - 3} y1={y + 8} x2={x - 2} y2={y + 12} />
+      <line x1={x + 3} y1={y + 8} x2={x + 2} y2={y + 12} />
+      <rect x={x - 2.4} y={y + 12} width={4.8} height={3} fill={FILL} />
+    </g>
+  );
+}
+
+/** Small airliner crossing the sky; a light blinks at night. */
+function Plane({ x, y }: { x: number; y: number }) {
+  const night = useAmbient().dayTime === "night";
+  return (
+    <g stroke={EDGE} strokeLinecap="round" strokeLinejoin="round">
+      <path d={`M${x - 9},${y} L${x + 8},${y} Q${x + 10.5},${y} ${x + 9},${y + 1.4} L${x - 8},${y + 1.4} Z`} fill={FILL} stroke={EDGE} />
+      <path d={`M${x + 1},${y + 0.8} L${x - 4},${y + 5} L${x - 1.8},${y + 5} L${x + 4},${y + 0.8}`} fill={FILL} stroke={EDGE} />
+      <path d={`M${x - 7},${y} L${x - 9},${y - 4} L${x - 7.6},${y - 4} L${x - 4.6},${y}`} fill={FILL} stroke={EDGE} />
+      <line x1={x - 12} y1={y + 0.7} x2={x - 30} y2={y + 0.7} strokeDasharray="3 3" />
+      {night && <circle className="kv-blink" cx={x - 8.6} cy={y - 4.2} r={1.6} fill="var(--night-glow)" stroke="none" />}
+    </g>
+  );
+}
+
+/** Kozolec "toplar": two hay racks under one gabled roof, slats on both racks. */
+function Kozolec({ x, y, L = 30, d = 9 }: { x: number; y: number; L?: number; d?: number }) {
+  const h = 13;
+  const posts = [0, L / 3, (2 * L) / 3, L];
+  const slats = [2.5, 5, 7.5, 10];
+  return (
+    <g stroke={EDGE} fill="none" strokeLinejoin="round">
+      {slats.map((z) => (
+        <polyline key={`b${z}`} points={lineX(x, x + L, y, z)} />
+      ))}
+      {posts.map((px) => (
+        <polyline key={`pb${px}`} points={pts([[x + px, y, 0], [x + px, y, h]])} />
+      ))}
+      <polyline points={pts([[x + L, y, 0], [x + L, y + d, 0]])} />
+      {posts.map((px) => (
+        <polyline key={`pf${px}`} points={pts([[x + px, y + d, 0], [x + px, y + d, h]])} />
+      ))}
+      {slats.map((z) => (
+        <polyline key={`f${z}`} points={lineX(x, x + L, y + d, z)} />
+      ))}
+      <polygon points={pts([[x - 2, y + d / 2, h + 6], [x + L + 2, y + d / 2, h + 6], [x + L + 2, y + d + 2, h], [x - 2, y + d + 2, h]])} fill={FILL} />
+      <polygon points={pts([[x + L + 2, y - 2, h], [x + L + 2, y + d / 2, h + 6], [x + L + 2, y + d + 2, h]])} fill={FILL} />
+    </g>
+  );
+}
+
+/** Stork on its nest on a pole (spring and summer); in autumn and winter the nest waits empty. */
+function StorkNest({ x, y }: { x: number; y: number }) {
+  const { season } = useAmbient();
+  const home = season === "spring" || season === "summer";
+  const [gx, gy] = proj([x, y, 0]);
+  const [nx, ny] = proj([x, y, 24]);
+  return (
+    <g strokeLinecap="round" strokeLinejoin="round">
+      <line x1={gx} y1={gy} x2={nx} y2={ny} stroke={EDGE} />
+      <line x1={nx - 4} y1={ny} x2={nx + 4} y2={ny} stroke={EDGE} />
+      {home && (
+        <g stroke={EDGE}>
+          <path d={`M${nx + 2.6},${ny - 2.4} l0.4,-6`} fill="none" />
+          <circle cx={nx + 3.1} cy={ny - 9} r={1.3} fill={FILL} />
+          <line x1={nx + 4.3} y1={ny - 9} x2={nx + 7.6} y2={ny - 8} />
+          <ellipse cx={nx} cy={ny - 2.6} rx={3.6} ry={1.8} fill={FILL} />
+          <path d={`M${nx - 3.4},${ny - 2.4} l-2.4,1`} fill="none" />
+        </g>
+      )}
+      <ellipse cx={nx} cy={ny - 0.6} rx={5.4} ry={2} fill={season === "winter" ? "var(--snow)" : FILL} stroke={EDGE} />
+      <path d={`M${nx - 5},${ny - 0.4} l1.5,-1 l1.5,1 l1.5,-1 l1.5,1 l1.5,-1 l1.5,1`} fill="none" stroke={EDGE} />
+    </g>
+  );
+}
+
+/** Sunflower field by season: sprouts in spring, flowers turned to the sun in summer, bowed heads in autumn, snow in winter. */
+function Sunflowers({ x0, x1, y0, y1 }: { x0: number; x1: number; y0: number; y1: number }) {
+  const { season } = useAmbient();
+  const items: ReactNode[] = [];
+  if (season !== "winter") {
+    for (let y = y0 + 3, j = 0; y < y1 - 1; y += 4, j++) {
+      for (let x = x0 + 3 + (j % 2) * 2; x < x1 - 2; x += 4.5) {
+        const [gx, gy] = proj([x, y, 0]);
+        const k = `${x}-${y}`;
+        if (season === "spring") items.push(<line key={k} x1={gx} y1={gy} x2={gx} y2={gy - 2.4} stroke={EDGE} />);
+        else
+          items.push(
+            <g key={k}>
+              <line x1={gx} y1={gy} x2={gx} y2={gy - 5} stroke={EDGE} />
+              {season === "summer" ? (
+                <circle cx={gx} cy={gy - 6.2} r={1.5} fill={FILL} stroke={EDGE} strokeDasharray="1 0.6" />
+              ) : (
+                <circle cx={gx + 1.2} cy={gy - 4.4} r={1.2} fill={FILL} stroke={EDGE} />
+              )}
+            </g>,
+          );
+      }
+    }
+  }
+  return (
+    <g>
+      <polygon points={pts([[x0, y0, 0], [x1, y0, 0], [x1, y1, 0], [x0, y1, 0]])} fill="none" stroke={EDGE} />
+      {items}
+    </g>
+  );
+}
+
+/** A river along x (gently wavy banks, a few ripples); frozen white in winter. */
+function River({ x0, x1, y, w = 9 }: { x0: number; x1: number; y: number; w?: number }) {
+  const winter = useAmbient().season === "winter";
+  const n = 40;
+  const bank = (off: number, ph: number): Pt[] =>
+    Array.from({ length: n + 1 }, (_, i) => {
+      const x = x0 + ((x1 - x0) * i) / n;
+      return [x, y + off + Math.sin(i * 0.7 + ph) * 0.9, 0];
+    });
+  const near = bank(w, 0);
+  const far = bank(0, 1.7);
+  return (
+    <g>
+      <polygon points={pts([...far, ...near.slice().reverse()])} fill={FILL} stroke="none" />
+      <polyline points={pts(far)} fill="none" stroke={EDGE} />
+      <polyline points={pts(near)} fill="none" stroke={EDGE} />
+      {!winter &&
+        Array.from({ length: Math.floor((x1 - x0) / 22) }, (_, i) => {
+          const [rx, ry] = proj([x0 + 10 + i * 22, y + (i % 2 ? w * 0.35 : w * 0.65), 0]);
+          return <path key={i} d={`M${rx - 3},${ry} q1.5,-1.4 3,0 t3,0`} fill="none" stroke={EDGE} strokeOpacity={0.7} />;
+        })}
+    </g>
+  );
+}
+
+/** Floating mill on the river (like the one on the Mura): a house on two pontoons, the wheel turning in between. */
+function FloatingMill({ x, y }: { x: number; y: number }) {
+  const [wx, wy] = proj([x + 15, y + 4, 3]);
+  return (
+    <g strokeLinejoin="round">
+      <Box x={x} y={y} z={0} w={13} d={9} h={1.5} />
+      <Box x={x + 1} y={y + 1} z={1.5} w={10} d={7} h={7} />
+      <polygon points={pts([[x + 0.5, y + 4.5, 12.5], [x + 11.5, y + 4.5, 12.5], [x + 11.5, y + 8.6, 8.5], [x + 0.5, y + 8.6, 8.5]])} fill={FILL} stroke={EDGE} />
+      <polygon points={pts([[x + 11.5, y + 0.4, 8.5], [x + 11.5, y + 4.5, 12.5], [x + 11.5, y + 8.6, 8.5]])} fill={FILL} stroke={EDGE} />
+      <Spin seconds={14}>
+        <circle cx={wx} cy={wy} r={5.5} fill={FILL} stroke={EDGE} />
+        {Array.from({ length: 8 }, (_, i) => {
+          const a = (i * Math.PI) / 4;
+          return <line key={i} x1={wx} y1={wy} x2={wx + Math.cos(a) * 5.5} y2={wy + Math.sin(a) * 5.5} stroke={EDGE} />;
+        })}
+      </Spin>
+      <Box x={x + 18} y={y} z={0} w={4} d={9} h={1.5} />
+    </g>
+  );
+}
+
+/** Klopotec: the Styrian wind rattle in the vineyard – a pole, four turning blades and a brush tail. */
+function Klopotec({ x, y, z }: { x: number; y: number; z: number }) {
+  const [gx, gy] = proj([x, y, z]);
+  const [tx, ty] = proj([x, y, z + 12]);
+  return (
+    <g stroke={EDGE} strokeLinecap="round">
+      <line x1={gx} y1={gy} x2={tx} y2={ty} />
+      <path d={`M${tx},${ty} l-7,1.5 M${tx - 7},${ty + 1.5} l-2,-2.5 M${tx - 7},${ty + 1.5} l-2.5,0 M${tx - 7},${ty + 1.5} l-2,2.5`} fill="none" />
+      <Spin seconds={3}>
+        {[0, 1, 2, 3].map((i) => {
+          const a = (i * Math.PI) / 2;
+          const c = Math.cos(a);
+          const s = Math.sin(a);
+          return (
+            <g key={i}>
+              <line x1={tx} y1={ty} x2={tx + c * 6} y2={ty + s * 6} />
+              <line x1={tx + c * 3.5 - s * 1.4} y1={ty + s * 3.5 + c * 1.4} x2={tx + c * 6 - s * 1.4} y2={ty + s * 6 + c * 1.4} />
+            </g>
+          );
+        })}
+      </Spin>
+      <circle cx={tx} cy={ty} r={1} fill={FILL} />
+    </g>
+  );
+}
+
+/** Small vineyard cottage (zidanica): a white box with a gabled roof. */
+function Zidanica({ x, y, z }: { x: number; y: number; z: number }) {
+  return (
+    <g strokeLinejoin="round">
+      <Box x={x} y={y} z={z} w={8} d={6} h={5} />
+      <polygon points={pts([[x - 0.6, y + 3, z + 8.5], [x + 8.6, y + 3, z + 8.5], [x + 8.6, y + 6.6, z + 5], [x - 0.6, y + 6.6, z + 5]])} fill={FILL} stroke={EDGE} />
+      <polygon points={pts([[x + 8.6, y - 0.6, z + 5], [x + 8.6, y + 3, z + 8.5], [x + 8.6, y + 6.6, z + 5]])} fill={FILL} stroke={EDGE} />
+    </g>
+  );
+}
+
+
+// ---------- Backdrops per scene ----------
+
+type PeakSpec = [f: number, D: number, r: number, h: number, snow?: number];
+
+/** Park: a lake with an island just behind, forested hills with a lookout tower, the Julian Alps far away. */
+function parkBackdrop(rows: TownRow[], L: SceneLayers) {
+  const B = backdrop(rows);
+  // Far: the Alps, the three-headed main peak with a tiny shelter on the summit.
+  const alps: PeakSpec[] = [
+    [0.5, 140, 20, 36, 0.3],
+    [0.6, 150, 24, 50, 0.32],
+    [0.7, 146, 12, 56, 0.34],
+    [0.76, 152, 30, 70, 0.38],
+    [0.83, 146, 12, 58, 0.34],
+    [0.94, 150, 24, 46, 0.3],
+    [1.05, 140, 20, 34, 0.25],
+    [1.14, 132, 16, 24],
+  ];
+  const peaks = alps.map(([f, D, r, h, snow]) => {
+    const [x, y] = B.at(f, D);
+    return { x, y, r, h, snow, cairn: h === 70 };
+  });
+  // Mid: forested hills, pines on their slopes, a lookout tower on the right one.
+  const hills = [
+    { f: 0.42, D: 96, R: 26, H: 22 },
+    { f: 0.98, D: 92, R: 24, H: 20 },
+  ].map((h) => ({ ...h, at: B.at(h.f, h.D) }));
+  const pines = hills.flatMap(({ at: [x, y], R, H }, j) =>
+    [0.25, 0.55, 0.8].flatMap((k, i) =>
+      Array.from({ length: 4 - i }, (_, n) => {
+        const a = -Math.PI / 4 + 0.35 + ((Math.PI - 0.7) * (n + (i % 2) * 0.5)) / (4 - i);
+        return hillPt(x, y, R, H, k, a);
+      }).filter(() => j === 0 || k < 0.8),
+    ),
+  );
+  pines.sort((p, q) => proj(p)[1] - proj(q)[1]);
+  const [tx, ty] = hills[1]!.at;
+  // Near: the lake just behind the row.
+  const [lx, ly] = B.at(1.1, 34);
+  L.far.push(
+    <Layer key="far" depth="far">
+      <Range peaks={peaks} />
+    </Layer>,
+    <Layer key="mid" depth="mid">
+      {hills.map(({ at: [x, y], R, H }, i) => (
+        <Hill key={i} x={x} y={y} R={R} H={H} />
+      ))}
+      {pines.map(([x, y, z], i) => (
+        <Pine key={i} x={x} y={y} z={z} s={0.42 + (i % 3) * 0.06} />
+      ))}
+      <LookoutTower x={tx} y={ty} z={hills[1]!.H} h={20} />
+    </Layer>,
+    <Layer key="near" depth="near">
+      <Lake cx={lx} cy={ly} rx={30} ry={16} />
+    </Layer>,
+  );
+  L.extent.push(...peaks.map((p) => [p.x, p.y, p.h + 4] as Pt), B.at(1.14, 132, 0), [tx, ty, hills[1]!.H + 32], [lx - 32, ly - 18, 0]);
+
+  // Sky: a paraglider drifting over the right half, a flock of birds the other way.
+  const sky = skyLane(B, L, 70);
+  const x0 = B.sx(0.35);
+  const x1 = B.sx(1.15);
+  L.moving.push(
+    <Drift key="pg" sx={x1 - x0} sy={10} seconds={60} phase={0.35}>
+      <g className="kv-bob" style={{ animationDuration: "2.4s" }}>
+        <Paraglider x={x0} y={sky - 12} />
+      </g>
+    </Drift>,
+    <Drift key="birds" sx={-(B.sx(1.1) - B.sx(0.1))} sy={0} seconds={40} phase={0.7}>
+      <Birds x={B.sx(1.1)} y={sky - 6} />
+    </Drift>,
+  );
+}
+
+/** City: a castle on its hill with a funicular, a ferris wheel, soft hills far away, a balloon and a plane. */
+function cityBackdrop(rows: TownRow[], L: SceneLayers) {
+  const B = backdrop(rows);
+  // Far: soft hills around the city.
+  const hills = [
+    { f: 0.6, D: 158, R: 26, H: 18 },
+    { f: 0.74, D: 150, R: 24, H: 16 },
+    { f: 0.88, D: 162, R: 30, H: 24 },
+    { f: 1.02, D: 150, R: 24, H: 17 },
+    { f: 1.14, D: 142, R: 20, H: 13 },
+  ]
+    .map((h) => ({ ...h, at: B.at(h.f, h.D) }))
+    .sort((p, q) => p.at[0] + p.at[1] - (q.at[0] + q.at[1]));
+  // Mid: the castle hill with the castle on top and the funicular going up its side.
+  const C0 = { R: 30, H: 24, at: B.at(0.32, 104) };
+  const [hx, hy] = C0.at;
+  const base = hillPt(hx, hy, C0.R, C0.H, 0, Math.PI * 0.55);
+  const station = hillPt(hx, hy, C0.R, C0.H, 0.92, Math.PI * 0.4);
+  const [bx, by] = proj(base);
+  const [sx, sy] = proj(station);
+  // Near: the ferris wheel at the far right end.
+  const [wx, wy] = B.at(1.12, 62);
+  L.far.push(
+    <Layer key="far" depth="far">
+      {hills.map(({ at: [x, y], R, H }, i) => (
+        <Hill key={i} x={x} y={y} R={R} H={H} trees={Math.round(R / 3)} />
+      ))}
+    </Layer>,
+    <Layer key="mid" depth="mid">
+      <Hill x={hx} y={hy} R={C0.R} H={C0.H} contours={[0.45]} dash="2 3" />
+      <line x1={bx} y1={by} x2={sx} y2={sy} stroke={EDGE} />
+      <Castle x={hx - 14} y={hy - 6} z={C0.H - 1} />
+      <Drift sx={sx - bx} sy={sy - by} seconds={16} phase={0.2} mode="shuttle">
+        <rect x={bx - 2.4} y={by - 4.2} width={4.8} height={3.6} rx={0.6} fill={FILL} stroke={EDGE} />
+      </Drift>
+    </Layer>,
+    <Layer key="near" depth="near">
+      <FerrisWheel x={wx} y={wy} r={17} />
+    </Layer>,
+  );
+  L.extent.push(...hills.map(({ at: [x, y], R, H }) => [x, y - R, H] as Pt), [hx, hy, C0.H + 32], [wx, wy, 40], [wx + 10, wy, 0]);
+
+  // Sky: a hot-air balloon floating, a plane crossing high above.
+  const sky = skyLane(B, L, 70, 22);
+  const x0 = B.sx(0.05);
+  const x1 = B.sx(1.15);
+  L.moving.push(
+    <Drift key="balloon" sx={10} sy={-6} seconds={11} phase={0.4} mode="shuttle">
+      <Balloon x={B.sx(0.6)} y={sky - 6} />
+    </Drift>,
+    <Drift key="plane" sx={x1 - x0} sy={-8} seconds={46} phase={0.3}>
+      <Plane x={x0} y={sky - 14} />
+    </Drift>,
+  );
+}
+
+/** Countryside (Prekmurje and Styria): kozolec, stork, sunflowers, the Mura with a floating mill, vineyard hills, Goričko far away. */
+function countryBackdrop(rows: TownRow[], L: SceneLayers) {
+  const B = backdrop(rows);
+  // Far: the soft hills of Goričko.
+  const far = [
+    { f: 0.42, D: 150, R: 26, H: 15 },
+    { f: 0.56, D: 160, R: 30, H: 20 },
+    { f: 0.7, D: 148, R: 26, H: 16 },
+    { f: 0.84, D: 158, R: 32, H: 22 },
+    { f: 0.98, D: 146, R: 26, H: 16 },
+    { f: 1.12, D: 138, R: 22, H: 12 },
+  ]
+    .map((h) => ({ ...h, at: B.at(h.f, h.D) }))
+    .sort((p, q) => p.at[0] + p.at[1] - (q.at[0] + q.at[1]));
+  // Mid: vineyard hills with rows of vines, a church on the left top, a zidanica and a klopotec on the right one.
+  const v1 = { R: 28, H: 26, at: B.at(0.3, 100) };
+  const v2 = { R: 31, H: 30, at: B.at(0.74, 104) };
+  const zid = hillPt(v2.at[0], v2.at[1], v2.R, v2.H, 0.55, Math.PI * 0.35);
+  // The Mura with a floating mill, then (just behind the row) kozolec, sunflowers and a stork's nest.
+  const [r0] = B.at(0.02, 72);
+  const [r1, ry] = B.at(1.14, 72);
+  const [mx, my] = B.at(0.82, 73);
+  const [kx, ky] = B.at(0.12, 44);
+  const [s0, sy0] = B.at(0.4, 52);
+  const [s1] = B.at(0.66, 52);
+  const [nx, ny] = B.at(0.9, 40);
+  L.far.push(
+    <Layer key="far" depth="far">
+      {far.map(({ at: [x, y], R, H }, i) => (
+        <Hill key={i} x={x} y={y} R={R} H={H} trees={Math.round(R / 4)} />
+      ))}
+    </Layer>,
+    <Layer key="mid" depth="mid">
+      {[v1, v2].map(({ at: [x, y], R, H }, i) => (
+        <Hill key={i} x={x} y={y} R={R} H={H} contours={[0.2, 0.38, 0.56, 0.74]} dash="1.5 2.5" />
+      ))}
+      <Church x={v1.at[0] - 6} y={v1.at[1] - 3} z={v1.H - 1} s={0.9} />
+      <Zidanica x={zid[0] - 4} y={zid[1] - 3} z={zid[2]} />
+      <Klopotec x={v2.at[0] + 4} y={v2.at[1]} z={v2.H} />
+    </Layer>,
+    <Layer key="near" depth="near">
+      <River x0={r0} x1={r1} y={ry} w={10} />
+      <FloatingMill x={mx} y={my} />
+      <Kozolec x={kx} y={ky} />
+      <Sunflowers x0={s0} x1={s1} y0={sy0} y1={sy0 + 14} />
+      <StorkNest x={nx} y={ny} />
+    </Layer>,
+  );
+  L.extent.push(...far.map(({ at: [x, y], R, H }) => [x, y - R, H] as Pt), [v1.at[0], v1.at[1], v1.H + 26], [v2.at[0], v2.at[1], v2.H + 16], [r1, ry, 0]);
+
+  // Sky: a flock of birds crossing.
+  const sky = skyLane(B, L, 60);
+  const x0 = B.sx(0.05);
+  const x1 = B.sx(1.15);
+  L.moving.push(
+    <Drift key="birds" sx={x1 - x0} sy={-6} seconds={34} phase={0.15}>
+      <Birds x={x0} y={sky - 10} n={7} />
+    </Drift>,
+  );
 }

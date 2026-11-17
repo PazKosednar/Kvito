@@ -855,6 +855,12 @@ export function TownCanvas({
             {ambient.dayTime === "night" && <rect x={box.x0} y={box.y0} width={box.w} height={box.h} fill="var(--night-tint)" />}
           </g>
           <Sky box={box} />
+          {/* Deep backdrop behind the first row (hills, landmarks), deepest first. */}
+          {decor.far.length > 0 && (
+            <g aria-hidden="true" className="pointer-events-none" strokeWidth="1">
+              {decor.far}
+            </g>
+          )}
           {/* Painter's order per row: surroundings behind, each building followed by the decoration in the gap to its right, then the front. */}
           {rows.map((r) => (
             <g key={r.index}>

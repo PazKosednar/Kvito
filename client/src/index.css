@@ -227,10 +227,48 @@
 .kv-bob {
   animation: kv-bob ease-in-out infinite alternate;
 }
+/* Slow turning around its own centre (ferris wheel, klopotec, mill wheel). */
+@keyframes kv-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.kv-spin {
+  animation: kv-spin linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+/* Birds flapping their wings. */
+@keyframes kv-flap {
+  to {
+    transform: scaleY(-0.6);
+  }
+}
+.kv-flap {
+  animation: kv-flap ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+/* A light blinking (plane at night). */
+@keyframes kv-blink {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 0.1;
+  }
+}
+.kv-blink {
+  animation: kv-blink 1.6s steps(1) infinite;
+}
 /* Reduced motion: freeze instead of removing, so the negative delays keep the cars spread along the road. */
 @media (prefers-reduced-motion: reduce) {
   .kv-drive,
   .kv-shuttle,
+  .kv-spin,
+  .kv-flap,
+  .kv-blink,
   .kv-bob {
     animation-play-state: paused;
   }
