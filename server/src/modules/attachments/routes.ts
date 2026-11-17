@@ -7,6 +7,7 @@ import { cleanFileName, extensionFor, MAX_UPLOAD_BYTES, sniffMime, verifyFileSig
 import { prisma } from "../../lib/prisma.js";
 import { idParam } from "../../lib/validation.js";
 import { authUserId } from "../../middleware/auth.js";
+import { uploadLimiter } from "../../middleware/rateLimit.js";
 import type { Storage } from "../../services/storage/Storage.js";
 import { assertTenancyAccess } from "../access/access.js";
 import { attachmentDto } from "./service.js";
@@ -45,6 +46,7 @@ export function attachmentsRouter(deps: { storage: Storage }): Router {
   /** Upload: raw file bytes in the body (no multipart parser needed), kind + name in the query. */
   router.post(
     "/tenancies/:id/attachments",
+    uploadLimiter,
     express.raw({ type: () => true, limit: MAX_UPLOAD_BYTES }),
     async (req, res) => {
       const userId = authUserId(req);

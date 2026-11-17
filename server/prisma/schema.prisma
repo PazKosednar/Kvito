@@ -113,6 +113,8 @@ model User {
   /// Wrong passwords in a row; after a few the account is locked for a short, growing time.
   failedLogins     Int       @default(0)
   loginLockedUntil DateTime?
+  /// Access tokens issued before this moment are refused (set on password change/reset: "sign out everywhere").
+  sessionsValidFrom DateTime?
   name             String?
   phone            String?
   locale           Locale    @default(sl)

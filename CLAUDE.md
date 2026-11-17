@@ -51,3 +51,4 @@ Komunikacija z lastnikom projekta: slovenščina. Koda, imena v bazi in komentar
 - Izvoz in izbris podatkov uporabnika; pravila hrambe.
 - Pogoji uporabe in politika zasebnosti: `TODO(pravnik)`.
 - Aplikacija nikoli ne prejme ali posreduje denarja.
+- Stanje varnosti in odprte točke: [docs/SECURITY.md](docs/SECURITY.md). Dostopni žeton se vedno preverja z `verifySession` (ne samo podpis).

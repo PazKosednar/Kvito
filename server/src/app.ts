@@ -64,6 +64,11 @@ export function createApp(deps: AppDeps): Express {
       },
     }),
   );
+  // The app needs none of these browser features (photos come from a file input, which is not affected).
+  app.use((_req, res, next) => {
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()");
+    next();
+  });
   app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
   app.use(express.json({ limit: "100kb" }));
   app.use(cookieParser());

@@ -16,12 +16,25 @@ export async function signAccessToken(userId: string, ttlMinutes = env.ACCESS_TO
     .sign(secret);
 }
 
-/** Returns the user id, or null when the token is invalid or expired. */
-export async function verifyAccessToken(token: string): Promise<string | null> {
+export interface AccessClaims {
+  userId: string;
+  /** Issued at / expires at, seconds since the epoch. */
+  iat: number;
+  exp: number;
+}
+
+/** Signature, issuer, audience and expiry only (no database). Null when the token is invalid or expired. */
+export async function verifyAccessClaims(token: string): Promise<AccessClaims | null> {
   try {
     const { payload } = await jwtVerify(token, secret, { issuer: ISSUER, audience: AUDIENCE, algorithms: ["HS256"] });
-    return typeof payload.sub === "string" ? payload.sub : null;
+    if (typeof payload.sub !== "string" || typeof payload.iat !== "number" || typeof payload.exp !== "number") return null;
+    return { userId: payload.sub, iat: payload.iat, exp: payload.exp };
   } catch {
     return null;
   }
+}
+
+/** Returns the user id, or null when the token is invalid or expired. */
+export async function verifyAccessToken(token: string): Promise<string | null> {
+  return (await verifyAccessClaims(token))?.userId ?? null;
 }
