@@ -126,7 +126,7 @@
       "invite": "Povabi najemnika",
       "inviteHint": "Pošlji povezavo ali pokaži QR kodo. Aplikacije ni treba nameščati."
     },
-    "comingSoon": "Ti koraki pridejo v naslednji posodobitvi Kvita.",
+    "comingSoon": "Ti koraki pridejo v naslednji posodobitvi aplikacije Kvito.",
     "tenantTitle": "Najem še ni povezan",
     "tenantBody": "Najemodajalcu pošlji svoj e-naslov in te bo povabil. Ko sprejmeš povabilo, tu vidiš najemnino, položnice in sporočila.",
     "tenantEmailLabel": "Tvoj e-naslov za povabilo",
@@ -147,7 +147,7 @@
   "install": {
     "iosTitle": "Dodaj Kvito na začetni zaslon",
     "iosBody": "Samo tako ti iPhone pošilja opomnike. V Safariju tapni Deli in nato Dodaj na začetni zaslon.",
-    "updateAvailable": "Na voljo je nova različica Kvita.",
+    "updateAvailable": "Na voljo je nova različica aplikacije Kvito.",
     "update": "Posodobi"
   },
   "notFound": {
