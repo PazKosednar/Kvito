@@ -33,9 +33,9 @@ export function LoginPage() {
       {/* Hero on the panel (CGP; follows the theme). */}
       <section className="on-panel kv-grid-panel flex flex-col px-4 pt-[calc(1.25rem+env(safe-area-inset-top))] pb-8 sm:px-8 lg:px-12 lg:py-10">
         <KvitaLockup className="h-6 w-auto self-start lg:h-7" />
-        <div className="mt-8 lg:mt-auto">
+        <div className="mt-8 lg:mt-auto lg:pt-10">
           <Eyebrow onPanel index="01">{t("login.eyebrow")}</Eyebrow>
-          <h1 className="mt-3 max-w-[13ch] text-[2.5rem] lg:max-w-[22ch] leading-[2.75rem] font-semibold tracking-[-0.02em] whitespace-pre-line lg:text-display">
+          <h1 className="mt-3 max-w-[13ch] text-[2.5rem] lg:max-w-[22ch] leading-[2.75rem] font-semibold tracking-[-0.02em] whitespace-pre-line lg:text-display lg:leading-[1.05]">
             {t("app.headline")}
           </h1>
           <p className="mt-4 max-w-[40ch] text-lg leading-7 text-ink-on-panel-muted">{t("app.lead")}</p>
@@ -48,7 +48,8 @@ export function LoginPage() {
             ))}
           </ul>
         </div>
-        <ApartmentScene className="mt-6 max-w-[24rem] self-center lg:mt-auto lg:max-w-[34rem]" />
+        {/* Text and house sit together in the middle of the panel (house right under the text, not at the bottom). */}
+        <ApartmentScene className="mt-6 max-w-[24rem] self-center lg:mt-10 lg:mb-auto lg:max-w-[min(34rem,62dvh)]" />
       </section>
 
       {/* Form on stone. */}
