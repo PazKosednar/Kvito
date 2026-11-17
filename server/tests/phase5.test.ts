@@ -116,7 +116,7 @@ describe.skipIf(!hasDb)("overview, exports and privacy", () => {
     expect(gone.name).toBe("Izbrisan uporabnik");
     expect(await ctx.prisma.pushSubscription.count({ where: { userId: ana.user.id } })).toBe(0);
     // The old token stops working, the landlord still sees the charges and the confirmed payment.
-    await ana.get("/api/me").expect(404);
+    await ana.get("/api/me").expect(401);
     const charges = (await landlord.get(`/api/tenancies/${tenancyId}/charges`).expect(200)).body.charges as unknown[];
     expect(charges.length).toBeGreaterThanOrEqual(4);
     expect(await ctx.prisma.auditLog.count({ where: { actorId: ana.user.id, action: "account.delete" } })).toBe(1);
