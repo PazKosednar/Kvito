@@ -152,6 +152,118 @@ function Box({ x, y, z = 0, w, d, h, faint = false }: { x: number; y: number; z?
   );
 }
 
+// ---------- City skyline landmarks (background, faint lines) ----------
+
+/** Iso ellipse (a circle on the ground plane at height z), as world points. */
+const ring = (cx: number, cy: number, rx: number, ry: number, z: number, from = 0, to = Math.PI * 2, n = 36): Pt[] =>
+  Array.from({ length: n + 1 }, (_, i) => {
+    const a = from + ((to - from) * i) / n;
+    return [cx + Math.cos(a) * rx, cy + Math.sin(a) * ry, z] as Pt;
+  });
+
+/** Tall tower: base, a narrower set-back top, horizontal floor bands, antenna with a light at night. */
+function Tower({ x, y, h }: { x: number; y: number; h: number }) {
+  const night = useAmbient().dayTime === "night";
+  const w = 16;
+  const d = 14;
+  const top = Math.round(h * 0.78);
+  const [ax, ay] = proj([x + w / 2, y + d / 2, h + 4]);
+  const [bx, by] = proj([x + w / 2, y + d / 2, h + 22]);
+  return (
+    <g>
+      <Box x={x} y={y} w={w} d={d} h={top} faint />
+      <Box x={x + 3} y={y + 3} z={top} w={w - 6} d={d - 6} h={h - top} faint />
+      <Box x={x + w / 2 - 2} y={y + d / 2 - 2} z={h} w={4} d={4} h={4} faint />
+      {Array.from({ length: Math.floor(top / 9) - 1 }, (_, i) => (
+        <g key={i} stroke={FAINT} fill="none">
+          <polyline points={pts([[x + 2, y + d, 9 * (i + 1)], [x + w - 2, y + d, 9 * (i + 1)]])} />
+          <polyline points={pts([[x + w, y + 2, 9 * (i + 1)], [x + w, y + d - 2, 9 * (i + 1)]])} />
+        </g>
+      ))}
+      <line x1={ax} y1={ay} x2={bx} y2={by} stroke={FAINT} />
+      {night && <circle cx={bx} cy={by} r={4} fill="var(--night-glow)" opacity={0.9} />}
+      <circle cx={bx} cy={by} r={1.4} className={night ? "fill-ink-on-panel" : "fill-ink-on-panel-muted"} />
+    </g>
+  );
+}
+
+/** Stadium: an oval bowl with the pitch inside and four floodlight masts (lit at night). */
+function Stadium({ cx, cy, rx, ry }: { cx: number; cy: number; rx: number; ry: number }) {
+  const night = useAmbient().dayTime === "night";
+  const h = 12;
+  // Front half of the outer wall (angles 0..π face the viewer in this projection: +y is towards the viewer).
+  const frontBottom = ring(cx, cy, rx, ry, 0, -Math.PI / 4, (Math.PI * 5) / 4);
+  const frontTop = ring(cx, cy, rx, ry, h, -Math.PI / 4, (Math.PI * 5) / 4).reverse();
+  const masts: Pt[] = [
+    [cx - rx * 0.8, cy - ry * 0.8, 0],
+    [cx + rx * 0.8, cy - ry * 0.8, 0],
+    [cx - rx * 0.8, cy + ry * 0.8, 0],
+    [cx + rx * 0.8, cy + ry * 0.8, 0],
+  ];
+  const mast = ([mx, my]: Pt, i: number) => {
+    const [gx, gy] = proj([mx, my, h]);
+    const [tx, ty] = proj([mx, my, h + 22]);
+    return (
+      <g key={i}>
+        <line x1={gx} y1={gy} x2={tx} y2={ty} stroke={FAINT} />
+        {night && <ellipse cx={tx} cy={ty} rx={7} ry={4} fill="var(--night-glow)" opacity={0.85} />}
+        <rect x={tx - 3.5} y={ty - 2} width={7} height={3} fill={FILL} stroke={FAINT} />
+      </g>
+    );
+  };
+  return (
+    <g strokeLinejoin="round">
+      {masts.slice(0, 2).map(mast)}
+      <polygon points={pts(ring(cx, cy, rx, ry, h))} fill={FILL} stroke={FAINT} />
+      <polygon points={pts([...frontBottom, ...frontTop])} fill={FILL} stroke={FAINT} />
+      {/* Stands: inner rim, then the pitch with halfway line and centre circle. */}
+      <polygon points={pts(ring(cx, cy, rx * 0.72, ry * 0.68, h))} fill={FILL} stroke={FAINT} />
+      <polygon
+        points={pts([[cx - rx * 0.5, cy - ry * 0.42, h], [cx + rx * 0.5, cy - ry * 0.42, h], [cx + rx * 0.5, cy + ry * 0.42, h], [cx - rx * 0.5, cy + ry * 0.42, h]])}
+        fill="none"
+        stroke={FAINT}
+      />
+      <polyline points={pts([[cx, cy - ry * 0.42, h], [cx, cy + ry * 0.42, h]])} fill="none" stroke={FAINT} />
+      <polygon points={pts(ring(cx, cy, rx * 0.1, ry * 0.12, h, 0, Math.PI * 2, 16))} fill="none" stroke={FAINT} />
+      {/* Ribs on the outer wall. */}
+      {[0.1, 0.35, 0.6, 0.85].map((f, i) => {
+        const a = -Math.PI / 4 + ((Math.PI * 3) / 2) * f;
+        const p = [cx + Math.cos(a) * rx, cy + Math.sin(a) * ry] as const;
+        return <polyline key={i} points={pts([[p[0], p[1], 0], [p[0], p[1], h]])} fill="none" stroke={FAINT} />;
+      })}
+      {masts.slice(2).map((m, i) => mast(m, i + 2))}
+    </g>
+  );
+}
+
+/** Tower crane: lattice mast, jib with trolley and hook, counter-jib with weight. */
+function Crane({ x, y, h }: { x: number; y: number; h: number }) {
+  const m = 3;
+  const jib = 46;
+  const back = 14;
+  const lines: [Pt, Pt][] = [];
+  for (const [dx, dy] of [[0, 0], [m, 0], [m, m], [0, m]] as const) lines.push([[x + dx, y + dy, 0], [x + dx, y + dy, h]]);
+  for (let z = 6; z < h; z += 6) lines.push([[x, y + m, z - 6], [x + m, y + m, z]], [[x + m, y, z - 6], [x + m, y + m, z]]);
+  const top: Pt = [x + m / 2, y + m / 2, h + 8];
+  lines.push(
+    [[x - back, y + m / 2, h], [x + m + jib, y + m / 2, h]],
+    [[x - back, y + m / 2, h + 2], [x + m + jib, y + m / 2, h + 2]],
+    [top, [x + m + jib, y + m / 2, h + 2]],
+    [top, [x - back, y + m / 2, h + 2]],
+    [[x + m, y + m / 2, h], top],
+    [[x + 30, y + m / 2, h], [x + 30, y + m / 2, h - 20]],
+  );
+  return (
+    <g stroke={FAINT} fill="none">
+      {lines.map(([a, b], i) => (
+        <polyline key={i} points={pts([a, b])} />
+      ))}
+      <Box x={x - back} y={y - 1} z={h - 5} w={6} d={m + 2} h={5} faint />
+      <Box x={x + 28} y={y} z={h - 24} w={4} d={m} h={3} faint />
+    </g>
+  );
+}
+
 function Car({ x, y }: { x: number; y: number }) {
   return (
     <g>
@@ -243,7 +355,7 @@ function Sheep({ x, y }: { x: number; y: number }) {
  */
 function nearLabel(r: TownRow, x: number, dy: number) {
   const labels = [...r.gaps.map((g) => g.x0), r.x1 + 6];
-  return labels.some((lx) => Math.abs(x - (lx + dy - 6)) < 13);
+  return labels.some((lx) => Math.abs(x - (lx + dy - 6)) < 20);
 }
 
 const lineX = (x0: number, x1: number, y: number, z = 0) => pts([[x0, y, z], [x1, y, z]]);
@@ -292,11 +404,32 @@ function park(rows: TownRow[], L: SceneLayers) {
 function city(rows: TownRow[], L: SceneLayers) {
   for (const r of rows) {
     const rnd = seeded(`city-${r.index}`);
-    // Skyline behind: faint taller blocks.
+    // Skyline behind (faint): a stadium further back, then a row of blocks with two towers and a crane.
     const back: ReactNode[] = [];
+    const span = r.x1 - r.x0;
+    const by = r.y0 - 30;
+    if (span > 120) back.push(<Stadium key="stadium" cx={r.x0 + span * 0.62} cy={r.y0 - 92} rx={44} ry={30} />);
+    const towerAt = [r.x0 + span * 0.18, r.x0 + span * 0.82];
+    const craneAt = r.x0 + span * 0.42;
+    let crane = false;
     for (let x = r.x0 - 14, i = 0; x <= r.x1 + 6; i++) {
+      const t = towerAt.findIndex((tx) => tx >= x && tx < x + 30);
+      if (t >= 0) {
+        back.push(<Tower key={`t${i}`} x={x} y={by - 2} h={t === 0 ? 112 : 96} />);
+        towerAt.splice(t, 1);
+        x += 22;
+        continue;
+      }
+      if (!crane && x >= craneAt) {
+        crane = true;
+        back.push(<Crane key="crane" x={x + 4} y={by - 6} h={84} />);
+        x += 14;
+        continue;
+      }
       const w = 20 + Math.round(rnd() * 12);
-      back.push(<Box key={`k${i}`} x={x} y={r.y0 - 30} w={w} d={16} h={30 + Math.round(rnd() * 34)} faint />);
+      const h = 26 + Math.round(rnd() * 30);
+      back.push(<Box key={`k${i}`} x={x} y={by} w={w} d={16} h={h} faint />);
+      if (rnd() > 0.6) back.push(<Box key={`k${i}r`} x={x + w / 2 - 3} y={by + 5} z={h} w={6} d={6} h={5} faint />);
       x += w + 6;
     }
     L.back.set(r.index, back);
@@ -317,6 +450,9 @@ function city(rows: TownRow[], L: SceneLayers) {
       front.push(<polyline key={`z${i}`} points={pts([[cx + i * 4, curbA + 2, 0], [cx + i * 4, curbB - 2, 0]])} fill="none" stroke={FAINT} strokeWidth="2" />);
     }
     for (let x = r.x0 - 6, i = 0; x <= r.x1 + 6; x += 48, i++) if (!nearLabel(r, x, 10)) front.push(<Lamp key={`lp${i}`} x={x} y={curbA - 2} />);
+    // Far side of the road: a sidewalk and a second row of lamps, staggered by half a step.
+    front.push(<polyline key="sw2" points={lineX(x0, x1, curbB + 6)} fill="none" stroke={FAINT} />);
+    for (let x = r.x0 + 18, i = 0; x <= r.x1 + 18; x += 48, i++) if (!nearLabel(r, x, 41)) front.push(<Lamp key={`lq${i}`} x={x} y={curbB + 3} />);
     // Traffic: near lane drives right, far lane drives left; drawn near lane first (it is further back).
     const len = x1 - x0 - 14;
     const near = 16 + Math.round(rnd() * 4);
@@ -336,7 +472,7 @@ function city(rows: TownRow[], L: SceneLayers) {
         <Car x={x1 - 14} y={curbA + 15} />
       </Mover>,
     );
-    L.extent.push([x0, r.y0 - 32, 0], [x1, r.y0 - 32, 0], [x0, curbB + 4, 0], [x1, curbB + 4, 0], [r.x0, r.y0 - 30, 66]);
+    L.extent.push([x0, r.y0 - 32, 0], [x1, r.y0 - 32, 0], [x0, curbB + 10, 0], [x1, curbB + 10, 0], [r.x0, r.y0 - 30, 140], [r.x0 + (r.x1 - r.x0) * 0.62, r.y0 - 122, 40]);
   }
 }
 
