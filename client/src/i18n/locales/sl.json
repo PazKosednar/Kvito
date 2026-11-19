@@ -672,7 +672,9 @@
     "unread_one": "{{count}} neprebrano sporočilo",
     "unread_two": "{{count}} neprebrani sporočili",
     "unread_few": "{{count}} neprebrana sporočila",
-    "unread_other": "{{count}} neprebranih sporočil"
+    "unread_other": "{{count}} neprebranih sporočil",
+    "today": "Danes",
+    "yesterday": "Včeraj"
   },
   "systemEvents": {
     "MEMBER_JOINED": "Nov najemnik: {{name}}.",

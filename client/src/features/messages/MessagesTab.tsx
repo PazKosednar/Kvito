@@ -1,11 +1,9 @@
-import { Loader2, Receipt, Send, Wrench } from "lucide-react";
+import { ArrowUp, CheckCheck, Info, Loader2, MessagesSquare, Paperclip, Receipt, Wrench } from "lucide-react";
 import { Fragment, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Eyebrow, UnitsIllustration } from "@/components/brand";
-import { AttachmentList, FilePickerButton, PendingFiles } from "@/components/attachments";
+import { AttachmentList, PendingFiles } from "@/components/attachments";
 import { ErrorState, FormError, LoadingState } from "@/components/layout-parts";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useComposer } from "@/hooks/useComposer";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
@@ -13,9 +11,39 @@ import { useMessages } from "@/hooks/useMessages";
 import { formatDate, formatTime } from "@/lib/dates";
 import { formatCents } from "@/lib/money";
 import { cn } from "@/lib/utils";
-import type { Message } from "@/types/domain";
+import type { Message, PersonRef } from "@/types/domain";
 import { useTenancyContext } from "@/features/tenancies/TenancyLayout";
 
+/** Messages of one person within this many minutes form one group (one name, one time). */
+const GROUP_MINUTES = 5;
+
+const dayKey = (iso: string) => new Date(iso).toLocaleDateString("sv-SE", { timeZone: "Europe/Ljubljana" });
+
+const displayName = (p: PersonRef | null | undefined) => p?.name?.trim() || p?.email || "";
+
+const initials = (p: PersonRef | null | undefined) =>
+  displayName(p)
+    .split(/[\s@.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join("");
+
+function Avatar({ person, className }: { person: PersonRef | null | undefined; className?: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn("inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-ink/10 text-xs font-semibold text-ink-muted", className)}
+    >
+      {initials(person)}
+    </span>
+  );
+}
+
+/**
+ * The conversation of one tenancy: a messenger-like window (own scroll and composer on large screens),
+ * messages grouped by person, mine in ink, system events as small labels.
+ */
 export function MessagesTab() {
   const { t } = useTranslation();
   const toMessage = useErrorMessage();
@@ -23,6 +51,7 @@ export function MessagesTab() {
   const { tenancy } = useTenancyContext();
   const q = useMessages(tenancy.id);
   const composer = useComposer((body, files) => q.send(body, files));
+  const listRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const count = q.messages.length;
   const { markRead } = q;
@@ -31,65 +60,130 @@ export function MessagesTab() {
   useEffect(() => {
     if (count === 0) return;
     void markRead().catch(() => undefined);
-    endRef.current?.scrollIntoView({ block: "end" });
+    const list = listRef.current;
+    if (list && list.scrollHeight > list.clientHeight) list.scrollTop = list.scrollHeight;
+    else endRef.current?.scrollIntoView({ block: "end" });
   }, [count, markRead]);
 
   if (q.loading) return <LoadingState />;
   if (q.error) return <ErrorState message={toMessage(q.error)} onRetry={() => void q.reload()} />;
 
+  const people = [tenancy.unit.property.owner, ...tenancy.members.map((m) => m.user)].filter((p) => p.id !== user?.id);
+  const hasUserMessages = q.messages.some((m) => m.kind === "USER");
+
   // "Prebrano" goes under my last message once someone else has read past it.
   const lastMine = [...q.messages].reverse().find((m) => m.author?.id === user?.id);
   const readByOther = lastMine && q.reads.some((r) => r.userId !== user?.id && r.lastReadAt >= lastMine.createdAt);
 
+  const today = dayKey(new Date().toISOString());
+  const yesterday = dayKey(new Date(Date.now() - 86_400_000).toISOString());
+  const dayLabel = (iso: string) => {
+    const k = dayKey(iso);
+    return k === today ? t("messages.today") : k === yesterday ? t("messages.yesterday") : formatDate(k);
+  };
+
+  const sameGroup = (a: Message | undefined, b: Message | undefined) =>
+    !!a &&
+    !!b &&
+    a.kind === "USER" &&
+    b.kind === "USER" &&
+    a.author?.id === b.author?.id &&
+    dayKey(a.createdAt) === dayKey(b.createdAt) &&
+    Math.abs(new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) < GROUP_MINUTES * 60_000;
+
   return (
-    <div className="flex flex-col">
-      {q.messages.filter((m) => m.kind === "USER").length === 0 && (
-        <div className="kv-grid-bg mb-6 grid items-center gap-4 rounded-md border border-line p-5 sm:grid-cols-[1fr_12rem]">
-          <div>
-            <Eyebrow index="00">{t("tabs.messages")}</Eyebrow>
-            <p className="mt-2 text-h3 font-semibold">{t("messages.emptyTitle")}</p>
-            <p className="mt-1 text-ink-muted">{t("messages.emptyBody")}</p>
-          </div>
-          <UnitsIllustration className="max-w-48" />
+    <section
+      aria-label={t("tabs.messages")}
+      className="flex flex-col rounded-lg border border-line bg-surface-raised lg:h-[calc(100dvh-15rem)] lg:min-h-[28rem] lg:overflow-hidden"
+    >
+      {/* Who is in the conversation. */}
+      <header className="flex items-center gap-3 border-b border-line px-4 py-3">
+        <div className="flex -space-x-1.5">
+          {people.slice(0, 3).map((p) => (
+            <Avatar key={p.id} person={p} className="border border-line-strong bg-surface-raised" />
+          ))}
         </div>
-      )}
+        <div className="min-w-0">
+          <p className="truncate font-semibold">{people.map(displayName).join(", ")}</p>
+          <p className="truncate text-xs text-ink-muted">{tenancy.unit.property.name}, {tenancy.unit.name}</p>
+        </div>
+      </header>
 
-      <ol className="flex flex-col gap-3" aria-live="polite">
-        {q.messages.map((m, i) => {
-          const prev = q.messages[i - 1];
-          const newDay = !prev || prev.createdAt.slice(0, 10) !== m.createdAt.slice(0, 10);
-          return (
-            <Fragment key={m.id}>
-              {newDay && (
-                <li className="my-2 flex items-center gap-3" aria-hidden="true">
-                  <span className="h-px flex-1 bg-line" />
-                  <Eyebrow>{formatDate(m.createdAt)}</Eyebrow>
-                  <span className="h-px flex-1 bg-line" />
-                </li>
-              )}
-              {m.kind === "SYSTEM" ? (
-                <SystemLine message={m} tenancyId={tenancy.id} />
-              ) : (
-                <Bubble message={m} mine={m.author?.id === user?.id} tenancyId={tenancy.id} read={m.id === lastMine?.id && !!readByOther} />
-              )}
-            </Fragment>
-          );
-        })}
-      </ol>
-      <div ref={endRef} />
+      <div ref={listRef} className="flex-1 px-3 py-4 sm:px-5 lg:overflow-y-auto">
+        {!hasUserMessages && (
+          <div className="mx-auto mb-6 flex max-w-sm flex-col items-center py-6 text-center">
+            <span className="inline-flex size-11 items-center justify-center rounded-full bg-ink/[0.07]">
+              <MessagesSquare className="size-5 text-ink-muted" aria-hidden="true" />
+            </span>
+            <p className="mt-3 font-semibold">{t("messages.emptyTitle")}</p>
+            <p className="mt-1 text-sm text-ink-muted">{t("messages.emptyBody")}</p>
+          </div>
+        )}
 
-      {/* Composer */}
+        <ol className="flex flex-col" aria-live="polite">
+          {q.messages.map((m, i) => {
+            const prev = q.messages[i - 1];
+            const next = q.messages[i + 1];
+            const newDay = !prev || dayKey(prev.createdAt) !== dayKey(m.createdAt);
+            const first = !sameGroup(prev, m);
+            const last = !sameGroup(m, next);
+            return (
+              <Fragment key={m.id}>
+                {newDay && (
+                  <li className="my-4 flex justify-center" aria-hidden="true">
+                    <span className="rounded-full bg-ink/[0.07] px-3 py-1 text-xs text-ink-muted">{dayLabel(m.createdAt)}</span>
+                  </li>
+                )}
+                {m.kind === "SYSTEM" ? (
+                  <SystemLine message={m} tenancyId={tenancy.id} />
+                ) : (
+                  <Bubble
+                    message={m}
+                    mine={m.author?.id === user?.id}
+                    first={first}
+                    last={last}
+                    tenancyId={tenancy.id}
+                    read={m.id === lastMine?.id && !!readByOther}
+                  />
+                )}
+              </Fragment>
+            );
+          })}
+        </ol>
+        <div ref={endRef} />
+      </div>
+
+      {/* Composer: one rounded field with attach and send inside. */}
       <form
-        className="sticky bottom-0 mt-6 -mx-4 flex flex-col gap-3 border-t border-line bg-surface px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:-mx-6 sm:px-6"
+        className="sticky bottom-0 rounded-b-lg border-t border-line bg-surface-raised px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:static lg:pb-3"
         onSubmit={(e) => {
           e.preventDefault();
           void composer.submit();
         }}
       >
-        <PendingFiles files={composer.files} onRemove={composer.removeFile} />
-        <FormError message={composer.error} />
-        <div className="flex items-end gap-2">
-          <FilePickerButton onPick={composer.addFiles} label={t("messages.attach")} className="shrink-0 px-2.5 [&>span]:sr-only" disabled={composer.pending} />
+        <div className="flex flex-col gap-2 empty:hidden">
+          <PendingFiles files={composer.files} onRemove={composer.removeFile} />
+          <FormError message={composer.error} />
+        </div>
+        <div className="mt-0 flex items-end gap-1 rounded-3xl border border-line-strong bg-surface py-1 pr-1 pl-1 focus-within:border-ink">
+          <label
+            className="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-surface-sunken hover:text-ink has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-45"
+            title={t("messages.attach")}
+          >
+            <Paperclip className="size-4" aria-hidden="true" />
+            <span className="sr-only">{t("messages.attach")}</span>
+            <input
+              type="file"
+              multiple
+              accept="image/*,application/pdf"
+              className="sr-only"
+              disabled={composer.pending}
+              onChange={(e) => {
+                composer.addFiles([...(e.target.files ?? [])]);
+                e.target.value = "";
+              }}
+            />
+          </label>
           <label className="sr-only" htmlFor="message-body">
             {t("messages.placeholder")}
           </label>
@@ -99,59 +193,101 @@ export function MessagesTab() {
             value={composer.body}
             onChange={(e) => composer.setBody(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
                 e.preventDefault();
                 void composer.submit();
               }
             }}
             placeholder={t("messages.placeholder")}
             maxLength={4000}
-            className="field-sizing-content max-h-40 min-h-10 flex-1 resize-none rounded-sm border border-line-strong bg-surface-raised px-3 py-2 text-base outline-none placeholder:text-ink-faint focus-visible:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)]"
+            className="field-sizing-content max-h-40 min-h-9 flex-1 resize-none bg-transparent px-1 py-1.5 text-base outline-none placeholder:text-ink-faint"
           />
-          <Button type="submit" size="icon" disabled={!composer.canSend} aria-label={t("messages.send")}>
-            {composer.pending ? <Loader2 className="animate-spin" /> : <Send />}
-          </Button>
+          <button
+            type="submit"
+            disabled={!composer.canSend}
+            aria-label={t("messages.send")}
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-surface transition-opacity duration-150 disabled:opacity-25"
+          >
+            {composer.pending ? <Loader2 className="size-4 animate-spin" /> : <ArrowUp className="size-4" />}
+          </button>
         </div>
       </form>
-    </div>
+    </section>
   );
 }
 
-function Bubble({ message: m, mine, tenancyId, read }: { message: Message; mine: boolean; tenancyId: string; read: boolean }) {
+function Bubble({
+  message: m,
+  mine,
+  first,
+  last,
+  tenancyId,
+  read,
+}: {
+  message: Message;
+  mine: boolean;
+  first: boolean;
+  last: boolean;
+  tenancyId: string;
+  read: boolean;
+}) {
   const { t } = useTranslation();
+  const onlyFiles = !m.body && !m.charge && !m.issue;
   return (
-    <li className={cn("flex flex-col gap-1", mine ? "items-end" : "items-start")}>
-      {!mine && <span className="px-1 text-xs text-ink-faint">{m.author?.name ?? m.author?.email}</span>}
-      <div
-        className={cn(
-          "max-w-[85%] rounded-md border px-3 py-2 sm:max-w-[70%]",
-          mine ? "border-transparent bg-accent-soft text-ink" : "border-line bg-surface-raised",
+    <li className={cn("flex items-end gap-2", mine ? "justify-end" : "justify-start", first ? "mt-3" : "mt-0.5")}>
+      {/* The other person's initials sit next to the last message of their group. */}
+      {!mine && (last ? <Avatar person={m.author} className="mb-[1.375rem]" /> : <span className="w-8 shrink-0" aria-hidden="true" />)}
+      <div className={cn("flex max-w-[80%] flex-col sm:max-w-[65%]", mine ? "items-end" : "items-start")}>
+        {!mine && first && <span className="mb-1 px-3 text-xs text-ink-muted">{displayName(m.author)}</span>}
+        <div
+          className={cn(
+            "rounded-2xl text-[15px] leading-snug",
+            onlyFiles ? "p-1" : "px-3.5 py-2",
+            mine ? "bg-ink text-surface" : "bg-ink/[0.07] text-ink",
+            // The corners on the speaker's side are smaller where messages of a group meet (and at the bottom: a quiet "tail").
+            mine ? "rounded-br-md" : "rounded-bl-md",
+            mine && !first && "rounded-tr-md",
+            !mine && !first && "rounded-tl-md",
+          )}
+        >
+          {(m.charge || m.issue) && <LinkChip message={m} tenancyId={tenancyId} mine={mine} />}
+          {m.body && <p className="whitespace-pre-wrap [overflow-wrap:anywhere]">{m.body}</p>}
+          <AttachmentList files={m.attachments} className={cn(m.body && "mt-2", "[&_a]:bg-surface-raised")} />
+        </div>
+        {last && (
+          <span className="mt-1 flex items-center gap-1 px-1 text-[11px] text-ink-faint tabular-nums">
+            {formatTime(m.createdAt)}
+            {read && (
+              <>
+                <CheckCheck className="ml-1 size-3.5" aria-hidden="true" />
+                {t("messages.read")}
+              </>
+            )}
+          </span>
         )}
-      >
-        {(m.charge || m.issue) && <LinkChip message={m} tenancyId={tenancyId} />}
-        {m.body && <p className="text-sm leading-5 whitespace-pre-wrap [overflow-wrap:anywhere]">{m.body}</p>}
-        <AttachmentList files={m.attachments} className={m.body ? "mt-2" : undefined} />
       </div>
-      <span className="mono px-1 text-[11px] text-ink-faint">
-        {formatTime(m.createdAt)}
-        {read && ` · ${t("messages.read")}`}
-      </span>
     </li>
   );
 }
 
-function LinkChip({ message: m, tenancyId }: { message: Message; tenancyId: string }) {
+function LinkChip({ message: m, tenancyId, mine }: { message: Message; tenancyId: string; mine: boolean }) {
   const to = m.systemEvent?.startsWith("DEPOSIT_") || m.systemEvent?.startsWith("SETTLEMENT_") || m.systemEvent === "RENT_CHANGED" ? `/najemi/${tenancyId}/pogodba` : m.charge ? `/najemi/${tenancyId}/obveznosti/${m.charge.id}` : `/najemi/${tenancyId}/okvare/${m.issue!.id}`;
   const Icon = m.charge ? Receipt : Wrench;
   return (
-    <Link to={to} className="mb-1.5 inline-flex max-w-full items-center gap-1.5 text-xs font-medium text-primary hover:underline">
+    <Link
+      to={to}
+      className={cn(
+        "mb-1.5 flex max-w-full items-center gap-1.5 border-b pb-1.5 text-xs font-medium hover:underline",
+        mine ? "border-surface/20 text-surface/80" : "border-line text-ink-muted",
+      )}
+    >
       <Icon className="size-3.5 shrink-0" aria-hidden="true" />
       <span className="truncate">{m.charge?.title ?? m.issue?.title}</span>
     </Link>
   );
 }
 
-/** System events (charge created, payment confirmed …) as a quiet centred line with a link. */
+/** System events (charge created, payment confirmed …) as a small centred label with an icon and a link. */
 function SystemLine({ message: m, tenancyId }: { message: Message; tenancyId: string }) {
   const { t } = useTranslation();
   const d = m.systemData ?? {};
@@ -169,18 +305,24 @@ function SystemLine({ message: m, tenancyId }: { message: Message; tenancyId: st
   };
   const text = t(`systemEvents.${m.systemEvent ?? "UNKNOWN"}`, { ...params, defaultValue: m.body });
   const to = m.charge ? `/najemi/${tenancyId}/obveznosti/${m.charge.id}` : m.issue ? `/najemi/${tenancyId}/okvare/${m.issue.id}` : null;
+  const Icon = m.charge ? Receipt : m.issue ? Wrench : Info;
+  const body = (
+    <>
+      <Icon className="size-3.5 shrink-0" aria-hidden="true" />
+      <span>{text}</span>
+      <span className="text-ink-faint tabular-nums">{formatTime(m.createdAt)}</span>
+    </>
+  );
+  const cls = "inline-flex max-w-full items-center gap-2 rounded-full border border-line px-3 py-1.5 text-left text-xs text-ink-muted";
   return (
-    <li className="flex justify-center px-4 text-center">
-      <span className="text-xs text-ink-muted">
-        {to ? (
-          <Link to={to} className="hover:text-ink hover:underline">
-            {text}
-          </Link>
-        ) : (
-          text
-        )}
-        <span className="mono ml-2 text-[11px] text-ink-faint">{formatTime(m.createdAt)}</span>
-      </span>
+    <li className="my-3 flex justify-center px-2">
+      {to ? (
+        <Link to={to} className={cn(cls, "transition-colors duration-150 hover:border-line-strong hover:text-ink")}>
+          {body}
+        </Link>
+      ) : (
+        <span className={cls}>{body}</span>
+      )}
     </li>
   );
 }
