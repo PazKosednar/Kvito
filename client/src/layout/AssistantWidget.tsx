@@ -94,8 +94,6 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-const isMac = () => typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
-
 /**
  * "Vprašaj Kvito": the landlord's assistant. A trigger bottom right (Ctrl/⌘ K), a panel with the conversation
  * as questions and answers (no chat bubbles). Floating layer, so it may cast a shadow (CGP).
@@ -305,15 +303,12 @@ export function AssistantWidget() {
         aria-expanded={open}
         aria-label={open ? t("assistant.close") : t("assistant.open")}
         className={cn(
-          "on-panel fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 inline-flex size-14 items-center justify-center gap-2.5 rounded-full border border-line-strong shadow-lg transition-colors duration-150 hover:border-ink-on-panel-muted sm:right-5 sm:bottom-5 sm:h-12 sm:w-auto sm:pr-3 sm:pl-4",
+          "on-panel fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 inline-flex size-14 items-center justify-center gap-2.5 rounded-full border border-line-strong shadow-lg transition-colors duration-150 hover:border-ink-on-panel-muted sm:right-5 sm:bottom-5 sm:h-12 sm:w-auto sm:pr-5 sm:pl-4",
           open && "max-sm:hidden",
         )}
       >
         {open ? <X className="size-5 text-ink-on-panel" /> : <KvitaMark className="size-6" />}
         <span className="hidden font-medium text-ink-on-panel sm:inline">{open ? t("assistant.closeShort") : t("assistant.trigger")}</span>
-        <kbd className="hidden rounded-xs border border-ink-on-panel/20 px-1.5 py-0.5 font-mono text-[11px] text-ink-on-panel-muted sm:inline">
-          {isMac() ? "⌘K" : "Ctrl K"}
-        </kbd>
       </button>
     </>
   );
