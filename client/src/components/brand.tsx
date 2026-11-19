@@ -10,36 +10,38 @@ import { formatCents } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import type { ChargeStatus } from "@/types/domain";
 
-// ---------- Logo (assets/Logos, CGP v2) ----------
+// ---------- Logo (assets/Logos, CGP v3) ----------
 
-/** Rounded tile of the mark (48 × 48, radius 10). */
-const MARK_TILE = "M10 0H38A10 10 0 0 1 48 10V38A10 10 0 0 1 38 48H10A10 10 0 0 1 0 38V10A10 10 0 0 1 10 0Z";
-/** The oversized check of the app icon, clipped to the tile – its long stroke leaves the tile top right. */
-const MARK_CHECK =
-  "M47.93 8.87 L47.89 8.53 L47.81 8.05 L47.7 7.57 L47.57 7.1 L47.42 6.63 L47.24 6.17 L47.04 5.72 L46.82 5.29 L46.58 4.86 L46.31 4.44 L46.03 4.04 L45.73 3.66 L45.41 3.28 L45.07 2.93 L44.72 2.59 L44.34 2.27 L43.96 1.97 L43.56 1.69 L43.14 1.42 L42.78 1.22 L18.41 27.04 L9.68 18.32 L3.32 24.68 L18.59 39.96Z";
+/** Mark "two sides": a house split into two equal halves – landlord (left) and tenant (right). 48 × 48 grid. */
+const MARK_LEFT = "M2 19.5 L22.25 2.47 V46 H2 Z";
+const MARK_RIGHT = "M25.75 2.47 L46 19.5 V46 H25.75 Z";
 /** Wordmark letters k, i, t, o (drawn, not typeset; 7-unit strokes on a 40-unit height). */
 const WORD_LETTERS =
   "M7 0 L0 0 L0 40 L7 40 L7 34.5 L10.53 30.43 L18.5 40 L27.5 40 L14.91 25.38 L26.5 12 L17.5 12 L7 24Z M75 12 L75 40 L68 40 L68 12Z M75 0 L75 7 L68 7 L68 0Z M98 19 L98 12 L90 12 L90 2 L83 2 L83 12 L78 12 L78 19 L83 19 L83 40 L90 40 L90 19Z M101 26a14 14 0 1 0 28 0a14 14 0 1 0 -28 0Z M108 26a7 7 0 1 1 14 0a7 7 0 1 1 -14 0Z";
 /** The "v" of the wordmark is a check – "everything is settled". */
 const WORD_CHECK = "M42.1 39.89 L62.87 10 L57.13 6 L41.9 27.91 L34.81 18.41 L29.19 22.59Z";
 
-/** The mark: a rounded tile with the oversized check of the app icon. For small spaces (loader, banner, avatar). Min. 16 px. */
+/** The mark: the "two sides" house, no background. Left half follows the text color, right half is always signal green. Min. 16 px. */
 export function KvitaMark({ className, title }: { className?: string; title?: string }) {
   return (
     <svg viewBox="0 0 48 48" className={cn("size-7 shrink-0", className)} role={title ? "img" : undefined} aria-hidden={title ? undefined : true}>
       {title && <title>{title}</title>}
-      <path d={MARK_TILE} fill="var(--logo-sheet)" />
-      <path d={MARK_CHECK} fill="var(--logo-check)" />
+      <path d={MARK_LEFT} fill="var(--logo-word)" />
+      <path d={MARK_RIGHT} fill="var(--logo-mark)" />
     </svg>
   );
 }
 
-/** The logo: lowercase "kvito" wordmark whose "v" is a check. Colors follow the theme or `.on-panel`. Min. height 16 px. */
+/** The logo: the house mark + lowercase "kvito" wordmark whose "v" is a check. Colors follow the theme. Min. height 16 px. */
 export function KvitaLockup({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 129 40" className={cn("h-6 w-auto", className)} role="img" aria-label="Kvito">
-      <path d={WORD_LETTERS} fill="var(--logo-word)" fillRule="evenodd" />
-      <path d={WORD_CHECK} fill="var(--logo-accent)" />
+    <svg viewBox="0 0 190 48" className={cn("h-6 w-auto", className)} role="img" aria-label="Kvito">
+      <path d={MARK_LEFT} fill="var(--logo-word)" />
+      <path d={MARK_RIGHT} fill="var(--logo-mark)" />
+      <g transform="translate(61 6)">
+        <path d={WORD_LETTERS} fill="var(--logo-word)" fillRule="evenodd" />
+        <path d={WORD_CHECK} fill="var(--logo-accent)" />
+      </g>
     </svg>
   );
 }

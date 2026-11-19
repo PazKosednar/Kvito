@@ -32,9 +32,8 @@
   --shadow-overlay: 0 12px 32px rgba(18, 18, 18, 0.14), 0 0 0 1px rgba(18, 18, 18, 0.06);
 
   /* Logo colors (see assets/Logos/README.md). Wordmark: --logo-word letters + --logo-accent check ("v").
-     Mark (tile + check): --logo-sheet tile + --logo-check check. */
-  --logo-sheet: #121212;
-  --logo-check: #38e08c;
+     Mark ("two sides" house): left half --logo-word, right half --logo-mark. */
+  --logo-mark: #38e08c;
   --logo-word: #121212;
   --logo-accent: #0a7a45;
 
@@ -112,8 +111,7 @@
   --danger-soft: #34120f;
   --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
 
-  --logo-sheet: #38e08c;
-  --logo-check: #0c0c0d;
+  --logo-mark: #38e08c;
   --logo-word: #f2f1ec;
   --logo-accent: #38e08c;
   --iso-left: #1f7a4d;
