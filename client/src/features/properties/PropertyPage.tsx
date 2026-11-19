@@ -7,6 +7,8 @@ import { Field, TextInput } from "@/components/form";
 import { ErrorState, FormError, List, ListRow, LoadingState, PageHeader, Section } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
+import { formatDate } from "@/lib/dates";
+import { formatCents } from "@/lib/money";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useProperty } from "@/hooks/useProperties";
 import { TenancyStatusLabel, tenantNames } from "@/features/tenancies/tenancy-ui";
@@ -38,6 +40,7 @@ export function PropertyPage() {
     <>
       <PageHeader
         back="/"
+        eyebrow={t(`properties.types.${property.type}`)}
         title={property.name}
         subtitle={`${property.street}, ${property.postalCode} ${property.city}`}
         action={
@@ -48,6 +51,8 @@ export function PropertyPage() {
           </Button>
         }
       />
+
+      <PropertySummary units={property.units} />
 
       <Section
         title={t("units.title")}
@@ -90,10 +95,35 @@ export function PropertyPage() {
   );
 }
 
+const currentTenancy = (unit: Unit) => unit.tenancies.find((x) => x.status === "ACTIVE") ?? unit.tenancies[0];
+
+/** Units, how many are let and the monthly rent of the active tenancies, in one quiet strip. */
+function PropertySummary({ units }: { units: Unit[] }) {
+  const { t } = useTranslation();
+  if (units.length === 0) return null;
+  const active = units.map(currentTenancy).filter((x) => x?.status === "ACTIVE");
+  const rent = active.reduce((sum, x) => sum + (x?.rentCents ?? 0), 0);
+  const items = [
+    { label: t("units.count"), value: String(units.length) },
+    { label: t("units.let"), value: `${active.length} / ${units.length}` },
+    { label: t("units.rent"), value: formatCents(rent) },
+  ];
+  return (
+    <dl aria-label={t("units.summary")} className="grid grid-cols-3 gap-px overflow-hidden rounded-md border border-line bg-line">
+      {items.map((it) => (
+        <div key={it.label} className="min-w-0 bg-surface-raised px-3 py-3 sm:px-4">
+          <dt className="label-mono">{it.label}</dt>
+          <dd className="amount mt-1 text-base whitespace-nowrap sm:text-lg">{it.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 function UnitRow({ unit, onRemove }: { unit: Unit; onRemove: () => Promise<void> }) {
   const { t } = useTranslation();
   const toMessage = useErrorMessage();
-  const tenancy = unit.tenancies.find((x) => x.status === "ACTIVE") ?? unit.tenancies[0];
+  const tenancy = currentTenancy(unit);
 
   if (tenancy) {
     const names = tenantNames(tenancy.members);
@@ -103,7 +133,15 @@ function UnitRow({ unit, onRemove }: { unit: Unit; onRemove: () => Promise<void>
         leading={<DoorOpen className="size-5 shrink-0 text-primary" aria-hidden="true" />}
         title={unit.name}
         subtitle={names || t("tenancies.waitingForTenant")}
-        trailing={<TenancyStatusLabel status={tenancy.status} />}
+        trailing={
+          <span className="flex items-center gap-5">
+            <span className="hidden text-right sm:block">
+              <span className="block font-mono text-sm tabular-nums">{t("units.perMonth", { amount: formatCents(tenancy.rentCents) })}</span>
+              <span className="block text-xs text-ink-faint">{t("units.since", { date: formatDate(tenancy.startDate) })}</span>
+            </span>
+            <TenancyStatusLabel status={tenancy.status} />
+          </span>
+        }
       />
     );
   }

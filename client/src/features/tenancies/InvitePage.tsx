@@ -40,7 +40,7 @@ export function InvitePage() {
         <InviteLink url={link} onAnother={() => { setLink(null); setEmail(""); }} sentTo={email.trim() || null} />
       ) : (
         <form
-          className="flex flex-col gap-5"
+          className="flex max-w-2xl flex-col gap-5"
           onSubmit={(e) => {
             e.preventDefault();
             void createInvite.run();

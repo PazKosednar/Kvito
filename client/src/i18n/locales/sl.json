@@ -307,7 +307,13 @@
     "save": "Dodaj enoto",
     "vacant": "Prosto",
     "delete": "Izbriši enoto",
-    "confirmDelete": "Izbrišem enoto »{{name}}«?"
+    "confirmDelete": "Izbrišem enoto »{{name}}«?",
+    "summary": "Pregled nepremičnine",
+    "count": "Enote",
+    "let": "Oddane",
+    "rent": "Najemnine na mesec",
+    "perMonth": "{{amount}} / mesec",
+    "since": "od {{date}}"
   },
   "tenancies": {
     "sections": "Razdelki najema",

@@ -58,7 +58,7 @@ function PropertyForm({ id, initial }: { id: string | undefined; initial: Proper
         subtitle={id ? undefined : t("properties.newSubtitle")}
       />
       <form
-        className="flex flex-col gap-5"
+        className="flex max-w-2xl flex-col gap-5"
         onSubmit={(e) => {
           e.preventDefault();
           void save.run();

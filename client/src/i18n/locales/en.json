@@ -305,7 +305,13 @@
     "save": "Add unit",
     "vacant": "Vacant",
     "delete": "Delete unit",
-    "confirmDelete": "Delete unit “{{name}}”?"
+    "confirmDelete": "Delete unit “{{name}}”?",
+    "summary": "Property overview",
+    "count": "Units",
+    "let": "Let",
+    "rent": "Rent per month",
+    "perMonth": "{{amount}} / month",
+    "since": "since {{date}}"
   },
   "tenancies": {
     "sections": "Tenancy sections",

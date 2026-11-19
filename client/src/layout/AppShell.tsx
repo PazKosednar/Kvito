@@ -15,9 +15,9 @@ export function AppShell() {
   const { activeRole } = useRole();
   const location = useLocation();
   const online = useOnline();
-  // Landlord overview gets a wider single column on large screens (bigger town); every other page stays narrow.
-  const wide = activeRole === "LANDLORD" && location.pathname === ROUTES.home;
-  const column = wide ? "max-w-3xl lg:max-w-5xl" : "max-w-3xl";
+  // One column width for every page (wider on large screens), so the header and content never jump between pages.
+  // Forms keep their own narrower width for readable fields.
+  const column = "max-w-3xl lg:max-w-5xl";
   // Landlords get the assistant button bottom right; leave room for it under the content.
   const landlord = activeRole === "LANDLORD";
 

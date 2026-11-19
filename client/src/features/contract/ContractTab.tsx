@@ -257,7 +257,7 @@ function DepositStart({ amountCents, q }: { amountCents: number; q: DepositQ }) 
           </Button>
         ))}
       </div>
-      <div className="mt-4 flex flex-wrap items-end gap-3">
+      <div className="mt-4 flex max-w-md flex-wrap items-end gap-3">
         <Field label={t(mode === "request" ? "contract.deposit.dueDate" : "contract.deposit.receivedOn")} className="min-w-44 flex-1">
           {(p) => <TextInput {...p} type="date" value={date} onChange={(e) => setDate(e.target.value)} />}
         </Field>
@@ -399,7 +399,7 @@ function DepositState({ deposit, q }: { deposit: Deposit; q: DepositQ }) {
 
       {deposit.status === "RETURN_AGREED" &&
         (isLandlord ? (
-          <div className="flex flex-wrap items-end gap-3 rounded-md border border-line bg-surface-raised p-4">
+          <div className="flex flex-wrap items-end gap-3 rounded-md border border-line bg-surface-raised p-4 [&>*:first-child]:max-w-xs">
             <Field label={t("contract.deposit.returnedOn")} className="min-w-44 flex-1">
               {(p) => <TextInput {...p} type="date" value={returnedOn} onChange={(e) => setReturnedOn(e.target.value)} />}
             </Field>

@@ -100,7 +100,7 @@ export function ExpenseFormPage() {
     <>
       <PageHeader back={ROUTES.taxes} eyebrow={t("taxes.eyebrow")} title={t(editing ? "expense.editTitle" : "expense.newTitle")} />
       <form
-        className="flex flex-col gap-5"
+        className="flex max-w-2xl flex-col gap-5"
         onSubmit={(ev) => {
           ev.preventDefault();
           void submit.run();

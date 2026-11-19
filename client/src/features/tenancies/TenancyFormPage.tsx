@@ -51,7 +51,7 @@ function TenancyForm({ existing }: { existing: TenancyDetail | undefined }) {
       />
       <form
         noValidate
-        className="flex flex-col"
+        className="flex max-w-2xl flex-col"
         onSubmit={(e) => {
           e.preventDefault();
           void save.run();

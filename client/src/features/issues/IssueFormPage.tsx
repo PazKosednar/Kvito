@@ -32,7 +32,7 @@ export function IssueFormPage() {
     <>
       <PageHeader back={`/najemi/${tenancy.id}/okvare`} title={t("issues.newTitle")} subtitle={t("issues.newSubtitle")} />
       <form
-        className="flex flex-col gap-6"
+        className="flex max-w-2xl flex-col gap-6"
         onSubmit={(e) => {
           e.preventDefault();
           void save.run();

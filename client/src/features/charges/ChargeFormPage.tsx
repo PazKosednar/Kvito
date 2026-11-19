@@ -89,7 +89,7 @@ export function ChargeFormPage() {
 
       <form
         noValidate
-        className="mt-6 flex flex-col gap-5"
+        className="mt-6 flex max-w-2xl flex-col gap-5"
         onSubmit={(e) => {
           e.preventDefault();
           void save.run();
