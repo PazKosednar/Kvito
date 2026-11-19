@@ -640,31 +640,8 @@ html:not(.dark) .hero-visual::before {
 }
 
 /* Pricing (strategy: docs/NAROCNINA.md). Monthly/yearly prices switch with [data-billing] (site.js); yearly without JS. */
-.trial-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  max-width: 760px;
-  margin-top: 24px;
-  padding: 12px 16px;
-  border: 1px dashed var(--line-strong);
-  border-radius: 6px;
-}
-.trial-banner .icon {
-  flex: none;
-  margin-top: 3px;
-  color: var(--ink-muted);
-}
-.trial-banner p {
-  margin: 0;
-  color: var(--ink-muted);
-}
-.trial-banner strong {
-  color: var(--ink);
-  font-weight: 600;
-}
 .billing {
-  margin-top: 24px;
+  margin-top: 32px;
 }
 .billing-toggle {
   display: inline-flex;
@@ -734,16 +711,6 @@ html:not(.dark) .hero-visual::before {
 .price-card .checks {
   flex: 1;
   margin-bottom: 24px;
-}
-.price-foot {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 24px;
-  margin: 20px 0 0;
-  padding: 0;
-  list-style: none;
-  font-size: 14px;
-  color: var(--ink-muted);
 }
 
 .faq {
