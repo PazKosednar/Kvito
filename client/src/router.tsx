@@ -27,6 +27,8 @@ import { PropertyPage } from "@/features/properties/PropertyPage";
 import { ChangePasswordPage } from "@/features/account/ChangePasswordPage";
 import { MyHistoryPage } from "@/features/account/MyHistoryPage";
 import { AnnualSummaryPage } from "@/features/properties/AnnualSummaryPage";
+import { ExpenseFormPage } from "@/features/taxes/ExpenseFormPage";
+import { TaxesPage } from "@/features/taxes/TaxesPage";
 import { ReferencePage } from "@/pages/ReferencePage";
 import { PrivacyPage } from "@/features/account/PrivacyPage";
 import { NotificationsPage } from "@/features/notifications/NotificationsPage";
@@ -63,6 +65,9 @@ export const router = createBrowserRouter([
           { path: "zasebnost", element: <PrivacyPage /> },
           { path: "geslo", element: <ChangePasswordPage /> },
           { path: "letni-povzetek", element: <AnnualSummaryPage /> },
+          { path: "davki", element: <TaxesPage /> },
+          { path: "davki/stroski/nov", element: <ExpenseFormPage /> },
+          { path: "davki/stroski/:id", element: <ExpenseFormPage /> },
           { path: "moj-zivljenjepis", element: <MyHistoryPage /> },
           { path: "izpisek", element: <BankImportPage /> },
           { path: "placila", element: <PaymentsPage /> },

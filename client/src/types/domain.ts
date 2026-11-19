@@ -139,7 +139,7 @@ export interface InvitationPreview {
 export type ChargeStatus = "OPEN" | "REPORTED_PAID" | "CONFIRMED" | "OVERDUE" | "DISPUTED";
 export type ChargeType = "RENT" | "BILL" | "OTHER" | "DEPOSIT" | "ADVANCE" | "SETTLEMENT";
 export type PayTo = "LANDLORD" | "SUPPLIER";
-export type AttachmentKind = "BILL" | "PAYMENT_PROOF" | "MESSAGE" | "ISSUE" | "METER" | "HANDOVER" | "DOCUMENT";
+export type AttachmentKind = "BILL" | "PAYMENT_PROOF" | "MESSAGE" | "ISSUE" | "METER" | "HANDOVER" | "DOCUMENT" | "EXPENSE";
 
 export interface Attachment {
   id: string;
@@ -559,4 +559,58 @@ export interface BankPreview {
   matches: BankMatch[];
   foreignReferences: number;
   unmatched: { entryId: string; bookedOn: string | null; amountCents: number | null; counterparty: string | null; purpose: string | null; reference: string | null }[];
+}
+
+// ---------- Landlord's own costs and taxes ----------
+
+export const EXPENSE_CATEGORIES = [
+  "MAINTENANCE",
+  "RENOVATION",
+  "RESERVE_FUND",
+  "MANAGEMENT",
+  "INSURANCE",
+  "PROPERTY_TAX",
+  "UTILITIES",
+  "EQUIPMENT",
+  "OTHER",
+] as const;
+export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
+
+export interface Expense {
+  id: string;
+  property: { id: string; name: string };
+  unit: { id: string; name: string } | null;
+  category: ExpenseCategory;
+  title: string;
+  amountCents: number;
+  /** YYYY-MM-DD */
+  spentOn: string;
+  note: string | null;
+  attachments: Attachment[];
+}
+
+export type TaxRateKind = "CURRENT" | "ZIURS" | "ZIURS_YOUNG";
+
+export interface TaxOverview {
+  year: number;
+  received: { rent: number; costs: number; deposit: number; other: number };
+  expensesCents: number;
+  expensesByCategory: { category: ExpenseCategory; amountCents: number }[];
+  properties: { id: string; name: string; rentCents: number; expensesCents: number }[];
+  rateOptions: { kind: TaxRateKind; percent: number }[];
+  rateKind: TaxRateKind;
+  estimate: {
+    incomeCents: number;
+    flatCostsCents: number;
+    actualCostsCents: number;
+    method: "FLAT" | "ACTUAL";
+    deductionCents: number;
+    baseCents: number;
+    ratePercent: number;
+    taxCents: number;
+    otherMethodTaxCents: number;
+  };
+  /** YYYY-MM-DD */
+  deadline: string;
+  expenses: Expense[];
 }

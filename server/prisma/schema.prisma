@@ -145,6 +145,7 @@ model User {
   handoversConfirmed  Handover[]         @relation("HandoverTenantConfirmedBy")
   notifications       Notification[]
   pushSubscriptions   PushSubscription[]
+  expenses            Expense[]
 }
 
 /// One-time login code. Only an HMAC of the code is stored.
@@ -233,8 +234,9 @@ model Property {
   updatedAt  DateTime     @updatedAt
   deletedAt  DateTime?
 
-  owner User   @relation("PropertyOwner", fields: [ownerId], references: [id])
-  units Unit[]
+  owner    User      @relation("PropertyOwner", fields: [ownerId], references: [id])
+  units    Unit[]
+  expenses Expense[]
 
   @@index([ownerId])
 }
@@ -253,6 +255,7 @@ model Unit {
   tenancies     Tenancy[]
   meterReadings MeterReading[]
   documents     Document[]
+  expenses      Expense[]
 
   @@index([propertyId])
 }
@@ -478,6 +481,8 @@ enum AttachmentKind {
   METER
   HANDOVER
   DOCUMENT
+  /// Receipt for a landlord's own cost (Expense); not tied to a tenancy.
+  EXPENSE
 }
 
 /// A stored file (local disk in development, S3-compatible EU storage in production). Served only via signed URLs.
@@ -503,8 +508,10 @@ model Attachment {
   documentId      String?
   settlementId    String?
   costEntryId     String?
+  expenseId       String?
 
   costEntry     CostEntry?      @relation(fields: [costEntryId], references: [id])
+  expense       Expense?        @relation(fields: [expenseId], references: [id])
   tenancy       Tenancy?        @relation(fields: [tenancyId], references: [id])
   uploadedBy    User            @relation(fields: [uploadedById], references: [id])
   charge        Charge?         @relation(fields: [chargeId], references: [id])
@@ -1009,4 +1016,51 @@ model RentChange {
   tenancy Tenancy @relation(fields: [tenancyId], references: [id])
 
   @@index([tenancyId, effectiveFrom])
+}
+
+// ---------- Landlord's own costs (tax overview) ----------
+
+/// What a landlord's own cost was for. Kvito only sorts them; which ones count for the tax return is for the
+/// landlord (or their advisor) to decide – TODO(preveri) with FURS.
+enum ExpenseCategory {
+  /// Repairs and regular upkeep.
+  MAINTENANCE
+  /// Investment upkeep, renovation.
+  RENOVATION
+  /// Building reserve fund (rezervni sklad).
+  RESERVE_FUND
+  /// Building management (upravnik).
+  MANAGEMENT
+  INSURANCE
+  /// Land use fee (NUSZ) and other property levies.
+  PROPERTY_TAX
+  /// Running costs the landlord pays and does not pass on.
+  UTILITIES
+  /// Furniture, appliances.
+  EQUIPMENT
+  OTHER
+}
+
+/// A landlord's own cost for a property (or one unit of it), for the yearly tax overview.
+model Expense {
+  id          String          @id @default(cuid())
+  ownerId     String
+  propertyId  String
+  unitId      String?
+  category    ExpenseCategory
+  title       String
+  amountCents Int
+  spentOn     DateTime        @db.Date
+  note        String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deletedAt   DateTime?
+
+  owner       User         @relation(fields: [ownerId], references: [id])
+  property    Property     @relation(fields: [propertyId], references: [id])
+  unit        Unit?        @relation(fields: [unitId], references: [id])
+  attachments Attachment[]
+
+  @@index([ownerId, spentOn])
+  @@index([propertyId])
 }

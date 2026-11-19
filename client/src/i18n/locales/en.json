@@ -218,7 +218,11 @@
     "CODE_RATE_LIMITED": "We've sent 5 codes in the last hour. Enter the latest one or try again in an hour.",
     "ACCOUNT_LOCKED": "Too many wrong passwords. Wait a few minutes or set a new one via “Forgot your password?”.",
     "TOO_MANY_LINKS": "You already have 10 valid links. Revoke one of them.",
-    "TOO_MANY_PHOTOS": "An item can have at most 12 photos."
+    "TOO_MANY_PHOTOS": "An item can have at most 12 photos.",
+    "UNIT_NOT_IN_PROPERTY": "The chosen unit is not in this property.",
+    "ASSISTANT_DISABLED": "The assistant is not switched on yet.",
+    "ASSISTANT_UNAVAILABLE": "The assistant is not answering right now. Try again in a moment.",
+    "ASSISTANT_LIMIT": "You have asked the assistant a lot today. Try again in an hour."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -616,7 +620,11 @@
     }
   },
   "login": {
-    "welcome": { "login": "Sign in", "register": "Create account", "back": "Back to start" },
+    "welcome": {
+      "login": "Sign in",
+      "register": "Create account",
+      "back": "Back to start"
+    },
     "eyebrow": "Renting, settled",
     "scene": {
       "flat": "Flat 2B · November",
@@ -1515,5 +1523,93 @@
     "title": "Payments",
     "subtitle": "Bank statement import, payment exports and the annual summary.",
     "menu": "Payments and statements"
+  },
+  "taxes": {
+    "menu": "Taxes and costs",
+    "eyebrow": "Taxes",
+    "title": "Taxes and costs {{year}}",
+    "subtitle": "Rent received, your costs and an informative estimate of income tax on renting out property.",
+    "year": "Year",
+    "rate": "Tax rate",
+    "rateKind": {
+      "CURRENT": "25 % (now)",
+      "ZIURS": "15 %",
+      "ZIURS_YOUNG": "5 %"
+    },
+    "ziursNote": "The ZIURS act lowers the rate for 2026 to 15 % (5 % for long-term rentals to young people or young families). It applies only if confirmed in the referendum on 6 Dec 2026. Until then 25 % applies.",
+    "income": "Rent received",
+    "costs": "Costs",
+    "flat": "Flat rate 10 %",
+    "actual": "Your costs",
+    "used": "Applied",
+    "usedFlat": "Flat-rate costs are more favourable.",
+    "usedActual": "Your costs are higher than the flat rate, so they are more favourable.",
+    "base": "Tax base",
+    "tax": "Estimated income tax",
+    "otherMethod": "With the other costs the tax would be {{amount}}.",
+    "deadline": "File the return for {{year}} by {{date}} in eDavki.",
+    "edavki": "Open eDavki",
+    "csv": "Download CSV",
+    "notIncluded": "Not counted as income: reimbursed costs {{costs}}, deposits {{deposit}}, other {{other}}.",
+    "byProperty": "By property",
+    "propertyRent": "Rent",
+    "propertyCosts": "Costs",
+    "expensesTitle": "Your costs",
+    "addExpense": "Add cost",
+    "noExpenses": "No costs entered for this year yet. Add repairs, reserve fund, insurance and more to see whether they beat the flat rate.",
+    "disclaimer": "The estimate is informative and applies to renting to individuals (not short-term rentals or renting to a company, where the payer withholds the tax). It is not tax advice: check with FURS or a tax advisor which costs are recognised and whether it applies to you.",
+    "entryHint": "Rent received, your costs and the tax estimate in one place."
+  },
+  "expense": {
+    "newTitle": "New cost",
+    "editTitle": "Edit cost",
+    "property": "Property",
+    "unit": "Unit",
+    "wholeProperty": "Whole property",
+    "category": "Type of cost",
+    "titleLabel": "Description",
+    "titlePlaceholder": "e.g. Boiler repair",
+    "amount": "Amount",
+    "spentOn": "Date paid",
+    "note": "Note",
+    "receipts": "Receipt",
+    "addReceipt": "Add receipt or photo",
+    "save": "Save cost",
+    "saved": "Cost saved.",
+    "delete": "Delete cost",
+    "deleteTitle": "Delete this cost?",
+    "deleteBody": "“{{title}}” will be removed from the tax overview.",
+    "deleted": "Cost deleted.",
+    "categories": {
+      "MAINTENANCE": "Maintenance and repairs",
+      "RENOVATION": "Renovation and investments",
+      "RESERVE_FUND": "Reserve fund",
+      "MANAGEMENT": "Building management",
+      "INSURANCE": "Insurance",
+      "PROPERTY_TAX": "Land use fee",
+      "UTILITIES": "Running costs",
+      "EQUIPMENT": "Equipment",
+      "OTHER": "Other"
+    }
+  },
+  "assistant": {
+    "open": "Open Kvito assistant",
+    "close": "Close assistant",
+    "title": "Kvito assistant",
+    "subtitle": "Ask about your properties, payments and taxes.",
+    "placeholder": "Ask anything …",
+    "send": "Send",
+    "thinking": "Thinking …",
+    "clear": "New conversation",
+    "suggestions": [
+      "Who is late with payment?",
+      "How much rent did I receive this year?",
+      "Which repairs are open?",
+      "How much income tax will I pay?"
+    ],
+    "disabled": "The assistant is not switched on yet. Once it is, it will answer questions about your properties.",
+    "error": "The assistant is not answering right now. Try again in a moment.",
+    "limit": "You have asked the assistant a lot today. Try again in an hour.",
+    "privacy": "Answers are automatic and can be wrong. The assistant uses data from your Kvito (no e-mails or messages)."
   }
 }

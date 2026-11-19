@@ -24,6 +24,7 @@ export const ROUTES = {
   bankImport: "/izpisek",
   payments: "/placila",
   annual: "/letni-povzetek",
+  taxes: "/davki",
   history: "/moj-zivljenjepis",
   terms: "/pogoji",
   privacyPolicy: "/politika-zasebnosti",

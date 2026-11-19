@@ -1,4 +1,4 @@
-import { BadgeCheck, KeyRound, LogOut, Plus, ShieldCheck, Wallet } from "lucide-react";
+import { BadgeCheck, Calculator, KeyRound, LogOut, Plus, ShieldCheck, Wallet } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -122,6 +122,12 @@ export function AccountMenu() {
           <DropdownMenuItem className="py-3" onSelect={() => void navigate(ROUTES.payments)}>
             <Wallet />
             {t("payments.menu")}
+          </DropdownMenuItem>
+        )}
+        {activeRole === "LANDLORD" && (
+          <DropdownMenuItem className="py-3" onSelect={() => void navigate(ROUTES.taxes)}>
+            <Calculator />
+            {t("taxes.menu")}
           </DropdownMenuItem>
         )}
         <DropdownMenuItem className="py-3" onSelect={() => void navigate("/geslo")}>

@@ -5,6 +5,7 @@ import { prisma } from "../../lib/prisma.js";
 
 export interface AnnualUnit {
   tenancyId: string;
+  propertyId: string;
   property: string;
   unit: string;
   tenants: string[];
@@ -57,7 +58,7 @@ export async function loadAnnualSummary(landlordId: string, year: number): Promi
     prisma.costSettlement.findMany({ where: { deletedAt: null, tenancy: owned, refundedOn: { not: null }, refundedCents: { gt: 0 } }, select: { tenancyId: true, refundedOn: true, refundedCents: true } }),
     prisma.tenancy.findMany({
       where: { deletedAt: null, ...owned },
-      select: { id: true, unit: { select: { name: true, property: { select: { name: true } } } }, members: { where: { deletedAt: null }, select: { user: { select: { name: true, email: true } } } } },
+      select: { id: true, unit: { select: { name: true, property: { select: { id: true, name: true } } } }, members: { where: { deletedAt: null }, select: { user: { select: { name: true, email: true } } } } },
     }),
   ]);
 
@@ -68,6 +69,7 @@ export async function loadAnnualSummary(landlordId: string, year: number): Promi
       const t = tenancies.find((x) => x.id === tenancyId)!;
       u = {
         tenancyId,
+        propertyId: t.unit.property.id,
         property: t.unit.property.name,
         unit: t.unit.name,
         tenants: t.members.map((m) => m.user.name ?? m.user.email),

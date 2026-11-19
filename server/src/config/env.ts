@@ -48,6 +48,9 @@ const EnvSchema = z.object({
   VAPID_PUBLIC_KEY: z.string().min(1).optional(),
   VAPID_PRIVATE_KEY: z.string().min(1).optional(),
   VAPID_SUBJECT: z.string().min(1).default("mailto:podpora@kvito.si"),
+  /** Kvito assistant for landlords (Claude API). Without a key the assistant is switched off. */
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  ASSISTANT_MODEL: z.string().min(1).default("claude-haiku-5-5"),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

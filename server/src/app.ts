@@ -17,7 +17,9 @@ import { bankRouter } from "./modules/bank/routes.js";
 import { chargesRouter } from "./modules/charges/routes.js";
 import { contractRouter } from "./modules/contract/routes.js";
 import { invitationsPublicRouter, invitationsRouter } from "./modules/invitations/routes.js";
+import { assistantRouter } from "./modules/assistant/routes.js";
 import { documentsRouter } from "./modules/documents/routes.js";
+import { expensesRouter } from "./modules/expenses/routes.js";
 import { handoversRouter } from "./modules/handovers/routes.js";
 import { issuesRouter } from "./modules/issues/routes.js";
 import { metersRouter } from "./modules/meters/routes.js";
@@ -105,6 +107,8 @@ export function createApp(deps: AppDeps): Express {
   app.use("/api", invitationsRouter(deps));
   app.use("/api", propertiesRouter());
   app.use("/api", reportsRouter());
+  app.use("/api", expensesRouter(deps));
+  app.use("/api", assistantRouter());
   app.use("/api", referencesRouter());
   app.use("/api", privacyRouter());
   app.use("/api", tenanciesRouter());

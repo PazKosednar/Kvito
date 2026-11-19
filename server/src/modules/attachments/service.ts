@@ -77,6 +77,7 @@ export async function claimAttachments(
       documentId: null,
       settlementId: null,
       costEntryId: null,
+      expenseId: null,
     },
     data: opts.link,
   });

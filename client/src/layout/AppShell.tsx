@@ -5,6 +5,7 @@ import { ROUTES } from "@/constants";
 import { useOnline } from "@/hooks/useOnline";
 import { useRole } from "@/hooks/useRole";
 import { AccountMenu } from "./AccountMenu";
+import { AssistantWidget } from "./AssistantWidget";
 import { NotificationsBell } from "./NotificationsBell";
 import { ThemeMenu } from "./ThemeMenu";
 
@@ -17,6 +18,8 @@ export function AppShell() {
   // Landlord overview gets a wider single column on large screens (bigger town); every other page stays narrow.
   const wide = activeRole === "LANDLORD" && location.pathname === ROUTES.home;
   const column = wide ? "max-w-3xl lg:max-w-5xl" : "max-w-3xl";
+  // Landlords get the assistant button bottom right; leave room for it under the content.
+  const landlord = activeRole === "LANDLORD";
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -42,12 +45,13 @@ export function AppShell() {
         </p>
       )}
 
-      <main className={`mx-auto flex w-full ${column} flex-1 flex-col px-4 pt-6 pb-[calc(3rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-8`}>
+      <main className={`mx-auto flex w-full ${column} flex-1 flex-col px-4 pt-6 ${landlord ? "pb-[calc(6rem+env(safe-area-inset-bottom))]" : "pb-[calc(3rem+env(safe-area-inset-bottom))]"} sm:px-6 sm:pt-8`}>
         {/* CGP motion: opacity only, 180 ms. */}
         <div key={location.pathname} className="animate-enter flex flex-1 flex-col">
           <Outlet />
         </div>
       </main>
+      {landlord && <AssistantWidget />}
     </div>
   );
 }

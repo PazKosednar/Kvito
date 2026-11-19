@@ -218,7 +218,11 @@
     "CODE_RATE_LIMITED": "V zadnji uri smo poslali že 5 kod. Vpiši zadnjo prejeto ali poskusi čez eno uro.",
     "ACCOUNT_LOCKED": "Preveč napačnih gesel. Počakaj nekaj minut ali nastavi novo geslo prek »Pozabljeno geslo?«.",
     "TOO_MANY_LINKS": "Imaš že 10 veljavnih povezav. Prekliči katero od njih.",
-    "TOO_MANY_PHOTOS": "Postavka ima lahko največ 12 fotografij."
+    "TOO_MANY_PHOTOS": "Postavka ima lahko največ 12 fotografij.",
+    "UNIT_NOT_IN_PROPERTY": "Izbrana enota ni v tej nepremičnini.",
+    "ASSISTANT_DISABLED": "Pomočnik še ni vklopljen.",
+    "ASSISTANT_UNAVAILABLE": "Pomočnik trenutno ne odgovarja. Poskusi znova čez trenutek.",
+    "ASSISTANT_LIMIT": "Danes si pomočniku zastavil že veliko vprašanj. Poskusi znova čez eno uro."
   },
   "validation": {
     "invalid": "Vrednost ni pravilna.",
@@ -628,7 +632,11 @@
     }
   },
   "login": {
-    "welcome": { "login": "Prijava", "register": "Registracija", "back": "Nazaj na začetek" },
+    "welcome": {
+      "login": "Prijava",
+      "register": "Registracija",
+      "back": "Nazaj na začetek"
+    },
     "eyebrow": "Najem, poravnan",
     "scene": {
       "flat": "Stan 2B · November",
@@ -1559,5 +1567,93 @@
     "title": "Plačila",
     "subtitle": "Uvoz bančnega izpiska, izvoz prejetih plačil in letni povzetek.",
     "menu": "Plačila in izpiski"
+  },
+  "taxes": {
+    "menu": "Davki in stroški",
+    "eyebrow": "Davki",
+    "title": "Davki in stroški {{year}}",
+    "subtitle": "Prejete najemnine, tvoji stroški in informativni izračun dohodnine od oddajanja v najem.",
+    "year": "Leto",
+    "rate": "Stopnja dohodnine",
+    "rateKind": {
+      "CURRENT": "25 % (zdaj)",
+      "ZIURS": "15 %",
+      "ZIURS_YOUNG": "5 %"
+    },
+    "ziursNote": "Interventni zakon ZIURS za leto 2026 znižuje stopnjo na 15 % (5 % za dolgoročni najem mladim ali mladim družinam). Veljal bo le, če ga potrdi referendum 6. 12. 2026. Do takrat velja 25 %.",
+    "income": "Prejete najemnine",
+    "costs": "Stroški",
+    "flat": "Normirani 10 %",
+    "actual": "Tvoji stroški",
+    "used": "Upoštevano",
+    "usedFlat": "Normirani stroški so ugodnejši.",
+    "usedActual": "Tvoji stroški so višji od normiranih, zato so ugodnejši.",
+    "base": "Davčna osnova",
+    "tax": "Ocena dohodnine",
+    "otherMethod": "Z drugimi stroški bi bila dohodnina {{amount}}.",
+    "deadline": "Napoved za leto {{year}} oddaš do {{date}} v eDavkih.",
+    "edavki": "Odpri eDavke",
+    "csv": "Prenesi CSV",
+    "notIncluded": "Ni vključeno v dohodek: povrnjeni stroški {{costs}}, varščine {{deposit}}, drugo {{other}}.",
+    "byProperty": "Po nepremičninah",
+    "propertyRent": "Najemnine",
+    "propertyCosts": "Stroški",
+    "expensesTitle": "Tvoji stroški",
+    "addExpense": "Dodaj strošek",
+    "noExpenses": "V tem letu še nisi vnesel stroškov. Vnesi popravila, rezervni sklad, zavarovanje in drugo, da vidiš, ali so ugodnejši od normiranih.",
+    "disclaimer": "Izračun je informativen in velja za oddajanje fizičnim osebam (ne za kratkoročni najem ali najem podjetju, kjer davek odtegne plačnik). Ni davčni nasvet: kateri stroški se priznajo in ali vse velja za tvoj primer, preveri na FURS ali pri davčnem svetovalcu.",
+    "entryHint": "Prejete najemnine, tvoji stroški in ocena dohodnine na enem mestu."
+  },
+  "expense": {
+    "newTitle": "Nov strošek",
+    "editTitle": "Uredi strošek",
+    "property": "Nepremičnina",
+    "unit": "Enota",
+    "wholeProperty": "Cela nepremičnina",
+    "category": "Vrsta stroška",
+    "titleLabel": "Opis",
+    "titlePlaceholder": "npr. Popravilo bojlerja",
+    "amount": "Znesek",
+    "spentOn": "Datum plačila",
+    "note": "Opomba",
+    "receipts": "Račun",
+    "addReceipt": "Dodaj račun ali fotografijo",
+    "save": "Shrani strošek",
+    "saved": "Strošek je shranjen.",
+    "delete": "Izbriši strošek",
+    "deleteTitle": "Izbrišem strošek?",
+    "deleteBody": "Strošek »{{title}}« bo odstranjen iz davčnega pregleda.",
+    "deleted": "Strošek je izbrisan.",
+    "categories": {
+      "MAINTENANCE": "Vzdrževanje in popravila",
+      "RENOVATION": "Obnova in investicije",
+      "RESERVE_FUND": "Rezervni sklad",
+      "MANAGEMENT": "Upravljanje",
+      "INSURANCE": "Zavarovanje",
+      "PROPERTY_TAX": "Nadomestilo za stavbno zemljišče",
+      "UTILITIES": "Obratovalni stroški",
+      "EQUIPMENT": "Oprema",
+      "OTHER": "Drugo"
+    }
+  },
+  "assistant": {
+    "open": "Odpri Kvito pomočnika",
+    "close": "Zapri pomočnika",
+    "title": "Kvito pomočnik",
+    "subtitle": "Vprašaj o svojih nepremičninah, plačilih in davkih.",
+    "placeholder": "Vprašaj karkoli …",
+    "send": "Pošlji",
+    "thinking": "Razmišljam …",
+    "clear": "Nov pogovor",
+    "suggestions": [
+      "Kdo zamuja s plačilom?",
+      "Koliko najemnine sem prejel letos?",
+      "Katere okvare so odprte?",
+      "Koliko dohodnine bom plačal?"
+    ],
+    "disabled": "Pomočnik še ni vklopljen. Ko ga vklopimo, bo odgovarjal na vprašanja o tvojih nepremičninah.",
+    "error": "Pomočnik trenutno ne odgovarja. Poskusi znova čez trenutek.",
+    "limit": "Danes si pomočniku zastavil že veliko vprašanj. Poskusi znova čez eno uro.",
+    "privacy": "Odgovori so samodejni in se lahko motijo. Za odgovor pomočnik uporabi podatke iz tvojega Kvita (brez e-naslovov in sporočil)."
   }
 }
