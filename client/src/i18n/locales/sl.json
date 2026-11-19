@@ -628,6 +628,7 @@
     }
   },
   "login": {
+    "welcome": { "login": "Prijava", "register": "Registracija", "back": "Nazaj na začetek" },
     "eyebrow": "Najem, poravnan",
     "scene": {
       "flat": "Stan 2B · November",

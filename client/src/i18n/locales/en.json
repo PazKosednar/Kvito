@@ -616,6 +616,7 @@
     }
   },
   "login": {
+    "welcome": { "login": "Sign in", "register": "Create account", "back": "Back to start" },
     "eyebrow": "Renting, settled",
     "scene": {
       "flat": "Flat 2B · November",
