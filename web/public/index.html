@@ -265,28 +265,110 @@
         </div>
       </section>
 
-      <!-- Pricing -->
+      <!-- Pricing (strategy: docs/NAROCNINA.md) -->
       <section id="cenik" class="section section-alt">
         <div class="wrap">
           <p class="eyebrow"><span class="idx">07</span> Cenik</p>
-          <h2>Med testiranjem brezplačno.</h2>
-          <p class="section-lead">Kvito je v testnem obdobju. Uporabljaš ga brez plačila in brez kartice.</p>
-          <div class="pricing">
-            <div class="card card-pad price-card">
-              <p class="eyebrow">Testno obdobje</p>
+          <h2>Prva enota je za vedno brezplačna.</h2>
+          <p class="section-lead">Plača samo najemodajalec, po številu enot. Najemniki so vedno brezplačni. Vsi paketi imajo vse funkcije.</p>
+
+          <div class="trial-banner">
+            <svg class="icon" aria-hidden="true"><use href="#i-calendar-clock" /></svg>
+            <p><strong>Zdaj je testno obdobje:</strong> Kvito je brezplačen za vse, brez omejitve enot. Cene spodaj veljajo po njegovem koncu, ki ga napovemo vsaj 30 dni prej.</p>
+          </div>
+
+          <div class="billing" data-billing="y">
+            <div class="billing-toggle" role="group" aria-label="Način plačila">
+              <button type="button" data-bill="m" aria-pressed="false">Mesečno</button>
+              <button type="button" data-bill="y" aria-pressed="true">Letno <span class="save">2 meseca gratis</span></button>
+            </div>
+
+            <div class="plans">
+            <div class="card card-pad plan">
+              
+              <p class="eyebrow">Brezplačno</p>
+              <p class="plan-units">1 enota</p>
               <p class="price"><span class="amount">0,00 €</span> <span class="per">/ mesec</span></p>
+              <p class="price-sub">Za vedno, brez kartice.</p>
               <ul class="checks">
-                <li>Vse funkcije za najemodajalca in najemnika</li>
-                <li>Brez kartice in brez obveznosti</li>
-                <li>Plačila z UPN QR, delitev stroškov, sporočila</li>
-                <li>Okvare, števci, primopredaja in dokumenti</li>
+                <li>Neomejeno najemnikov</li>
+                <li>1 GB za fotografije in dokumente</li>
+                <li>Pomoč po e-pošti</li>
               </ul>
-              <a class="btn btn-primary btn-lg btn-block" href="{{APP_URL}}/prijava">Začni brezplačno</a>
+              <a class="btn btn-secondary btn-block" href="{{APP_URL}}/prijava">Začni brezplačno</a>
+            </div>
+            <div class="card card-pad plan plan-featured">
+              <p class="plan-badge">Najpogostejša izbira</p>
+              <p class="eyebrow">Plus</p>
+              <p class="plan-units">do 3 enote</p>
+              <p class="price"><span class="amount"><span class="bill-y">4,16 €</span><span class="bill-m">4,99 €</span></span> <span class="per">/ mesec</span></p>
+              <p class="price-sub"><span class="bill-y">49,90 € letno, 2 meseca gratis</span><span class="bill-m">ali 49,90 € letno</span></p>
+              <ul class="checks">
+                <li>Neomejeno najemnikov</li>
+                <li>5 GB za fotografije in dokumente</li>
+                <li>Pomoč po e-pošti</li>
+              </ul>
+              <a class="btn btn-primary btn-block" href="{{APP_URL}}/prijava">Začni brezplačno</a>
+            </div>
+            <div class="card card-pad plan">
+              
+              <p class="eyebrow">Pro</p>
+              <p class="plan-units">do 10 enot</p>
+              <p class="price"><span class="amount"><span class="bill-y">9,99 €</span><span class="bill-m">11,99 €</span></span> <span class="per">/ mesec</span></p>
+              <p class="price-sub"><span class="bill-y">119,90 € letno, 2 meseca gratis</span><span class="bill-m">ali 119,90 € letno</span></p>
+              <ul class="checks">
+                <li>Neomejeno najemnikov</li>
+                <li>20 GB za fotografije in dokumente</li>
+                <li>Prednostna pomoč</li>
+              </ul>
+              <a class="btn btn-secondary btn-block" href="{{APP_URL}}/prijava">Začni brezplačno</a>
+            </div>
+            <div class="card card-pad plan">
+              
+              <p class="eyebrow">Upravnik</p>
+              <p class="plan-units">do 30 enot</p>
+              <p class="price"><span class="amount"><span class="bill-y">23,33 €</span><span class="bill-m">27,99 €</span></span> <span class="per">/ mesec</span></p>
+              <p class="price-sub"><span class="bill-y">279,90 € letno, 2 meseca gratis</span><span class="bill-m">ali 279,90 € letno</span></p>
+              <ul class="checks">
+                <li>Neomejeno najemnikov</li>
+                <li>50 GB za fotografije in dokumente</li>
+                <li>Prednostna pomoč</li>
+              </ul>
+              <a class="btn btn-secondary btn-block" href="{{APP_URL}}/prijava">Začni brezplačno</a>
+            </div>
+            </div>
+          </div>
+          <p class="plans-more">Več kot 30 enot? Paket in ceno uredimo po dogovoru.</p>
+
+          <div class="included">
+            <h3>Vsi paketi vključujejo</h3>
+            <ul class="checks two">
+              <li>Najemnine in položnice z UPN QR kodo</li>
+              <li>Delitev stroškov med sostanovalce</li>
+              <li>Sporočila in obvestila na telefon</li>
+              <li>Okvare s fotografijami in potekom popravila</li>
+              <li>Števci in odčitki</li>
+              <li>Primopredaja s fotografijami in primerjava »prej in potem«</li>
+              <li>Pogodba, varščina in dokumenti na enem mestu</li>
+              <li>Letni povzetek za evidenco in izvoz podatkov</li>
+            </ul>
+          </div>
+
+          <div class="price-notes">
+            <div class="card card-pad price-note">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-sprout" /></svg>
+              <h3>Ustanovna cena: 30 % ceneje</h3>
+              <p>Kdor se registrira v testnem obdobju, ima izbrani paket 30 % ceneje, dokler je naročen.</p>
             </div>
             <div class="card card-pad price-note">
-              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-calendar-clock" /></svg>
-              <h3>Kaj pride po testnem obdobju?</h3>
-              <p>Cenik za čas po testiranju še pripravljamo. Objavimo ga tukaj, preden testno obdobje mine.</p>
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-users" /></svg>
+              <h3>Najemnik ne plača nič</h3>
+              <p>Najemnika povabiš brezplačno. Za svoj najem nikoli ne vidi cenika ali poziva k plačilu.</p>
+            </div>
+            <div class="card card-pad price-note">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="#i-shield-check" /></svg>
+              <h3>Tvoji podatki ostanejo</h3>
+              <p>Če naročnino prekličeš, nič ne izbrišemo. Enote nad brezplačno ostanejo vidne, samo za branje.</p>
             </div>
           </div>
         </div>
@@ -324,7 +406,15 @@
             </details>
             <details>
               <summary>Koliko stane?</summary>
-              <p>Med testnim obdobjem je brezplačen. Cenik za čas po testiranju objavimo na tej strani.</p>
+              <p>Med testnim obdobjem je Kvito brezplačen za vse. Potem je ena enota za vedno brezplačna, za več enot izbereš paket Plus (do 3 enote, 4,99 € na mesec), Pro (do 10 enot, 11,99 €) ali Upravnik (do 30 enot, 27,99 €). Pri letnem plačilu dobiš 2 meseca gratis.</p>
+            </details>
+            <details>
+              <summary>Kaj šteje kot enota?</summary>
+              <p>Vsako stanovanje, soba ali poslovni prostor, ki ga oddajaš posebej. Hiša s tremi stanovanji so tri enote. Najemniki se ne štejejo.</p>
+            </details>
+            <details>
+              <summary>Kaj se zgodi, ko se testno obdobje konča?</summary>
+              <p>Konec napovemo vsaj 30 dni prej. Kdor ima več kot eno enoto, dobi 30 dni preizkusa paketa brez kartice in ustanovno ceno, 30 % nižjo, dokler je naročen. Kdor ne izbere paketa, obdrži eno enoto, ostale so samo za branje.</p>
             </details>
           </div>
         </div>

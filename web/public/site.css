@@ -639,22 +639,117 @@ html:not(.dark) .hero-visual::before {
   color: var(--ink-faint);
 }
 
-.pricing {
+/* Pricing (strategy: docs/NAROCNINA.md). Monthly/yearly prices switch with [data-billing] (site.js); yearly without JS. */
+.trial-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 760px;
+  margin-top: 32px;
+  padding: 14px 18px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 6px;
+}
+.trial-banner .icon {
+  flex: none;
+  margin-top: 3px;
+  color: var(--ink-muted);
+}
+.trial-banner p {
+  margin: 0;
+  color: var(--ink-muted);
+}
+.trial-banner strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.billing {
+  margin-top: 40px;
+}
+.billing-toggle {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-sunken);
+}
+.billing-toggle button {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  transition: color 150ms ease-out, background-color 150ms ease-out;
+}
+.billing-toggle button[aria-pressed="true"] {
+  border-color: var(--line);
+  background: var(--surface-raised);
+  color: var(--ink);
+}
+.billing-toggle .save {
+  margin-left: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.billing[data-billing="y"] .bill-m,
+.billing[data-billing="m"] .bill-y {
+  display: none;
+}
+.plans {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
-  max-width: 880px;
-  margin-top: 48px;
+  margin-top: 20px;
+}
+.plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.plan .checks {
+  flex: 1;
+  margin-bottom: 24px;
+}
+.plan-featured {
+  border-color: var(--line-strong);
+}
+.plan-badge {
+  position: absolute;
+  top: -11px;
+  left: 27px;
+  margin: 0;
+  padding: 2px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface-raised);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.plan-units {
+  margin: 6px 0 0;
+  font-size: 20px;
+  font-weight: 600;
 }
 .price {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin: 4px 0 20px;
+  margin: 16px 0 0;
 }
 .price .amount {
   font-family: var(--font-mono);
-  font-size: 40px;
+  font-size: 34px;
   font-weight: 500;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
@@ -662,8 +757,35 @@ html:not(.dark) .hero-visual::before {
 .price .per {
   color: var(--ink-muted);
 }
-.price-card .checks {
-  margin-bottom: 24px;
+.price-sub {
+  min-height: 1.5em;
+  margin: 4px 0 16px;
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+.plans-more {
+  margin: 16px 0 0;
+  color: var(--ink-muted);
+}
+.included {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
+}
+.checks.two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+  margin-top: 12px;
+}
+.checks.two li:nth-child(2) {
+  border-top: 0;
+}
+.price-notes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 40px;
 }
 .price-note {
   background: transparent !important;
@@ -783,6 +905,13 @@ html:not(.dark) .hero-visual::before {
 
 /* ---------- Responsive ---------- */
 /* Tablet (iPad portrait and landscape): the same layout as desktop, just a little tighter. */
+/* Four plans side by side need room; two by two below a desktop width. */
+@media (max-width: 1099px) {
+  .plans {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 28px;
+  }
+}
 @media (min-width: 768px) and (max-width: 1023px) {
   .header-row {
     gap: 10px;
@@ -855,9 +984,26 @@ html:not(.dark) .hero-visual::before {
   .features,
   .two-col,
   .steps,
-  .pricing,
+  .plans,
+  .price-notes,
+  .checks.two,
   .footer-grid {
     grid-template-columns: 1fr;
+  }
+  .checks.two li:nth-child(2) {
+    border-top: 1px solid var(--line);
+  }
+  .billing-toggle {
+    display: flex;
+  }
+  .billing-toggle button {
+    flex: 1;
+    min-height: 52px;
+    line-height: 1.2;
+  }
+  .billing-toggle .save {
+    display: block;
+    margin: 2px 0 0;
   }
   .phones {
     grid-template-columns: repeat(3, minmax(0, 1fr));

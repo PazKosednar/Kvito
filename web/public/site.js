@@ -37,6 +37,20 @@
     window.addEventListener("scroll", onScroll, { passive: true });
   }
 
+  // Pricing: monthly / yearly prices.
+  var billing = document.querySelector(".billing");
+  if (billing) {
+    billing.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-bill]");
+      if (!btn) return;
+      var mode = btn.getAttribute("data-bill");
+      billing.setAttribute("data-billing", mode);
+      billing.querySelectorAll("[data-bill]").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b === btn));
+      });
+    });
+  }
+
   var year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
 })();
