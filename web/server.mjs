@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = resolve(fileURLToPath(new URL("./public", import.meta.url)));
 const PORT = Number(process.env.PORT) || 8080;
 // Where "Prijava" / "Začni brezplačno" lead. Change on Railway when the app gets its own domain (e.g. app.kvito.si).
-const APP_URL = (process.env.APP_URL || "https://kvitaserver-production.up.railway.app").replace(/\/+$/, "");
+const APP_URL = (process.env.APP_URL || "https://kvito-server-production.up.railway.app").replace(/\/+$/, "");
 
 const TYPES = {
   ".html": "text/html; charset=utf-8",
