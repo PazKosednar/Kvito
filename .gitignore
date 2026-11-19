@@ -31,3 +31,6 @@ server/.test-uploads/
 
 # Playwright MCP screenshots and snapshots
 .playwright-mcp/
+
+# Mockup source archives (PSD, too large for git)
+files/cgp/**/*.zip
