@@ -51,6 +51,8 @@ const EnvSchema = z.object({
   /** Kvito assistant for landlords (Claude API). Without a key the assistant is switched off. */
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
   ASSISTANT_MODEL: z.string().min(1).default("claude-haiku-5-5"),
+  /** Claude API address (overridden only in tests with a local stand-in). */
+  ANTHROPIC_BASE_URL: z.string().url().default("https://api.anthropic.com"),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

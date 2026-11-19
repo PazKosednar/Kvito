@@ -91,6 +91,27 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   return (await res.json().catch(() => null)) as T;
 }
 
+/**
+ * A text answer that arrives in pieces (the assistant). `onText` gets the whole text so far after each piece.
+ * The server marks a failure that happened after the answer started with "\u0000CODE".
+ */
+export async function apiStream(path: string, options: RequestOptions, onText: (soFar: string) => void): Promise<string> {
+  const res = await request(path, options);
+  if (!res.body) throw new ApiError(0, "NETWORK");
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let text = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    text += decoder.decode(value, { stream: true });
+    const fail = text.indexOf("\u0000");
+    if (fail >= 0) throw new ApiError(502, text.slice(fail + 1) || "ASSISTANT_UNAVAILABLE");
+    onText(text);
+  }
+  return text;
+}
+
 /** Binary responses (e.g. the UPN QR as PNG). */
 export async function apiBlob(path: string, options: RequestOptions = {}): Promise<Blob> {
   return (await request(path, options)).blob();
