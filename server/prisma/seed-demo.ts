@@ -139,6 +139,51 @@ async function main() {
   const u3 = await prisma.unit.create({ data: { propertyId: p2.id, name: "Mansarda", floor: "mansarda", createdAt: at(0, 1, 10, 21) } });
   const u4 = await prisma.unit.create({ data: { propertyId: p3.id, name: "Pisarna 1", floor: "pritličje", createdAt: at(0, 1, 10, 40) } });
 
+  // ---------- Building and unit details (one insurance and one energy certificate expire soon) ----------
+  await prisma.property.update({
+    where: { id: p1.id },
+    data: { yearBuilt: 1974, yearRenovated: 2016, managerName: "Domplan d.o.o.", managerContact: "02 230 41 00", reserveFundCents: 3600, insurer: "Zavarovalnica Sava", insurancePolicy: "41-0098817", insuranceValidUntil: addDays(TODAY, 34) },
+  });
+  await prisma.property.update({
+    where: { id: p2.id },
+    data: { yearBuilt: 1962, yearRenovated: 2021, insurer: "Generali zavarovalnica", insurancePolicy: "GZ-552190", insuranceValidUntil: addDays(TODAY, 230) },
+  });
+  await prisma.property.update({
+    where: { id: p3.id },
+    data: { yearBuilt: 1998, managerName: "Upravljanje Pomurje d.o.o.", managerContact: "info@upravljanje-pomurje.test", reserveFundCents: 5200, insurer: "Zavarovalnica Triglav", insurancePolicy: "PO-7731204", insuranceValidUntil: addDays(TODAY, 140) },
+  });
+  const unitDetails: [string, Prisma.UnitUpdateInput][] = [
+    [u1.id, { areaM2: 58.4, rooms: 2.5, furnishing: "FURNISHED", hasParking: false, hasStorage: true, hasBalcony: true, petsAllowed: false, buildingPartId: "657-1204-12", energyClass: "D", energyCertValidUntil: addDays(TODAY, 1900) }],
+    [u2.id, { areaM2: 74, rooms: 3, furnishing: "PARTLY", hasParking: true, hasStorage: true, hasBalcony: false, petsAllowed: true, buildingPartId: "105-842-1", energyClass: "E", energyCertValidUntil: addDays(TODAY, 45) }],
+    [u3.id, { areaM2: 41.5, rooms: 1.5, furnishing: "FURNISHED", hasParking: true, hasStorage: false, hasBalcony: false, petsAllowed: false, buildingPartId: "105-842-2" }],
+    [u4.id, { areaM2: 48, rooms: 2, furnishing: "UNFURNISHED", hasParking: true, hasStorage: false, hasBalcony: false, buildingPartId: "105-1377-3", energyClass: "C", energyCertValidUntil: addDays(TODAY, 2400) }],
+  ];
+  for (const [id, data] of unitDetails) await prisma.unit.update({ where: { id }, data });
+  // Fictional metering point numbers.
+  const points: [string, "ELECTRICITY" | "GAS" | "WATER" | "HEATING" | "INTERNET" | "OTHER", string | null, string | null, string | null][] = [
+    [u1.id, "ELECTRICITY", "4-301772", "Energija plus", "Na najemnika"],
+    [u1.id, "HEATING", null, "Energetika Maribor", "Daljinsko ogrevanje, delilniki na radiatorjih"],
+    [u1.id, "WATER", "MB-55120", "Mariborski vodovod", null],
+    [u2.id, "ELECTRICITY", "3-118204", "Energija Mura", null],
+    [u2.id, "WATER", "MS-20871", "Vodovod Murska Sobota", "Skupni števec za hišo"],
+    [u3.id, "ELECTRICITY", "3-118205", "Energija Mura", "Ločen števec za mansardo"],
+    [u4.id, "ELECTRICITY", "3-207719", "Energija Mura d.o.o.", "Najemnik plača neposredno dobavitelju"],
+    [u4.id, "INTERNET", null, "Telemach", "Optika, na najemnika"],
+  ];
+  for (const [unitId, kind, pointNumber, supplier, note] of points) await prisma.utilityPoint.create({ data: { unitId, kind, pointNumber, supplier, note, createdAt: at(0, 1, 11) } });
+  const keySets: [string, string, number, string | null][] = [
+    [u1.id, "Vhodna vrata stanovanja", 3, "2 najemnik, 1 rezervni pri meni"],
+    [u1.id, "Vhod v blok", 2, "Najemnik"],
+    [u1.id, "Klet", 1, "Najemnik"],
+    [u2.id, "Vhodna vrata", 3, "Maja, Rok, 1 rezervni pri meni"],
+    [u2.id, "Garaža (daljinec)", 2, "Najemnika"],
+    [u3.id, "Vhodna vrata mansarde", 2, "Žan"],
+    [u3.id, "Poštni nabiralnik", 1, "Žan"],
+    [u4.id, "Vhod v poslovni prostor", 2, "Petra"],
+    [u4.id, "Alarm (kartica)", 2, "Petra"],
+  ];
+  for (const [unitId, label, count, holder] of keySets) await prisma.keySet.create({ data: { unitId, label, count, holder, createdAt: at(0, 1, 11) } });
+
   const payee = { payeeName: landlord.name!, payeeIban: LANDLORD_IBAN, payeeStreet: "Gosposka ulica 3", payeeCity: "2000 Maribor" };
   const T3_END = 8; // previous mansarda tenant moves out at the end of month 8
   const T4_START = 10;
@@ -648,7 +693,7 @@ async function wipe(ownerId: string) {
   const issueIds = (await prisma.issue.findMany({ where: { tenancyId: { in: tenancyIds } }, select: { id: true } })).map((x) => x.id);
   const byTenancy = { tenancyId: { in: tenancyIds } };
   await prisma.$transaction([
-    prisma.attachment.deleteMany({ where: { OR: [byTenancy, { expense: { ownerId } }] } }),
+    prisma.attachment.deleteMany({ where: { OR: [byTenancy, { expense: { ownerId } }, { property: { ownerId } }] } }),
     prisma.paymentReport.deleteMany({ where: { chargeShare: { chargeId: { in: chargeIds } } } }),
     prisma.chargeShare.deleteMany({ where: { chargeId: { in: chargeIds } } }),
     prisma.depositDeduction.deleteMany({ where: { deposit: byTenancy } }),
@@ -672,6 +717,8 @@ async function wipe(ownerId: string) {
     prisma.tenancyMember.deleteMany({ where: byTenancy }),
     prisma.tenancy.deleteMany({ where: { id: { in: tenancyIds } } }),
     prisma.expense.deleteMany({ where: { ownerId } }),
+    prisma.utilityPoint.deleteMany({ where: { unit: { property: { ownerId } } } }),
+    prisma.keySet.deleteMany({ where: { unit: { property: { ownerId } } } }),
     prisma.unit.deleteMany({ where: { property: { ownerId } } }),
     prisma.property.deleteMany({ where: { ownerId } }),
   ]);

@@ -87,7 +87,7 @@ Vlogo zamenjaš v meniju računa (krogec z začetnicami zgoraj desno), če imaš
 
 ### Demo podatki (2 leti zgodovine)
 
-`npm run db:seed:demo` doda ločenega najemodajalca s 3 nepremičninami (4 enote, 5 najemov) in zgodovino zadnjih 24 mesecev do tekočega meseca: najemnine, akontacije, računi za elektriko, letni poračuni, varščine, primopredaje, odčitki števcev, okvare, sporočila in lastni stroški za davčni pregled. Datumi so vedno relativni na današnji dan. Če podatki že obstajajo, se skripta ne izvede; `npm run db:seed:demo -- --reset` izbriše **samo** nepremičnine tega demo najemodajalca (in vse pod njimi) ter jih ustvari znova.
+`npm run db:seed:demo` doda ločenega najemodajalca s 3 nepremičninami (4 enote, 5 najemov) in zgodovino zadnjih 24 mesecev do tekočega meseca: najemnine, akontacije, računi za elektriko, letni poračuni, varščine, primopredaje, odčitki števcev, okvare, sporočila, lastni stroški za davčni pregled ter podatki o stavbah in enotah (merilna mesta, ključi; eno zavarovanje in ena energetska izkaznica kmalu potečeta). Datumi so vedno relativni na današnji dan. Če podatki že obstajajo, se skripta ne izvede; `npm run db:seed:demo -- --reset` izbriše **samo** nepremičnine tega demo najemodajalca (in vse pod njimi) ter jih ustvari znova.
 
 | E-pošta | Vloga | Opomba |
 | --- | --- | --- |
