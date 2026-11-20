@@ -1,18 +1,21 @@
-import { DoorOpen, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowRight, Building2, DoorOpen, Loader2, Pencil, Plus, Ruler, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { Field, TextInput } from "@/components/form";
-import { ErrorState, FormError, List, ListRow, LoadingState, PageHeader, Section } from "@/components/layout-parts";
+import { ErrorState, Facts, FormError, List, LoadingState, PageHeader, Section } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
+import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/dates";
 import { formatCents } from "@/lib/money";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useProperty } from "@/hooks/useProperties";
+import { usePropertyPhotos } from "@/hooks/useUnit";
 import { TenancyStatusLabel, tenantNames } from "@/features/tenancies/tenancy-ui";
-import type { Unit } from "@/types/domain";
+import type { Property, Unit } from "@/types/domain";
+import { ExpiryLabel, PhotoGallery } from "./details-ui";
 
 export function PropertyPage() {
   const { id } = useParams();
@@ -20,6 +23,7 @@ export function PropertyPage() {
   const navigate = useNavigate();
   const toMessage = useErrorMessage();
   const { property, loading, error, reload, addUnit, remove, removeUnit } = useProperty(id);
+  const gallery = usePropertyPhotos(id);
   const [adding, setAdding] = useState(false);
 
   if (loading) return <LoadingState />;
@@ -85,6 +89,13 @@ export function PropertyPage() {
         )}
       </Section>
 
+      <div className="mt-10 grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-2">
+        <BuildingSection property={property} />
+        <Section title={t("photos.title")} className="mt-0">
+          <PhotoGallery photos={gallery.photos} onAdd={gallery.add} onRemove={gallery.remove} />
+        </Section>
+      </div>
+
       <Section>
         <Button variant="ghost" className="text-danger hover:text-destructive" onClick={() => void removeProperty()}>
           <Trash2 />
@@ -128,12 +139,13 @@ function UnitRow({ unit, onRemove }: { unit: Unit; onRemove: () => Promise<void>
   if (tenancy) {
     const names = tenantNames(tenancy.members);
     return (
-      <ListRow
-        to={`/najemi/${tenancy.id}`}
-        leading={<DoorOpen className="size-5 shrink-0 text-primary" aria-hidden="true" />}
-        title={unit.name}
-        subtitle={names || t("tenancies.waitingForTenant")}
-        trailing={
+      <li className="flex items-stretch">
+        <Link to={`/najemi/${tenancy.id}`} className="group flex min-h-16 min-w-0 flex-1 items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-sunken">
+          <DoorOpen className="size-5 shrink-0 text-primary" aria-hidden="true" />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate font-medium">{unit.name}</span>
+            <span className="mt-0.5 block text-sm text-muted-foreground">{names || t("tenancies.waitingForTenant")}</span>
+          </span>
           <span className="flex items-center gap-5">
             <span className="hidden text-right sm:block">
               <span className="block font-mono text-sm tabular-nums">{t("units.perMonth", { amount: formatCents(tenancy.rentCents) })}</span>
@@ -141,8 +153,10 @@ function UnitRow({ unit, onRemove }: { unit: Unit; onRemove: () => Promise<void>
             </span>
             <TenancyStatusLabel status={tenancy.status} />
           </span>
-        }
-      />
+          <ArrowRight className="size-4 shrink-0 text-ink-faint transition-colors duration-150 group-hover:text-primary" aria-hidden="true" />
+        </Link>
+        <UnitDetailsLink unit={unit} />
+      </li>
     );
   }
 
@@ -168,7 +182,91 @@ function UnitRow({ unit, onRemove }: { unit: Unit; onRemove: () => Promise<void>
       <Button variant="ghost" size="icon" aria-label={t("units.delete")} onClick={() => void remove()}>
         <Trash2 />
       </Button>
+      <UnitDetailsLink unit={unit} className="-my-3 -mr-4" />
     </li>
+  );
+}
+
+/** Separate door to the unit's own page (details, metering points, keys, photos), next to the tenancy link. */
+function UnitDetailsLink({ unit, className }: { unit: Unit; className?: string }) {
+  const { t } = useTranslation();
+  return (
+    <Link
+      to={`/enote/${unit.id}`}
+      aria-label={`${t("unitDetails.open")}: ${unit.name}`}
+      title={t("unitDetails.open")}
+      className={cn(
+        "flex shrink-0 items-center gap-2 self-stretch border-l border-line px-4 text-sm text-ink-muted transition-colors duration-150 hover:bg-surface-sunken hover:text-ink",
+        className,
+      )}
+    >
+      <Ruler className="size-4" aria-hidden="true" />
+      <span className="hidden md:inline">{t("unitDetails.open")}</span>
+    </Link>
+  );
+}
+
+/** Building data in one card: years, manager, reserve fund, insurance with its expiry. */
+function BuildingSection({ property }: { property: Property }) {
+  const { t } = useTranslation();
+  const p = property;
+  const items: { label: string; value: React.ReactNode }[] = [];
+  if (p.yearBuilt) items.push({ label: t("building.yearBuilt"), value: <span className="font-mono tabular-nums">{p.yearBuilt}</span> });
+  if (p.yearRenovated) items.push({ label: t("building.yearRenovated"), value: <span className="font-mono tabular-nums">{p.yearRenovated}</span> });
+  if (p.managerName || p.managerContact)
+    items.push({
+      label: t("building.manager"),
+      value: (
+        <>
+          <span className="block">{p.managerName}</span>
+          {p.managerContact && <span className="block text-sm font-normal text-ink-muted">{p.managerContact}</span>}
+        </>
+      ),
+    });
+  if (p.reserveFundCents !== null) items.push({ label: t("building.reserveFund"), value: <span className="font-mono tabular-nums">{formatCents(p.reserveFundCents)}</span> });
+  if (p.insurer || p.insurancePolicy)
+    items.push({
+      label: t("building.insurance"),
+      value: (
+        <>
+          <span className="block">{p.insurer}</span>
+          {p.insurancePolicy && <span className="block font-mono text-sm font-normal text-ink-muted">{p.insurancePolicy}</span>}
+        </>
+      ),
+    });
+  if (p.insuranceValidUntil) items.push({ label: t("building.insuranceValidUntil"), value: <ExpiryLabel date={p.insuranceValidUntil} /> });
+
+  const to = `/nepremicnine/${p.id}/stavba`;
+  return (
+    <Section
+      className="mt-0"
+      title={t("building.title")}
+      action={
+        items.length > 0 ? (
+          <Button asChild variant="ghost">
+            <Link to={to}>
+              <Pencil />
+              {t("common.edit")}
+            </Link>
+          </Button>
+        ) : undefined
+      }
+    >
+      {items.length > 0 ? (
+        <Facts items={items} />
+      ) : (
+        <Link
+          to={to}
+          className="flex items-start gap-3 rounded-md border border-dashed border-line-strong p-4 text-ink-muted transition-colors duration-150 hover:border-ink hover:text-ink"
+        >
+          <Building2 className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+          <span>
+            <span className="block font-semibold text-ink">{t("building.add")}</span>
+            <span className="mt-1 block text-sm">{t("building.empty")}</span>
+          </span>
+        </Link>
+      )}
+    </Section>
   );
 }
 

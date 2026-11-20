@@ -28,6 +28,7 @@ import { messagesRouter } from "./modules/messages/routes.js";
 import { privacyRouter } from "./modules/users/privacy.js";
 import { referencesPublicRouter, referencesRouter } from "./modules/references/routes.js";
 import { reportsRouter } from "./modules/reports/routes.js";
+import { propertyDetailsRouter } from "./modules/properties/details.js";
 import { propertiesRouter } from "./modules/properties/routes.js";
 import { tenanciesRouter } from "./modules/tenancies/routes.js";
 import { upnRouter } from "./modules/upn/routes.js";
@@ -106,6 +107,7 @@ export function createApp(deps: AppDeps): Express {
   app.use("/api", attachmentsRouter(deps));
   app.use("/api", invitationsRouter(deps));
   app.use("/api", propertiesRouter());
+  app.use("/api", propertyDetailsRouter(deps));
   app.use("/api", reportsRouter());
   app.use("/api", expensesRouter(deps));
   app.use("/api", assistantRouter());

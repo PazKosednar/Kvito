@@ -7,6 +7,16 @@ export const tenancyInclude = {
       id: true,
       name: true,
       floor: true,
+      // Unit details both sides see (keys and photos stay with the landlord).
+      areaM2: true,
+      rooms: true,
+      furnishing: true,
+      hasParking: true,
+      hasStorage: true,
+      hasBalcony: true,
+      petsAllowed: true,
+      energyClass: true,
+      utilityPoints: { orderBy: { createdAt: "asc" }, select: { id: true, kind: true, pointNumber: true, supplier: true, note: true } },
       property: {
         select: {
           id: true,

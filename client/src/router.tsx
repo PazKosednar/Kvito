@@ -24,6 +24,9 @@ import { HandoverTab } from "@/features/handover/HandoverTab";
 import { MetersTab } from "@/features/meters/MetersTab";
 import { PropertyFormPage } from "@/features/properties/PropertyFormPage";
 import { PropertyPage } from "@/features/properties/PropertyPage";
+import { BuildingFormPage } from "@/features/properties/BuildingFormPage";
+import { UnitFormPage } from "@/features/properties/UnitFormPage";
+import { UnitPage } from "@/features/properties/UnitPage";
 import { ChangePasswordPage } from "@/features/account/ChangePasswordPage";
 import { MyHistoryPage } from "@/features/account/MyHistoryPage";
 import { AnnualSummaryPage } from "@/features/properties/AnnualSummaryPage";
@@ -74,6 +77,9 @@ export const router = createBrowserRouter([
           { path: "nepremicnine/nova", element: <PropertyFormPage /> },
           { path: "nepremicnine/:id", element: <PropertyPage /> },
           { path: "nepremicnine/:id/uredi", element: <PropertyFormPage /> },
+          { path: "nepremicnine/:id/stavba", element: <BuildingFormPage /> },
+          { path: "enote/:id", element: <UnitPage /> },
+          { path: "enote/:id/uredi", element: <UnitFormPage /> },
           { path: "enote/:unitId/najem", element: <TenancyFormPage /> },
           { path: "najemi/:id/uredi", element: <TenancyFormPage /> },
           { path: "najemi/:id/povabi", element: <InvitePage /> },

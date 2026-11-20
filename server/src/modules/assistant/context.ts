@@ -23,11 +23,30 @@ export async function landlordSnapshot(ownerId: string) {
         type: true,
         street: true,
         city: true,
+        yearBuilt: true,
+        yearRenovated: true,
+        managerName: true,
+        managerContact: true,
+        reserveFundCents: true,
+        insurer: true,
+        insuranceValidUntil: true,
         units: {
           where: { deletedAt: null },
           orderBy: { createdAt: "asc" },
           select: {
             name: true,
+            areaM2: true,
+            rooms: true,
+            furnishing: true,
+            hasParking: true,
+            hasStorage: true,
+            hasBalcony: true,
+            petsAllowed: true,
+            buildingPartId: true,
+            energyClass: true,
+            energyCertValidUntil: true,
+            utilityPoints: { select: { kind: true, pointNumber: true, supplier: true } },
+            keySets: { select: { label: true, count: true, holder: true } },
             tenancies: {
               where: { deletedAt: null, status: { in: ["DRAFT", "ACTIVE"] } },
               orderBy: { startDate: "desc" },
@@ -83,10 +102,32 @@ export async function landlordSnapshot(ownerId: string) {
       name: p.name,
       type: p.type,
       address: `${p.street}, ${p.city}`,
+      building: {
+        yearBuilt: p.yearBuilt,
+        yearRenovated: p.yearRenovated,
+        manager: p.managerName ? `${p.managerName}${p.managerContact ? ` (${p.managerContact})` : ""}` : null,
+        reserveFundEurPerMonth: p.reserveFundCents == null ? null : eur(p.reserveFundCents),
+        insurer: p.insurer,
+        insuranceValidUntil: p.insuranceValidUntil ? toDateOnly(p.insuranceValidUntil) : null,
+      },
       units: p.units.map((u) => {
         const t = u.tenancies[0];
         return {
           name: u.name,
+          details: {
+            areaM2: u.areaM2,
+            rooms: u.rooms,
+            furnishing: u.furnishing,
+            parking: u.hasParking,
+            storage: u.hasStorage,
+            balcony: u.hasBalcony,
+            petsAllowed: u.petsAllowed,
+            buildingPartId: u.buildingPartId,
+            energyClass: u.energyClass,
+            energyCertValidUntil: u.energyCertValidUntil ? toDateOnly(u.energyCertValidUntil) : null,
+            utilityPoints: u.utilityPoints,
+            keys: u.keySets,
+          },
           tenancy: t
             ? {
                 status: t.status,

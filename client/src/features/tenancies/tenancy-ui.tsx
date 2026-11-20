@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import type { TenancyMember, TenancyStatus } from "@/types/domain";
 
-export function tenantNames(members: TenancyMember[]): string {
+export function tenantNames(members: Pick<TenancyMember, "user">[]): string {
   return members.map((m) => m.user.name ?? m.user.email).join(", ");
 }
 

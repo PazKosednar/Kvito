@@ -230,13 +230,27 @@ model Property {
   city       String
   country    String       @default("SI")
   notes      String?
+
+  // Building details (all optional, filled in later on the property page).
+  yearBuilt           Int?
+  yearRenovated       Int?
+  /// Building manager (upravnik): name and phone or e-mail.
+  managerName         String?
+  managerContact      String?
+  /// Monthly contribution to the building reserve fund (rezervni sklad).
+  reserveFundCents    Int?
+  insurer             String?
+  insurancePolicy     String?
+  insuranceValidUntil DateTime? @db.Date
+
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   deletedAt  DateTime?
 
-  owner    User      @relation("PropertyOwner", fields: [ownerId], references: [id])
+  owner    User         @relation("PropertyOwner", fields: [ownerId], references: [id])
   units    Unit[]
   expenses Expense[]
+  photos   Attachment[] @relation("PropertyPhotos")
 
   @@index([ownerId])
 }
@@ -247,11 +261,30 @@ model Unit {
   name       String
   floor      String?
   notes      String?
+
+  // Unit details (all optional).
+  areaM2               Float?
+  /// Rooms as used in Slovenian listings (e.g. 2.5 = "2,5-sobno").
+  rooms                Float?
+  furnishing           Furnishing?
+  hasParking           Boolean?
+  hasStorage           Boolean?
+  hasBalcony           Boolean?
+  petsAllowed          Boolean?
+  /// ID znak dela stavbe (e.g. "1722-123-45"), as written by the landlord.
+  buildingPartId       String?
+  /// Energy performance certificate class (A1 … G) and its expiry.
+  energyClass          String?
+  energyCertValidUntil DateTime? @db.Date
+
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   deletedAt  DateTime?
 
   property      Property       @relation(fields: [propertyId], references: [id])
+  utilityPoints UtilityPoint[]
+  keySets       KeySet[]
+  photos        Attachment[]   @relation("UnitPhotos")
   tenancies     Tenancy[]
   meterReadings MeterReading[]
   documents     Document[]
@@ -483,6 +516,8 @@ enum AttachmentKind {
   DOCUMENT
   /// Receipt for a landlord's own cost (Expense); not tied to a tenancy.
   EXPENSE
+  /// Photo of a property or one of its units (landlord's gallery).
+  PHOTO
 }
 
 /// A stored file (local disk in development, S3-compatible EU storage in production). Served only via signed URLs.
@@ -509,9 +544,13 @@ model Attachment {
   settlementId    String?
   costEntryId     String?
   expenseId       String?
+  propertyId      String?
+  unitId          String?
 
   costEntry     CostEntry?      @relation(fields: [costEntryId], references: [id])
   expense       Expense?        @relation(fields: [expenseId], references: [id])
+  property      Property?       @relation("PropertyPhotos", fields: [propertyId], references: [id])
+  unit          Unit?           @relation("UnitPhotos", fields: [unitId], references: [id])
   tenancy       Tenancy?        @relation(fields: [tenancyId], references: [id])
   uploadedBy    User            @relation(fields: [uploadedById], references: [id])
   charge        Charge?         @relation(fields: [chargeId], references: [id])
@@ -1063,4 +1102,52 @@ model Expense {
 
   @@index([ownerId, spentOn])
   @@index([propertyId])
+}
+
+// ---------- Unit details ----------
+
+enum Furnishing {
+  UNFURNISHED
+  PARTLY
+  FURNISHED
+}
+
+enum UtilityKind {
+  ELECTRICITY
+  GAS
+  WATER
+  HEATING
+  INTERNET
+  OTHER
+}
+
+/// A metering / supply point of a unit (merilno ali odjemno mesto) and who supplies it.
+model UtilityPoint {
+  id          String      @id @default(cuid())
+  unitId      String
+  kind        UtilityKind
+  pointNumber String?
+  supplier    String?
+  note        String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  unit Unit @relation(fields: [unitId], references: [id])
+
+  @@index([unitId])
+}
+
+/// Keys or cards of a unit: what they open, how many, who has them.
+model KeySet {
+  id        String   @id @default(cuid())
+  unitId    String
+  label     String
+  count     Int      @default(1)
+  holder    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  unit Unit @relation(fields: [unitId], references: [id])
+
+  @@index([unitId])
 }

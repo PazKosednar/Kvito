@@ -12,6 +12,18 @@ export interface PropertyInput {
   notes?: string | null;
 }
 
+/** Building details of a property (all optional; null clears). */
+export interface BuildingInput {
+  yearBuilt: number | null;
+  yearRenovated: number | null;
+  managerName: string | null;
+  managerContact: string | null;
+  reserveFundCents: number | null;
+  insurer: string | null;
+  insurancePolicy: string | null;
+  insuranceValidUntil: string | null;
+}
+
 export interface UnitInput {
   name: string;
   floor?: string | null;
@@ -35,7 +47,7 @@ export function useProperty(id: string | undefined) {
   const q = useQuery<{ property: Property }>(path);
 
   const update = useCallback(
-    async (input: Partial<PropertyInput>) => {
+    async (input: Partial<PropertyInput> | Partial<BuildingInput>) => {
       await api(`/api/properties/${id}`, { method: "PATCH", body: input });
       await invalidate("/api/properties");
     },

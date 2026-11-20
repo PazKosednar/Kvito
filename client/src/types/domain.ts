@@ -77,6 +77,15 @@ export interface TenancyDetail extends Tenancy {
     id: string;
     name: string;
     floor: string | null;
+    areaM2: number | null;
+    rooms: number | null;
+    furnishing: Furnishing | null;
+    hasParking: boolean | null;
+    hasStorage: boolean | null;
+    hasBalcony: boolean | null;
+    petsAllowed: boolean | null;
+    energyClass: EnergyClass | null;
+    utilityPoints: UtilityPoint[];
     property: {
       id: string;
       type: PropertyType;
@@ -89,13 +98,59 @@ export interface TenancyDetail extends Tenancy {
   };
 }
 
-export interface Unit {
+export type Furnishing = "UNFURNISHED" | "PARTLY" | "FURNISHED";
+export const ENERGY_CLASSES = ["A1", "A2", "B1", "B2", "C", "D", "E", "F", "G"] as const;
+export type EnergyClass = (typeof ENERGY_CLASSES)[number];
+
+/** Unit details, all optional (null = not filled in). */
+export interface UnitDetails {
+  areaM2: number | null;
+  rooms: number | null;
+  furnishing: Furnishing | null;
+  hasParking: boolean | null;
+  hasStorage: boolean | null;
+  hasBalcony: boolean | null;
+  petsAllowed: boolean | null;
+  buildingPartId: string | null;
+  energyClass: EnergyClass | null;
+  /** YYYY-MM-DD */
+  energyCertValidUntil: string | null;
+}
+
+export interface Unit extends UnitDetails {
   id: string;
   propertyId: string;
   name: string;
   floor: string | null;
   notes: string | null;
   tenancies: Tenancy[];
+}
+
+export const UTILITY_KINDS = ["ELECTRICITY", "GAS", "WATER", "HEATING", "INTERNET", "OTHER"] as const;
+export type UtilityKind = (typeof UTILITY_KINDS)[number];
+
+export interface UtilityPoint {
+  id: string;
+  kind: UtilityKind;
+  pointNumber: string | null;
+  supplier: string | null;
+  note: string | null;
+}
+
+export interface KeySet {
+  id: string;
+  label: string;
+  count: number;
+  holder: string | null;
+}
+
+/** GET /api/units/:id – the unit page. */
+export interface UnitDetail extends Omit<Unit, "tenancies"> {
+  property: { id: string; name: string; type: PropertyType; street: string; postalCode: string; city: string };
+  tenancies: { id: string; status: TenancyStatus; startDate: string; rentCents: number; members: { user: PersonRef }[] }[];
+  utilityPoints: UtilityPoint[];
+  keySets: KeySet[];
+  photos: Attachment[];
 }
 
 /** Mirrors server PropertyType: hiša, večstanovanjska hiša, stanovanje (v bloku), poslovni prostor. */
@@ -109,6 +164,15 @@ export interface Property {
   postalCode: string;
   city: string;
   notes: string | null;
+  yearBuilt: number | null;
+  yearRenovated: number | null;
+  managerName: string | null;
+  managerContact: string | null;
+  reserveFundCents: number | null;
+  insurer: string | null;
+  insurancePolicy: string | null;
+  /** YYYY-MM-DD */
+  insuranceValidUntil: string | null;
   units: Unit[];
 }
 
@@ -139,7 +203,7 @@ export interface InvitationPreview {
 export type ChargeStatus = "OPEN" | "REPORTED_PAID" | "CONFIRMED" | "OVERDUE" | "DISPUTED";
 export type ChargeType = "RENT" | "BILL" | "OTHER" | "DEPOSIT" | "ADVANCE" | "SETTLEMENT";
 export type PayTo = "LANDLORD" | "SUPPLIER";
-export type AttachmentKind = "BILL" | "PAYMENT_PROOF" | "MESSAGE" | "ISSUE" | "METER" | "HANDOVER" | "DOCUMENT" | "EXPENSE";
+export type AttachmentKind = "BILL" | "PAYMENT_PROOF" | "MESSAGE" | "ISSUE" | "METER" | "HANDOVER" | "DOCUMENT" | "EXPENSE" | "PHOTO";
 
 export interface Attachment {
   id: string;

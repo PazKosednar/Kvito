@@ -1,4 +1,4 @@
-import { Crown, Mail, Phone, UserPlus, UserX } from "lucide-react";
+import { Crown, Mail, Phone, Ruler, UserPlus, UserX, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { toast } from "sonner";
@@ -7,6 +7,8 @@ import { splitPreview } from "@/lib/split";
 import { Button } from "@/components/ui/button";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { formatCents } from "@/lib/money";
+import { useBasicsItems } from "@/features/properties/details-ui";
+import type { TenancyDetail } from "@/types/domain";
 import { useTenancyContext } from "./TenancyLayout";
 
 /** People, terms and payee details of a tenancy. Landlords can edit and invite. */
@@ -108,6 +110,8 @@ export function TenancyDetailsTab() {
         </Section>
       )}
 
+      <UnitInfo unit={tenancy.unit} isLandlord={isLandlord} />
+
       <p className="mt-10 text-sm text-ink-muted">
         {t("tenancies.termsMoved")}{" "}
         <Link to={`/najemi/${tenancy.id}/pogodba`} className="text-primary underline-offset-4 hover:underline">
@@ -128,6 +132,55 @@ export function TenancyDetailsTab() {
       </Section>
 
     </>
+  );
+}
+
+/** What the tenant rents: basics and metering points (both roles see this; keys and photos stay with the landlord). */
+function UnitInfo({ unit, isLandlord }: { unit: TenancyDetail["unit"]; isLandlord: boolean }) {
+  const { t } = useTranslation();
+  const items = useBasicsItems(unit);
+  if (unit.energyClass) items.push({ label: t("unitDetails.energyClass"), value: unit.energyClass });
+  const points = unit.utilityPoints;
+  if (!items.length && !points.length && !isLandlord) return null;
+  return (
+    <Section
+      title={t("unitInfo.title")}
+      action={
+        isLandlord ? (
+          <Button asChild variant="ghost">
+            <Link to={`/enote/${unit.id}`}>
+              <Ruler />
+              {t("unitDetails.open")}
+            </Link>
+          </Button>
+        ) : undefined
+      }
+    >
+      <div className="grid grid-cols-1 gap-x-8 gap-y-6 lg:grid-cols-2">
+        {items.length > 0 ? (
+          <Facts items={items} />
+        ) : (
+          <p className="rounded-md border border-dashed border-line-strong px-4 py-4 text-ink-muted">{t("unitDetails.emptyBasics")}</p>
+        )}
+        {points.length > 0 && (
+          <div>
+            <h3 className="mb-2 label-mono">{t("unitInfo.utilities")}</h3>
+            <List>
+              {points.map((p) => (
+                <li key={p.id} className="flex items-center gap-3 px-4 py-3">
+                  <Zap className="size-4 shrink-0 text-ink-faint" aria-hidden="true" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold">{t(`utilities.kinds.${p.kind}`)}</span>
+                    {(p.supplier || p.note) && <span className="block truncate text-sm text-ink-muted">{[p.supplier, p.note].filter(Boolean).join(" · ")}</span>}
+                  </span>
+                  {p.pointNumber && <span className="font-mono text-sm break-all tabular-nums">{p.pointNumber}</span>}
+                </li>
+              ))}
+            </List>
+          </div>
+        )}
+      </div>
+    </Section>
   );
 }
 

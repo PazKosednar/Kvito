@@ -3,7 +3,7 @@ import { z } from "zod";
 import { audit, diff } from "../../lib/audit.js";
 import { badRequest, notFound } from "../../lib/errors.js";
 import { prisma } from "../../lib/prisma.js";
-import { idParam, optionalText, text } from "../../lib/validation.js";
+import { cents, dateOnly, idParam, optionalText, text } from "../../lib/validation.js";
 import { authUserId } from "../../middleware/auth.js";
 import { validateBody } from "../../middleware/validate.js";
 import { assertPropertyOwner, assertUnitOwner } from "../access/access.js";
@@ -16,8 +16,35 @@ const PropertyBody = z.object({
   postalCode: z.string().trim().regex(/^\d{4}$/, "INVALID_POSTAL_CODE"),
   city: text(60),
   notes: optionalText(500),
+  // Building details: optional; null clears a value.
+  yearBuilt: z.number().int().min(1500).max(2100).nullable().optional(),
+  yearRenovated: z.number().int().min(1500).max(2100).nullable().optional(),
+  managerName: optionalText(80),
+  managerContact: optionalText(120),
+  reserveFundCents: cents.nullable().optional(),
+  insurer: optionalText(80),
+  insurancePolicy: optionalText(60),
+  insuranceValidUntil: dateOnly.nullable().optional(),
 });
-const UnitBody = z.object({ name: text(60), floor: optionalText(40), notes: optionalText(500) });
+
+export const ENERGY_CLASSES = ["A1", "A2", "B1", "B2", "C", "D", "E", "F", "G"] as const;
+
+const UnitBody = z.object({
+  name: text(60),
+  floor: optionalText(40),
+  notes: optionalText(500),
+  // Unit details: optional; null clears a value.
+  areaM2: z.number().min(1).max(100_000).nullable().optional(),
+  rooms: z.number().min(0.5).max(100).multipleOf(0.5).nullable().optional(),
+  furnishing: z.enum(["UNFURNISHED", "PARTLY", "FURNISHED"]).nullable().optional(),
+  hasParking: z.boolean().nullable().optional(),
+  hasStorage: z.boolean().nullable().optional(),
+  hasBalcony: z.boolean().nullable().optional(),
+  petsAllowed: z.boolean().nullable().optional(),
+  buildingPartId: optionalText(40),
+  energyClass: z.enum(ENERGY_CLASSES).nullable().optional(),
+  energyCertValidUntil: dateOnly.nullable().optional(),
+});
 
 const activeTenancy = { where: { deletedAt: null, status: { in: ["DRAFT", "ACTIVE"] as ("DRAFT" | "ACTIVE")[] } } };
 
@@ -131,9 +158,7 @@ export function propertiesRouter(): Router {
     const userId = authUserId(req);
     await assertPropertyOwner(userId, propertyId);
     const body = req.body as z.infer<typeof UnitBody>;
-    const unit = await prisma.unit.create({
-      data: { propertyId, name: body.name, floor: body.floor ?? null, notes: body.notes ?? null },
-    });
+    const unit = await prisma.unit.create({ data: { ...body, propertyId } });
     await audit({ actorId: userId, entityType: "Unit", entityId: unit.id, action: "create", after: { name: unit.name, propertyId }, ip: req.ip });
     res.status(201).json({ unit });
   });
