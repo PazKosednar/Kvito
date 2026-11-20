@@ -112,6 +112,8 @@ export async function deleteAccount(userId: string, ip: string | undefined): Pro
     // Shared renting-history links stop working with the account.
     await tx.tenantReference.deleteMany({ where: { userId } });
     await tx.pushSubscription.deleteMany({ where: { userId } });
+    // The private calendar link stops working.
+    await tx.calendarFeed.deleteMany({ where: { userId } });
     await tx.notification.deleteMany({ where: { userId } });
     await tx.loginCode.deleteMany({ where: { email: user.email } });
     await tx.user.update({

@@ -9,6 +9,7 @@ import { validateBody } from "../../middleware/validate.js";
 import { assertTenancyAccess, assertTenancyLandlord, assertUnitOwner } from "../access/access.js";
 import { tenancyInclude } from "./dto.js";
 import { onTimeMonthsByTenancy } from "../reports/on-time.js";
+import { assertUnitWritable } from "../billing/plans.js";
 
 const billingMode = z.enum(["COMBINED", "SEPARATE"]);
 
@@ -84,6 +85,7 @@ export function tenanciesRouter(): Router {
     const userId = authUserId(req);
     const unitId = idParam.parse(req.params.unitId);
     await assertUnitOwner(userId, unitId);
+    await assertUnitWritable(userId, unitId);
     const body = req.body as z.infer<typeof TenancyBody>;
     const existing = await prisma.tenancy.count({ where: { unitId, deletedAt: null, status: "ACTIVE" } });
     if (existing > 0) throw badRequest("UNIT_HAS_ACTIVE_TENANCY");

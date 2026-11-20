@@ -7,6 +7,7 @@ import { cents, dateOnly, idParam, optionalText, text } from "../../lib/validati
 import { authUserId } from "../../middleware/auth.js";
 import { validateBody } from "../../middleware/validate.js";
 import { assertPropertyOwner, assertUnitOwner } from "../access/access.js";
+import { assertCanAddUnit } from "../billing/plans.js";
 
 const PropertyBody = z.object({
   // Optional (no default) so a PATCH without it keeps the stored type; the DB default is APARTMENT.
@@ -158,6 +159,7 @@ export function propertiesRouter(): Router {
     const propertyId = idParam.parse(req.params.id);
     const userId = authUserId(req);
     await assertPropertyOwner(userId, propertyId);
+    await assertCanAddUnit(userId);
     const body = req.body as z.infer<typeof UnitBody>;
     const unit = await prisma.unit.create({ data: { ...body, propertyId } });
     await audit({ actorId: userId, entityType: "Unit", entityId: unit.id, action: "create", after: { name: unit.name, propertyId }, ip: req.ip });

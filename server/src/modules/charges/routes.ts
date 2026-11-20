@@ -18,6 +18,7 @@ import { assertTenancyAccess, assertTenancyLandlord } from "../access/access.js"
 import { claimAttachments } from "../attachments/service.js";
 import { restoreOffsetCredit } from "../contract/credit.js";
 import { chargeDto, chargeInclude, createCharge, paymentData, refreshChargeStatus, transitionShare } from "./service.js";
+import { assertUnitWritable } from "../billing/plans.js";
 
 const reference = z
   .string()
@@ -121,6 +122,8 @@ export function chargesRouter(deps: { emailSender: EmailSender }): Router {
     const userId = authUserId(req);
     const tenancyId = idParam.parse(req.params.id);
     await assertTenancyLandlord(userId, tenancyId);
+    const { unitId } = await prisma.tenancy.findUniqueOrThrow({ where: { id: tenancyId }, select: { unitId: true } });
+    await assertUnitWritable(userId, unitId);
     const body = req.body as z.infer<typeof CreateChargeBody>;
     const charge = await prisma.$transaction((tx) =>
       createCharge(

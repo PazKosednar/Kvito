@@ -229,7 +229,10 @@
     "ACCOUNT_HAS_ACTIVE_TENANCIES": "Your account still has active tenancies. End them first, then delete the account.",
     "CONFIRMATION_MISMATCH": "The e-mail you typed does not match your account.",
     "END_BEFORE_START": "The end cannot be before the start.",
-    "TOO_MANY_ATTACHMENTS": "You have reached the maximum number of attachments."
+    "TOO_MANY_ATTACHMENTS": "You have reached the maximum number of attachments.",
+    "PLAN_LIMIT_UNITS": "Your package allows no more units. See the packages under account menu → Subscription.",
+    "PLAN_LIMIT_UNIT_LOCKED": "This unit is over your package limit, so it is read-only. See the packages under account menu → Subscription.",
+    "PLAN_LIMIT_STORAGE": "The file storage of your package is used up. Delete old files or see the packages (account menu → Subscription)."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -1756,5 +1759,90 @@
   "unitInfo": {
     "title": "Unit",
     "utilities": "Metering points"
+  },
+  "billing": {
+    "menu": "Subscription",
+    "eyebrow": "Account",
+    "title": "Subscription",
+    "subtitle": "Your package and how much of it you use. Every unit counts, empty ones too.",
+    "noLimits": "During the trial period Kvito has no limits: add as many units and files as you like. We announce its end at least 30 days ahead.",
+    "usage": "Package usage",
+    "current": "Your package",
+    "founder": "founding price −30%",
+    "units": "Units",
+    "storage": "File storage",
+    "near": "Almost used up.",
+    "over": "Over the package limit: you cannot add new units or files.",
+    "plansTitle": "Packages",
+    "plans": {
+      "FREE": "Free",
+      "PLUS": "Plus",
+      "PRO": "Pro",
+      "MANAGER": "Manager"
+    },
+    "yours": "Yours",
+    "perMonth": "/ month",
+    "forever": "Free forever",
+    "yearly": "or {{amount}} a year (2 months free)",
+    "unitsCount_one": "{{count}} unit",
+    "unitsCount_other": "up to {{count}} units",
+    "storageAmount": "{{amount}} of file storage",
+    "currentPlan": "This is your current package.",
+    "choose": "Choose",
+    "tooSmall": "Too few units for you",
+    "paymentsSoon": "Choosing a paid package will be possible at the end of the trial period. Tenants never pay anything.",
+    "fits_one": "For {{count}} unit the {{plan}} package fits.",
+    "fits_other": "For {{count}} units the {{plan}} package fits."
+  },
+  "calendar": {
+    "menu": "Deadlines",
+    "eyebrow": "Overview",
+    "title": "Deadlines",
+    "subtitle": "Every date you should not miss: due dates, tenancy ends, rent reviews and expiring energy certificates.",
+    "overdue": "Overdue",
+    "late": "Overdue",
+    "today": "today",
+    "empty": "No deadlines in the next year. They appear here once you add tenancies and obligations.",
+    "types": {
+      "CHARGE_DUE": "{{title}}",
+      "LEASE_END": "Tenancy ends",
+      "RENT_REVIEW": "Yearly rent review",
+      "RENT_CHANGE": "New rent starts",
+      "ENERGY_CERT": "Energy certificate expires"
+    },
+    "feed": {
+      "title": "Add to your calendar",
+      "body": "A private link for Google, Apple or Outlook calendar. Deadlines update there by themselves.",
+      "create": "Create link",
+      "replace": "New link",
+      "replaceConfirm": "Create a new link? The old one stops working, so replace it in your calendar.",
+      "off": "Switch link off",
+      "offConfirm": "Switch the link off? Calendars using it will stop updating.",
+      "open": "Open in calendar",
+      "once": "Save the link now: for safety it is not shown again. In Google Calendar: Other calendars → From URL.",
+      "active": "The link is on (created {{date}}).",
+      "private": "Anyone with the link sees your deadlines and unit names. Do not share it; if it leaks, create a new one."
+    }
+  },
+  "profit": {
+    "menu": "Profitability",
+    "eyebrow": "Overview",
+    "title": "Unit profitability",
+    "subtitle": "What each unit brought in during the year: rent received minus your costs.",
+    "year": "Year",
+    "addCost": "Add a cost",
+    "totals": "Totals",
+    "income": "Income",
+    "costs": "Costs",
+    "net": "Net",
+    "perMonth_one": "Per month ({{count}} month)",
+    "perMonth_other": "Per month ({{count}} months)",
+    "byUnit": "By unit",
+    "empty": "No units yet. Add a property and a unit to see profitability.",
+    "sharedNote": "(incl. {{amount}} share of building costs)",
+    "occupied_one": "let {{count}} / {{total}} month",
+    "occupied_other": "let {{count}} / {{total}} months",
+    "unassigned": "Costs of properties without units",
+    "method": "Income is confirmed payments of rent and other obligations in the year (no deposits and no cost advances you pass on to suppliers). Costs are your own costs from Taxes and costs; a cost for a whole property is split equally between its units. Informative, not an accounting statement."
   }
 }

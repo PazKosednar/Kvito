@@ -15,6 +15,7 @@ import type { Storage } from "../../services/storage/Storage.js";
 import { assertPropertyOwner } from "../access/access.js";
 import { attachmentDto, attachmentSelect } from "../attachments/service.js";
 import { loadAnnualSummary } from "../reports/annual.js";
+import { assertStorageFor } from "../billing/plans.js";
 
 export const EXPENSE_CATEGORIES = [
   "MAINTENANCE",
@@ -190,6 +191,7 @@ export function expensesRouter(deps: { storage: Storage }): Router {
     const { name } = UploadQuery.parse(req.query);
     const body = req.body as unknown;
     if (!Buffer.isBuffer(body) || body.length === 0) throw badRequest("FILE_EMPTY");
+    await assertStorageFor(userId, body.length);
     const mime = sniffMime(body);
     if (!mime) throw badRequest("FILE_TYPE_NOT_ALLOWED");
     const key = `expenses/${userId}/${new Date().toISOString().slice(0, 7)}/${randomToken(16)}.${extensionFor(mime)}`;

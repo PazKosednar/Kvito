@@ -148,6 +148,8 @@ model User {
   notifications       Notification[]
   pushSubscriptions   PushSubscription[]
   expenses            Expense[]
+  subscription        Subscription?
+  calendarFeed        CalendarFeed?
 }
 
 /// One-time login code. Only an HMAC of the code is stored.
@@ -1170,4 +1172,46 @@ model KeySet {
   unit Unit @relation(fields: [unitId], references: [id])
 
   @@index([unitId])
+}
+
+// ---------- Subscription (docs/NAROCNINA.md) ----------
+
+enum Plan {
+  FREE
+  PLUS
+  PRO
+  MANAGER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+}
+
+/// A landlord's paid plan. No row = FREE. Payments come later through a payment provider (merchant of record).
+model Subscription {
+  userId                 String             @id
+  plan                   Plan               @default(FREE)
+  status                 SubscriptionStatus @default(ACTIVE)
+  currentPeriodEnd       DateTime?
+  trialEndsAt            DateTime?
+  /// Founding price (−30 %) for accounts from the test period.
+  founder                Boolean            @default(false)
+  providerCustomerId     String?
+  providerSubscriptionId String?            @unique
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+/// Private calendar link (.ics) of a landlord: the token is shown once, only its hash is stored.
+model CalendarFeed {
+  userId    String   @id
+  tokenHash String   @unique
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }

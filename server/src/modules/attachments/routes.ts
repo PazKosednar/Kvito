@@ -11,6 +11,7 @@ import { uploadLimiter } from "../../middleware/rateLimit.js";
 import type { Storage } from "../../services/storage/Storage.js";
 import { assertTenancyAccess } from "../access/access.js";
 import { attachmentDto } from "./service.js";
+import { assertStorageFor } from "../billing/plans.js";
 
 const KINDS = ["BILL", "PAYMENT_PROOF", "MESSAGE", "ISSUE", "METER", "HANDOVER", "DOCUMENT"] as const;
 const LANDLORD_ONLY: AttachmentKind[] = ["BILL", "DOCUMENT"];
@@ -58,6 +59,7 @@ export function attachmentsRouter(deps: { storage: Storage }): Router {
 
       const body = req.body as unknown;
       if (!Buffer.isBuffer(body) || body.length === 0) throw badRequest("FILE_EMPTY");
+      await assertStorageFor(access.landlordId, body.length);
       const mime = sniffMime(body);
       if (!mime) throw badRequest("FILE_TYPE_NOT_ALLOWED");
 

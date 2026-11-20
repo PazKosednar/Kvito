@@ -31,6 +31,9 @@ import { MyHistoryPage } from "@/features/account/MyHistoryPage";
 import { AnnualSummaryPage } from "@/features/properties/AnnualSummaryPage";
 import { ExpenseFormPage } from "@/features/taxes/ExpenseFormPage";
 import { TaxesPage } from "@/features/taxes/TaxesPage";
+import { BillingPage } from "@/features/billing/BillingPage";
+import { CalendarPage } from "@/features/calendar/CalendarPage";
+import { ProfitabilityPage } from "@/features/profitability/ProfitabilityPage";
 import { ReferencePage } from "@/pages/ReferencePage";
 import { PrivacyPage } from "@/features/account/PrivacyPage";
 import { NotificationsPage } from "@/features/notifications/NotificationsPage";
@@ -68,6 +71,9 @@ export const router = createBrowserRouter([
           { path: "geslo", element: <ChangePasswordPage /> },
           { path: "letni-povzetek", element: <AnnualSummaryPage /> },
           { path: "davki", element: <TaxesPage /> },
+          { path: "narocnina", element: <BillingPage /> },
+          { path: "koledar", element: <CalendarPage /> },
+          { path: "donosnost", element: <ProfitabilityPage /> },
           { path: "davki/stroski/nov", element: <ExpenseFormPage /> },
           { path: "davki/stroski/:id", element: <ExpenseFormPage /> },
           { path: "moj-zivljenjepis", element: <MyHistoryPage /> },

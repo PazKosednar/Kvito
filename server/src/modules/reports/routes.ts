@@ -8,6 +8,7 @@ import { authUserId } from "../../middleware/auth.js";
 import { annualCsv, loadAnnualSummary, renderAnnualPdf } from "./annual.js";
 import { onTimeMonthsByTenancy } from "./on-time.js";
 import { loadPaymentRows, paymentsCsv, renderPaymentsPdf } from "./payments.js";
+import { loadProfitability } from "./profitability.js";
 
 const AnnualQuery = z.object({
   year: z.coerce.number().int().min(2000).max(2100).optional(),
@@ -98,6 +99,12 @@ export function reportsRouter(): Router {
   });
 
   /** Yearly summary of received money by unit and month: rent, costs, deposit, other (JSON, CSV or PDF). */
+  /** Earnings per unit: rent received minus the landlord's own costs (informative). */
+  router.get("/profitability", async (req, res) => {
+    const year = z.coerce.number().int().min(2000).max(2100).optional().parse(req.query["year"]) ?? todayInLjubljana().getUTCFullYear();
+    res.json({ profitability: await loadProfitability(authUserId(req), year) });
+  });
+
   router.get("/annual", async (req, res) => {
     const userId = authUserId(req);
     const q = AnnualQuery.parse(req.query);

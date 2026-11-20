@@ -75,6 +75,8 @@ Kvito še nima registriranega podjetja. Priporočilo:
 
 Pred korakom 4 vprašaj lastnika projekta (CLAUDE.md: plačilni ponudnik).
 
+**Stanje (20. 11. 2026):** koraki 1–3 so narejeni (`Subscription`, `server/src/modules/billing/plans.ts`, stran »Naročnina« v meniju računa). Omejitve se preverjajo le, ko je na strežniku `PLAN_LIMITS_ENABLED=true`; med testnim obdobjem je izklopljeno. Enote nad omejitvijo so samo za branje pri novih najemih in obveznostih; sporočila ostanejo odprta, da se najemnik in najemodajalec lahko vedno dogovorita. Koraki 4–6 čakajo na registracijo dejavnosti in izbiro plačilnega ponudnika.
+
 ## 8. Kaj spremljamo
 
 - Delež najemodajalcev z več kot 1 enoto (kandidati za plačilo).

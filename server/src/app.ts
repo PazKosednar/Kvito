@@ -35,6 +35,8 @@ import { upnRouter } from "./modules/upn/routes.js";
 import { usersRouter } from "./modules/users/routes.js";
 import type { EmailSender } from "./services/email/EmailSender.js";
 import type { Storage } from "./services/storage/Storage.js";
+import { billingRouter } from "./modules/billing/routes.js";
+import { calendarPublicRouter, calendarRouter } from "./modules/calendar/routes.js";
 
 export interface AppDeps {
   emailSender: EmailSender;
@@ -105,6 +107,7 @@ export function createApp(deps: AppDeps): Express {
   app.use("/api", filesPublicRouter(deps));
   app.use("/api", invitationsPublicRouter());
   app.use("/api", referencesPublicRouter());
+  app.use("/api", calendarPublicRouter());
 
   // Everything below requires a valid access token. Routers do not repeat this check.
   app.use("/api", requireAuth);
@@ -116,6 +119,8 @@ export function createApp(deps: AppDeps): Express {
   app.use("/api", reportsRouter());
   app.use("/api", expensesRouter(deps));
   app.use("/api", assistantRouter());
+  app.use("/api", billingRouter());
+  app.use("/api", calendarRouter());
   app.use("/api", referencesRouter());
   app.use("/api", privacyRouter());
   app.use("/api", tenanciesRouter());

@@ -12,6 +12,7 @@ import { validateBody } from "../../middleware/validate.js";
 import type { Storage } from "../../services/storage/Storage.js";
 import { assertPropertyOwner, assertUnitOwner } from "../access/access.js";
 import { attachmentDto, attachmentSelect } from "../attachments/service.js";
+import { assertStorageFor } from "../billing/plans.js";
 
 const UTILITY_KINDS = ["ELECTRICITY", "GAS", "WATER", "HEATING", "INTERNET", "OTHER"] as const;
 
@@ -156,6 +157,7 @@ export function propertyDetailsRouter(deps: { storage: Storage }): Router {
     if (existing >= MAX_PHOTOS) throw badRequest("TOO_MANY_GALLERY_PHOTOS");
     const body = req.body as unknown;
     if (!Buffer.isBuffer(body) || body.length === 0) throw badRequest("FILE_EMPTY");
+    await assertStorageFor(userId, body.length);
     const mime = sniffMime(body);
     if (!mime || !isImage(mime)) throw badRequest("FILE_TYPE_NOT_ALLOWED");
     const key = `properties/${propertyId}/${randomToken(16)}.${extensionFor(mime)}`;
