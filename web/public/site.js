@@ -51,19 +51,6 @@
     });
   }
 
-  // Hero: computer / phone mockup.
-  var visual = document.querySelector(".hero-visual");
-  if (visual) {
-    visual.addEventListener("click", function (e) {
-      var btn = e.target.closest("[data-show]");
-      if (!btn) return;
-      visual.setAttribute("data-device", btn.getAttribute("data-show"));
-      visual.querySelectorAll("[data-show]").forEach(function (b) {
-        b.setAttribute("aria-pressed", String(b === btn));
-      });
-    });
-  }
-
   var year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
 })();
