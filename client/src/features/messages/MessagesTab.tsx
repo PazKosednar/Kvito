@@ -1,5 +1,5 @@
 import { ArrowUp, CheckCheck, Info, Loader2, MessagesSquare, Paperclip, Receipt, Wrench } from "lucide-react";
-import { Fragment, useEffect, useRef } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { AttachmentList, PendingFiles } from "@/components/attachments";
@@ -44,6 +44,37 @@ function Avatar({ person, className }: { person: PersonRef | null | undefined; c
  * The conversation of one tenancy: a messenger-like window (own scroll and composer on large screens),
  * messages grouped by person, mine in ink, system events as small labels.
  */
+/**
+ * On wide screens the conversation fills the window down to the page's bottom spacing, so the page itself
+ * does not scroll (only the message list does). Measured, because the header above it varies in height.
+ */
+function useFitToViewport(loading: boolean) {
+  const ref = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const wide = window.matchMedia("(min-width: 1024px)");
+    const fit = () => {
+      if (!wide.matches) {
+        el.style.height = "";
+        return;
+      }
+      const main = el.closest("main");
+      const bottom = main ? parseFloat(getComputedStyle(main).paddingBottom) || 0 : 0;
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      el.style.height = `${Math.max(420, Math.floor(window.innerHeight - top - bottom))}px`;
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    wide.addEventListener("change", fit);
+    return () => {
+      window.removeEventListener("resize", fit);
+      wide.removeEventListener("change", fit);
+    };
+  }, [loading]);
+  return ref;
+}
+
 export function MessagesTab() {
   const { t } = useTranslation();
   const toMessage = useErrorMessage();
@@ -53,6 +84,7 @@ export function MessagesTab() {
   const composer = useComposer((body, files) => q.send(body, files));
   const listRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const panelRef = useFitToViewport(q.loading);
   const count = q.messages.length;
   const { markRead } = q;
 
@@ -92,10 +124,7 @@ export function MessagesTab() {
     Math.abs(new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) < GROUP_MINUTES * 60_000;
 
   return (
-    <section
-      aria-label={t("tabs.messages")}
-      className="flex flex-col rounded-lg border border-line bg-surface-raised lg:h-[calc(100dvh-15rem)] lg:min-h-[28rem] lg:overflow-hidden"
-    >
+    <section ref={panelRef} aria-label={t("tabs.messages")} className="flex flex-col rounded-lg border border-line bg-surface-raised lg:overflow-hidden">
       {/* Who is in the conversation. */}
       <header className="flex items-center gap-3 border-b border-line px-4 py-3">
         <div className="flex -space-x-1.5">
