@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import { NavLink, Outlet, useParams } from "react-router";
+import { ChevronLeft } from "lucide-react";
+import { Link, NavLink, Outlet, useParams } from "react-router";
 import { Eyebrow } from "@/components/brand";
 import { CountBadge } from "@/components/count-badge";
 import { ErrorState, LoadingState } from "@/components/layout-parts";
@@ -44,6 +45,15 @@ export function TenancyLayout() {
   return (
     <Ctx.Provider value={{ ...q, tenancy }}>
       <div className="mb-6">
+        {q.isLandlord && (
+          <Link
+            to={`/nepremicnine/${tenancy.unit.property.id}`}
+            className="-ml-2 mb-4 inline-flex h-9 items-center gap-1 rounded-sm px-2 font-mono text-xs tracking-[0.06em] text-muted-foreground uppercase hover:text-foreground"
+          >
+            <ChevronLeft className="size-4" aria-hidden="true" />
+            {t("common.back")}
+          </Link>
+        )}
         <div className="min-w-0">
           <Eyebrow>
             {tenancy.unit.property.name} · {tenancy.unit.property.city}
