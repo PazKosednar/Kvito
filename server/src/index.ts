@@ -9,7 +9,7 @@ import { attachNotificationListeners } from "./services/notifications/listeners.
 import { createNotifier } from "./services/notifications/notifier.js";
 import { NullPushSender, WebPushSender } from "./services/push/WebPushSender.js";
 import { sendPaymentReminders, sendWeeklySummaries } from "./services/jobs/reminders.js";
-import { purgeExpiredData } from "./services/jobs/retention.js";
+import { purgeDeletedFiles, purgeExpiredData } from "./services/jobs/retention.js";
 import { attachRealtime } from "./services/realtime.js";
 import { sendContractReminders } from "./services/jobs/contract.js";
 import { generateMonthlyAdvances, generateMonthlyRent, markOverdue } from "./services/jobs/rent.js";
@@ -57,6 +57,7 @@ async function main() {
     { name: "weekly-summary", run: (now) => sendWeeklySummaries(notifier, now) },
     { name: "contract-reminders", run: (now) => sendContractReminders(notifier, now) },
     { name: "retention", run: purgeExpiredData },
+    { name: "deleted-files", run: (now) => purgeDeletedFiles(storage, now) },
   ]);
 
   const shutdown = (signal: string) => {

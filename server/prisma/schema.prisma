@@ -534,6 +534,8 @@ model Attachment {
   sizeBytes    Int
   createdAt    DateTime       @default(now())
   deletedAt    DateTime?
+  /// The file itself was removed from storage (some time after deletedAt); the row stays for history.
+  purgedAt     DateTime?
 
   chargeId        String?
   paymentReportId String?
@@ -567,6 +569,7 @@ model Attachment {
 
   @@index([tenancyId])
   @@index([uploadedById])
+  @@index([deletedAt, purgedAt])
 }
 
 // ---------- Messages ----------

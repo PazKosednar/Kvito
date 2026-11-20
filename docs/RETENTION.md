@@ -18,10 +18,13 @@ Kvito hrani čim manj podatkov: brez EMŠO, brez kopij osebnih dokumentov.
 | Prebrana obvestila | 180 dni |
 | Neprebrana obvestila | 365 dni |
 | Neuporabljena povabila | 90 dni po poteku ali preklicu |
+| Naložena datoteka, ki ni nikjer pripeta (opuščen obrazec) | po 7 dneh se šteje za izbrisano |
+| Izbrisane datoteke (vsebina v hrambi S3 oz. na disku) | 30 dni po izbrisu; zapis v bazi ostane z oznako `purgedAt` |
 
 Finančnih zapisov (obveznosti, plačila) in dnevnika sprememb (`AuditLog`) se ne briše samodejno.
 
 ## Odprto
 - `TODO(pravnik)`: zakonski roki hrambe za računovodske zapise in dnevnik; po potrebi popravi tabelo in dodaj čiščenje.
 - `TODO(pravnik)`: pogoji uporabe in politika zasebnosti.
-- Datoteke izbrisanega računa (priloge) se zaenkrat ne brišejo fizično; ostanejo vezane na zapise druge strani.
+- Datoteke izbrisanega računa, ki jih potrebuje druga stran (npr. dokazila o plačilu), ostanejo vezane na njene zapise. Fotografije nepremičnin ter stroški najemodajalca s prilogami se ob izbrisu računa izbrišejo in po 30 dneh odstranijo iz hrambe.
+- `TODO(pravnik)`: potrdi 30-dnevni rok za izbrisane datoteke.
