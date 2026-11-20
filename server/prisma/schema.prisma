@@ -265,7 +265,7 @@ model Unit {
   // Unit details (all optional).
   areaM2               Float?
   /// Rooms as used in Slovenian listings (e.g. 2.5 = "2,5-sobno").
-  rooms                Float?
+  layout               UnitLayout?
   furnishing           Furnishing?
   hasParking           Boolean?
   hasStorage           Boolean?
@@ -1110,6 +1110,21 @@ enum Furnishing {
   UNFURNISHED
   PARTLY
   FURNISHED
+}
+
+/// Apartment size as used in Slovenian listings (garsonjera, enosobno, …).
+enum UnitLayout {
+  STUDIO
+  ONE
+  ONE_HALF
+  TWO
+  TWO_HALF
+  THREE
+  THREE_HALF
+  FOUR
+  FOUR_HALF
+  FIVE_PLUS
+  OTHER
 }
 
 enum UtilityKind {

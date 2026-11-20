@@ -27,6 +27,7 @@ const PropertyBody = z.object({
   insuranceValidUntil: dateOnly.nullable().optional(),
 });
 
+export const UNIT_LAYOUTS = ["STUDIO", "ONE", "ONE_HALF", "TWO", "TWO_HALF", "THREE", "THREE_HALF", "FOUR", "FOUR_HALF", "FIVE_PLUS", "OTHER"] as const;
 export const ENERGY_CLASSES = ["A1", "A2", "B1", "B2", "C", "D", "E", "F", "G"] as const;
 
 const UnitBody = z.object({
@@ -35,7 +36,7 @@ const UnitBody = z.object({
   notes: optionalText(500),
   // Unit details: optional; null clears a value.
   areaM2: z.number().min(1).max(100_000).nullable().optional(),
-  rooms: z.number().min(0.5).max(100).multipleOf(0.5).nullable().optional(),
+  layout: z.enum(UNIT_LAYOUTS).nullable().optional(),
   furnishing: z.enum(["UNFURNISHED", "PARTLY", "FURNISHED"]).nullable().optional(),
   hasParking: z.boolean().nullable().optional(),
   hasStorage: z.boolean().nullable().optional(),

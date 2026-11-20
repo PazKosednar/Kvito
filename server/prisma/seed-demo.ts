@@ -153,10 +153,10 @@ async function main() {
     data: { yearBuilt: 1998, managerName: "Upravljanje Pomurje d.o.o.", managerContact: "info@upravljanje-pomurje.test", reserveFundCents: 5200, insurer: "Zavarovalnica Triglav", insurancePolicy: "PO-7731204", insuranceValidUntil: addDays(TODAY, 140) },
   });
   const unitDetails: [string, Prisma.UnitUpdateInput][] = [
-    [u1.id, { areaM2: 58.4, rooms: 2.5, furnishing: "FURNISHED", hasParking: false, hasStorage: true, hasBalcony: true, petsAllowed: false, buildingPartId: "657-1204-12", energyClass: "D", energyCertValidUntil: addDays(TODAY, 1900) }],
-    [u2.id, { areaM2: 74, rooms: 3, furnishing: "PARTLY", hasParking: true, hasStorage: true, hasBalcony: false, petsAllowed: true, buildingPartId: "105-842-1", energyClass: "E", energyCertValidUntil: addDays(TODAY, 45) }],
-    [u3.id, { areaM2: 41.5, rooms: 1.5, furnishing: "FURNISHED", hasParking: true, hasStorage: false, hasBalcony: false, petsAllowed: false, buildingPartId: "105-842-2" }],
-    [u4.id, { areaM2: 48, rooms: 2, furnishing: "UNFURNISHED", hasParking: true, hasStorage: false, hasBalcony: false, buildingPartId: "105-1377-3", energyClass: "C", energyCertValidUntil: addDays(TODAY, 2400) }],
+    [u1.id, { areaM2: 58.4, layout: "TWO_HALF", furnishing: "FURNISHED", hasParking: false, hasStorage: true, hasBalcony: true, petsAllowed: false, buildingPartId: "657-1204-12", energyClass: "D", energyCertValidUntil: addDays(TODAY, 1900) }],
+    [u2.id, { areaM2: 74, layout: "THREE", furnishing: "PARTLY", hasParking: true, hasStorage: true, hasBalcony: false, petsAllowed: true, buildingPartId: "105-842-1", energyClass: "E", energyCertValidUntil: addDays(TODAY, 45) }],
+    [u3.id, { areaM2: 41.5, layout: "ONE_HALF", furnishing: "FURNISHED", hasParking: true, hasStorage: false, hasBalcony: false, petsAllowed: false, buildingPartId: "105-842-2" }],
+    [u4.id, { areaM2: 48, layout: "OTHER", furnishing: "UNFURNISHED", hasParking: true, hasStorage: false, hasBalcony: false, buildingPartId: "105-1377-3", energyClass: "C", energyCertValidUntil: addDays(TODAY, 2400) }],
   ];
   for (const [id, data] of unitDetails) await prisma.unit.update({ where: { id }, data });
   // Fictional metering point numbers.

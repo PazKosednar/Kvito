@@ -9,7 +9,7 @@ export const tenancyInclude = {
       floor: true,
       // Unit details both sides see (keys and photos stay with the landlord).
       areaM2: true,
-      rooms: true,
+      layout: true,
       furnishing: true,
       hasParking: true,
       hasStorage: true,

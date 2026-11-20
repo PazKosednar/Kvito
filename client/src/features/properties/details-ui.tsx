@@ -124,12 +124,12 @@ export function useYesNo() {
 const decimal = (n: number) => String(n).replace(".", ",");
 
 /** Filled-in basics only; an empty unit gets one friendly line instead of a column of dashes. */
-export function useBasicsItems(unit: Pick<UnitDetails, "areaM2" | "rooms" | "furnishing" | "hasParking" | "hasStorage" | "hasBalcony" | "petsAllowed">) {
+export function useBasicsItems(unit: Pick<UnitDetails, "areaM2" | "layout" | "furnishing" | "hasParking" | "hasStorage" | "hasBalcony" | "petsAllowed">) {
   const { t } = useTranslation();
   const yesNo = useYesNo();
   const items: { label: string; value: string }[] = [];
   if (unit.areaM2 !== null) items.push({ label: t("unitDetails.area"), value: `${decimal(unit.areaM2)} ${t("unitDetails.areaUnit")}` });
-  if (unit.rooms !== null) items.push({ label: t("unitDetails.rooms"), value: decimal(unit.rooms) });
+  if (unit.layout) items.push({ label: t("unitDetails.layout"), value: t(`unitDetails.layouts.${unit.layout}`) });
   if (unit.furnishing) items.push({ label: t("unitDetails.furnishing"), value: t(`unitDetails.furnishings.${unit.furnishing}`) });
   const flags = [
     [t("unitDetails.parking"), yesNo(unit.hasParking)],

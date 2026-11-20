@@ -36,7 +36,7 @@ export async function landlordSnapshot(ownerId: string) {
           select: {
             name: true,
             areaM2: true,
-            rooms: true,
+            layout: true,
             furnishing: true,
             hasParking: true,
             hasStorage: true,
@@ -116,7 +116,7 @@ export async function landlordSnapshot(ownerId: string) {
           name: u.name,
           details: {
             areaM2: u.areaM2,
-            rooms: u.rooms,
+            layout: u.layout,
             furnishing: u.furnishing,
             parking: u.hasParking,
             storage: u.hasStorage,

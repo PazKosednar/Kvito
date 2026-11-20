@@ -27,27 +27,6 @@ export async function removePhoto(photoId: string): Promise<void> {
   await api(`/api/photos/${photoId}`, { method: "DELETE" });
 }
 
-/** The property's own photo gallery. */
-export function usePropertyPhotos(propertyId: string | undefined) {
-  const path = propertyId ? `/api/properties/${propertyId}/photos` : null;
-  const q = useQuery<{ photos: Attachment[] }>(path);
-  const add = useCallback(
-    async (files: File[]) => {
-      for (const f of files) await uploadPhoto(propertyId!, f);
-      await invalidate(`/api/properties/${propertyId}/photos`);
-    },
-    [propertyId],
-  );
-  const remove = useCallback(
-    async (photoId: string) => {
-      await removePhoto(photoId);
-      await invalidate(`/api/properties/${propertyId}/photos`);
-    },
-    [propertyId],
-  );
-  return { ...q, photos: q.data?.photos ?? [], add, remove };
-}
-
 /** The unit page: details, metering points, keys and photos, with every change refreshing it. */
 export function useUnit(id: string | undefined) {
   const path = id ? `/api/units/${id}` : null;

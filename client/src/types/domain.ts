@@ -78,7 +78,7 @@ export interface TenancyDetail extends Tenancy {
     name: string;
     floor: string | null;
     areaM2: number | null;
-    rooms: number | null;
+    layout: UnitLayout | null;
     furnishing: Furnishing | null;
     hasParking: boolean | null;
     hasStorage: boolean | null;
@@ -99,13 +99,16 @@ export interface TenancyDetail extends Tenancy {
 }
 
 export type Furnishing = "UNFURNISHED" | "PARTLY" | "FURNISHED";
+/** Apartment size as in Slovenian listings: garsonjera, enosobno, enoinpolsobno … */
+export const UNIT_LAYOUTS = ["STUDIO", "ONE", "ONE_HALF", "TWO", "TWO_HALF", "THREE", "THREE_HALF", "FOUR", "FOUR_HALF", "FIVE_PLUS", "OTHER"] as const;
+export type UnitLayout = (typeof UNIT_LAYOUTS)[number];
 export const ENERGY_CLASSES = ["A1", "A2", "B1", "B2", "C", "D", "E", "F", "G"] as const;
 export type EnergyClass = (typeof ENERGY_CLASSES)[number];
 
 /** Unit details, all optional (null = not filled in). */
 export interface UnitDetails {
   areaM2: number | null;
-  rooms: number | null;
+  layout: UnitLayout | null;
   furnishing: Furnishing | null;
   hasParking: boolean | null;
   hasStorage: boolean | null;

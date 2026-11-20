@@ -10,7 +10,7 @@ import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useUnit } from "@/hooks/useUnit";
 import { toDateInput } from "@/lib/dates";
-import { ENERGY_CLASSES, type EnergyClass, type Furnishing } from "@/types/domain";
+import { ENERGY_CLASSES, UNIT_LAYOUTS, type EnergyClass, type Furnishing, type UnitLayout } from "@/types/domain";
 
 type Tri = "" | "yes" | "no";
 const toTri = (v: boolean | null): Tri => (v === null ? "" : v ? "yes" : "no");
@@ -33,7 +33,7 @@ export function UnitFormPage() {
   const [name, setName] = useState("");
   const [floor, setFloor] = useState("");
   const [area, setArea] = useState("");
-  const [rooms, setRooms] = useState("");
+  const [layout, setLayout] = useState<UnitLayout | "">("");
   const [furnishing, setFurnishing] = useState<Furnishing | "">("");
   const [parking, setParking] = useState<Tri>("");
   const [storage, setStorage] = useState<Tri>("");
@@ -48,7 +48,7 @@ export function UnitFormPage() {
     setName(unit.name);
     setFloor(unit.floor ?? "");
     setArea(decimalToInput(unit.areaM2));
-    setRooms(decimalToInput(unit.rooms));
+    setLayout(unit.layout ?? "");
     setFurnishing(unit.furnishing ?? "");
     setParking(toTri(unit.hasParking));
     setStorage(toTri(unit.hasStorage));
@@ -65,7 +65,7 @@ export function UnitFormPage() {
       name: name.trim(),
       floor: floor.trim() || null,
       areaM2: decimal(area),
-      rooms: decimal(rooms),
+      layout: layout || null,
       furnishing: furnishing || null,
       hasParking: fromTri(parking),
       hasStorage: fromTri(storage),
@@ -120,8 +120,17 @@ export function UnitFormPage() {
           <Field label={`${t("unitDetails.area")} (${t("unitDetails.areaUnit")})`} error={submit.fieldErrors["areaM2"]}>
             {(p) => <TextInput {...p} inputMode="decimal" value={area} onChange={(e) => setArea(e.target.value)} />}
           </Field>
-          <Field label={t("unitDetails.rooms")} hint={t("unitDetails.roomsHint")} error={submit.fieldErrors["rooms"]}>
-            {(p) => <TextInput {...p} inputMode="decimal" value={rooms} onChange={(e) => setRooms(e.target.value)} />}
+          <Field label={t("unitDetails.layout")}>
+            {(p) => (
+              <Select {...p} value={layout} onChange={(e) => setLayout(e.target.value as UnitLayout | "")}>
+                <option value="">–</option>
+                {UNIT_LAYOUTS.map((l) => (
+                  <option key={l} value={l}>
+                    {t(`unitDetails.layouts.${l}`)}
+                  </option>
+                ))}
+              </Select>
+            )}
           </Field>
           <Field label={t("unitDetails.furnishing")}>
             {(p) => (
