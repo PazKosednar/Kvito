@@ -20,7 +20,7 @@ export async function exportUserData(userId: string) {
   const user = await prisma.user.findFirst({ where: { id: userId, deletedAt: null } });
   if (!user) throw notFound();
 
-  const [properties, memberships, reports, messages, issues, issueComments, meters, documents, notifications, subscriptions, audits] = await Promise.all([
+  const [properties, memberships, reports, messages, issues, issueComments, meters, documents, notifications, subscriptions, audits, expenses] = await Promise.all([
     prisma.property.findMany({
       where: { ownerId: userId, deletedAt: null },
       select: { id: true, name: true, street: true, postalCode: true, city: true, createdAt: true, units: { where: { deletedAt: null }, select: { id: true, name: true, floor: true } } },
@@ -44,6 +44,11 @@ export async function exportUserData(userId: string) {
     prisma.notification.findMany({ where: { userId }, select: { type: true, title: true, body: true, createdAt: true, readAt: true } }),
     prisma.pushSubscription.findMany({ where: { userId }, select: { provider: true, userAgent: true, createdAt: true } }),
     prisma.auditLog.findMany({ where: { actorId: userId }, orderBy: { createdAt: "desc" }, take: 1000, select: { entityType: true, action: true, createdAt: true, ip: true } }),
+    prisma.expense.findMany({
+      where: { ownerId: userId, deletedAt: null },
+      orderBy: { spentOn: "desc" },
+      select: { category: true, title: true, amountCents: true, spentOn: true, note: true, property: { select: { name: true } }, unit: { select: { name: true } } },
+    }),
   ]);
 
   return JSON.parse(
@@ -53,6 +58,7 @@ export async function exportUserData(userId: string) {
         note: "Podatki, ki jih Kvito hrani o tebi. Datotek (slike, PDF) izvoz ne vsebuje.",
         profile: { id: user.id, email: user.email, name: user.name, phone: user.phone, locale: user.locale, roles: user.roles, createdAt: user.createdAt, lastLoginAt: user.lastLoginAt },
         propertiesAsLandlord: properties,
+        landlordExpenses: expenses,
         tenancies: memberships,
         paymentReports: reports,
         messages,
@@ -92,7 +98,11 @@ export async function deleteAccount(userId: string, ip: string | undefined): Pro
     if (propertyIds.length) {
       await tx.unit.updateMany({ where: { propertyId: { in: propertyIds }, deletedAt: null }, data: { deletedAt: now } });
       await tx.property.updateMany({ where: { id: { in: propertyIds } }, data: { deletedAt: now } });
+      await tx.attachment.updateMany({ where: { propertyId: { in: propertyIds }, deletedAt: null }, data: { deletedAt: now } });
     }
+    // The landlord's own costs (tax overview) are nobody else's records.
+    await tx.attachment.updateMany({ where: { expense: { ownerId: userId }, deletedAt: null }, data: { deletedAt: now } });
+    await tx.expense.updateMany({ where: { ownerId: userId, deletedAt: null }, data: { deletedAt: now } });
     // Tenant side: leave every tenancy.
     await tx.tenancyMember.updateMany({ where: { userId, leftAt: null, deletedAt: null }, data: { leftAt: now } });
     // Pending invitations of this person can no longer be used.
