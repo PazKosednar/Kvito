@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Field, Select, Textarea, TextInput } from "@/components/form";
 import { ErrorState, FormError, LoadingState, PageHeader, Section } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
+import { askConfirm } from "@/components/confirm-host";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { useSettlement } from "@/hooks/useContract";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
@@ -201,7 +202,7 @@ function SettlementEditor({ s, q }: { s: Settlement; q: Q }) {
   });
 
   const remove = async () => {
-    if (!window.confirm(t("contract.costs.confirmDelete"))) return;
+    if (!(await askConfirm(t("contract.costs.confirmDelete")))) return;
     await q.remove();
     void navigate(`/najemi/${tenancy.id}/pogodba`);
   };
@@ -439,7 +440,7 @@ function SettlementView({ s, q }: { s: Settlement; q: Q }) {
                 <Field label={t("contract.costs.refundedOn")} hint={t("contract.credit.refundHint")} className="min-w-44 flex-1">
                   {(p) => <TextInput {...p} type="date" value={refundedOn} onChange={(e) => setRefundedOn(e.target.value)} />}
                 </Field>
-                <Button size="lg" variant="secondary" disabled={act.pending || !refundedOn} onClick={() => window.confirm(t("contract.credit.confirmRefund", { amount: formatCents(s.creditRemainingCents) })) && void act.run(() => q.markRefunded(refundedOn), "contract.costs.refundedToast")}>
+                <Button size="lg" variant="secondary" disabled={act.pending || !refundedOn} onClick={() => void askConfirm(t("contract.credit.confirmRefund", { amount: formatCents(s.creditRemainingCents) }), { danger: false }).then((ok) => ok && void act.run(() => q.markRefunded(refundedOn), "contract.costs.refundedToast"))}>
                   {t("contract.costs.markRefunded", { amount: formatCents(s.creditRemainingCents) })}
                 </Button>
               </div>

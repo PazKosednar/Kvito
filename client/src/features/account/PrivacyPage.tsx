@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Field, TextInput } from "@/components/form";
 import { FormError, PageHeader, Section } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
+import { askConfirm } from "@/components/confirm-host";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { useAuth } from "@/hooks/useAuth";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
@@ -61,7 +62,7 @@ export function PrivacyPage() {
           className="flex max-w-sm flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault();
-            if (matches && window.confirm(t("privacy.deleteConfirm"))) void remove.run();
+            if (matches) void askConfirm(t("privacy.deleteConfirm")).then((ok) => ok && void remove.run());
           }}
         >
           <Field label={t("privacy.typeEmail", { email: user?.email ?? "" })}>

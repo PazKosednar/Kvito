@@ -1,4 +1,5 @@
 import { ArrowRight, DoorOpen, Loader2, Pencil, Plus, Ruler, Trash2 } from "lucide-react";
+import { askConfirm } from "@/components/confirm-host";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
@@ -27,7 +28,7 @@ export function PropertyPage() {
   if (error || !property) return <ErrorState message={toMessage(error)} onRetry={() => void reload()} />;
 
   const removeProperty = async () => {
-    if (!window.confirm(t("properties.confirmDelete", { name: property.name }))) return;
+    if (!(await askConfirm(t("properties.confirmDelete", { name: property.name }), { confirmLabel: t("properties.delete") }))) return;
     try {
       await remove();
       toast.success(t("properties.deleted"));
@@ -151,7 +152,7 @@ function UnitRow({ unit, onRemove }: { unit: Unit; onRemove: () => Promise<void>
   }
 
   const remove = async () => {
-    if (!window.confirm(t("units.confirmDelete", { name: unit.name }))) return;
+    if (!(await askConfirm(t("units.confirmDelete", { name: unit.name }), { confirmLabel: t("units.delete") }))) return;
     try {
       await onRemove();
     } catch (err) {

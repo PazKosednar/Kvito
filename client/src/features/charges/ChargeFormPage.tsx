@@ -1,7 +1,7 @@
 import { FileText, Loader2, ScanLine, Upload, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Field, MoneyInput, Segmented, Select, Textarea, TextInput } from "@/components/form";
 import { FormError, PageHeader, Section } from "@/components/layout-parts";
@@ -16,6 +16,13 @@ import { useTenancyContext } from "@/features/tenancies/TenancyLayout";
 
 /** Landlord adds a bill. Uploading the bill first fills everything in from its UPN QR code. */
 export function ChargeFormPage() {
+  const { tenancy, isLandlord } = useTenancyContext();
+  // Only the landlord adds obligations; a tenant opening the address goes back to the list.
+  if (!isLandlord) return <Navigate to={`/najemi/${tenancy.id}`} replace />;
+  return <ChargeForm />;
+}
+
+function ChargeForm() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const toMessage = useErrorMessage();

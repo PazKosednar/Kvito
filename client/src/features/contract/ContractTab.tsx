@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { askConfirm } from "@/components/confirm-host";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { useAdvances, useCloseout, useCosts, useDeposit, useRentChanges, useSettlements } from "@/hooks/useContract";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
@@ -65,7 +66,7 @@ function RentSection() {
   const applied = rent.changes.filter((c) => c.appliedAt);
 
   const cancel = async (id: string) => {
-    if (!window.confirm(t("contract.rent.confirmCancel"))) return;
+    if (!(await askConfirm(t("contract.rent.confirmCancel")))) return;
     try {
       await rent.cancel(id);
     } catch (err) {
@@ -306,7 +307,7 @@ function DepositState({ deposit, q }: { deposit: Deposit; q: DepositQ }) {
                 variant="ghost"
                 className="text-muted-foreground"
                 disabled={act.pending}
-                onClick={() => window.confirm(t("contract.deposit.confirmWithdraw")) && void act.run(q.withdraw, "contract.deposit.withdrawn")}
+                onClick={() => void askConfirm(t("contract.deposit.confirmWithdraw")).then((ok) => ok && void act.run(q.withdraw, "contract.deposit.withdrawn"))}
               >
                 {t("contract.deposit.withdraw")}
               </Button>

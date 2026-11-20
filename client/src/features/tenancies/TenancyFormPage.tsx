@@ -1,8 +1,9 @@
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router";
+import { Navigate, useNavigate, useParams } from "react-router";
 import { ChipGroup, Field, MoneyInput, Segmented, Select, TextInput } from "@/components/form";
-import { FormError, LoadingState, PageHeader, Section } from "@/components/layout-parts";
+import { ErrorState, FormError, LoadingState, PageHeader, Section } from "@/components/layout-parts";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,8 +14,12 @@ import { COST_TYPES, type BillingMode, type SplitMethod, type TenancyDetail } fr
 /** Create (/enote/:unitId/najem) or edit (/najemi/:id/uredi) a tenancy. */
 export function TenancyFormPage() {
   const { id } = useParams();
-  const { tenancy, loading } = useTenancy(id);
+  const { tenancy, loading, error, reload, isLandlord } = useTenancy(id);
+  const toMessage = useErrorMessage();
   if (id && loading) return <LoadingState />;
+  // Editing: the tenancy must load and belong to this landlord (a tenant opening the address goes back to it).
+  if (id && (error || !tenancy)) return <ErrorState message={toMessage(error)} onRetry={() => void reload()} />;
+  if (id && !isLandlord) return <Navigate to={`/najemi/${id}`} replace />;
   return <TenancyForm key={tenancy?.id ?? "new"} existing={tenancy} />;
 }
 

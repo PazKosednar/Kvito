@@ -1,4 +1,5 @@
 import { FileText, Loader2, Paperclip, Pencil, Plus, Trash2, X } from "lucide-react";
+import { askConfirm } from "@/components/confirm-host";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
@@ -247,7 +248,7 @@ function EntryForm({ entry, q, onDone }: { entry: CostEntry; q: Q; onDone: () =>
   const [error, setError] = useState<string | undefined>();
   const save = useAsyncAction(async (remove: boolean) => {
     if (remove) {
-      if (!window.confirm(t("contract.monthly.confirmDelete"))) return;
+      if (!(await askConfirm(t("contract.monthly.confirmDelete")))) return;
       await q.setEntry(entry.period, entry.costType, null);
     } else {
       const cents = parseAmountToCents(amount);

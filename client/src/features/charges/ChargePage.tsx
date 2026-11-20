@@ -1,4 +1,5 @@
 import { CheckCheck, FileText, Loader2, Paperclip, RotateCcw, Trash2, Undo2, X } from "lucide-react";
+import { askConfirm } from "@/components/confirm-host";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
@@ -42,7 +43,7 @@ export function ChargePage() {
   const { charge, myShare, isLandlord } = q;
 
   const remove = async () => {
-    if (!window.confirm(t("charges.confirmDelete", { title: titleOf(charge) }))) return;
+    if (!(await askConfirm(t("charges.confirmDelete", { title: titleOf(charge) })))) return;
     try {
       await q.remove();
       toast.success(t("charges.deleted"));

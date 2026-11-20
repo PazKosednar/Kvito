@@ -8,6 +8,7 @@ import { Card, Eyebrow } from "@/components/brand";
 import { Field, Segmented, Select, Textarea, TextInput } from "@/components/form";
 import { ErrorState, FormError, LoadingState, PageHeader, Section } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
+import { askConfirm } from "@/components/confirm-host";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useHandover, useHandoverCompare } from "@/hooks/usePhase4";
@@ -87,7 +88,7 @@ export function HandoverPage() {
             </Button>
           )}
           {!q.isLandlord && h.status === "AWAITING_CONFIRMATION" && (
-            <Button disabled={busy !== null} onClick={() => window.confirm(t("handover.confirmPrompt")) && void run("confirm", () => q.transition("confirm"), t("handover.confirmedToast"))}>
+            <Button disabled={busy !== null} onClick={() => void askConfirm(t("handover.confirmPrompt"), { danger: false, confirmLabel: t("handover.confirm") }).then((ok) => ok && void run("confirm", () => q.transition("confirm"), t("handover.confirmedToast")))}>
               {busy === "confirm" ? <Loader2 className="animate-spin" /> : <FileCheck2 />}
               {t("handover.confirm")}
             </Button>

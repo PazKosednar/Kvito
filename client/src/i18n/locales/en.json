@@ -25,7 +25,9 @@
     "remove": "Remove",
     "errorLabel": "Error",
     "saved": "Saved.",
-    "offline": "You're offline. Showing the last data we have."
+    "offline": "You're offline. Showing the last data we have.",
+    "confirm": "Confirm",
+    "confirmTitle": "Are you sure?"
   },
   "auth": {
     "title": "Sign in",
@@ -223,7 +225,11 @@
     "ASSISTANT_DISABLED": "The assistant is not switched on yet.",
     "ASSISTANT_UNAVAILABLE": "The assistant is not answering right now. Try again in a moment.",
     "ASSISTANT_LIMIT": "You have asked the assistant a lot today. Try again in an hour.",
-    "TOO_MANY_GALLERY_PHOTOS": "A gallery can hold up to 24 photos."
+    "TOO_MANY_GALLERY_PHOTOS": "A gallery can hold up to 24 photos.",
+    "ACCOUNT_HAS_ACTIVE_TENANCIES": "Your account still has active tenancies. End them first, then delete the account.",
+    "CONFIRMATION_MISMATCH": "The e-mail you typed does not match your account.",
+    "END_BEFORE_START": "The end cannot be before the start.",
+    "TOO_MANY_ATTACHMENTS": "You have reached the maximum number of attachments."
   },
   "validation": {
     "invalid": "This value is not valid.",

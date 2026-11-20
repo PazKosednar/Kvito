@@ -1,4 +1,5 @@
 import { Copy, Link2, Loader2, X } from "lucide-react";
+import { askConfirm } from "@/components/confirm-host";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -31,7 +32,7 @@ export function MyHistoryPage() {
     }
   };
   const revoke = async (id: string) => {
-    if (!window.confirm(t("history.confirmRevoke"))) return;
+    if (!(await askConfirm(t("history.confirmRevoke")))) return;
     try {
       await q.revoke(id);
       toast.success(t("history.revoked"));

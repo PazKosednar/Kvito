@@ -2,9 +2,10 @@ import { Check, Copy, Link2, Loader2, Share2, X } from "lucide-react";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router";
+import { Navigate, useParams } from "react-router";
 import { Field, TextInput } from "@/components/form";
-import { FormError, List, LoadingState, PageHeader, Section } from "@/components/layout-parts";
+import { ErrorState, FormError, List, LoadingState, PageHeader, Section } from "@/components/layout-parts";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
@@ -15,7 +16,8 @@ import { formatDate } from "@/lib/dates";
 export function InvitePage() {
   const { id } = useParams();
   const { t } = useTranslation();
-  const { tenancy, loading } = useTenancy(id);
+  const { tenancy, loading, error, reload, isLandlord } = useTenancy(id);
+  const toMessage = useErrorMessage();
   const { invitations, create, revoke } = useInvitations(id);
   const [email, setEmail] = useState("");
   const [link, setLink] = useState<string | null>(null);
@@ -25,7 +27,9 @@ export function InvitePage() {
     setLink(res.url);
   });
 
-  if (loading || !tenancy) return <LoadingState />;
+  if (loading) return <LoadingState />;
+  if (error || !tenancy) return <ErrorState message={toMessage(error)} onRetry={() => void reload()} />;
+  if (!isLandlord) return <Navigate to={`/najemi/${tenancy.id}`} replace />;
   const pending = (invitations ?? []).filter((i) => i.state === "PENDING");
 
   return (

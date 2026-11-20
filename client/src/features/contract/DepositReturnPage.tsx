@@ -1,7 +1,7 @@
 import { Loader2, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Field, MoneyInput, Textarea, TextInput } from "@/components/form";
 import { ErrorState, FormError, LoadingState, PageHeader, Section } from "@/components/layout-parts";
@@ -22,11 +22,14 @@ interface Row {
 
 /** Landlord proposes how much of the deposit goes back; damaged items from the move-out record are suggested. */
 export function DepositReturnPage() {
-  const { tenancy } = useTenancyContext();
+  const { tenancy, isLandlord } = useTenancyContext();
   const toMessage = useErrorMessage();
   const q = useDeposit(tenancy.id);
+  // Only the landlord proposes, and only when there is a deposit (e.g. an old link or a typed address).
+  if (!isLandlord) return <Navigate to={`/najemi/${tenancy.id}/pogodba`} replace />;
   if (q.loading) return <LoadingState />;
-  if (q.error || !q.state?.deposit) return <ErrorState message={toMessage(q.error)} onRetry={() => void q.reload()} />;
+  if (q.error) return <ErrorState message={toMessage(q.error)} onRetry={() => void q.reload()} />;
+  if (!q.state?.deposit) return <Navigate to={`/najemi/${tenancy.id}/pogodba`} replace />;
   return <ProposalForm state={q.state} q={q} />;
 }
 

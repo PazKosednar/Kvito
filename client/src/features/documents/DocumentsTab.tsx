@@ -8,6 +8,7 @@ import { Field, Segmented, Select, TextInput } from "@/components/form";
 import { IsoGlyph } from "@/components/iso";
 import { ErrorState, FormError, LoadingState, Section } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
+import { askConfirm } from "@/components/confirm-host";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useDocuments } from "@/hooks/usePhase4";
@@ -89,7 +90,7 @@ export function DocumentsTab() {
                           variant="ghost"
                           size="icon-sm"
                           aria-label={t("documents.delete")}
-                          onClick={() => window.confirm(t("documents.confirmDelete", { title: d.title })) && void act(() => q.remove(d.id))}
+                          onClick={() => void askConfirm(t("documents.confirmDelete", { title: d.title }), { confirmLabel: t("documents.delete") }).then((ok) => ok && void act(() => q.remove(d.id)))}
                         >
                           <Trash2 />
                         </Button>

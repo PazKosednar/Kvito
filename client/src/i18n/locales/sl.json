@@ -25,7 +25,9 @@
     "remove": "Odstrani",
     "errorLabel": "Napaka",
     "saved": "Shranjeno.",
-    "offline": "Brez povezave si. Prikazani so zadnji znani podatki."
+    "offline": "Brez povezave si. Prikazani so zadnji znani podatki.",
+    "confirm": "Potrdi",
+    "confirmTitle": "Si prepričan?"
   },
   "auth": {
     "title": "Prijava",
@@ -223,7 +225,11 @@
     "ASSISTANT_DISABLED": "Pomočnik še ni vklopljen.",
     "ASSISTANT_UNAVAILABLE": "Pomočnik trenutno ne odgovarja. Poskusi znova čez trenutek.",
     "ASSISTANT_LIMIT": "Danes si pomočniku zastavil že veliko vprašanj. Poskusi znova čez eno uro.",
-    "TOO_MANY_GALLERY_PHOTOS": "Galerija ima lahko največ 24 fotografij."
+    "TOO_MANY_GALLERY_PHOTOS": "Galerija ima lahko največ 24 fotografij.",
+    "ACCOUNT_HAS_ACTIVE_TENANCIES": "Račun ima še aktivne najeme. Najprej zaključi najeme, nato izbriši račun.",
+    "CONFIRMATION_MISMATCH": "Vpisani e-naslov se ne ujema s tvojim računom.",
+    "END_BEFORE_START": "Konec ne more biti pred začetkom.",
+    "TOO_MANY_ATTACHMENTS": "Dodal si največje dovoljeno število prilog."
   },
   "validation": {
     "invalid": "Vrednost ni pravilna.",

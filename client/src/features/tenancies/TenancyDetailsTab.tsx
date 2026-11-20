@@ -1,4 +1,5 @@
 import { Crown, Mail, Phone, Ruler, UserPlus, UserX, Zap } from "lucide-react";
+import { askConfirm } from "@/components/confirm-host";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { toast } from "sonner";
@@ -19,7 +20,7 @@ export function TenancyDetailsTab() {
   const owner = tenancy.unit.property.owner;
 
   const remove = async (id: string, name: string) => {
-    if (!window.confirm(t("tenancies.confirmRemoveMember", { name }))) return;
+    if (!(await askConfirm(t("tenancies.confirmRemoveMember", { name }), { confirmLabel: t("tenancies.removeMember") }))) return;
     try {
       await removeMember(id);
     } catch (err) {
