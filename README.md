@@ -85,6 +85,19 @@ Testni uporabniki iz seeda imajo vsi geslo **`kvito1234`** (samo za razvoj):
 
 Vlogo zamenjaš v meniju računa (krogec z začetnicami zgoraj desno), če imaš obe.
 
+### Demo podatki (2 leti zgodovine)
+
+`npm run db:seed:demo` doda ločenega najemodajalca s 3 nepremičninami (4 enote, 5 najemov) in zgodovino zadnjih 24 mesecev do tekočega meseca: najemnine, akontacije, računi za elektriko, letni poračuni, varščine, primopredaje, odčitki števcev, okvare, sporočila in lastni stroški za davčni pregled. Datumi so vedno relativni na današnji dan. Če podatki že obstajajo, se skripta ne izvede; `npm run db:seed:demo -- --reset` izbriše **samo** nepremičnine tega demo najemodajalca (in vse pod njimi) ter jih ustvari znova.
+
+| E-pošta | Vloga | Opomba |
+| --- | --- | --- |
+| `demo@kvito.test` | najemodajalec | Stanovanje Maribor, Hiša Murska Sobota (2 enoti), Pisarna Lendavska |
+| `jure@kvito.test` | najemnik | Stanovanje 2B: akontacije, poračun v breme, uskladitev najemnine |
+| `maja@kvito.test`, `rok@kvito.test` | najemnika | Pritličje: pavšal 50/50, poračun z vračilom, Rok čaka potrditev |
+| `tina@kvito.test` | najemnica | Mansarda: končan najem, vrnjena varščina z odbitkom |
+| `zan@kvito.test` | najemnik | Mansarda: najemnina ta mesec v zamudi, odprta okvara |
+| `petra@kvito.test` | najemnica | Pisarna 1: plačila potrjuje najemodajalec, elektrika dobavitelju |
+
 ## Ukazi
 
 Vsi ukazi se poženejo iz korena repozitorija.
@@ -99,6 +112,7 @@ Vsi ukazi se poženejo iz korena repozitorija.
 | `npm run db:deploy` | uporabi migracije (produkcija, Railway) |
 | `npm run vapid -w server` | ustvari ključe za Web Push |
 | `npm run db:seed` | razvojni podatki (idempotentno, varno za ponovitev) |
+| `npm run db:seed:demo -w server` | demo najemodajalec s 3 nepremičninami in 2 leti zgodovine |
 | `npm run db:studio -w server` | Prisma Studio (pregled baze v brskalniku) |
 | `npm run icons -w client` | ponovno generira favicon in PWA ikone iz `client/public/logo.svg` |
 
