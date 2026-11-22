@@ -185,7 +185,7 @@
 /* Promo popup (features/billing/PromoDialog): a ticket with chamfered corners.
    The outer layer is the 1px edge (green on the top-left and bottom-right cut), the inner layer the panel. */
 .kv-chamfer {
-  --cut: 22px;
+  --cut: 18px;
   clip-path: polygon(
     var(--cut) 0,
     calc(100% - var(--cut)) 0,

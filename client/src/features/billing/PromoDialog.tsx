@@ -34,15 +34,15 @@ export function PromoDialog() {
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200" />
         <DialogPrimitive.Content
           aria-describedby={undefined}
-          className="kv-promo-shadow fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200"
+          className="kv-promo-shadow fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-[30rem] -translate-x-1/2 -translate-y-1/2 outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200"
         >
           {/* Frame: a 1px chamfered edge (green on two corners) around the chamfered panel. */}
           <div className="kv-chamfer kv-promo-edge p-px">
-            <div className="kv-chamfer kv-grid-panel kv-promo-body relative max-h-[calc(100dvh-2rem)] overflow-y-auto px-5 pt-5 pb-6 sm:px-8 sm:pt-7 sm:pb-8">
+            <div className="kv-chamfer kv-grid-panel kv-promo-body relative max-h-[calc(100dvh-2rem)] overflow-y-auto px-5 pt-4 pb-5 sm:px-7 sm:pt-5 sm:pb-6">
               <CornerTicks />
 
               <div className="flex items-center gap-3">
-                <KvitaLockup className="h-6 sm:h-7" />
+                <KvitaLockup className="h-5 sm:h-6" />
                 <span className="ml-auto rounded-xs bg-accent-soft px-2 py-1 font-mono text-[11px] leading-4 font-medium tracking-[0.12em] text-signal uppercase">
                   {t("promo.badge")}
                 </span>
@@ -54,43 +54,43 @@ export function PromoDialog() {
                 </DialogPrimitive.Close>
               </div>
 
-              <Eyebrow index="01" onPanel className="mt-7 sm:mt-9">
+              <Eyebrow index="01" onPanel className="mt-4 sm:mt-5">
                 {t("promo.eyebrow")}
               </Eyebrow>
 
               <DialogPrimitive.Title className="mt-2">
-                <span className="block text-[5.25rem] leading-[0.9] font-semibold tracking-[-0.05em] text-signal tabular-nums sm:text-[7.5rem]">
+                <span className="block text-[4.25rem] leading-[0.9] font-semibold tracking-[-0.05em] text-signal tabular-nums sm:text-[5.75rem]">
                   −{promo.percent}&thinsp;%
                 </span>
-                <span className="mt-2 block text-[1.75rem] leading-tight font-semibold tracking-[-0.03em] text-ink-on-panel sm:text-[2.5rem]">
+                <span className="mt-1.5 block text-[1.5rem] leading-tight font-semibold tracking-[-0.03em] text-ink-on-panel sm:text-[1.875rem]">
                   {t("promo.headline")}
                 </span>
               </DialogPrimitive.Title>
 
               <Coupon code={promo.code} />
 
-              <ul className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
+              <ul className="mt-4 grid grid-cols-3 gap-2">
                 {promo.prices.map((p) => (
                   <PriceCard key={p.plan} price={p} />
                 ))}
               </ul>
 
-              <div className="mt-6 border-t border-[var(--panel-line)] pt-5">
-                <p className="text-ink-on-panel">{t("promo.free")}</p>
+              <div className="mt-5 border-t border-[var(--panel-line)] pt-4">
+                <p className="text-sm text-ink-on-panel">{t("promo.free")}</p>
                 {plus && (
-                  <p className="mt-1.5 text-sm text-ink-on-panel-muted">
+                  <p className="mt-1 text-xs leading-5 text-ink-on-panel-muted">
                     {t("promo.once", { discounted: formatCents(plus.discountedYearlyCents), full: formatCents(plus.yearlyCents) })}
                   </p>
                 )}
               </div>
 
-              <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <DialogPrimitive.Close asChild>
-                  <Button variant="ghost" size="lg" className="text-ink-on-panel-muted hover:bg-ink-on-panel/10 hover:text-ink-on-panel">
+                  <Button variant="ghost" size="lg" className="sm:h-10 text-ink-on-panel-muted hover:bg-ink-on-panel/10 hover:text-ink-on-panel">
                     {t("promo.later")}
                   </Button>
                 </DialogPrimitive.Close>
-                <Button size="lg" onClick={choose}>
+                <Button size="lg" className="sm:h-10" onClick={choose}>
                   {t("promo.choose")}
                 </Button>
               </div>
@@ -107,13 +107,13 @@ function Coupon({ code }: { code: string }) {
   const { t } = useTranslation();
   const { copied, copy } = useCopyToClipboard();
   return (
-    <div className="relative mt-7 rounded-sm border border-dashed border-signal/80 bg-[var(--panel-raised)]/70 px-5 py-4 sm:px-6 sm:py-5">
+    <div className="relative mt-5 rounded-sm border border-dashed border-signal/80 bg-[var(--panel-raised)]/70 px-4 py-3 sm:px-5 sm:py-4">
       <span aria-hidden="true" className="kv-notch -left-[9px]" />
       <span aria-hidden="true" className="kv-notch -right-[9px]" />
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         <div className="min-w-0">
           <p className="font-mono text-[11px] leading-4 font-medium tracking-[0.12em] text-ink-on-panel-muted uppercase">{t("promo.codeLabel")}</p>
-          <p className="mt-1 font-mono text-[2.5rem] leading-none font-medium tracking-[0.12em] text-ink-on-panel select-all sm:text-5xl">{code}</p>
+          <p className="mt-1 font-mono text-[2rem] leading-none font-medium tracking-[0.12em] text-ink-on-panel select-all sm:text-[2.5rem]">{code}</p>
         </div>
         <div className="ml-auto flex flex-col items-end gap-2 text-right">
           <p className="hidden text-sm leading-5 text-ink-on-panel-muted sm:block">
@@ -144,14 +144,14 @@ function Coupon({ code }: { code: string }) {
 function PriceCard({ price }: { price: PromoPrice }) {
   const { t } = useTranslation();
   return (
-    <li className="flex min-w-0 flex-col rounded-sm border border-[var(--panel-line)] bg-[var(--panel-raised)] px-2.5 py-3 sm:p-4">
-      <p className="text-sm font-semibold break-words text-ink-on-panel sm:text-lg">{t(`billing.plans.${price.plan}`)}</p>
+    <li className="flex min-w-0 flex-col rounded-sm border border-[var(--panel-line)] bg-[var(--panel-raised)] px-2.5 py-3 sm:p-3.5">
+      <p className="text-sm font-semibold break-words text-ink-on-panel sm:text-base">{t(`billing.plans.${price.plan}`)}</p>
       <p className="truncate text-xs text-ink-on-panel-muted sm:text-sm">{t("billing.unitsCount", { count: price.units })}</p>
-      <p className="mt-3 font-mono text-xs text-ink-on-panel-muted tabular-nums line-through decoration-1 sm:mt-4 sm:text-sm">
+      <p className="mt-3 font-mono text-xs text-ink-on-panel-muted tabular-nums line-through decoration-1 sm:mt-3 sm:text-xs">
         <span className="sr-only">{t("promo.was")} </span>
         {formatCents(price.monthlyCents)}
       </p>
-      <p className="font-mono text-lg leading-tight font-medium tracking-[-0.02em] text-signal tabular-nums sm:text-[1.75rem]">
+      <p className="font-mono text-lg leading-tight font-medium tracking-[-0.02em] text-signal tabular-nums sm:text-[1.375rem]">
         <span className="sr-only">{t("promo.now")} </span>
         {formatCents(price.discountedMonthlyCents)}
       </p>
@@ -165,10 +165,10 @@ function CornerTicks() {
   const tick = "pointer-events-none absolute size-3 border-[var(--panel-edge)]";
   return (
     <>
-      <span aria-hidden="true" className={cn(tick, "top-3 left-6 border-t border-l")} />
-      <span aria-hidden="true" className={cn(tick, "top-3 right-6 border-t border-r")} />
-      <span aria-hidden="true" className={cn(tick, "bottom-3 left-6 border-b border-l")} />
-      <span aria-hidden="true" className={cn(tick, "right-6 bottom-3 border-r border-b")} />
+      <span aria-hidden="true" className={cn(tick, "top-2.5 left-5 border-t border-l")} />
+      <span aria-hidden="true" className={cn(tick, "top-2.5 right-5 border-t border-r")} />
+      <span aria-hidden="true" className={cn(tick, "bottom-2.5 left-5 border-b border-l")} />
+      <span aria-hidden="true" className={cn(tick, "right-5 bottom-2.5 border-r border-b")} />
     </>
   );
 }
