@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 /**
  * Promo popup for landlords: "Najem brez skrbi. Zdaj 30 % ceneje." with the code NEW30.
  * Built only from theme tokens, so it is dark in Grafit and light in Kamen. A floating layer (shadow allowed)
- * with chamfered corners, green on two of them. Motion: opacity only.
+ * with rounded corners (a deliberate exception to the CGP radii for this promo). Motion: opacity only.
  */
 export function PromoDialog() {
   const { t } = useTranslation();
@@ -32,15 +32,14 @@ export function PromoDialog() {
     <DialogPrimitive.Root open onOpenChange={(open) => !open && promo.dismiss()}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200" />
-        <DialogPrimitive.Content className="kv-promo-shadow fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-[32rem] -translate-x-1/2 -translate-y-1/2 outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200">
-          {/* Frame: a 1px chamfered edge (green on two corners) around the chamfered surface. */}
-          <div className="kv-chamfer kv-promo-edge p-px">
-            <div className="kv-chamfer relative max-h-[calc(100dvh-2rem)] overflow-y-auto bg-surface px-5 pt-4 pb-5 text-ink [scrollbar-width:thin] sm:px-7 sm:pt-5 sm:pb-6">
+        <DialogPrimitive.Content className="fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-[32rem] -translate-x-1/2 -translate-y-1/2 outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200">
+          <div className="overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-overlay)]">
+            <div className="relative max-h-[calc(100dvh-2rem)] overflow-y-auto px-5 pt-4 pb-5 text-ink [scrollbar-width:thin] sm:px-7 sm:pt-5 sm:pb-6">
               <div className="flex items-center">
                 <KvitaLockup className="h-5 sm:h-6" />
                 <DialogPrimitive.Close
                   aria-label={t("common.close")}
-                  className="-mr-2 ml-auto flex size-10 items-center justify-center rounded-sm text-ink-muted transition-colors duration-150 hover:bg-surface-sunken hover:text-ink"
+                  className="-mr-2 ml-auto flex size-10 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-surface-sunken hover:text-ink"
                 >
                   <X className="size-5" aria-hidden="true" />
                 </DialogPrimitive.Close>
@@ -76,11 +75,11 @@ export function PromoDialog() {
 
               <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <DialogPrimitive.Close asChild>
-                  <Button variant="ghost" size="lg" className="text-ink-muted sm:h-10">
+                  <Button variant="ghost" size="lg" className="rounded-lg text-ink-muted sm:h-10">
                     {t("promo.later")}
                   </Button>
                 </DialogPrimitive.Close>
-                <Button size="lg" className="sm:h-10" onClick={choose}>
+                <Button size="lg" className="rounded-lg sm:h-10" onClick={choose}>
                   {t("promo.choose")}
                 </Button>
               </div>
@@ -97,13 +96,13 @@ function Code({ code }: { code: string }) {
   const { t } = useTranslation();
   const { copied, copy } = useCopyToClipboard();
   return (
-    <div className="mt-5 flex items-center gap-3 rounded-sm bg-accent-soft py-3 pr-3 pl-4 sm:mt-6 sm:py-3.5 sm:pl-5">
+    <div className="mt-5 flex items-center gap-3 rounded-xl bg-accent-soft py-3 pr-3 pl-4 sm:mt-6 sm:py-3.5 sm:pl-5">
       <p className="min-w-0 flex-1 text-sm sm:text-base">{t("promo.enterCode")}</p>
       <button
         type="button"
         onClick={() => void copy(code)}
         aria-label={`${code} – ${copied ? t("promo.copied") : t("promo.copy")}`}
-        className="group inline-flex h-12 items-center gap-2.5 rounded-sm border border-primary bg-surface-raised px-4 transition-colors duration-150 hover:bg-surface"
+        className="group inline-flex h-12 items-center gap-2.5 rounded-lg border border-primary bg-surface-raised px-4 transition-colors duration-150 hover:bg-surface"
       >
         <span className="text-xl font-semibold tracking-[0.12em] text-primary sm:text-2xl">{code}</span>
         {copied ? (
@@ -122,7 +121,7 @@ function Code({ code }: { code: string }) {
 function PriceCard({ price }: { price: PromoPrice }) {
   const { t } = useTranslation();
   return (
-    <li className="flex min-w-0 flex-col rounded-sm border border-line bg-surface-raised px-2.5 py-3 sm:p-3.5">
+    <li className="flex min-w-0 flex-col rounded-xl border border-line bg-surface-raised px-2.5 py-3 sm:p-3.5">
       <p className="text-sm font-semibold break-words sm:text-base">{t(`billing.plans.${price.plan}`)}</p>
       <p className="text-xs text-ink-muted sm:text-sm">{t("promo.units", { count: price.units })}</p>
       <p className="mt-3 text-xs text-ink-muted tabular-nums line-through decoration-1 sm:text-sm">

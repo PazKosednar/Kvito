@@ -182,33 +182,6 @@
   animation: kvita-fade 180ms ease-out both;
 }
 
-/* Promo popup (features/billing/PromoDialog): chamfered corners.
-   The outer layer is the 1px edge (green on the top-left and bottom-right cut), the inner layer the surface. */
-.kv-chamfer {
-  --cut: 18px;
-  clip-path: polygon(
-    var(--cut) 0,
-    calc(100% - var(--cut)) 0,
-    100% var(--cut),
-    100% calc(100% - var(--cut)),
-    calc(100% - var(--cut)) 100%,
-    var(--cut) 100%,
-    0 calc(100% - var(--cut)),
-    0 var(--cut)
-  );
-}
-.kv-promo-edge {
-  background: linear-gradient(
-    135deg,
-    var(--accent) 0 calc(var(--cut) + 6px),
-    var(--line-strong) calc(var(--cut) + 6px) calc(100% - var(--cut) - 6px),
-    var(--accent) calc(100% - var(--cut) - 6px)
-  );
-}
-/* Floating layer: the shadow follows the cut shape (box-shadow would be clipped). */
-.kv-promo-shadow {
-  filter: drop-shadow(0 16px 40px rgb(0 0 0 / 0.35));
-}
 /* Town "city" scene: cars driving along the road (decoration only; distance via --kv-dx / --kv-dy). */
 @keyframes kv-drive {
   0% {
