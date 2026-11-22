@@ -41,7 +41,6 @@ export function billingRouter(): Router {
       prisma.subscription.findUnique({ where: { userId }, select: { providerCustomerId: true } }),
     ]);
     res.json({
-      limitsEnabled: env.PLAN_LIMITS_ENABLED,
       ...current,
       limits: PLANS[current.plan],
       usage,

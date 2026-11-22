@@ -53,6 +53,8 @@ describe.skipIf(!hasDb)("contract money and bank import", () => {
   beforeAll(async () => {
     ctx = await setupApp();
     landlord = await ctx.login(uniqueEmail("ll"), "Mojca Test");
+    // Every test adds a unit: a paid plan (plan limits always apply).
+    await ctx.prisma.subscription.create({ data: { userId: landlord.user.id, plan: "MANAGER" } });
     ana = await ctx.login(uniqueEmail("ana"), "Ana Test");
     stranger = await ctx.login(uniqueEmail("x"), "Tujec");
     propertyId = (await landlord.post("/api/properties", { name: "Hiša", street: "Cesta 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property.id;

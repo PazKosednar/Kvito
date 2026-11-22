@@ -15,6 +15,8 @@ describe.skipIf(!hasDb)("profitability", () => {
 
   it("splits building costs equally and counts the months a unit was let", async () => {
     const l = await ctx.login(uniqueEmail("profit"));
+    // Several units need a paid plan (plan limits always apply).
+    await ctx.prisma.subscription.create({ data: { userId: l.user.id, plan: "PRO" } });
     const property = (await l.post("/api/properties", { type: "MULTI_UNIT_HOUSE", name: "Hiša", street: "Ulica 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property;
     const a = (await l.post(`/api/properties/${property.id}/units`, { name: "A" }).expect(201)).body.unit;
     const b = (await l.post(`/api/properties/${property.id}/units`, { name: "B" }).expect(201)).body.unit;

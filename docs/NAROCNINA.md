@@ -1,6 +1,6 @@
 # Kvito – strategija naročnine
 
-Stanje: november 2026, Kvito je v testnem obdobju (brezplačno za vse). Ta dokument določa, kako Kvito zaračunava po testnem obdobju, in je osnova za cenik na spletni strani (`web/public/index.html#cenik`) ter za kasnejšo izvedbo v aplikaciji.
+Stanje: testno obdobje se je končalo 22. 11. 2026; omejitve paketov veljajo vedno. Ta dokument določa, kako Kvito zaračunava, in je osnova za cenik na spletni strani (`web/public/index.html#cenik`) in za aplikacijo.
 
 ## 1. Načela
 
@@ -41,8 +41,7 @@ Vse cene so končne cene za uporabnika. `TODO(preveri)`: obračun DDV je odvisen
 
 ## 4. Testno obdobje in ustanovni uporabniki
 
-- Do konca testnega obdobja je Kvito brezplačen za vse, brez omejitve enot.
-- Konec testnega obdobja napovemo **vsaj 30 dni prej** (e-pošta + obvestilo v aplikaciji). Datuma še ne objavimo.
+- Testno obdobje (brezplačno za vse, brez omejitev) se je **končalo 22. 11. 2026**. Migracija `20261122200000_end_test_period` ob deployu podeli ustanovno ceno in 30-dnevni prehod (spodaj).
 - **Ustanovna cena:** kdor se registrira v testnem obdobju, ima **−30 % na izbrani paket, dokler je naročen** (Plus 3,49 €, Pro 8,39 €, Upravnik 19,59 € mesečno). To nagradi prve uporabnike, ki pomagajo pri testiranju, in zmanjša odhod ob koncu testnega obdobja.
 - Ob koncu testnega obdobja vsak obstoječi uporabnik z več kot eno enoto dobi 30 dni preizkusa paketa, ki ustreza številu njegovih enot (enako kot v točki 3), z že upoštevano ustanovno ceno.
 
@@ -70,12 +69,14 @@ Kvito še nima registriranega podjetja. Priporočilo:
 2. Funkcija `planLimits(plan)` (enote, prostor) in preverjanje na strežniku pri ustvarjanju enote, najema, obveznosti in nalaganju datotek. Napaka `PLAN_LIMIT` z jasnim sporočilom in gumbom »Poglej pakete«.
 3. Stran **Naročnina** v nastavitvah najemodajalca: trenutni paket, poraba (enote, prostor), gumb za nadgradnjo (odpre stran za plačilo pri ponudniku) in za upravljanje naročnine.
 4. Webhook ponudnika → posodobi `Subscription` (idempotentno, podpis preverjen).
-5. Oznaka ustanovnih uporabnikov ob koncu testnega obdobja (vsi računi najemodajalcev, ustvarjeni pred datumom konca).
+5. Oznaka ustanovnih uporabnikov ob koncu testnega obdobja (vsi računi najemodajalcev, ustvarjeni pred datumom konca) – narejeno z migracijo `20261122200000_end_test_period`.
 6. E-pošta in obvestila: konec preizkusa, neuspešno plačilo, preseganje omejitve.
 
 Pred korakom 4 vprašaj lastnika projekta (CLAUDE.md: plačilni ponudnik) – odobreno 22. 11. 2026 (Polar).
 
-**Stanje (20. 11. 2026):** koraki 1–3 so narejeni (`Subscription`, `server/src/modules/billing/plans.ts`, stran »Naročnina« v meniju računa). Omejitve se preverjajo le, ko je na strežniku `PLAN_LIMITS_ENABLED=true`; med testnim obdobjem je izklopljeno. Enote nad omejitvijo so samo za branje pri novih najemih in obveznostih; sporočila ostanejo odprta, da se najemnik in najemodajalec lahko vedno dogovorita. Koraki 5–6 še čakajo.
+**Stanje (20. 11. 2026):** koraki 1–3 so narejeni (`Subscription`, `server/src/modules/billing/plans.ts`, stran »Naročnina« v meniju računa). Omejitve se od 22. 11. 2026 preverjajo vedno (stikala `PLAN_LIMITS_ENABLED` ni več). Enote nad omejitvijo so samo za branje pri novih najemih in obveznostih; sporočila ostanejo odprta, da se najemnik in najemodajalec lahko vedno dogovorita. Korak 5 je narejen 22. 11. 2026, korak 6 še čaka.
+
+**Konec testnega obdobja (22. 11. 2026):** vsi obstoječi najemodajalci imajo `founder = true`. Kdor ima več kot eno enoto in še nima paketa, ima 30 dni Kvitovega lastnega preizkusa paketa, ki ustreza številu enot (`status = TRIALING`, `trialEndsAt`, brez `providerSubscriptionId`); po `trialEndsAt` `planOf` vrne FREE. Stran Naročnina med preizkusom pokaže datum konca. `TODO`: opomnik 7 dni in 1 dan pred koncem preizkusa (korak 6).
 
 **Stanje (22. 11. 2026): korak 4 je narejen (Polar) in deluje v produkciji** (preizkušeno s popustom 100 %).
 

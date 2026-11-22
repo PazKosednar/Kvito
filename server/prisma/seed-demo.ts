@@ -116,6 +116,8 @@ async function main() {
     return printLogins();
   }
   if (existing) await wipe(landlord.id);
+  // 4 units need PRO (no provider ids: managed by hand, not by Polar).
+  await prisma.subscription.upsert({ where: { userId: landlord.id }, update: { plan: "PRO", status: "ACTIVE" }, create: { userId: landlord.id, plan: "PRO", status: "ACTIVE" } });
 
   const jure = await upsertUser("jure@kvito.test", "Jure Vidmar", ["TENANT"], "031 482 117");
   const maja = await upsertUser("maja@kvito.test", "Maja Kolar", ["TENANT"], "040 219 334");

@@ -1190,7 +1190,8 @@ enum SubscriptionStatus {
   CANCELED
 }
 
-/// A landlord's paid plan. No row = FREE. Payments come later through a payment provider (merchant of record).
+/// A landlord's paid plan. No row = FREE. Payments through Polar (merchant of record); TRIALING without a
+/// provider subscription is Kvito's own free trial until trialEndsAt.
 model Subscription {
   userId                 String             @id
   plan                   Plan               @default(FREE)

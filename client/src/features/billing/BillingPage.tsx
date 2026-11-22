@@ -5,6 +5,7 @@ import { Segmented } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { useBilling, type Billing, type BillingInterval, type PaidPlan, type PlanInfo } from "@/hooks/useBilling";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
+import { formatDate } from "@/lib/dates";
 import { formatCents } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
@@ -30,10 +31,10 @@ export function BillingPage() {
     <>
       <PageHeader eyebrow={t("billing.eyebrow")} title={t("billing.title")} subtitle={t("billing.subtitle")} />
 
-      {!b.limitsEnabled && (
+      {b.trialEndsAt && (
         <p className="mb-6 flex items-start gap-3 rounded-md border border-line bg-surface-raised p-4 text-ink-muted">
           <Info className="mt-0.5 size-5 shrink-0 text-ink" aria-hidden="true" />
-          <span>{t("billing.noLimits")}</span>
+          <span>{t("billing.trial", { date: formatDate(b.trialEndsAt), plan: t(`billing.plans.${b.plan}`) })}</span>
         </p>
       )}
 
@@ -113,19 +114,19 @@ function Usage({ b }: { b: Billing }) {
         {b.founder && <span className="ml-3 align-middle text-sm font-normal text-ink-on-panel-muted">{t("billing.founder")}</span>}
       </p>
       <div className="mt-6 grid gap-6 md:grid-cols-2">
-        <Meter label={t("billing.units")} used={b.usage.units} limit={b.limits.units} format={(n) => String(n)} enforced={b.limitsEnabled} />
-        <Meter label={t("billing.storage")} used={b.usage.storageBytes} limit={b.limits.storageBytes} format={formatBytes} enforced={b.limitsEnabled} />
+        <Meter label={t("billing.units")} used={b.usage.units} limit={b.limits.units} format={(n) => String(n)} />
+        <Meter label={t("billing.storage")} used={b.usage.storageBytes} limit={b.limits.storageBytes} format={formatBytes} />
       </div>
       <Fits b={b} />
     </section>
   );
 }
 
-/** Used / limit as a bar; near or over the limit it says so in words (and colour) only when limits apply. */
-function Meter({ label, used, limit, format, enforced }: { label: string; used: number; limit: number; format: (n: number) => string; enforced: boolean }) {
+/** Used / limit as a bar; near or over the limit it says so in words (and colour). */
+function Meter({ label, used, limit, format }: { label: string; used: number; limit: number; format: (n: number) => string }) {
   const { t } = useTranslation();
   const ratio = limit > 0 ? used / limit : 0;
-  const state = !enforced ? "ok" : ratio > 1 ? "over" : ratio >= 0.9 ? "near" : "ok";
+  const state = ratio > 1 ? "over" : ratio >= 0.9 ? "near" : "ok";
   return (
     <div>
       <div className="flex items-baseline justify-between gap-3">
@@ -150,7 +151,7 @@ function Meter({ label, used, limit, format, enforced }: { label: string; used: 
   );
 }
 
-/** Which package fits the current use, when it is not the current one (e.g. before the end of the trial). */
+/** Which package fits the current use, when it is bigger than the current one. */
 function Fits({ b }: { b: Billing }) {
   const { t } = useTranslation();
   const fit = b.plans.find((p) => p.units >= b.usage.units && p.storageBytes >= b.usage.storageBytes);

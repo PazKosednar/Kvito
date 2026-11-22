@@ -49,11 +49,6 @@ const EnvSchema = z.object({
   VAPID_PRIVATE_KEY: z.string().min(1).optional(),
   VAPID_SUBJECT: z.string().min(1).default("mailto:podpora@kvito.si"),
   /**
-   * Plan limits (units, storage) are enforced only when this is on. Off during the test period, when Kvito is
-   * free for everyone without limits (docs/NAROCNINA.md).
-   */
-  PLAN_LIMITS_ENABLED: bool.default(false),
-  /**
    * Polar (polar.sh, merchant of record) for landlords' subscriptions. Payments are on only when the token,
    * the webhook secret and all six product IDs are set; otherwise the app works without them.
    */

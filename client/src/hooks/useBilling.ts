@@ -18,10 +18,10 @@ export interface PlanInfo {
 }
 
 export interface Billing {
-  limitsEnabled: boolean;
   plan: Plan;
   founder: boolean;
   status: string;
+  /** Kvito's own free trial of `plan` runs until this date (set for landlords from the test period). */
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
   limits: Omit<PlanInfo, "id">;

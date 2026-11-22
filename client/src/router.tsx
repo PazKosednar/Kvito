@@ -56,8 +56,8 @@ export const router = createBrowserRouter([
   // Public legal texts (linked from sign-up).
   { path: ROUTES.terms, element: <LegalPage doc="terms" /> },
   { path: ROUTES.privacyPolicy, element: <LegalPage doc="privacy" /> },
-  // Manual UPN QR test page (samples are only served outside production).
-  { path: "/upn-test", element: <UpnTestPage /> },
+  // Manual UPN QR test page: development only (the samples API is closed in production too).
+  ...(import.meta.env.DEV ? [{ path: "/upn-test", element: <UpnTestPage /> }] : []),
   {
     element: <ProtectedRoute />,
     children: [

@@ -37,7 +37,7 @@ Lastna domena (`kvito.si` / `www.kvito.si`): Settings → Networking → Custom 
 
 ## Odprto
 
-- `TODO(preveri)`: cenik po testnem obdobju (na strani namenoma ni cen).
+- Cenik na strani (`#cenik`) sledi `docs/NAROCNINA.md`; ob spremembi cen posodobi oboje.
 - `TODO(pravnik)`: pogoji uporabe in politika zasebnosti (povezave vodijo v aplikacijo).
 - Kontaktni e-naslov ni objavljen, dokler domena `kvito.si` in e-pošta nista urejeni.
 - Posnetki zaslonov so iz seeda; ob večjih spremembah videza jih posnemi znova.

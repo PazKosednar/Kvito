@@ -29,11 +29,11 @@ Vse so opisane v [server/.env.example](../server/.env.example). Obvezne v produk
 
 Strežnik se v produkciji **ne zažene**, če manjka SMTP ali S3.
 
-### Trenutna testna postavitev (projekt `eloquent-dream`)
+### Trenutna produkcijska postavitev (projekt `eloquent-dream`)
 - Storitev `@kvita/server` (EU, `europe-west4`), domena `https://kvito-server-production.up.railway.app`, `PORT=8080`.
 - `Postgres` (EU, volumen 5 GB) → `DATABASE_URL=${{Postgres.DATABASE_URL}}`.
 - Bucket `kvito-files` (regija `ams`) → `S3_*` kot reference `${{kvito-files.*}}`, `S3_FORCE_PATH_STYLE=false`.
-- `EMAIL_CONSOLE_IN_PRODUCTION=true`: brez SMTP gredo e-poštna sporočila (npr. koda za pozabljeno geslo) v dnevnik (Railway → Deploy Logs). **Izklopi, preden se prijavijo pravi uporabniki**, in nastavi `SMTP_*`.
+- **Še odprto (ostanek testnega obdobja):** `EMAIL_CONSOLE_IN_PRODUCTION=true`: brez SMTP gredo e-poštna sporočila (npr. koda za pozabljeno geslo) v dnevnik (Railway → Deploy Logs). **Izklopi, preden se prijavijo pravi uporabniki**, in nastavi `SMTP_*`.
 - `SKIP_EMAIL_VERIFICATION=true`: registracija brez kode – nov račun je takoj prijavljen, e-naslov ostane nepotrjen. Ponovna registracija na že uporabljen e-naslov ni mogoča. **Izklopi skupaj z zgornjim**, ko bo SMTP urejen (obstoječi nepotrjeni računi bodo ob prijavi dobili kodo).
 
 ## 3. Po prvem deployu

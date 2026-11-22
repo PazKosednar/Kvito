@@ -48,6 +48,8 @@ async function main() {
   const ana = await upsertUser("ana@kvita.test", "Ana Kovač", ["TENANT"]);
   const luka = await upsertUser("luka@kvita.test", "Luka Horvat", ["TENANT"]);
   const nina = await upsertUser("nina@kvita.test", "Nina Zupan", ["TENANT"]);
+  // Two units need PLUS (plan limits always apply); managed by hand, not by Polar.
+  await prisma.subscription.upsert({ where: { userId: landlord.id }, update: { plan: "PLUS", status: "ACTIVE", trialEndsAt: null }, create: { userId: landlord.id, plan: "PLUS", status: "ACTIVE" } });
 
   await prisma.property.upsert({
     where: { id: ID.property },
