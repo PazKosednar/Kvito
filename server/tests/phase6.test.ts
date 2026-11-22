@@ -57,7 +57,7 @@ describe.skipIf(!hasDb)("contract money and bank import", () => {
     await ctx.prisma.subscription.create({ data: { userId: landlord.user.id, plan: "MANAGER" } });
     ana = await ctx.login(uniqueEmail("ana"), "Ana Test");
     stranger = await ctx.login(uniqueEmail("x"), "Tujec");
-    propertyId = (await landlord.post("/api/properties", { name: "Hiša", street: "Cesta 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property.id;
+    propertyId = (await landlord.post("/api/properties", { type: "MULTI_UNIT_HOUSE", name: "Hiša", street: "Cesta 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property.id;
     tenancyId = await newTenancy({ startDate: "2031-01-01", rentCents: 65_000, depositCents: 130_000 });
   });
 

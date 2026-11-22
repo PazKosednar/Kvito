@@ -378,6 +378,13 @@ function nearLabel(r: TownRow, x: number, dy: number) {
   return labels.some((lx) => Math.abs(x - (lx + dy - 6)) < 20);
 }
 
+/** Whether x lies in front of a building of the row (with a margin): a lamp there would stand over its facade. */
+function inFrontOfBuilding(r: TownRow, x: number) {
+  const starts = [r.x0, ...r.gaps.map((g) => g.x1 + 6)];
+  const ends = [...r.gaps.map((g) => g.x0 - 6), r.x1];
+  return starts.some((x0, i) => x > x0 - 14 && x < ends[i]! + 14);
+}
+
 const lineX = (x0: number, x1: number, y: number, z = 0) => pts([[x0, y, z], [x1, y, z]]);
 
 // ---------- Scenes ----------
@@ -456,7 +463,7 @@ function city(rows: TownRow[], L: SceneLayers) {
       x += w + 6;
     }
     L.back.set(r.index, back);
-    for (const g of r.gaps) L.gap.set(g.after, [<Lamp key="l" x={(g.x0 + g.x1) / 2} y={r.y1 - 4} />]);
+    // No lamps between the buildings: their poles and glow would stand over the facades.
     const curbA = r.y1 + 12;
     const curbB = r.y1 + 38;
     const x0 = r.x0 - 24;
@@ -472,7 +479,7 @@ function city(rows: TownRow[], L: SceneLayers) {
     for (let i = 0; i < 5; i++) {
       front.push(<polyline key={`z${i}`} points={pts([[cx + i * 4, curbA + 2, 0], [cx + i * 4, curbB - 2, 0]])} fill="none" stroke={FAINT} strokeWidth="2" />);
     }
-    for (let x = r.x0 - 6, i = 0; x <= r.x1 + 6; x += 48, i++) if (!nearLabel(r, x, 10)) front.push(<Lamp key={`lp${i}`} x={x} y={curbA - 2} />);
+    for (let x = r.x0 - 6, i = 0; x <= r.x1 + 6; x += 48, i++) if (!nearLabel(r, x, 10) && !inFrontOfBuilding(r, x)) front.push(<Lamp key={`lp${i}`} x={x} y={curbA - 2} />);
     // Far side of the road: a sidewalk and a second row of lamps, staggered by half a step.
     front.push(<polyline key="sw2" points={lineX(x0, x1, curbB + 6)} fill="none" stroke={FAINT} />);
     for (let x = r.x0 + 18, i = 0; x <= r.x1 + 18; x += 48, i++) if (!nearLabel(r, x, 41)) front.push(<Lamp key={`lq${i}`} x={x} y={curbB + 3} />);

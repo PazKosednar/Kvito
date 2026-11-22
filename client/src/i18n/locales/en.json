@@ -236,7 +236,10 @@
     "BILLING_DISABLED": "Payments are not switched on yet. Try again later.",
     "BILLING_HAS_SUBSCRIPTION": "You already have a subscription. Change your plan under Manage subscription.",
     "BILLING_NO_CUSTOMER": "You have no subscription yet. Choose a plan first.",
-    "BILLING_PROVIDER": "The payment provider is not responding. Try again in a minute."
+    "BILLING_PROVIDER": "The payment provider is not responding. Try again in a minute.",
+    "PROPERTY_SINGLE_UNIT": "A house, apartment or commercial space is let as a whole, so it has no separate units. For several flats choose “Multi-unit house”.",
+    "UNIT_IS_PROPERTY": "This is the whole property. If you no longer let it, delete the property.",
+    "PROPERTY_HAS_UNITS": "The property has several units, so it stays a multi-unit house."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -274,7 +277,7 @@
     "add": "Add a property",
     "addFirst": "Add your first property",
     "newTitle": "New property",
-    "newSubtitle": "The house, flat or commercial space you rent out. You'll add units in the next step.",
+    "newSubtitle": "A house, apartment or commercial space you let. For a multi-unit house you add the units in the next step.",
     "type": "Property type",
     "types": {
       "HOUSE": "House",
@@ -283,7 +286,7 @@
       "COMMERCIAL": "Commercial"
     },
     "typeHints": {
-      "HOUSE": "A single-family house (detached or terraced). Rent out the whole house, a floor or rooms.",
+      "HOUSE": "A single-family house (detached or terraced) that you let as a whole.",
       "MULTI_UNIT_HOUSE": "A house with several flats, e.g. a two- or three-flat house.",
       "APARTMENT": "A flat in an apartment block.",
       "COMMERCIAL": "An office, warehouse, shop or other commercial space."
@@ -305,7 +308,22 @@
     "deleted": "Property deleted.",
     "indexLabel_one": "{{count}} property",
     "indexLabel_other": "{{count}} properties",
-    "occupancy": "Let {{occupied}} / {{total}}"
+    "occupancy": "Let {{occupied}} / {{total}}",
+    "newSubtitleWhole": "You let the property as a whole: add a few details, and the tenancy in the next step.",
+    "rooms": "Rooms",
+    "aboutTitle": "About the property",
+    "aboutHint": "All optional – you can add it later too.",
+    "yearBuilt": "Year built",
+    "tenancyTitle": "Tenancy",
+    "tenancy": "Tenancy",
+    "vacant": "Vacant",
+    "vacantHint": "Not let yet.",
+    "details": "Details",
+    "wholeUnit": {
+      "HOUSE": "Whole house",
+      "APARTMENT": "Whole apartment",
+      "COMMERCIAL": "Whole space"
+    }
   },
   "units": {
     "title": "Units",

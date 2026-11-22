@@ -21,7 +21,7 @@ describe.skipIf(!hasDb)("plan limits", () => {
   async function landlordWithProperty() {
     const l = await ctx.login(uniqueEmail("plan"));
     users.push(l.user.id);
-    const property = (await l.post("/api/properties", { type: "HOUSE", name: "Hiša", street: "Ulica 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property;
+    const property = (await l.post("/api/properties", { type: "MULTI_UNIT_HOUSE", name: "Hiša", street: "Ulica 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property;
     return { l, propertyId: property.id as string };
   }
 

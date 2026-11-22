@@ -42,14 +42,14 @@ describe.skipIf(!hasDb)("messages, issues, realtime", () => {
     landlord = await ctx.login(uniqueEmail("ll3"), "Mojca");
     tenant = await ctx.login(uniqueEmail("t3"), "Ana");
     stranger = await ctx.login(uniqueEmail("s3"), "Tujec");
-    const prop = (await landlord.post("/api/properties", { name: "Blok", street: "Ulica 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property;
+    const prop = (await landlord.post("/api/properties", { type: "MULTI_UNIT_HOUSE", name: "Blok", street: "Ulica 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property;
     const unit = (await landlord.post(`/api/properties/${prop.id}/units`, { name: "S1" }).expect(201)).body.unit;
     const terms = { startDate: "2026-01-01", rentCents: 50000, rentDueDay: 5, payeeName: "Mojca", payeeIban: "SI56191000000123438" };
     tenancyId = (await landlord.post(`/api/units/${unit.id}/tenancies`, terms).expect(201)).body.tenancy.id;
     const url = (await landlord.post(`/api/tenancies/${tenancyId}/invitations`, {}).expect(201)).body.url as string;
     await tenant.post(`/api/invitations/${url.split("/povabilo/")[1]}/accept`).expect(200);
 
-    const prop2 = (await stranger.post("/api/properties", { name: "Druga", street: "Pot 2", postalCode: "2000", city: "Maribor" }).expect(201)).body.property;
+    const prop2 = (await stranger.post("/api/properties", { type: "MULTI_UNIT_HOUSE", name: "Druga", street: "Pot 2", postalCode: "2000", city: "Maribor" }).expect(201)).body.property;
     const unit2 = (await stranger.post(`/api/properties/${prop2.id}/units`, { name: "X" }).expect(201)).body.unit;
     otherTenancyId = (await stranger.post(`/api/units/${unit2.id}/tenancies`, terms).expect(201)).body.tenancy.id;
 

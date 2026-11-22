@@ -236,7 +236,10 @@
     "BILLING_DISABLED": "Plačila še niso vklopljena. Poskusi znova kasneje.",
     "BILLING_HAS_SUBSCRIPTION": "Naročnino že imaš. Paket zamenjaš v upravljanju naročnine.",
     "BILLING_NO_CUSTOMER": "Naročnine še nimaš. Najprej izberi paket.",
-    "BILLING_PROVIDER": "Plačilni ponudnik se ne odziva. Poskusi znova čez minuto."
+    "BILLING_PROVIDER": "Plačilni ponudnik se ne odziva. Poskusi znova čez minuto.",
+    "PROPERTY_SINGLE_UNIT": "Hišo, stanovanje ali poslovni prostor oddajaš kot celoto, zato nima ločenih enot. Za več stanovanj izberi »Večstanovanjska hiša«.",
+    "UNIT_IS_PROPERTY": "To je cela nepremičnina. Če je ne oddajaš več, izbriši nepremičnino.",
+    "PROPERTY_HAS_UNITS": "Nepremičnina ima več enot, zato ostane večstanovanjska hiša."
   },
   "validation": {
     "invalid": "Vrednost ni pravilna.",
@@ -274,7 +277,7 @@
     "add": "Dodaj nepremičnino",
     "addFirst": "Dodaj prvo nepremičnino",
     "newTitle": "Nova nepremičnina",
-    "newSubtitle": "Hiša, stanovanje ali poslovni prostor, ki ga oddajaš. Enote dodaš v naslednjem koraku.",
+    "newSubtitle": "Hiša, stanovanje ali poslovni prostor, ki ga oddajaš. Pri večstanovanjski hiši enote dodaš v naslednjem koraku.",
     "type": "Vrsta nepremičnine",
     "types": {
       "HOUSE": "Hiša",
@@ -283,7 +286,7 @@
       "COMMERCIAL": "Poslovni prostor"
     },
     "typeHints": {
-      "HOUSE": "Enodružinska hiša (samostojna ali vrstna). Oddajaš lahko celo hišo, etažo ali sobe.",
+      "HOUSE": "Enodružinska hiša (samostojna ali vrstna), ki jo oddajaš kot celoto.",
       "MULTI_UNIT_HOUSE": "Hiša z več stanovanji, na primer dvo- ali tristanovanjska hiša.",
       "APARTMENT": "Stanovanje v bloku.",
       "COMMERCIAL": "Pisarna, skladišče, lokal ali drug poslovni prostor."
@@ -307,7 +310,22 @@
     "indexLabel_two": "{{count}} nepremičnini",
     "indexLabel_few": "{{count}} nepremičnine",
     "indexLabel_other": "{{count}} nepremičnin",
-    "occupancy": "Oddano {{occupied}} / {{total}}"
+    "occupancy": "Oddano {{occupied}} / {{total}}",
+    "newSubtitleWhole": "Nepremičnino oddajaš kot celoto: vpiši nekaj podatkov, najem dodaš v naslednjem koraku.",
+    "rooms": "Sobnost",
+    "aboutTitle": "O nepremičnini",
+    "aboutHint": "Vse je neobvezno – dopolniš lahko tudi kasneje.",
+    "yearBuilt": "Leto izgradnje",
+    "tenancyTitle": "Najem",
+    "tenancy": "Najem",
+    "vacant": "Prosto",
+    "vacantHint": "Še ne oddajaš.",
+    "details": "Podatki",
+    "wholeUnit": {
+      "HOUSE": "Cela hiša",
+      "APARTMENT": "Celo stanovanje",
+      "COMMERCIAL": "Cel prostor"
+    }
   },
   "units": {
     "title": "Enote",

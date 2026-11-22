@@ -2,13 +2,14 @@ import { BriefcaseBusiness, Building2, House, HousePlus, Loader2, type LucideIco
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
-import { Field, TextInput } from "@/components/form";
+import { Field, Select, TextInput } from "@/components/form";
 import { FormError, LoadingState, PageHeader } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { useProperties, useProperty, type PropertyInput } from "@/hooks/useProperties";
 import { cn } from "@/lib/utils";
-import type { PropertyType } from "@/types/domain";
+import { isSingleUnit, UNIT_LAYOUTS, type PropertyType, type UnitLayout } from "@/types/domain";
+import { fromTri, parseDecimal, TriField, type Tri } from "./details-ui";
 
 const TYPES: { value: PropertyType; icon: LucideIcon }[] = [
   { value: "HOUSE", icon: House },
@@ -38,14 +39,39 @@ function PropertyForm({ id, initial }: { id: string | undefined; initial: Proper
     city: initial?.city ?? "",
   });
   const set = (k: keyof PropertyInput) => (e: React.ChangeEvent<HTMLInputElement>) => setV({ ...v, [k]: e.target.value });
+  const [yearBuilt, setYearBuilt] = useState(initial?.yearBuilt ? String(initial.yearBuilt) : "");
+  // Details of the whole property (house, apartment, commercial space), asked only when it is added.
+  const [layout, setLayout] = useState<UnitLayout | "">("");
+  const [area, setArea] = useState("");
+  const [parking, setParking] = useState<Tri>("");
+  const [storage, setStorage] = useState<Tri>("");
+  const [balcony, setBalcony] = useState<Tri>("");
+  const single = isSingleUnit(v.type);
+  const hasRooms = v.type === "HOUSE" || v.type === "APARTMENT";
 
   const save = useAsyncAction(async () => {
+    const year = yearBuilt.trim() ? Number(yearBuilt) : null;
     if (id) {
-      await update(v);
+      await update({ ...v, yearBuilt: year });
       void navigate(`/nepremicnine/${id}`);
     } else {
-      const created = await createProperty(v);
-      // Next natural step: add the first unit.
+      const created = await createProperty({
+        ...v,
+        yearBuilt: year,
+        ...(single
+          ? {
+              unit: {
+                name: t(`properties.wholeUnit.${v.type}`),
+                layout: hasRooms && layout ? layout : null,
+                areaM2: parseDecimal(area),
+                hasParking: fromTri(parking),
+                hasStorage: fromTri(storage),
+                hasBalcony: fromTri(balcony),
+              },
+            }
+          : {}),
+      });
+      // Next: a whole property gets its tenancy right away, a multi-unit house its first unit.
       void navigate(`/nepremicnine/${created.id}`, { replace: true });
     }
   });
@@ -55,7 +81,7 @@ function PropertyForm({ id, initial }: { id: string | undefined; initial: Proper
       <PageHeader
         back={id ? `/nepremicnine/${id}` : "/"}
         title={id ? t("properties.editTitle") : t("properties.newTitle")}
-        subtitle={id ? undefined : t("properties.newSubtitle")}
+        subtitle={id ? undefined : t(single ? "properties.newSubtitleWhole" : "properties.newSubtitle")}
       />
       <form
         className="flex max-w-2xl flex-col gap-5"
@@ -105,6 +131,40 @@ function PropertyForm({ id, initial }: { id: string | undefined; initial: Proper
             {(p) => <TextInput {...p} value={v.city} onChange={set("city")} required maxLength={60} autoComplete="address-level2" />}
           </Field>
         </div>
+
+        <h2 className="mt-4 label-mono">{t("properties.aboutTitle")}</h2>
+        {single && !id && (
+          <>
+            <div className={cn("grid gap-5", hasRooms ? "sm:grid-cols-2" : "sm:max-w-xs")}>
+              {hasRooms && (
+                <Field label={t("properties.rooms")}>
+                  {(p) => (
+                    <Select {...p} value={layout} onChange={(e) => setLayout(e.target.value as UnitLayout | "")}>
+                      <option value="">–</option>
+                      {UNIT_LAYOUTS.map((l) => (
+                        <option key={l} value={l}>
+                          {t(`unitDetails.layouts.${l}`)}
+                        </option>
+                      ))}
+                    </Select>
+                  )}
+                </Field>
+              )}
+              <Field label={`${t("unitDetails.area")} (${t("unitDetails.areaUnit")})`} error={save.fieldErrors["unit.areaM2"]}>
+                {(p) => <TextInput {...p} inputMode="decimal" value={area} onChange={(e) => setArea(e.target.value)} />}
+              </Field>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-3">
+              <TriField label={t("unitDetails.parking")} value={parking} onChange={setParking} />
+              <TriField label={t("unitDetails.storage")} value={storage} onChange={setStorage} />
+              <TriField label={t("unitDetails.balcony")} value={balcony} onChange={setBalcony} />
+            </div>
+          </>
+        )}
+        <Field label={t("properties.yearBuilt")} hint={t("properties.aboutHint")} error={save.fieldErrors["yearBuilt"]} className="sm:max-w-xs">
+          {(p) => <TextInput {...p} value={yearBuilt} onChange={(e) => setYearBuilt(e.target.value.replace(/\D/g, ""))} inputMode="numeric" maxLength={4} pattern="\d{4}" />}
+        </Field>
+
         <FormError message={save.error} />
         <Button type="submit" size="xl" disabled={save.pending}>
           {save.pending && <Loader2 className="animate-spin" />}

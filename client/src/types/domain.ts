@@ -159,6 +159,10 @@ export interface UnitDetail extends Omit<Unit, "tenancies"> {
 /** Mirrors server PropertyType: hiša, večstanovanjska hiša, stanovanje (v bloku), poslovni prostor. */
 export type PropertyType = "HOUSE" | "MULTI_UNIT_HOUSE" | "APARTMENT" | "COMMERCIAL";
 
+/** Let as a whole: one unit, created with the property and not shown as a separate "unit". Only a multi-unit house has units. */
+export const SINGLE_UNIT_TYPES: readonly PropertyType[] = ["HOUSE", "APARTMENT", "COMMERCIAL"];
+export const isSingleUnit = (type: PropertyType) => SINGLE_UNIT_TYPES.includes(type);
+
 export interface Property {
   id: string;
   type: PropertyType;

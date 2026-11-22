@@ -70,8 +70,8 @@ interface Shape {
   sills: boolean;
   windows: Win[]; // front-left face, one per unit
   side: Omit<Win, "unit">[]; // right face, decorative
-  /** Single-family house: gable to the front, porch on the side, dormer and chimney (drawn by <Cottage>). */
-  cottage?: { dormerX: number; dormerY: number };
+  /** Single-family house: gable to the front, entrance and windows on the side, chimney (drawn by <Cottage>). */
+  cottage?: { door: [number, number] };
 }
 
 /** Highest point of the shape (walls + roof). */
@@ -125,29 +125,24 @@ function blockShape(b: TownBuilding): Shape {
 }
 
 /**
- * Single-family house (smaller than the multi-unit house): one storey under a gable roof facing the front,
- * an attic window in the gable, a dormer and a chimney on the side slope, and the entrance with a porch,
- * pillars and steps on the side. Windows have awnings. The landlord owns the whole house, so windows light up
- * in order (front, side, attic, dormer); spare windows stay dark. More units make the house longer.
+ * Single-family house (smaller than the multi-unit house), kept simple: one storey under a gable roof facing
+ * the front, two windows in the front wall, the entrance with a step and plain windows on the side, a chimney
+ * at the back. A house is let as a whole, so its first front window is the tenancy; more units (older data)
+ * light up the further windows in order and make the house longer.
  */
 function houseShape(b: TownBuilding): Shape {
   const n = b.units.length;
   const w = 34;
   const h = 19;
-  const r = 17;
-  const sideCount = Math.max(1, n - 4);
-  const d = 24 + sideCount * 10 + 3;
-  const dormerX = w - 6;
-  const dormerY = Math.round(d * 0.55);
-  const ridge = h + r;
-  const slopeZ = (x: number) => ridge - (x - w / 2) * (r / (w / 2));
-  const zb = slopeZ(dormerX);
+  const r = 15;
+  const sideCount = Math.max(1, n - 2);
+  // Side wall from the back: windows, then the door near the front corner.
+  const doorY0 = 4 + sideCount * 10 + 1;
+  const d = doorY0 + 6 + 5;
   const slots: Omit<Win, "unit">[] = [
-    { x0: 5, x1: 12, z0: 5, z1: 14 },
-    { x0: 22, x1: 29, z0: 5, z1: 14 },
-    ...Array.from({ length: sideCount }, (_, i) => ({ x0: 25 + i * 10, x1: 32 + i * 10, z0: 5, z1: 14, planeX: w })),
-    { x0: 14, x1: 20, z0: h + 4, z1: h + 10 },
-    { x0: dormerY - 2.5, x1: dormerY + 2.5, z0: zb + 1.5, z1: zb + 4.5, planeX: dormerX },
+    { x0: 6, x1: 13, z0: 5, z1: 13 },
+    { x0: 21, x1: 28, z0: 5, z1: 13 },
+    ...Array.from({ length: sideCount }, (_, i) => ({ x0: 4 + i * 10, x1: 11 + i * 10, z0: 5, z1: 13, planeX: w })),
   ];
   const windows: Win[] = slots.map((win, i) => ({ ...win, unit: i < n ? i : null }));
   return {
@@ -159,11 +154,11 @@ function houseShape(b: TownBuilding): Shape {
     frontDoor: null,
     shutter: false,
     ...PLAIN,
-    eave: 3,
-    chimney: w / 2 + 3,
+    eave: 2,
+    chimney: w / 2 + 5,
     windows,
     side: [],
-    cottage: { dormerX, dormerY },
+    cottage: { door: [doorY0, doorY0 + 6] },
   };
 }
 
@@ -341,7 +336,7 @@ function Building({
       {/* Plot. */}
       {/* Plot: a quiet solid footprint (the house's steps reach a bit further out). */}
       <polygon
-        points={P([[-4, -4, 0], [w + (s.cottage ? 11 : 4), -4, 0], [w + (s.cottage ? 11 : 4), d + 4, 0], [-4, d + 4, 0]])}
+        points={P([[-4, -4, 0], [w + (s.cottage ? 7 : 4), -4, 0], [w + (s.cottage ? 7 : 4), d + 4, 0], [-4, d + 4, 0]])}
         fill="none"
         className={cn("transition-colors duration-200", highlighted ? "stroke-ink-on-panel-muted" : "stroke-[var(--panel-edge-faint)]")}
         strokeWidth="1"
@@ -442,52 +437,26 @@ function gardenSpots(s: Shape, count: number): number[] {
 }
 
 /**
- * Single-family house in the town's line style (after a classic cottage): front wall with the gable, side wall
- * with the entrance under a porch (pillars, canopy, steps), awnings over the windows, the side roof slope with
- * a dormer and a chimney, barge boards and fascia. Windows themselves are drawn by <Building> on top.
- * Painter's order: hidden left slope, walls, porch, awnings, side slope (+ snow), chimney, dormer, boards.
+ * Single-family house in the town's line style, kept plain: front wall with the gable, side wall with the door
+ * and a step, the side roof slope with a chimney at the back, barge boards and fascia. Windows are drawn by
+ * <Building> on top. Painter's order: hidden left slope, walls, door, step, side slope (+ snow), chimney, boards.
  */
 function Cottage({ s, P, face }: { s: Shape; P: (pts: Pt[]) => string; face: string }) {
   const snow = useContext(TownAmbientContext).season === "winter";
   const { w, d, h, roof: r, eave: e } = s;
-  const { dormerX: xd, dormerY: yc } = s.cottage!;
+  const [dy0, dy1] = s.cottage!.door;
   const half = w / 2;
   const k = r / half; // roof slope
   const ridge = h + r;
   const ze = h - e * k;
-  const t = 1.6;
+  const t = 1.4;
   const z = (x: number) => ridge - (x - half) * k; // roof height over x (side slope)
-  const box = (x0: number, x1: number, y0: number, y1: number, z0: number, z1: number, key: string) => (
-    <g key={key}>
-      <polygon className={face} points={P([[x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]])} />
-      <polygon className={face} points={P([[x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [x1, y0, z1]])} />
-      <polygon className={face} points={P([[x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]])} />
-    </g>
-  );
-  const awning = (win: Win, i: number) =>
-    win.planeX === w ? (
-      <polygon key={`aw${i}`} className={face} points={P([[w, win.x0 - 1, win.z1 + 3], [w, win.x1 + 1, win.z1 + 3], [w + 3, win.x1 + 1, win.z1 + 1.5], [w + 3, win.x0 - 1, win.z1 + 1.5]])} />
-    ) : win.planeX == null && win.z0 < h ? (
-      <polygon key={`aw${i}`} className={face} points={P([[win.x0 - 1, d, win.z1 + 3], [win.x1 + 1, d, win.z1 + 3], [win.x1 + 1, d + 3, win.z1 + 1.5], [win.x0 - 1, d + 3, win.z1 + 1.5]])} />
-    ) : null;
-  const sill = (win: Win, i: number) =>
-    win.planeX === w ? (
-      <polyline key={`sl${i}`} className="fill-none stroke-[var(--panel-edge)]" points={P([[w, win.x0 - 1, win.z0 - 1.2], [w, win.x1 + 1, win.z0 - 1.2]])} />
-    ) : win.planeX == null ? (
-      <polyline key={`sl${i}`} className="fill-none stroke-[var(--panel-edge)]" points={P([[win.x0 - 1, d, win.z0 - 1.2], [win.x1 + 1, d, win.z0 - 1.2]])} />
-    ) : null;
-  // Dormer on the side slope: front wall at x = xd, 10 wide, gable peak; its roof meets the main slope.
-  const y0 = yc - 5;
-  const y1 = yc + 5;
-  const zb = z(xd);
-  const zw = zb + 6;
-  const zp = zw + 3.5;
-  const xb = half + (ridge - zw) / k;
-  const xr = half + (ridge - zp) / k;
-  // Chimney on the back of the side slope.
-  const cx0 = s.chimney ?? half + 3;
-  const cx1 = cx0 + 5;
-  const top = ridge + 7;
+  // Chimney near the back of the side slope, well away from the ridge ends.
+  const cx0 = s.chimney ?? half + 5;
+  const cx1 = cx0 + 4;
+  const cy0 = 4;
+  const cy1 = 8;
+  const top = z(cx0) + 6;
   return (
     <>
       {/* Left slope (faces away; only its front overhang shows). */}
@@ -495,29 +464,18 @@ function Cottage({ s, P, face }: { s: Shape; P: (pts: Pt[]) => string; face: str
       {/* Walls: front with the gable, side. */}
       <polygon className={face} points={P([[0, d, 0], [w, d, 0], [w, d, h], [half, d, ridge], [0, d, h]])} />
       <polygon className={face} points={P([[w, 0, 0], [w, d, 0], [w, d, h], [w, 0, h]])} />
-      <polyline className="fill-none stroke-[var(--panel-edge-faint)]" points={P([[0, d, 3], [w, d, 3], [w, 0, 3]])} />
-      {/* Entrance on the side: door, porch floor, steps, pillars, canopy. */}
-      <polygon className={face} points={P([[w, 9, 2], [w, 16, 2], [w, 16, 14], [w, 9, 14]])} />
-      {box(w, w + 5, 6, 19, 0, 2, "floor")}
-      {box(w + 5, w + 7, 8, 17, 0, 1.3, "st1")}
-      {box(w + 7, w + 9, 8, 17, 0, 0.6, "st2")}
-      {box(w + 3.6, w + 4.8, 6.4, 7.6, 2, 15, "p1")}
-      {box(w + 3.6, w + 4.8, 17.4, 18.6, 2, 15, "p2")}
-      {box(w, w + 5.5, 5.5, 19.5, 15, 16.2, "canopy")}
-      {s.windows.map(sill)}
-      {s.windows.map(awning)}
+      {/* Entrance on the side: door and one step. */}
+      <polygon className={face} points={P([[w, dy0, 0], [w, dy1, 0], [w, dy1, 12], [w, dy0, 12]])} />
+      <polygon className={face} points={P([[w, dy0 - 1, 1.2], [w + 3, dy0 - 1, 1.2], [w + 3, dy1 + 1, 1.2], [w, dy1 + 1, 1.2]])} />
+      <polygon className={face} points={P([[w + 3, dy0 - 1, 0], [w + 3, dy1 + 1, 0], [w + 3, dy1 + 1, 1.2], [w + 3, dy0 - 1, 1.2]])} />
+      <polygon className={face} points={P([[w, dy1 + 1, 0], [w + 3, dy1 + 1, 0], [w + 3, dy1 + 1, 1.2], [w, dy1 + 1, 1.2]])} />
       {/* Side slope with eave overhang. */}
       <polygon className={face} points={P([[w + e, -e, ze], [w + e, d + e, ze], [half, d + e, ridge], [half, -e, ridge]])} />
       {snow && <CottageSnow s={s} P={P} />}
       {/* Chimney: bottom follows the slope. */}
-      <polygon className={face} points={P([[cx0, 11, z(cx0)], [cx1, 11, z(cx1)], [cx1, 11, top], [cx0, 11, top]])} />
-      <polygon className={face} points={P([[cx1, 6, z(cx1)], [cx1, 11, z(cx1)], [cx1, 11, top], [cx1, 6, top]])} />
-      <polygon className={face} points={P([[cx0 - 0.6, 5.4, top], [cx1 + 0.6, 5.4, top], [cx1 + 0.6, 11.6, top], [cx0 - 0.6, 11.6, top]])} />
-      {/* Dormer. */}
-      <polygon className={face} points={P([[xd, y0, zw], [xd, yc, zp], [xr, yc, zp], [xb, y0, zw]])} />
-      <polygon className={face} points={P([[xd, y1, zb], [xd, y1, zw], [xb, y1, zw]])} />
-      <polygon className={face} points={P([[xd, y0, zb], [xd, y1, zb], [xd, y1, zw], [xd, yc, zp], [xd, y0, zw]])} />
-      <polygon className={face} points={P([[xd, y1, zw], [xd, yc, zp], [xr, yc, zp], [xb, y1, zw]])} />
+      <polygon className={face} points={P([[cx0, cy1, z(cx0)], [cx1, cy1, z(cx1)], [cx1, cy1, top], [cx0, cy1, top]])} />
+      <polygon className={face} points={P([[cx1, cy0, z(cx1)], [cx1, cy1, z(cx1)], [cx1, cy1, top], [cx1, cy0, top]])} />
+      <polygon className={face} points={P([[cx0, cy0, top], [cx1, cy0, top], [cx1, cy1, top], [cx0, cy1, top]])} />
       {/* Barge boards on the front gable and fascia along the side eave. */}
       <polygon className={face} points={P([[-e, d + e, ze], [half, d + e, ridge], [half, d + e, ridge - t], [-e, d + e, ze - t]])} />
       <polygon className={face} points={P([[half, d + e, ridge], [w + e, d + e, ze], [w + e, d + e, ze - t], [half, d + e, ridge - t]])} />

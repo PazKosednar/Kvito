@@ -31,7 +31,7 @@ describe.skipIf(!hasDb)("pavšal, monthly costs and credit", () => {
     landlord = await ctx.login(uniqueEmail("ll"), "Tomaž Test");
     gaja = await ctx.login(uniqueEmail("gaja"), "Gaja Test");
     stranger = await ctx.login(uniqueEmail("x"), "Tujec");
-    const propertyId = (await landlord.post("/api/properties", { name: "Maistrova", street: "Maistrova 26", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property.id;
+    const propertyId = (await landlord.post("/api/properties", { type: "MULTI_UNIT_HOUSE", name: "Maistrova", street: "Maistrova 26", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property.id;
     const unit = (await landlord.post(`/api/properties/${propertyId}/units`, { name: "Stanovanje" }).expect(201)).body.unit;
     const created = (
       await landlord

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { Field, TextInput } from "@/components/form";
-import { ErrorState, FormError, List, LoadingState, PageHeader, Section } from "@/components/layout-parts";
+import { ErrorState, Facts, FormError, List, LoadingState, PageHeader, Section } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,8 @@ import { formatCents } from "@/lib/money";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useProperty } from "@/hooks/useProperties";
 import { TenancyStatusLabel, tenantNames } from "@/features/tenancies/tenancy-ui";
-import type { Unit } from "@/types/domain";
+import { isSingleUnit, type Property, type Unit } from "@/types/domain";
+import { useBasicsItems } from "./details-ui";
 
 export function PropertyPage() {
   const { id } = useParams();
@@ -54,44 +55,87 @@ export function PropertyPage() {
         }
       />
 
-      <PropertySummary units={property.units} />
+      {isSingleUnit(property.type) && property.units.length === 1 ? (
+        <WholeProperty property={property} unit={property.units[0]!} />
+      ) : (
+        <>
+          <PropertySummary units={property.units} />
 
-      <Section
-        title={t("units.title")}
-        action={
-          !adding && property.units.length > 0 ? (
-            <Button variant="ghost" onClick={() => setAdding(true)}>
-              <Plus />
-              {t("units.add")}
-            </Button>
-          ) : undefined
-        }
-      >
-        {property.units.length === 0 && !adding && (
-          <div className="rounded-md border border-dashed p-5">
-            <p className="font-semibold">{t("units.emptyTitle")}</p>
-            <p className="mt-1 text-muted-foreground">{t("units.emptyBody")}</p>
-            <Button className="mt-4" onClick={() => setAdding(true)}>
-              <Plus />
-              {t("units.addFirst")}
-            </Button>
-          </div>
-        )}
-        {adding && <AddUnitForm onAdd={addUnit} onDone={() => setAdding(false)} />}
-        {property.units.length > 0 && (
-          <List className={adding ? "mt-4" : undefined}>
-            {property.units.map((unit) => (
-              <UnitRow key={unit.id} unit={unit} onRemove={() => removeUnit(unit.id)} />
-            ))}
-          </List>
-        )}
-      </Section>
+          <Section
+            title={t("units.title")}
+            action={
+              !adding && property.units.length > 0 && !isSingleUnit(property.type) ? (
+                <Button variant="ghost" onClick={() => setAdding(true)}>
+                  <Plus />
+                  {t("units.add")}
+                </Button>
+              ) : undefined
+            }
+          >
+            {property.units.length === 0 && !adding && (
+              <div className="rounded-md border border-dashed p-5">
+                <p className="font-semibold">{t("units.emptyTitle")}</p>
+                <p className="mt-1 text-muted-foreground">{t("units.emptyBody")}</p>
+                <Button className="mt-4" onClick={() => setAdding(true)}>
+                  <Plus />
+                  {t("units.addFirst")}
+                </Button>
+              </div>
+            )}
+            {adding && <AddUnitForm onAdd={addUnit} onDone={() => setAdding(false)} />}
+            {property.units.length > 0 && (
+              <List className={adding ? "mt-4" : undefined}>
+                {property.units.map((unit) => (
+                  <UnitRow key={unit.id} unit={unit} onRemove={() => removeUnit(unit.id)} />
+                ))}
+              </List>
+            )}
+          </Section>
+        </>
+      )}
 
       <Section>
         <Button variant="ghost" className="text-danger hover:text-destructive" onClick={() => void removeProperty()}>
           <Trash2 />
           {t("properties.delete")}
         </Button>
+      </Section>
+    </>
+  );
+}
+
+/** A house, apartment or commercial space let as a whole: its tenancy and its details, without "units". */
+function WholeProperty({ property, unit }: { property: Property; unit: Unit }) {
+  const { t } = useTranslation();
+  const facts = [...useBasicsItems(unit), ...(property.yearBuilt ? [{ label: t("properties.yearBuilt"), value: String(property.yearBuilt) }] : [])];
+  return (
+    <>
+      <Section title={t("properties.tenancyTitle")}>
+        <List>
+          <UnitRow unit={unit} whole />
+        </List>
+      </Section>
+      <Section
+        title={t("properties.aboutTitle")}
+        action={
+          <Button asChild variant="ghost">
+            <Link to={`/enote/${unit.id}/uredi`}>
+              <Pencil />
+              {t("common.edit")}
+            </Link>
+          </Button>
+        }
+      >
+        {facts.length ? (
+          <Facts items={facts} />
+        ) : (
+          <Link
+            to={`/enote/${unit.id}/uredi`}
+            className="block rounded-md border border-dashed border-line-strong px-4 py-4 text-ink-muted transition-colors duration-150 hover:border-ink hover:text-ink"
+          >
+            {t("unitDetails.emptyBasics")}
+          </Link>
+        )}
       </Section>
     </>
   );
@@ -122,7 +166,7 @@ function PropertySummary({ units }: { units: Unit[] }) {
   );
 }
 
-function UnitRow({ unit, onRemove }: { unit: Unit; onRemove: () => Promise<void> }) {
+function UnitRow({ unit, onRemove, whole = false }: { unit: Unit; onRemove?: () => Promise<void>; whole?: boolean }) {
   const { t } = useTranslation();
   const toMessage = useErrorMessage();
   const tenancy = currentTenancy(unit);
@@ -134,7 +178,7 @@ function UnitRow({ unit, onRemove }: { unit: Unit; onRemove: () => Promise<void>
         <Link to={`/najemi/${tenancy.id}`} className="group flex min-h-16 min-w-0 flex-1 items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-sunken">
           <DoorOpen className="size-5 shrink-0 text-primary" aria-hidden="true" />
           <span className="min-w-0 flex-1">
-            <span className="block truncate font-medium">{unit.name}</span>
+            <span className="block truncate font-medium">{whole ? t("properties.tenancy") : unit.name}</span>
             <span className="mt-0.5 block text-sm text-muted-foreground">{names || t("tenancies.waitingForTenant")}</span>
           </span>
           <span className="flex items-center gap-5">
@@ -146,13 +190,13 @@ function UnitRow({ unit, onRemove }: { unit: Unit; onRemove: () => Promise<void>
           </span>
           <ArrowRight className="size-4 shrink-0 text-ink-faint transition-colors duration-150 group-hover:text-primary" aria-hidden="true" />
         </Link>
-        <UnitDetailsLink unit={unit} />
+        <UnitDetailsLink unit={unit} whole={whole} />
       </li>
     );
   }
 
   const remove = async () => {
-    if (!(await askConfirm(t("units.confirmDelete", { name: unit.name }), { confirmLabel: t("units.delete") }))) return;
+    if (!onRemove || !(await askConfirm(t("units.confirmDelete", { name: unit.name }), { confirmLabel: t("units.delete") }))) return;
     try {
       await onRemove();
     } catch (err) {
@@ -164,35 +208,38 @@ function UnitRow({ unit, onRemove }: { unit: Unit; onRemove: () => Promise<void>
     <li className="flex min-h-16 items-center gap-3 px-4 py-3">
       <DoorOpen className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-semibold">{unit.name}</span>
-        <span className="block text-sm text-muted-foreground">{t("units.vacant")}</span>
+        <span className="block truncate font-semibold">{whole ? t("properties.vacant") : unit.name}</span>
+        <span className="block text-sm text-muted-foreground">{whole ? t("properties.vacantHint") : t("units.vacant")}</span>
       </span>
       <Button asChild size="sm">
         <Link to={`/enote/${unit.id}/najem`}>{t("tenancies.create")}</Link>
       </Button>
-      <Button variant="ghost" size="icon" aria-label={t("units.delete")} onClick={() => void remove()}>
-        <Trash2 />
-      </Button>
-      <UnitDetailsLink unit={unit} className="-my-3 -mr-4" />
+      {onRemove && (
+        <Button variant="ghost" size="icon" aria-label={t("units.delete")} onClick={() => void remove()}>
+          <Trash2 />
+        </Button>
+      )}
+      <UnitDetailsLink unit={unit} whole={whole} className="-my-3 -mr-4" />
     </li>
   );
 }
 
 /** Separate door to the unit's own page (details, metering points, keys, photos), next to the tenancy link. */
-function UnitDetailsLink({ unit, className }: { unit: Unit; className?: string }) {
+function UnitDetailsLink({ unit, className, whole = false }: { unit: Unit; className?: string; whole?: boolean }) {
   const { t } = useTranslation();
+  const label = whole ? t("properties.details") : t("unitDetails.open");
   return (
     <Link
       to={`/enote/${unit.id}`}
-      aria-label={`${t("unitDetails.open")}: ${unit.name}`}
-      title={t("unitDetails.open")}
+      aria-label={whole ? label : `${label}: ${unit.name}`}
+      title={label}
       className={cn(
         "flex shrink-0 items-center gap-2 self-stretch border-l border-line px-4 text-sm text-ink-muted transition-colors duration-150 hover:bg-surface-sunken hover:text-ink",
         className,
       )}
     >
       <Ruler className="size-4" aria-hidden="true" />
-      <span className="hidden md:inline">{t("unitDetails.open")}</span>
+      <span className="hidden md:inline">{label}</span>
     </Link>
   );
 }

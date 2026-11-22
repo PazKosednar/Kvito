@@ -46,7 +46,7 @@ describe.skipIf(!hasDb)("forecast, yearly summary and renting history", () => {
     landlord = await ctx.login(uniqueEmail("ll"), "Tomaž Test");
     tina = await ctx.login(uniqueEmail("tina"), "Tina Test");
     stranger = await ctx.login(uniqueEmail("x"), "Tujec");
-    const propertyId = (await landlord.post("/api/properties", { name: "Maistrova", street: "Maistrova 26", postalCode: "2000", city: "Maribor" }).expect(201)).body.property.id;
+    const propertyId = (await landlord.post("/api/properties", { type: "MULTI_UNIT_HOUSE", name: "Maistrova", street: "Maistrova 26", postalCode: "2000", city: "Maribor" }).expect(201)).body.property.id;
     const unit = (await landlord.post(`/api/properties/${propertyId}/units`, { name: "Stanovanje" }).expect(201)).body.unit;
     tenancyId = (
       await landlord

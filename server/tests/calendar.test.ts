@@ -16,7 +16,7 @@ describe.skipIf(!hasDb)("calendar", () => {
 
   it("lists deadlines and serves them as a private .ics feed only to whoever has the link", async () => {
     const l = await ctx.login(uniqueEmail("cal"));
-    const property = (await l.post("/api/properties", { type: "HOUSE", name: "Hiša Koledar", street: "Ulica 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property;
+    const property = (await l.post("/api/properties", { type: "MULTI_UNIT_HOUSE", name: "Hiša Koledar", street: "Ulica 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property;
     const unit = (await l.post(`/api/properties/${property.id}/units`, { name: "Stanovanje 1" }).expect(201)).body.unit;
     const year = new Date().getUTCFullYear() + 1;
     const tenancy = (

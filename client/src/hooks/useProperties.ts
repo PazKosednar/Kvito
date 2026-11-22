@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { api } from "@/lib/api";
-import type { Property, PropertyType, Unit } from "@/types/domain";
+import type { Property, PropertyType, Unit, UnitDetails } from "@/types/domain";
 import { invalidate, useQuery } from "./useQuery";
 
 export interface PropertyInput {
@@ -10,6 +10,9 @@ export interface PropertyInput {
   postalCode: string;
   city: string;
   notes?: string | null;
+  yearBuilt?: number | null;
+  /** Details of the whole property (house, apartment, commercial space), only when it is created. */
+  unit?: Partial<Pick<UnitDetails, "areaM2" | "layout" | "hasParking" | "hasStorage" | "hasBalcony">> & { name?: string };
 }
 
 export interface UnitInput {

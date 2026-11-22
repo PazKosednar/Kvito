@@ -17,7 +17,7 @@ describe.skipIf(!hasDb)("overview, exports and privacy", () => {
     landlord = await ctx.login(uniqueEmail("ll"), "Mojca Test");
     ana = await ctx.login(uniqueEmail("ana"), "Ana Test");
     stranger = await ctx.login(uniqueEmail("x"), "Tujec");
-    const property = (await landlord.post("/api/properties", { name: "Hiša", street: "Cesta 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property;
+    const property = (await landlord.post("/api/properties", { type: "MULTI_UNIT_HOUSE", name: "Hiša", street: "Cesta 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property;
     const unit = (await landlord.post(`/api/properties/${property.id}/units`, { name: "Enota 1" }).expect(201)).body.unit;
     tenancyId = (
       await landlord

@@ -32,7 +32,7 @@ describe.skipIf(!hasDb)("notifications and reminders", () => {
     ctx = await setupApp();
     landlord = await ctx.login(uniqueEmail("ll"), "Mojca Test");
     luka = await ctx.login(uniqueEmail("luka"), "Luka Test");
-    const property = (await landlord.post("/api/properties", { name: "Hiša", street: "Cesta 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property;
+    const property = (await landlord.post("/api/properties", { type: "MULTI_UNIT_HOUSE", name: "Hiša", street: "Cesta 1", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property;
     const unit = (await landlord.post(`/api/properties/${property.id}/units`, { name: "Enota" }).expect(201)).body.unit;
     tenancyId = (
       await landlord

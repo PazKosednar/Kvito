@@ -25,7 +25,7 @@ describe.skipIf(!hasDb)("charges flow", () => {
     nina = await ctx.login(uniqueEmail("nina"), "Nina Test");
     stranger = await ctx.login(uniqueEmail("x"), "Tujec");
 
-    const property = (await landlord.post("/api/properties", { name: "Blok", street: "Cesta 5", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property;
+    const property = (await landlord.post("/api/properties", { type: "MULTI_UNIT_HOUSE", name: "Blok", street: "Cesta 5", postalCode: "1000", city: "Ljubljana" }).expect(201)).body.property;
     const unit = (await landlord.post(`/api/properties/${property.id}/units`, { name: "Stanovanje 2" }).expect(201)).body.unit;
     tenancyId = (
       await landlord

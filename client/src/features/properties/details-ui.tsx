@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Segmented } from "@/components/form";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { apiUrl } from "@/lib/api";
 import { formatDate } from "@/lib/dates";
@@ -141,3 +142,33 @@ export function useBasicsItems(unit: Pick<UnitDetails, "areaM2" | "layout" | "fu
   return items;
 }
 
+
+/** Yes / no / not filled in (null), e.g. parking, balcony. */
+export type Tri = "" | "yes" | "no";
+export const toTri = (v: boolean | null | undefined): Tri => (v === null || v === undefined ? "" : v ? "yes" : "no");
+export const fromTri = (v: Tri): boolean | null => (v === "" ? null : v === "yes");
+
+export function TriField({ label, value, onChange, yes, no }: { label: string; value: Tri; onChange: (v: Tri) => void; yes?: string; no?: string }) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-sm font-semibold">{label}</span>
+      <Segmented<Tri>
+        label={label}
+        value={value}
+        onChange={onChange}
+        options={[
+          { value: "", label: "–" },
+          { value: "yes", label: yes ?? t("unitDetails.yes") },
+          { value: "no", label: no ?? t("unitDetails.no") },
+        ]}
+      />
+    </div>
+  );
+}
+
+/** "54,5" or "54.5" → 54.5; empty or not a number → null. */
+export const parseDecimal = (v: string): number | null => {
+  const n = Number(v.trim().replace(",", "."));
+  return v.trim() && Number.isFinite(n) ? n : null;
+};

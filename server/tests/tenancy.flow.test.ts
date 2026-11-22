@@ -25,7 +25,7 @@ describe.skipIf(!hasDb)("tenancy flow", () => {
 
   it("creates a property and becomes a landlord", async () => {
     const res = await landlord
-      .post("/api/properties", { name: "Testna hiša", street: "Testna 1", postalCode: "1000", city: "Ljubljana" })
+      .post("/api/properties", { type: "MULTI_UNIT_HOUSE", name: "Testna hiša", street: "Testna 1", postalCode: "1000", city: "Ljubljana" })
       .expect(201);
     propertyId = res.body.property.id;
     const me = await landlord.get("/api/me").expect(200);
@@ -33,7 +33,7 @@ describe.skipIf(!hasDb)("tenancy flow", () => {
   });
 
   it("validates input", async () => {
-    const res = await landlord.post("/api/properties", { name: "", street: "x", postalCode: "10", city: "x" }).expect(400);
+    const res = await landlord.post("/api/properties", { type: "MULTI_UNIT_HOUSE", name: "", street: "x", postalCode: "10", city: "x" }).expect(400);
     expect(res.body.error.code).toBe("VALIDATION_ERROR");
   });
 

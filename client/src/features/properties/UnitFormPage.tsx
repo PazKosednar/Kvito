@@ -3,23 +3,16 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
-import { Field, Segmented, Select, TextInput } from "@/components/form";
+import { Field, Select, TextInput } from "@/components/form";
 import { ErrorState, FormError, LoadingState, PageHeader } from "@/components/layout-parts";
 import { Button } from "@/components/ui/button";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useUnit } from "@/hooks/useUnit";
 import { toDateInput } from "@/lib/dates";
+import { fromTri, parseDecimal, toTri, TriField, type Tri } from "./details-ui";
 import { ENERGY_CLASSES, UNIT_LAYOUTS, type EnergyClass, type Furnishing, type UnitLayout } from "@/types/domain";
 
-type Tri = "" | "yes" | "no";
-const toTri = (v: boolean | null): Tri => (v === null ? "" : v ? "yes" : "no");
-const fromTri = (v: Tri) => (v === "" ? null : v === "yes");
-/** "54,5" or "54.5" → 54.5; empty → null. */
-const decimal = (v: string) => {
-  const n = Number(v.trim().replace(",", "."));
-  return v.trim() && Number.isFinite(n) ? n : null;
-};
 const decimalToInput = (n: number | null) => (n === null ? "" : String(n).replace(".", ","));
 
 /** Name, basics and official details of one unit. All but the name are optional. */
@@ -64,7 +57,7 @@ export function UnitFormPage() {
     await update({
       name: name.trim(),
       floor: floor.trim() || null,
-      areaM2: decimal(area),
+      areaM2: parseDecimal(area),
       layout: layout || null,
       furnishing: furnishing || null,
       hasParking: fromTri(parking),
@@ -82,20 +75,8 @@ export function UnitFormPage() {
   if (loading) return <LoadingState />;
   if (error || !unit) return <ErrorState message={toMessage(error)} onRetry={() => void reload()} />;
 
-  const tri = (label: string, value: Tri, set: (v: Tri) => void, yes = t("unitDetails.yes"), no = t("unitDetails.no")) => (
-    <div className="flex flex-col gap-2">
-      <span className="text-sm font-semibold">{label}</span>
-      <Segmented<Tri>
-        label={label}
-        value={value}
-        onChange={set}
-        options={[
-          { value: "", label: "–" },
-          { value: "yes", label: yes },
-          { value: "no", label: no },
-        ]}
-      />
-    </div>
+  const tri = (label: string, value: Tri, set: (v: Tri) => void, yes?: string, no?: string) => (
+    <TriField label={label} value={value} onChange={set} {...(yes ? { yes } : {})} {...(no ? { no } : {})} />
   );
 
   return (
