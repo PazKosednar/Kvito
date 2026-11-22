@@ -27,19 +27,23 @@ Plačila so vklopljena samo, ko so nastavljeni žeton, skrivnost webhooka in vse
 
 | Paket | Mesečno | Letno |
 |---|---|---|
-| Plus | `9d2b312c-ef7a-4e9c-a7f5-03e7754a352f` (4,99 €) | `f84e4de7-2aa6-461a-8b7e-e2b7687eb8e7` (49,90 €) |
-| Pro | `b6011973-a7af-4329-be20-ecb3d97c17c9` (11,99 €) | `98aa110c-99a0-461d-952e-3169bfc78ef4` (119,90 €) |
-| Upravnik | `f34ebe91-78a1-4654-b158-a5f0c16514b1` (27,99 €) | `67873bf3-86b9-4070-a1e6-9d3f0a674169` (279,90 €) |
+| Plus | `9d2b312c-ef7a-4e9c-a7f5-03e7754a352f` (4,99 €) | `e2f5edb8-98cc-489a-8193-75313a7f7110` (49,90 €) |
+| Pro | `b6011973-a7af-4329-be20-ecb3d97c17c9` (11,99 €) | `d4c7baa3-7512-4e4f-9ed3-f860c4ed64e6` (119,90 €) |
+| Upravnik | `f34ebe91-78a1-4654-b158-a5f0c16514b1` (27,99 €) | `6ece1d6b-e899-457c-a11d-035bf99bc09b` (279,90 €) |
 
-Webhook endpoint: **še ni registriran** (glej spodaj).
+Vsak izdelek ima samo ceno v EUR in metadata `plan` + `interval`. Popusta: `NEW30` (−30 %, once, koda na strani za plačilo) in »Ustanovna cena −30 %« (forever, brez kode, `aa3d496a-cce8-4382-9d77-83dbc9d25770` = `POLAR_FOUNDER_DISCOUNT_ID`).
 
-## Popravi v nadzorni plošči Polar (polar.sh/dashboard/kvito) – najdeno 22. 11. 2026
+### Popravljeno 22. 11. 2026 (prek API-ja)
 
-1. **Letni izdelki se obračunavajo mesečno.** Pri »Kvito Plus – letno«, »Kvito Pro – letno« in »Kvito Upravnik – letno« nastavi obračunsko obdobje na **leto** (zdaj je mesec – letna cena bi se zaračunala vsak mesec).
-2. **Cena 0 USD.** Vsak izdelek ima poleg cene v EUR še ceno **0 USD**. V Settings nastavi privzeto valuto organizacije na **EUR** in pri vseh 6 izdelkih odstrani ceno v USD. (Koda pri checkoutu že zahteva `currency: "eur"`, a cena 0 ne sme ostati.)
-3. **Metadata** pri »Kvito Upravnik – mesečno«: ključ `interva` popravi v `interval` (vrednost `month`).
-4. **Davek**: cene so končne (z DDV) – nastavi davčno obnašanje na *inclusive*. `TODO(preveri)` z računovodjo.
-5. **Organizacija** ima status `created`: oddaj podatke podjetja in račun za izplačila, sicer plačila ne delujejo. `TODO(preveri)`: registracija dejavnosti (NAROCNINA.md, točka 6).
+- Organizacija: privzeta valuta **EUR**, davek **inclusive** (cene so končne). `TODO(preveri)` z računovodjo.
+- Mesečni izdelki: odstranjena cena 0 USD, popravljen metadata (`interva` → `interval`).
+- Letni izdelki so imeli obračun **mesečno**, česar Polar ne dovoli spremeniti: ustvarjeni so novi letni izdelki (zgoraj), stari trije so arhivirani (`f84e4de7…`, `98aa110c…`, `67873bf3…`).
+- Ustvarjen ustanovni popust.
+
+### Odprto v Polarju
+
+- **Organizacija ima status `created`**: oddaj podatke podjetja in račun za izplačila, sicer plačila ne delujejo. `TODO(preveri)`: registracija dejavnosti (NAROCNINA.md, točka 6).
+- **Rotiraj dostopni žeton** (bil je poslan v klepet) in nov vpiši v `server/.env` in na Railway.
 
 ## Webhook
 
@@ -53,7 +57,7 @@ Skrivnost (`whsec_…`) vpiši v Railway kot `POLAR_WEBHOOK_SECRET` (in lokalno 
 
 ## Preveri pred vklopom
 
-- [ ] Točke 1–5 zgoraj so popravljene.
+- [ ] Organizacija v Polarju je odobrena za plačila; žeton je rotiran.
 - [ ] Koda je na Railway (push na `main`), migracija `subscription_provider_updated_at` je uveljavljena.
 - [ ] Na Railway so nastavljene vse spremenljivke `POLAR_*` (`POLAR_SERVER=production`).
 - [ ] Webhook je registriran; v Polar → Webhooks → Deliveries je odgovor 202.
