@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Billing } from "@/hooks/useBilling";
-import { applyPromo, isPromoEligible, promoPrices } from "./promo";
+import { applyPromo, isPromoEligible, parsePromoSeen, promoClosed, promoDue, promoPrices } from "./promo";
 
 const billing = (over: Partial<Billing> = {}): Billing => ({
   plan: "FREE",
@@ -45,5 +45,35 @@ describe("promo NEW30", () => {
     expect(isPromoEligible(billing({ checkoutEnabled: false }))).toBe(false);
     // A trial of a paid plan still counts: the landlord has not paid yet.
     expect(isPromoEligible(billing({ plan: "PLUS", trialEndsAt: "2026-12-22T00:00:00.000Z" }))).toBe(true);
+  });
+});
+
+describe("promo popup repeats", () => {
+  const DAY = 24 * 60 * 60 * 1000;
+  const promo = { code: "NEW30", repeatAfterDays: 7, maxShows: 3 };
+  const t0 = Date.UTC(2026, 10, 22);
+
+  it("shows the first time and again 7 days after each close, at most 3 times", () => {
+    expect(promoDue(null, t0, promo)).toBe(true);
+    let seen = promoClosed(null, t0, "NEW30");
+    expect(promoDue(seen, t0 + 6 * DAY, promo)).toBe(false);
+    expect(promoDue(seen, t0 + 7 * DAY, promo)).toBe(true);
+    seen = promoClosed(seen, t0 + 7 * DAY, "NEW30");
+    expect(promoDue(seen, t0 + 14 * DAY, promo)).toBe(true);
+    seen = promoClosed(seen, t0 + 14 * DAY, "NEW30");
+    expect(seen.count).toBe(3);
+    expect(promoDue(seen, t0 + 100 * DAY, promo)).toBe(false);
+  });
+
+  it("a new code starts over", () => {
+    const seen = { code: "OLD", count: 3, at: t0 };
+    expect(promoDue(seen, t0, promo)).toBe(true);
+    expect(promoClosed(seen, t0, "NEW30").count).toBe(1);
+  });
+
+  it("reads the old stored format (just the code) as one close long ago", () => {
+    expect(parsePromoSeen("NEW30")).toEqual({ code: "NEW30", count: 1, at: 0 });
+    expect(parsePromoSeen(null)).toBeNull();
+    expect(promoDue(parsePromoSeen("NEW30"), t0, promo)).toBe(true);
   });
 });

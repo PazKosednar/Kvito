@@ -11,6 +11,39 @@ export interface PromoPrice {
   discountedYearlyCents: number;
 }
 
+/** What the device remembers about the popup: for which code, how many times it was closed and when last. */
+export interface PromoSeen {
+  code: string;
+  count: number;
+  /** Epoch ms of the last close. */
+  at: number;
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Reads the stored value; the old format (just the code) counts as closed once, long ago. */
+export function parsePromoSeen(raw: string | null): PromoSeen | null {
+  if (!raw) return null;
+  try {
+    const v = JSON.parse(raw) as Partial<PromoSeen>;
+    if (typeof v.code === "string" && typeof v.count === "number" && typeof v.at === "number") return { code: v.code, count: v.count, at: v.at };
+  } catch {
+    /* old format */
+  }
+  return { code: raw, count: 1, at: 0 };
+}
+
+/** Show again after `repeatAfterDays`, at most `maxShows` times; a new code starts over. */
+export function promoDue(seen: PromoSeen | null, now: number, promo: { code: string; repeatAfterDays: number; maxShows: number } = PROMO): boolean {
+  if (!seen || seen.code !== promo.code) return true;
+  return seen.count < promo.maxShows && now - seen.at >= promo.repeatAfterDays * DAY_MS;
+}
+
+/** The value to store after the popup was closed. */
+export function promoClosed(seen: PromoSeen | null, now: number, code: string = PROMO.code): PromoSeen {
+  return { code, count: seen?.code === code ? seen.count + 1 : 1, at: now };
+}
+
 /** Polar rounds a percentage discount to whole cents. */
 export const applyPromo = (cents: number, percent: number = PROMO.percent) => Math.round((cents * (100 - percent)) / 100);
 

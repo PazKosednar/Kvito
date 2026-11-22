@@ -14,15 +14,25 @@ export const STORAGE_KEYS = {
   townSeason: "kvita-town-season",
   locale: "kvita-locale",
   iosHintDismissed: "kvita-ios-hint-dismissed",
-  /** Holds the promo code whose popup was closed; a new code shows the popup again. */
-  promoDismissed: "kvita-promo-dismissed",
+  /**
+   * Promo popup closes: JSON { code, count, at } (lib/promo); a new code shows the popup again.
+   * Renaming the key resets the popup for everyone (v2: reset on 22. 11. 2026).
+   */
+  promoDismissed: "kvita-promo-seen-v2",
 } as const;
 
 /**
  * Promo code for new landlords. It lives in Polar as a discount "NEW30" (−30 %, duration "once");
  * the landlord types it on Polar's payment page (docs/POLAR_SETUP.md). Keep both in sync.
  */
-export const PROMO = { code: "NEW30", percent: 30 } as const;
+export const PROMO = {
+  code: "NEW30",
+  percent: 30,
+  /** The popup comes back this many days after it was closed (while the landlord still has no subscription)… */
+  repeatAfterDays: 7,
+  /** …but is shown at most this many times per device. */
+  maxShows: 3,
+} as const;
 
 export const ROUTES = {
   home: "/",
