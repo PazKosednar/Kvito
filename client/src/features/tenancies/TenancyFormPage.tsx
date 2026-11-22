@@ -48,7 +48,7 @@ function TenancyForm({ existing }: { existing: TenancyDetail | undefined }) {
   const fieldError = (k: keyof typeof v) => errors[k] ?? save.fieldErrors[k];
 
   return (
-    <>
+    <div className="mx-auto max-w-2xl">
       <PageHeader
         back={existing ? `/najemi/${existing.id}` : undefined}
         title={existing ? t("tenancies.editTitle") : t("tenancies.newTitle")}
@@ -178,6 +178,6 @@ function TenancyForm({ existing }: { existing: TenancyDetail | undefined }) {
           </Button>
         </div>
       </form>
-    </>
+    </div>
   );
 }

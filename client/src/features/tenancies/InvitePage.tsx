@@ -33,7 +33,7 @@ export function InvitePage() {
   const pending = (invitations ?? []).filter((i) => i.state === "PENDING");
 
   return (
-    <>
+    <div className="mx-auto max-w-2xl">
       <PageHeader
         back={`/najemi/${tenancy.id}`}
         title={t("invite.title")}
@@ -84,7 +84,7 @@ export function InvitePage() {
           </List>
         </Section>
       )}
-    </>
+    </div>
   );
 }
 

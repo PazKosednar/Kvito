@@ -97,7 +97,7 @@ export function ExpenseFormPage() {
   if (editing && (existing.error || !e)) return <ErrorState message={toMessage(existing.error)} onRetry={() => void existing.reload()} />;
 
   return (
-    <>
+    <div className="mx-auto max-w-2xl">
       <PageHeader back={ROUTES.taxes} eyebrow={t("taxes.eyebrow")} title={t(editing ? "expense.editTitle" : "expense.newTitle")} />
       <form
         className="flex max-w-2xl flex-col gap-5"
@@ -217,6 +217,6 @@ export function ExpenseFormPage() {
           </div>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 }

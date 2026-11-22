@@ -29,7 +29,7 @@ export function IssueFormPage() {
   });
 
   return (
-    <>
+    <div className="mx-auto max-w-2xl">
       <PageHeader back={`/najemi/${tenancy.id}/okvare`} title={t("issues.newTitle")} subtitle={t("issues.newSubtitle")} />
       <form
         className="flex max-w-2xl flex-col gap-6"
@@ -84,6 +84,6 @@ export function IssueFormPage() {
           {t("issues.submit")}
         </Button>
       </form>
-    </>
+    </div>
   );
 }

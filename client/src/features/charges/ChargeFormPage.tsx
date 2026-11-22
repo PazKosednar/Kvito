@@ -60,7 +60,7 @@ function ChargeForm() {
   const costOptions = [...tenancy.coveredCosts, ...COST_TYPES.filter((c) => !tenancy.coveredCosts.includes(c))];
 
   return (
-    <>
+    <div className="mx-auto max-w-2xl">
       <PageHeader back={`/najemi/${tenancy.id}`} title={t("charges.newTitle")} subtitle={t("charges.newSubtitle")} />
 
       {/* Step 1: the bill itself – optional, but it saves typing. */}
@@ -176,6 +176,6 @@ function ChargeForm() {
           {t("charges.publish")}
         </Button>
       </form>
-    </>
+    </div>
   );
 }

@@ -80,7 +80,7 @@ export function UnitFormPage() {
   );
 
   return (
-    <>
+    <div className="mx-auto max-w-2xl">
       <PageHeader back={back} eyebrow={`${unit.property.name}, ${unit.name}`} title={t("unitDetails.formTitle")} subtitle={t("unitDetails.formSubtitle")} />
       <form
         className="flex max-w-2xl flex-col gap-5"
@@ -162,6 +162,6 @@ export function UnitFormPage() {
           {t("common.save")}
         </Button>
       </form>
-    </>
+    </div>
   );
 }

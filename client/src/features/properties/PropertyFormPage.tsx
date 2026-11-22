@@ -77,7 +77,7 @@ function PropertyForm({ id, initial }: { id: string | undefined; initial: Proper
   });
 
   return (
-    <>
+    <div className="mx-auto max-w-2xl">
       <PageHeader
         back={id ? `/nepremicnine/${id}` : "/"}
         title={id ? t("properties.editTitle") : t("properties.newTitle")}
@@ -171,6 +171,6 @@ function PropertyForm({ id, initial }: { id: string | undefined; initial: Proper
           {id ? t("common.save") : t("properties.create")}
         </Button>
       </form>
-    </>
+    </div>
   );
 }
