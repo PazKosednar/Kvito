@@ -60,8 +60,8 @@ Vse cene so končne cene za uporabnika. `TODO(preveri)`: obračun DDV je odvisen
 Kvito še nima registriranega podjetja. Priporočilo:
 
 1. **Najprej registracija dejavnosti** (s.p. ali d.o.o.) – `TODO(preveri)` z računovodjo: obliko, DDV status in obveznosti pri prodaji digitalnih storitev potrošnikom v EU. Brez registrirane dejavnosti plačljivih paketov ne zaženemo.
-2. **Plačilni ponudnik kot »Merchant of Record«** (ponudnik je prodajalec, obračuna in plača DDV v vseh državah EU, izda račune): **Paddle** (5 % + 0,50 $ na transakcijo, preverjeno 19. 11. 2026). Alternativi: Stripe Managed Payments, Polar. Lemon Squeezy ne priporočamo za nove projekte (po prevzemu ga nadomešča Stripe Managed Payments). Sprejemljivost za s.p. potrdi pri ponudniku.
-3. **Provizija in letno plačilo:** pri 4,99 € mesečno fiksni del (0,50 $) pomeni ~14 % provizije; pri letnih 49,90 € pa ~6 %. Zato je letno plačilo privzeto in nagrajeno z 2 mesecema.
+2. **Plačilni ponudnik: Polar** (polar.sh, »Merchant of Record« – ponudnik je prodajalec, obračuna in plača DDV v vseh državah EU, izda račune). **Odločeno 22. 11. 2026.** Primerjali smo še Paddle (5 % + 0,50 $ na transakcijo, preverjeno 19. 11. 2026) in Stripe Managed Payments. `TODO(preveri)`: provizija Polarja, sprejemljivost za s.p. in izplačila na slovenski račun potrdi pri ponudniku.
+3. **Provizija in letno plačilo:** pri fiksnem delu provizije (npr. 0,50 $) pri 4,99 € mesečno to pomeni ~14 % provizije; pri letnih 49,90 € pa ~6 %. Zato je letno plačilo privzeto in nagrajeno z 2 mesecema.
 4. Aplikacija nikoli ne prejme denarja najemnine (načelo iz CLAUDE.md ostaja) – naročnina gre izključno prek plačilnega ponudnika.
 
 ## 7. Izvedba v aplikaciji (vrstni red)
@@ -73,9 +73,34 @@ Kvito še nima registriranega podjetja. Priporočilo:
 5. Oznaka ustanovnih uporabnikov ob koncu testnega obdobja (vsi računi najemodajalcev, ustvarjeni pred datumom konca).
 6. E-pošta in obvestila: konec preizkusa, neuspešno plačilo, preseganje omejitve.
 
-Pred korakom 4 vprašaj lastnika projekta (CLAUDE.md: plačilni ponudnik).
+Pred korakom 4 vprašaj lastnika projekta (CLAUDE.md: plačilni ponudnik) – odobreno 22. 11. 2026 (Polar).
 
-**Stanje (20. 11. 2026):** koraki 1–3 so narejeni (`Subscription`, `server/src/modules/billing/plans.ts`, stran »Naročnina« v meniju računa). Omejitve se preverjajo le, ko je na strežniku `PLAN_LIMITS_ENABLED=true`; med testnim obdobjem je izklopljeno. Enote nad omejitvijo so samo za branje pri novih najemih in obveznostih; sporočila ostanejo odprta, da se najemnik in najemodajalec lahko vedno dogovorita. Koraki 4–6 čakajo na registracijo dejavnosti in izbiro plačilnega ponudnika.
+**Stanje (20. 11. 2026):** koraki 1–3 so narejeni (`Subscription`, `server/src/modules/billing/plans.ts`, stran »Naročnina« v meniju računa). Omejitve se preverjajo le, ko je na strežniku `PLAN_LIMITS_ENABLED=true`; med testnim obdobjem je izklopljeno. Enote nad omejitvijo so samo za branje pri novih najemih in obveznostih; sporočila ostanejo odprta, da se najemnik in najemodajalec lahko vedno dogovorita. Koraki 5–6 še čakajo.
+
+**Stanje (22. 11. 2026): korak 4 je narejen (Polar).**
+
+- Strežnik: `server/src/modules/billing/polar.ts` (klient, preslikava izdelkov), `webhook.ts` (preverjanje podpisa, posodobitev `Subscription`), `routes.ts` (`GET /api/billing`, `POST /api/billing/checkout`, `POST /api/billing/portal`). Webhook: `POST /api/webhooks/polar`.
+- Webhook obdela `subscription.created|active|updated|canceled|uncanceled|past_due|revoked` iz celotnega stanja naročnine. Idempotentno; dogodek, starejši od zadnjega uporabljenega (`Subscription.providerUpdatedAt`), se zavrže. Preklic ob koncu obdobja = `CANCELED` z `currentPeriodEnd` do konca plačanega obdobja – paket velja do tega datuma. Sprememba paketa se zapiše v `AuditLog`.
+- En najemodajalec = ena naročnina: kdor jo že ima, gre v portal Polar (menjava paketa, kartica, računi, preklic).
+- Stran Naročnina: stikalo Mesečno/Letno (privzeto Letno), gumb »Izberi« odpre plačilo pri Polarju, po vrnitvi (`?placilo=ok`) se paket posodobi v nekaj sekundah.
+- **Promocijska koda `NEW30`**: ustvari se v Polarju kot popust z veljavnostjo »once«; uporabnik jo vpiše na strani za plačilo (`allow_discount_codes`).
+- **Ustanovni popust** −30 % »forever«: popust v Polarju, njegov ID v `POLAR_FOUNDER_DISCOUNT_ID`; samodejno se uporabi za račune z `founder = true` (oznako nastavi korak 5).
+
+Spremenljivke okolja (strežnik, vse neobvezne; plačila so vklopljena samo, ko so nastavljeni žeton, skrivnost in vseh 6 izdelkov):
+
+| Spremenljivka | Pomen |
+|---|---|
+| `POLAR_SERVER` | `sandbox` (privzeto) ali `production` |
+| `POLAR_ACCESS_TOKEN` | Organization Access Token |
+| `POLAR_WEBHOOK_SECRET` | skrivnost webhooka (`whsec_...`) |
+| `POLAR_PRODUCT_PLUS_MONTHLY`, `POLAR_PRODUCT_PLUS_YEARLY` | ID-ja izdelkov Plus |
+| `POLAR_PRODUCT_PRO_MONTHLY`, `POLAR_PRODUCT_PRO_YEARLY` | ID-ja izdelkov Pro |
+| `POLAR_PRODUCT_MANAGER_MONTHLY`, `POLAR_PRODUCT_MANAGER_YEARLY` | ID-ja izdelkov Upravnik |
+| `POLAR_FOUNDER_DISCOUNT_ID` | popust za ustanovne uporabnike |
+
+Izdelki v Polarju imajo v metadata `plan` (PLUS, PRO, MANAGER) in `interval` (month, year); strežnik jih uporabi kot rezervo, če ID izdelka ni v okolju.
+
+`TODO(preveri)`: pravila preklica in vračil (pogodbe na daljavo, 14 dni) in DDV – potrdita pravnik in računovodja pred produkcijo.
 
 ## 8. Kaj spremljamo
 

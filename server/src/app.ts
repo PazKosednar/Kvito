@@ -36,6 +36,7 @@ import { usersRouter } from "./modules/users/routes.js";
 import type { EmailSender } from "./services/email/EmailSender.js";
 import type { Storage } from "./services/storage/Storage.js";
 import { billingRouter } from "./modules/billing/routes.js";
+import { polarWebhook } from "./modules/billing/webhook.js";
 import { calendarPublicRouter, calendarRouter } from "./modules/calendar/routes.js";
 
 export interface AppDeps {
@@ -75,6 +76,9 @@ export function createApp(deps: AppDeps): Express {
     next();
   });
   app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
+  // Polar webhook: the signature covers the raw bytes, so it comes before express.json(), the API rate limit
+  // and requireAuth. Its body is never logged.
+  app.post("/api/webhooks/polar", express.raw({ type: "application/json", limit: "1mb" }), polarWebhook);
   app.use(express.json({ limit: "100kb" }));
   app.use(cookieParser());
   if (env.NODE_ENV !== "test") {

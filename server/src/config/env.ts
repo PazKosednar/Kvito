@@ -53,6 +53,21 @@ const EnvSchema = z.object({
    * free for everyone without limits (docs/NAROCNINA.md).
    */
   PLAN_LIMITS_ENABLED: bool.default(false),
+  /**
+   * Polar (polar.sh, merchant of record) for landlords' subscriptions. Payments are on only when the token,
+   * the webhook secret and all six product IDs are set; otherwise the app works without them.
+   */
+  POLAR_SERVER: z.enum(["sandbox", "production"]).default("sandbox"),
+  POLAR_ACCESS_TOKEN: z.string().min(1).optional(),
+  POLAR_WEBHOOK_SECRET: z.string().min(1).optional(),
+  POLAR_PRODUCT_PLUS_MONTHLY: z.string().min(1).optional(),
+  POLAR_PRODUCT_PLUS_YEARLY: z.string().min(1).optional(),
+  POLAR_PRODUCT_PRO_MONTHLY: z.string().min(1).optional(),
+  POLAR_PRODUCT_PRO_YEARLY: z.string().min(1).optional(),
+  POLAR_PRODUCT_MANAGER_MONTHLY: z.string().min(1).optional(),
+  POLAR_PRODUCT_MANAGER_YEARLY: z.string().min(1).optional(),
+  /** Founding price (−30 %, forever) applied at checkout for founder accounts. */
+  POLAR_FOUNDER_DISCOUNT_ID: z.string().min(1).optional(),
   /** Kvito assistant for landlords (Claude API). Without a key the assistant is switched off. */
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
   ASSISTANT_MODEL: z.string().min(1).default("claude-haiku-5-5"),

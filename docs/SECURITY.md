@@ -14,6 +14,7 @@ Pregled: 17. 11. 2026, ponovni pregled 20. 11. 2026 (avtorizacija vseh API poti,
 - **Glave**: CSP, HSTS, `frame-ancestors 'none'`, `Permissions-Policy`, brez `X-Powered-By`.
 - **Zagon v produkciji**: strežnik se ne zažene z `CLIENT_ORIGIN` brez https ali z nadomestnim `JWT_ACCESS_SECRET`.
 - **Zasebnost**: izvoz in izbris podatkov uporabnika (vključno z lastnimi stroški najemodajalca in fotografijami nepremičnin), pravila hrambe ([RETENTION.md](RETENTION.md)), revizijska sled.
+- **Plačila (Polar)**: webhook `POST /api/webhooks/polar` sprejme samo dogodke z veljavnim podpisom (Standard Webhooks, `POLAR_WEBHOOK_SECRET`), preverja se surovo telo (`express.raw`, do 1 MB, pred `express.json`); neveljaven podpis → 403. Vsebina dogodkov se ne logira (samo vrsta dogodka in ID-ji). Dogodki so idempotentni, starejši od zadnjega uporabljenega se zavržejo. Ključi Polarja so samo na strežniku; client dobi le `checkoutEnabled`. Povezava do portala se ne shranjuje. Kvito ne vidi podatkov kartice.
 - **Dnevniki**: brez teles zahtev, brez poizvedb s podpisi, brez žetonov in piškotkov.
 
 ## Odprto – pred prvimi pravimi uporabniki

@@ -1,8 +1,9 @@
-import { Check, Info, TriangleAlert } from "lucide-react";
+import { Check, CircleCheck, Info, Loader2, TriangleAlert, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ErrorState, LoadingState, PageHeader, Section } from "@/components/layout-parts";
+import { Segmented } from "@/components/form";
 import { Button } from "@/components/ui/button";
-import { useBilling, type Billing, type PlanInfo } from "@/hooks/useBilling";
+import { useBilling, type Billing, type BillingInterval, type PaidPlan, type PlanInfo } from "@/hooks/useBilling";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { formatCents } from "@/lib/money";
 import { cn } from "@/lib/utils";
@@ -36,15 +37,66 @@ export function BillingPage() {
         </p>
       )}
 
+      {q.paid && (
+        <p role="status" className="mb-6 flex items-start gap-3 rounded-md border border-primary bg-accent-soft p-4">
+          <CircleCheck className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
+          <span className="flex-1">{t("billing.paid")}</span>
+          <button type="button" onClick={q.dismissPaid} className="text-ink-muted hover:text-ink" aria-label={t("common.close")}>
+            <X className="size-5" aria-hidden="true" />
+          </button>
+        </p>
+      )}
+
       <Usage b={b} />
 
+      {b.hasPaidSubscription && (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button variant="outline" onClick={() => void q.openPortal()} disabled={q.portalPending}>
+            {q.portalPending && <Loader2 className="animate-spin" aria-hidden="true" />}
+            {t("billing.manage")}
+          </Button>
+          <span className="text-sm text-ink-muted">{t("billing.manageHint")}</span>
+        </div>
+      )}
+
       <Section title={t("billing.plansTitle")}>
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <div className="w-full max-w-xs">
+            <Segmented<BillingInterval>
+              label={t("billing.interval")}
+              value={q.interval}
+              onChange={q.setInterval}
+              options={[
+                { value: "month", label: t("billing.monthly") },
+                { value: "year", label: t("billing.yearlyTab") },
+              ]}
+            />
+          </div>
+          <span className="rounded-xs bg-accent-soft px-1.5 py-0.5 font-mono text-xs tracking-[0.06em] text-primary uppercase">{t("billing.twoMonthsFree")}</span>
+        </div>
+        {q.actionError && (
+          <p role="alert" className="mb-4 flex items-center gap-2 text-sm text-danger">
+            <TriangleAlert className="size-4 shrink-0" aria-hidden="true" />
+            {q.actionError}
+          </p>
+        )}
         <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {b.plans.map((p) => (
-            <PlanCard key={p.id} plan={p} current={p.id === b.plan} needed={b.usage.units > p.units} />
+            <PlanCard
+              key={p.id}
+              plan={p}
+              interval={q.interval}
+              current={p.id === b.plan}
+              needed={b.usage.units > p.units}
+              payable={b.checkoutEnabled}
+              pending={q.choosing === p.id}
+              busy={q.choosing !== null}
+              onChoose={(plan) => void q.choose(plan)}
+            />
           ))}
         </ul>
-        <p className="mt-4 text-sm text-ink-muted">{t("billing.paymentsSoon")}</p>
+        {!b.checkoutEnabled && <p className="mt-4 text-sm text-ink-muted">{t("billing.paymentsSoon")}</p>}
+        {b.checkoutEnabled && <p className="mt-4 text-sm text-ink-muted">{t("billing.tenantsFree")}</p>}
       </Section>
     </>
   );
@@ -106,9 +158,22 @@ function Fits({ b }: { b: Billing }) {
   return <p className="mt-5 text-sm text-ink-on-panel-muted">{t("billing.fits", { count: b.usage.units, plan: t(`billing.plans.${fit.id}`) })}</p>;
 }
 
-function PlanCard({ plan, current, needed }: { plan: PlanInfo; current: boolean; needed: boolean }) {
+interface PlanCardProps {
+  plan: PlanInfo;
+  interval: BillingInterval;
+  current: boolean;
+  needed: boolean;
+  /** Payments are on: paid plans get a working button. */
+  payable: boolean;
+  pending: boolean;
+  busy: boolean;
+  onChoose: (plan: PaidPlan) => void;
+}
+
+function PlanCard({ plan, interval, current, needed, payable, pending, busy, onChoose }: PlanCardProps) {
   const { t } = useTranslation();
-  const free = plan.monthlyCents === 0;
+  const free = plan.id === "FREE";
+  const yearly = interval === "year" && !free;
   return (
     <li className={cn("flex flex-col rounded-md border bg-surface-raised p-5", current ? "border-ink" : "border-line")}>
       <div className="flex items-baseline justify-between gap-2">
@@ -121,10 +186,12 @@ function PlanCard({ plan, current, needed }: { plan: PlanInfo; current: boolean;
         )}
       </div>
       <p className="mt-3">
-        <span className="amount text-2xl">{free ? formatCents(0) : formatCents(plan.monthlyCents)}</span>
-        <span className="ml-1 text-sm text-ink-muted">{t("billing.perMonth")}</span>
+        <span className="amount text-2xl">{formatCents(yearly ? plan.yearlyCents : plan.monthlyCents)}</span>
+        <span className="ml-1 text-sm text-ink-muted">{yearly ? t("billing.perYear") : t("billing.perMonth")}</span>
       </p>
-      <p className="mt-1 min-h-5 text-sm text-ink-muted">{free ? t("billing.forever") : t("billing.yearly", { amount: formatCents(plan.yearlyCents) })}</p>
+      <p className="mt-1 min-h-5 text-sm text-ink-muted">
+        {free ? t("billing.forever") : yearly ? t("billing.yearlyPerMonth", { amount: formatCents(Math.round(plan.yearlyCents / 12)) }) : t("billing.monthlyCancel")}
+      </p>
       <ul className="mt-4 flex flex-col gap-1.5 text-sm">
         <li>{t("billing.unitsCount", { count: plan.units })}</li>
         <li>{t("billing.storageAmount", { amount: formatBytes(plan.storageBytes) })}</li>
@@ -132,6 +199,11 @@ function PlanCard({ plan, current, needed }: { plan: PlanInfo; current: boolean;
       <div className="mt-auto pt-5">
         {current ? (
           <p className="text-sm text-ink-muted">{t("billing.currentPlan")}</p>
+        ) : free ? null : payable ? (
+          <Button variant={needed ? "outline" : "default"} className="w-full" disabled={busy || needed} onClick={() => onChoose(plan.id as PaidPlan)}>
+            {pending && <Loader2 className="animate-spin" aria-hidden="true" />}
+            {needed ? t("billing.tooSmall") : t("billing.choose")}
+          </Button>
         ) : (
           <Button variant="outline" className="w-full" disabled title={t("billing.paymentsSoon")}>
             {needed ? t("billing.tooSmall") : t("billing.choose")}

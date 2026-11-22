@@ -232,7 +232,11 @@
     "TOO_MANY_ATTACHMENTS": "Dodal si največje dovoljeno število prilog.",
     "PLAN_LIMIT_UNITS": "Tvoj paket ne dovoli več enot. Poglej pakete v meniju računa → Naročnina.",
     "PLAN_LIMIT_UNIT_LOCKED": "Ta enota je nad omejitvijo tvojega paketa, zato je samo za branje. Poglej pakete v meniju računa → Naročnina.",
-    "PLAN_LIMIT_STORAGE": "Prostor za datoteke v tvojem paketu je porabljen. Izbriši stare datoteke ali poglej pakete (meni računa → Naročnina)."
+    "PLAN_LIMIT_STORAGE": "Prostor za datoteke v tvojem paketu je porabljen. Izbriši stare datoteke ali poglej pakete (meni računa → Naročnina).",
+    "BILLING_DISABLED": "Plačila še niso vklopljena. Poskusi znova kasneje.",
+    "BILLING_HAS_SUBSCRIPTION": "Naročnino že imaš. Paket zamenjaš v upravljanju naročnine.",
+    "BILLING_NO_CUSTOMER": "Naročnine še nimaš. Najprej izberi paket.",
+    "BILLING_PROVIDER": "Plačilni ponudnik se ne odziva. Poskusi znova čez minuto."
   },
   "validation": {
     "invalid": "Vrednost ni pravilna.",
@@ -1848,7 +1852,18 @@
     "fits_one": "Za {{count}} enoto ustreza paket {{plan}}.",
     "fits_two": "Za {{count}} enoti ustreza paket {{plan}}.",
     "fits_few": "Za {{count}} enote ustreza paket {{plan}}.",
-    "fits_other": "Za {{count}} enot ustreza paket {{plan}}."
+    "fits_other": "Za {{count}} enot ustreza paket {{plan}}.",
+    "paid": "Plačilo je uspelo – paket se posodobi v nekaj sekundah.",
+    "manage": "Upravljaj naročnino",
+    "manageHint": "Zamenjaj paket ali kartico, prenesi račun ali prekliči.",
+    "interval": "Obračun",
+    "monthly": "Mesečno",
+    "yearlyTab": "Letno",
+    "twoMonthsFree": "2 meseca gratis",
+    "perYear": "/ leto",
+    "yearlyPerMonth": "{{amount}} na mesec, plačaš enkrat na leto",
+    "monthlyCancel": "Prekličeš kadar koli.",
+    "tenantsFree": "Plačilo opraviš pri ponudniku Polar. Najemniki nikoli ne plačajo ničesar."
   },
   "calendar": {
     "menu": "Koledar rokov",

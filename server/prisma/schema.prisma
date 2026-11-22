@@ -1201,6 +1201,8 @@ model Subscription {
   founder                Boolean            @default(false)
   providerCustomerId     String?
   providerSubscriptionId String?            @unique
+  /// modified_at (or created_at) of the last provider event applied; older events are dropped.
+  providerUpdatedAt      DateTime?
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
 

@@ -232,7 +232,11 @@
     "TOO_MANY_ATTACHMENTS": "You have reached the maximum number of attachments.",
     "PLAN_LIMIT_UNITS": "Your package allows no more units. See the packages under account menu → Subscription.",
     "PLAN_LIMIT_UNIT_LOCKED": "This unit is over your package limit, so it is read-only. See the packages under account menu → Subscription.",
-    "PLAN_LIMIT_STORAGE": "The file storage of your package is used up. Delete old files or see the packages (account menu → Subscription)."
+    "PLAN_LIMIT_STORAGE": "The file storage of your package is used up. Delete old files or see the packages (account menu → Subscription).",
+    "BILLING_DISABLED": "Payments are not switched on yet. Try again later.",
+    "BILLING_HAS_SUBSCRIPTION": "You already have a subscription. Change your plan under Manage subscription.",
+    "BILLING_NO_CUSTOMER": "You have no subscription yet. Choose a plan first.",
+    "BILLING_PROVIDER": "The payment provider is not responding. Try again in a minute."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -1792,7 +1796,18 @@
     "tooSmall": "Too few units for you",
     "paymentsSoon": "Choosing a paid package will be possible at the end of the trial period. Tenants never pay anything.",
     "fits_one": "For {{count}} unit the {{plan}} package fits.",
-    "fits_other": "For {{count}} units the {{plan}} package fits."
+    "fits_other": "For {{count}} units the {{plan}} package fits.",
+    "paid": "Payment successful – your plan updates in a few seconds.",
+    "manage": "Manage subscription",
+    "manageHint": "Change plan or card, download invoices or cancel.",
+    "interval": "Billing",
+    "monthly": "Monthly",
+    "yearlyTab": "Yearly",
+    "twoMonthsFree": "2 months free",
+    "perYear": "/ year",
+    "yearlyPerMonth": "{{amount}} a month, paid once a year",
+    "monthlyCancel": "Cancel any time.",
+    "tenantsFree": "You pay through Polar. Tenants never pay anything."
   },
   "calendar": {
     "menu": "Deadlines",
