@@ -14,8 +14,11 @@ const billingUrl = (query = "") => `${env.CLIENT_ORIGIN}${BILLING_PATH}${query}`
 
 const CheckoutBody = z.object({ plan: z.enum(["PLUS", "PRO", "MANAGER"]), interval: z.enum(["month", "year"]) });
 
-/** A paid subscription at the provider that still applies (also cancelled but paid until the period end). */
-function hasPaid(s: { providerSubscriptionId: string | null; status: string; currentPeriodEnd: Date | null } | null, now = new Date()): boolean {
+/**
+ * A subscription at the provider that still applies – also one cancelled at the period end but paid until then.
+ * A new checkout is allowed only after it has run out; until then changes go through the portal.
+ */
+function subscriptionApplies(s: { providerSubscriptionId: string | null; status: string; currentPeriodEnd: Date | null } | null, now = new Date()): boolean {
   if (!s?.providerSubscriptionId) return false;
   return s.status !== "CANCELED" || (s.currentPeriodEnd !== null && s.currentPeriodEnd > now);
 }
@@ -35,7 +38,7 @@ export function billingRouter(): Router {
     const [current, usage, sub] = await Promise.all([
       planOf(userId),
       usageOf(userId),
-      prisma.subscription.findUnique({ where: { userId }, select: { providerSubscriptionId: true, status: true, currentPeriodEnd: true } }),
+      prisma.subscription.findUnique({ where: { userId }, select: { providerCustomerId: true } }),
     ]);
     res.json({
       limitsEnabled: env.PLAN_LIMITS_ENABLED,
@@ -44,7 +47,8 @@ export function billingRouter(): Router {
       usage,
       plans: (Object.keys(PLANS) as (keyof typeof PLANS)[]).map((id) => ({ id, ...PLANS[id] })),
       checkoutEnabled: checkoutEnabled(),
-      hasPaidSubscription: hasPaid(sub),
+      // The landlord is a customer at Polar: the portal shows the subscription, invoices and the card.
+      hasPaidSubscription: Boolean(sub?.providerCustomerId),
     });
   });
 
@@ -55,7 +59,7 @@ export function billingRouter(): Router {
     if (!checkoutEnabled()) throw new AppError(503, "BILLING_DISABLED");
     const sub = await prisma.subscription.findUnique({ where: { userId: user.id } });
     // One subscription per landlord: changes go through the customer portal.
-    if (sub?.providerSubscriptionId && sub.status !== "CANCELED") throw new AppError(409, "BILLING_HAS_SUBSCRIPTION");
+    if (subscriptionApplies(sub)) throw new AppError(409, "BILLING_HAS_SUBSCRIPTION");
 
     const productId = productIdFor(body.plan, body.interval)!;
     const discountId = sub?.founder && env.POLAR_FOUNDER_DISCOUNT_ID ? env.POLAR_FOUNDER_DISCOUNT_ID : undefined;
@@ -81,8 +85,11 @@ export function billingRouter(): Router {
   router.post("/billing/portal", async (req, res) => {
     const user = await landlord(authUserId(req));
     if (!checkoutEnabled()) throw new AppError(503, "BILLING_DISABLED");
+    const sub = await prisma.subscription.findUnique({ where: { userId: user.id }, select: { providerCustomerId: true } });
+    // Polar's own customer ID (set by the webhook); without it there is nothing to manage yet.
+    if (!sub?.providerCustomerId) throw new AppError(404, "BILLING_NO_CUSTOMER");
     try {
-      const session = await polar().customerSessions.create({ external_customer_id: user.id, return_url: billingUrl() });
+      const session = await polar().customerSessions.create({ customer_id: sub.providerCustomerId, return_url: billingUrl() });
       res.json({ url: session.customer_portal_url });
     } catch (err) {
       if (polarStatus(err) === 404) throw new AppError(404, "BILLING_NO_CUSTOMER");

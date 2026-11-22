@@ -232,13 +232,38 @@ describe.skipIf(!hasDb)("Polar webhook and checkout", () => {
     }
   });
 
-  it("portal: returns the short-lived URL, 404 when the customer is not at Polar yet", async () => {
+  it("checkout: a subscription cancelled at the period end gives 409 until the period runs out", async () => {
+    const l = await landlord();
+    await send(event("subscription.active", l.user.id)).expect(202);
+    await send(event("subscription.canceled", l.user.id, { cancel_at_period_end: true, modified_at: "2033-01-03T10:00:00.000Z" })).expect(202);
+    expect((await ctx.prisma.subscription.findUniqueOrThrow({ where: { userId: l.user.id } })).status).toBe("CANCELED");
+    const count = calls.checkouts.length;
+    expect((await l.post("/api/billing/checkout", { plan: "PRO", interval: "year" }).expect(409)).body.error.code).toBe("BILLING_HAS_SUBSCRIPTION");
+    expect(calls.checkouts.length).toBe(count);
+
+    // The period is over: a new subscription may start.
+    await ctx.prisma.subscription.update({ where: { userId: l.user.id }, data: { currentPeriodEnd: new Date("2026-01-01T00:00:00Z") } });
+    await l.post("/api/billing/checkout", { plan: "PRO", interval: "year" }).expect(200);
+    expect(calls.checkouts.length).toBe(count + 1);
+  });
+
+  it("portal: no Polar customer yet → 404 without calling Polar; otherwise a session by customer_id", async () => {
     const l = await landlord();
     portalStatus = 200;
+    const before = calls.sessions.length;
+    expect((await l.post("/api/billing/portal").expect(404)).body.error.code).toBe("BILLING_NO_CUSTOMER");
+    expect(calls.sessions.length).toBe(before);
+    expect((await l.get("/api/billing").expect(200)).body.hasPaidSubscription).toBe(false);
+
+    await send(event("subscription.active", l.user.id)).expect(202);
+    expect((await l.get("/api/billing").expect(200)).body.hasPaidSubscription).toBe(true);
     const res = await l.post("/api/billing/portal").expect(200);
     expect(res.body.url).toBe("https://sandbox.polar.sh/portal/test");
-    expect(calls.sessions.at(-1)).toEqual({ external_customer_id: l.user.id, return_url: "http://localhost:5180/narocnina" });
+    expect(calls.sessions.at(-1)).toEqual({ customer_id: "cust-" + l.user.id, return_url: "http://localhost:5180/narocnina" });
+
+    // The customer was removed at Polar.
     portalStatus = 404;
     expect((await l.post("/api/billing/portal").expect(404)).body.error.code).toBe("BILLING_NO_CUSTOMER");
+    portalStatus = 200;
   });
 });
