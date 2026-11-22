@@ -77,7 +77,7 @@ Pred korakom 4 vprašaj lastnika projekta (CLAUDE.md: plačilni ponudnik) – od
 
 **Stanje (20. 11. 2026):** koraki 1–3 so narejeni (`Subscription`, `server/src/modules/billing/plans.ts`, stran »Naročnina« v meniju računa). Omejitve se preverjajo le, ko je na strežniku `PLAN_LIMITS_ENABLED=true`; med testnim obdobjem je izklopljeno. Enote nad omejitvijo so samo za branje pri novih najemih in obveznostih; sporočila ostanejo odprta, da se najemnik in najemodajalec lahko vedno dogovorita. Koraki 5–6 še čakajo.
 
-**Stanje (22. 11. 2026): korak 4 je narejen (Polar).**
+**Stanje (22. 11. 2026): korak 4 je narejen (Polar) in deluje v produkciji** (preizkušeno s popustom 100 %).
 
 - Strežnik: `server/src/modules/billing/polar.ts` (klient, preslikava izdelkov), `webhook.ts` (preverjanje podpisa, posodobitev `Subscription`), `routes.ts` (`GET /api/billing`, `POST /api/billing/checkout`, `POST /api/billing/portal`). Webhook: `POST /api/webhooks/polar`.
 - Webhook obdela `subscription.created|active|updated|canceled|uncanceled|past_due|revoked` iz celotnega stanja naročnine. Idempotentno; dogodek, starejši od zadnjega uporabljenega (`Subscription.providerUpdatedAt`), se zavrže. Preklic ob koncu obdobja = `CANCELED` z `currentPeriodEnd` do konca plačanega obdobja – paket velja do tega datuma. Sprememba paketa se zapiše v `AuditLog`.

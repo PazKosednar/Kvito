@@ -40,9 +40,12 @@ Vsak izdelek ima samo ceno v EUR in metadata `plan` + `interval`. Popusta: `NEW3
 - Letni izdelki so imeli obračun **mesečno**, česar Polar ne dovoli spremeniti: ustvarjeni so novi letni izdelki (zgoraj), stari trije so arhivirani (`f84e4de7…`, `98aa110c…`, `67873bf3…`).
 - Ustvarjen ustanovni popust.
 
+### V produkciji (22. 11. 2026)
+
+Organizacija je odobrena (`active`), na Railway so nastavljene vse spremenljivke `POLAR_*`, webhook `8f0601eb-4879-483c-8b9b-f1d1d29f99c4` je registriran. Preizkus s popustom 100 %: checkout, vrnitev v Kvito, paket posodobljen, dostave webhooka 202.
+
 ### Odprto v Polarju
 
-- **Organizacija ima status `created`**: oddaj podatke podjetja in račun za izplačila, sicer plačila ne delujejo. `TODO(preveri)`: registracija dejavnosti (NAROCNINA.md, točka 6).
 - **Rotiraj dostopni žeton** (bil je poslan v klepet) in nov vpiši v `server/.env` in na Railway.
 
 ## Webhook
