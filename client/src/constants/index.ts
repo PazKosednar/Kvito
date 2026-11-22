@@ -16,9 +16,9 @@ export const STORAGE_KEYS = {
   iosHintDismissed: "kvita-ios-hint-dismissed",
   /**
    * Promo popup closes: JSON { code, count, at } (lib/promo); a new code shows the popup again.
-   * Renaming the key resets the popup for everyone (v2: reset on 22. 11. 2026).
+   * Renaming the key resets the popup for everyone (v3: reset on 22. 11. 2026, new design).
    */
-  promoDismissed: "kvita-promo-seen-v2",
+  promoDismissed: "kvita-promo-seen-v3",
 } as const;
 
 /**
