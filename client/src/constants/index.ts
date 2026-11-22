@@ -14,7 +14,15 @@ export const STORAGE_KEYS = {
   townSeason: "kvita-town-season",
   locale: "kvita-locale",
   iosHintDismissed: "kvita-ios-hint-dismissed",
+  /** Holds the promo code whose popup was closed; a new code shows the popup again. */
+  promoDismissed: "kvita-promo-dismissed",
 } as const;
+
+/**
+ * Promo code for new landlords. It lives in Polar as a discount "NEW30" (−30 %, duration "once");
+ * the landlord types it on Polar's payment page (docs/POLAR_SETUP.md). Keep both in sync.
+ */
+export const PROMO = { code: "NEW30", percent: 30 } as const;
 
 export const ROUTES = {
   home: "/",

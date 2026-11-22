@@ -181,6 +181,50 @@
 .animate-enter {
   animation: kvita-fade 180ms ease-out both;
 }
+
+/* Promo popup (features/billing/PromoDialog): a ticket with chamfered corners.
+   The outer layer is the 1px edge (green on the top-left and bottom-right cut), the inner layer the panel. */
+.kv-chamfer {
+  --cut: 22px;
+  clip-path: polygon(
+    var(--cut) 0,
+    calc(100% - var(--cut)) 0,
+    100% var(--cut),
+    100% calc(100% - var(--cut)),
+    calc(100% - var(--cut)) 100%,
+    var(--cut) 100%,
+    0 calc(100% - var(--cut)),
+    0 var(--cut)
+  );
+}
+.kv-promo-edge {
+  background: linear-gradient(
+    135deg,
+    var(--signal-on-panel) 0 calc(var(--cut) + 6px),
+    var(--panel-edge) calc(var(--cut) + 6px) calc(100% - var(--cut) - 6px),
+    var(--signal-on-panel) calc(100% - var(--cut) - 6px)
+  );
+}
+/* Inside the panel, "signal" is the legible green for the theme (as .on-panel, without its outline). */
+.kv-promo-body {
+  --signal: var(--signal-on-panel);
+  scrollbar-width: thin;
+}
+/* Floating layer: the shadow follows the cut shape (box-shadow would be clipped). */
+.kv-promo-shadow {
+  filter: drop-shadow(0 16px 40px rgb(0 0 0 / 0.45));
+}
+/* Ticket notches on the coupon edges. */
+.kv-notch {
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  border-radius: 9999px;
+  background: var(--panel);
+  border: 1px dashed color-mix(in srgb, var(--signal) 80%, transparent);
+}
 /* Town "city" scene: cars driving along the road (decoration only; distance via --kv-dx / --kv-dy). */
 @keyframes kv-drive {
   0% {

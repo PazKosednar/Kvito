@@ -1810,6 +1810,24 @@
     "monthlyCancel": "Cancel any time.",
     "tenantsFree": "You pay through Polar. Tenants never pay anything."
   },
+  "promo": {
+    "badge": "Offer",
+    "eyebrow": "Subscription for landlords",
+    "headline": "off every subscription.",
+    "codeLabel": "Code at checkout",
+    "appliesTo": "Plus, Pro and Manager",
+    "appliesInterval": "monthly or yearly",
+    "copy": "Copy code",
+    "copied": "Copied",
+    "was": "was",
+    "now": "now",
+    "firstMonth": "first month",
+    "free": "One unit is always free. Tenants never pay.",
+    "once": "The discount applies to the first payment: the first month or the first year (e.g. Plus yearly {{discounted}} instead of {{full}}).",
+    "choose": "Choose a package",
+    "later": "Maybe later",
+    "strip": "With the code {{code}} you get −{{percent}}% off your first payment. Enter it on the payment page."
+  },
   "calendar": {
     "menu": "Deadlines",
     "eyebrow": "Overview",

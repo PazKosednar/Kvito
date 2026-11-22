@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Link, Outlet, useLocation } from "react-router";
 import { Eyebrow, KvitaLockup } from "@/components/brand";
 import { ROUTES } from "@/constants";
+import { PromoDialog } from "@/features/billing/PromoDialog";
 import { useOnline } from "@/hooks/useOnline";
 import { useRole } from "@/hooks/useRole";
 import { AccountMenu } from "./AccountMenu";
@@ -52,6 +53,7 @@ export function AppShell() {
         </div>
       </main>
       {landlord && <AssistantWidget />}
+      {landlord && <PromoDialog />}
     </div>
   );
 }

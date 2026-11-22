@@ -1866,6 +1866,24 @@
     "monthlyCancel": "Prekličeš kadar koli.",
     "tenantsFree": "Plačilo opraviš pri ponudniku Polar. Najemniki nikoli ne plačajo ničesar."
   },
+  "promo": {
+    "badge": "Akcija",
+    "eyebrow": "Naročnina za najemodajalce",
+    "headline": "na vse naročnine.",
+    "codeLabel": "Koda ob plačilu",
+    "appliesTo": "Plus, Pro in Upravnik",
+    "appliesInterval": "mesečno ali letno",
+    "copy": "Kopiraj kodo",
+    "copied": "Kopirano",
+    "was": "prej",
+    "now": "zdaj",
+    "firstMonth": "prvi mesec",
+    "free": "Ena enota je vedno brezplačna. Najemnik nikoli ne plača.",
+    "once": "Popust velja za prvo plačilo: prvi mesec ali prvo leto (npr. Plus letno {{discounted}} namesto {{full}}).",
+    "choose": "Izberi paket",
+    "later": "Mogoče kasneje",
+    "strip": "S kodo {{code}} dobiš −{{percent}} % na prvo plačilo. Vpiši jo na strani za plačilo."
+  },
   "calendar": {
     "menu": "Koledar rokov",
     "eyebrow": "Pregled",

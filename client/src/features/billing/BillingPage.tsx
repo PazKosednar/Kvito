@@ -4,7 +4,10 @@ import { ErrorState, LoadingState, PageHeader, Section } from "@/components/layo
 import { Segmented } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { useBilling, type Billing, type BillingInterval, type PaidPlan, type PlanInfo } from "@/hooks/useBilling";
+import { PROMO } from "@/constants";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
+import { isPromoEligible } from "@/lib/promo";
+import { PromoStrip } from "./PromoDialog";
 import { formatDate } from "@/lib/dates";
 import { formatCents } from "@/lib/money";
 import { cn } from "@/lib/utils";
@@ -47,6 +50,8 @@ export function BillingPage() {
           </button>
         </p>
       )}
+
+      {isPromoEligible(b) && <PromoStrip code={PROMO.code} percent={PROMO.percent} />}
 
       <Usage b={b} />
 
