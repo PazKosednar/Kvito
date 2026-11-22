@@ -91,6 +91,8 @@ const str = (v: unknown): string | null => {
 const at = (n: unknown, ...path: string[]): unknown => path.reduce<unknown>((cur, k) => (cur && typeof cur === "object" ? (cur as Node)[k] : undefined), n);
 
 function parseCamt(xml: string): BankEntry[] {
+  // Bank statements never declare a DTD; refusing one rules out entity expansion ("billion laughs") and the like.
+  if (/<!DOCTYPE|<!ENTITY/i.test(xml)) throw new Error("DTD not allowed");
   const doc = new XMLParser({ ignoreAttributes: false, removeNSPrefix: true, parseTagValue: false, processEntities: true }).parse(xml) as Node;
   const root = (doc["Document"] ?? doc) as Node;
   const containers = [...asArray(at(root, "BkToCstmrStmt", "Stmt")), ...asArray(at(root, "BkToCstmrDbtCdtNtfctn", "Ntfctn")), ...asArray(at(root, "BkToCstmrAcctRpt", "Rpt"))];

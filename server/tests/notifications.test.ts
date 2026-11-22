@@ -56,11 +56,13 @@ describe.skipIf(!hasDb)("notifications and reminders", () => {
   it("exposes the push key and stores subscriptions per user", async () => {
     const cfg = await luka.get("/api/push/config").expect(200);
     expect(cfg.body).toEqual({ publicKey: null }); // the test app has no push configured
-    const sub = { endpoint: "https://push.example.test/abc", keys: { p256dh: "p", auth: "a" } };
+    const sub = { endpoint: "https://fcm.googleapis.com/fcm/send/abc", keys: { p256dh: "p", auth: "a" } };
     await luka.post("/api/push/subscriptions", sub).expect(201);
     await luka.post("/api/push/subscriptions", sub).expect(201); // idempotent
     expect(await ctx.prisma.pushSubscription.count({ where: { userId: luka.user.id } })).toBe(1);
     await luka.post("/api/push/subscriptions", { ...sub, endpoint: "http://insecure.test/x" }).expect(400);
+    // Only browser push services (no requests to arbitrary or internal addresses).
+    await luka.post("/api/push/subscriptions", { ...sub, endpoint: "https://internal.railway.internal/x" }).expect(400);
   });
 
   // The jobs scan the whole (shared) test database, so give them room.
@@ -90,7 +92,7 @@ describe.skipIf(!hasDb)("notifications and reminders", () => {
     expect(await sent(at("2031-03-14"))).toBe(0); // still week 0
     expect(await sent(at("2031-03-18"))).toBe(1); // week 1
 
-    const pushed = push.sent.filter((p) => p.target.endpoint === "https://push.example.test/abc");
+    const pushed = push.sent.filter((p) => p.target.endpoint === "https://fcm.googleapis.com/fcm/send/abc");
     expect(pushed.map((p) => p.payload.title)).toEqual(
       expect.arrayContaining(["Rok za plačilo čez 3 dni", "Rok za plačilo je danes", "Obveznost je v zamudi"]),
     );
@@ -103,7 +105,7 @@ describe.skipIf(!hasDb)("notifications and reminders", () => {
     const { createNotifier } = await import("../src/services/notifications/notifier.js");
     const notifier = createNotifier({ emailSender: ctx.mail, pushSender: push });
 
-    push.gone.add("https://push.example.test/abc");
+    push.gone.add("https://fcm.googleapis.com/fcm/send/abc");
     const before = ctx.mail.sent.length;
     await notifier.notify({ userId: luka.user.id, type: "test", text: () => ({ title: "Preizkus", body: "Telo" }), dedupeKey: `t:${Date.now()}` });
     expect(await ctx.prisma.pushSubscription.count({ where: { userId: luka.user.id } })).toBe(0); // gone → deleted

@@ -2,12 +2,13 @@ import { Router } from "express";
 import { z } from "zod";
 import { notFound } from "../../lib/errors.js";
 import { prisma } from "../../lib/prisma.js";
+import { isPushEndpoint } from "../../lib/push-endpoint.js";
 import { idParam } from "../../lib/validation.js";
 import { authUserId } from "../../middleware/auth.js";
 import { validateBody } from "../../middleware/validate.js";
 
 const SubscribeBody = z.object({
-  endpoint: z.string().url().max(1000).startsWith("https://"),
+  endpoint: z.string().url().max(1000).refine(isPushEndpoint, "PUSH_ENDPOINT_NOT_ALLOWED"),
   keys: z.object({ p256dh: z.string().min(1).max(200), auth: z.string().min(1).max(100) }),
   userAgent: z.string().max(300).optional(),
 });

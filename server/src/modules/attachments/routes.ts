@@ -17,7 +17,24 @@ const KINDS = ["BILL", "PAYMENT_PROOF", "MESSAGE", "ISSUE", "METER", "HANDOVER",
 const LANDLORD_ONLY: AttachmentKind[] = ["BILL", "DOCUMENT"];
 const TENANT_ONLY: AttachmentKind[] = ["PAYMENT_PROOF"];
 
-const UploadQuery = z.object({ kind: z.enum(KINDS), name: z.string().max(200).optional() });
+/** No record links this file yet (it was uploaded, but the form was not saved). */
+const UNLINKED = {
+  chargeId: null,
+  paymentReportId: null,
+  messageId: null,
+  issueId: null,
+  issueCommentId: null,
+  meterReadingId: null,
+  handoverItemId: null,
+  documentId: null,
+  settlementId: null,
+  costEntryId: null,
+  expenseId: null,
+  propertyId: null,
+  unitId: null,
+} as const;
+
+const UploadQuery =z.object({ kind: z.enum(KINDS), name: z.string().max(200).optional() });
 
 /** Public: download through a signed, short-lived URL (no Authorization header, works in <img src>). */
 export function filesPublicRouter(deps: { storage: Storage }): Router {
@@ -84,9 +101,10 @@ export function attachmentsRouter(deps: { storage: Storage }): Router {
   router.delete("/attachments/:id", async (req, res) => {
     const userId = authUserId(req);
     const id = idParam.parse(req.params.id);
-    const att = await prisma.attachment.findFirst({ where: { id, uploadedById: userId, deletedAt: null } });
-    if (!att) throw notFound();
-    await prisma.attachment.update({ where: { id }, data: { deletedAt: new Date() } });
+    // Only a file that is not linked to anything yet: a linked one (payment proof, handover photo, document …)
+    // is evidence and is removed only through its record's own rules.
+    const { count } = await prisma.attachment.updateMany({ where: { id, uploadedById: userId, deletedAt: null, ...UNLINKED }, data: { deletedAt: new Date() } });
+    if (!count) throw notFound();
     res.status(204).end();
   });
 

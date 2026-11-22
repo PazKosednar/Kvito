@@ -16,6 +16,7 @@ import { assertPropertyOwner } from "../access/access.js";
 import { attachmentDto, attachmentSelect } from "../attachments/service.js";
 import { loadAnnualSummary } from "../reports/annual.js";
 import { assertStorageFor } from "../billing/plans.js";
+import { csvCell } from "../../lib/csv.js";
 
 export const EXPENSE_CATEGORIES = [
   "MAINTENANCE",
@@ -273,10 +274,6 @@ const CATEGORY_SL: Record<(typeof EXPENSE_CATEGORIES)[number], string> = {
   OTHER: "Drugo",
 };
 
-const csvCell = (v: string | number) => {
-  const s = String(v);
-  return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-};
 const eur = (c: number) => (c / 100).toFixed(2).replace(".", ",");
 
 function taxCsv(o: TaxOverview): string {

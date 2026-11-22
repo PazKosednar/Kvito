@@ -1,6 +1,6 @@
 # Varnost in varstvo podatkov – stanje in odprte točke
 
-Pregled: 17. 11. 2026, ponovni pregled 20. 11. 2026 (avtorizacija vseh API poti, odvisnosti, izvoz in izbris podatkov). Dokument dopolni ob vsaki spremembi, ki vpliva na varnost.
+Pregled: 17. 11. 2026, ponovni pregled 20. 11. 2026 (avtorizacija vseh API poti, odvisnosti, izvoz in izbris podatkov) in 22. 11. 2026 (vse API poti po vrsti, javne poti, Socket.IO, asistent, uvoz izpiskov, izvozi, push, spletna stran). Dokument dopolni ob vsaki spremembi, ki vpliva na varnost.
 
 ## Kaj je urejeno v kodi
 
@@ -15,7 +15,12 @@ Pregled: 17. 11. 2026, ponovni pregled 20. 11. 2026 (avtorizacija vseh API poti,
 - **Zagon v produkciji**: strežnik se ne zažene z `CLIENT_ORIGIN` brez https ali z nadomestnim `JWT_ACCESS_SECRET`.
 - **Zasebnost**: izvoz in izbris podatkov uporabnika (vključno z lastnimi stroški najemodajalca in fotografijami nepremičnin), pravila hrambe ([RETENTION.md](RETENTION.md)), revizijska sled.
 - **Plačila (Polar)**: webhook `POST /api/webhooks/polar` sprejme samo dogodke z veljavnim podpisom (Standard Webhooks, `POLAR_WEBHOOK_SECRET`), preverja se surovo telo (`express.raw`, do 1 MB, pred `express.json`); neveljaven podpis → 403. Vsebina dogodkov se ne logira (samo vrsta dogodka in ID-ji). Dogodki so idempotentni, starejši od zadnjega uporabljenega se zavržejo. Ključi Polarja so samo na strežniku; client dobi le `checkoutEnabled`. Povezava do portala se ne shranjuje. Kvito ne vidi podatkov kartice.
-- **Dnevniki**: brez teles zahtev, brez poizvedb s podpisi, brez žetonov in piškotkov.
+- **Dnevniki**: brez teles zahtev, brez poizvedb s podpisi, brez žetonov in piškotkov (tudi brez naslovov push, ki so skrivni URL-ji).
+- **Push (SSRF)**: strežnik pošilja Web Push samo na naslove brskalniških push storitev (FCM, Mozilla, Apple, Windows; `lib/push-endpoint.ts`). Drugačen naslov se zavrne ob prijavi naročnine, starejši tak zapis pa se ob pošiljanju izbriše.
+- **Datoteke kot dokaz**: `DELETE /api/attachments/:id` izbriše samo še nepovezano naložitev; povezane (dokazila o plačilu, fotografije primopredaje, dokumenti …) samo prek pravil svojega zapisa.
+- **Izvozi CSV**: celice, ki se začnejo z `= + - @`, dobijo apostrof (`lib/csv.ts`), da se v Excelu ne izvedejo kot formula (npr. ime najemnika `=HYPERLINK(...)`).
+- **Uvoz izpiskov (XML)**: dokument z `<!DOCTYPE`/`<!ENTITY` se zavrne (brez razširjanja entitet).
+- **Spletna stran** (`web/`): CSP, HSTS, `nosniff`, `frame-ancestors 'none'`, zaščita pred `../` v poteh.
 
 ## Odprto – pred prvimi pravimi uporabniki
 
@@ -25,6 +30,11 @@ Pregled: 17. 11. 2026, ponovni pregled 20. 11. 2026 (avtorizacija vseh API poti,
 4. **Varnostne kopije baze**: v Railway vklopi redne kopije volumna Postgres in enkrat preizkusi obnovitev.
 5. **Dostopi**: dvostopenjska prijava (2FA) na GitHub in Railway.
 6. **Odvisnosti**: `npm audit` ob vsaki izdaji; Dependabot odpira PR-je tedensko. Stanje 20. 11. 2026: ostaja opozorilo za `effect` (prek orodja `prisma` CLI, samo ob migracijah, ne obdeluje vnosov uporabnikov); popravek zahteva starejšo različico Prisme, zato počakamo na posodobitev Prisme.
+
+## Znani kompromisi
+
+- **Zaklep računa** po 5 napačnih geslih (do 60 min) lahko kdo, ki pozna e-naslov, sproži namerno. Zaščita pred ugibanjem gesel je pomembnejša; ponastavitev gesla z e-poštno kodo deluje tudi med zaklepom.
+- **Omejevanje zahtev** je v pomnilniku enega strežnika. Ob več instancah na Railwayu ga je treba preseliti v skupno hrambo (npr. Redis).
 
 ## Prijava ranljivosti
 

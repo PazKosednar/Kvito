@@ -2,6 +2,7 @@ import PDFDocument from "pdfkit";
 import { addTo, emptyMonths, splitReceived, sumMonths, type MoneyKind, type MonthTotals } from "../../lib/annual.js";
 import { C, drawLogo, registerFonts } from "../../lib/pdf.js";
 import { prisma } from "../../lib/prisma.js";
+import { csvCell } from "../../lib/csv.js";
 
 export interface AnnualUnit {
   tenancyId: string;
@@ -111,7 +112,6 @@ export async function loadAnnualSummary(landlordId: string, year: number): Promi
 
 const MONTHS = ["januar", "februar", "marec", "april", "maj", "junij", "julij", "avgust", "september", "oktober", "november", "december"];
 const sheetMoney = (cents: number) => (cents / 100).toFixed(2).replace(".", ",");
-const csvCell = (v: string) => (/[";\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
 
 /** One row per unit and month with money; UTF-8 with BOM and ";" for Slovenian Excel. */
 export function annualCsv(s: AnnualSummary): Buffer {

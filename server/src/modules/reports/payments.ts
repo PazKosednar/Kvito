@@ -1,6 +1,7 @@
 import PDFDocument from "pdfkit";
 import { C, drawLogo, registerFonts } from "../../lib/pdf.js";
 import { prisma } from "../../lib/prisma.js";
+import { csvCell } from "../../lib/csv.js";
 
 export interface PaymentRow {
   confirmedAt: Date;
@@ -86,7 +87,6 @@ export async function loadPaymentRows(landlordId: string, year: number): Promise
   }));
 }
 
-const csvCell = (v: string) => (/[";\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
 
 /** UTF-8 with BOM and ";" so that Slovenian Excel opens it with correct characters and columns. */
 export function paymentsCsv(rows: PaymentRow[]): Buffer {

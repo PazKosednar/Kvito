@@ -25,6 +25,8 @@ const TYPES = {
 
 const SECURITY = {
   "X-Content-Type-Options": "nosniff",
+  // Served only over https (Railway terminates TLS); browsers then never try plain http.
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "X-Frame-Options": "DENY",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
