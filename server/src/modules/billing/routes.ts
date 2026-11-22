@@ -71,6 +71,8 @@ export function billingRouter(): Router {
         success_url: billingUrl("?placilo=ok"),
         return_url: billingUrl(),
         locale: "sl",
+        // Prices are in euro; never fall back to another currency of the product.
+        currency: "eur",
         allow_discount_codes: true,
         ...(discountId ? { discount_id: discountId } : {}),
       });

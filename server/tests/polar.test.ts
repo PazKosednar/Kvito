@@ -201,6 +201,7 @@ describe.skipIf(!hasDb)("Polar webhook and checkout", () => {
       success_url: "http://localhost:5180/narocnina?placilo=ok",
       return_url: "http://localhost:5180/narocnina",
       locale: "sl",
+      currency: "eur",
       allow_discount_codes: true,
       discount_id: "disc-founder",
     });

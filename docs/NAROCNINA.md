@@ -86,6 +86,8 @@ Pred korakom 4 vprašaj lastnika projekta (CLAUDE.md: plačilni ponudnik) – od
 - **Promocijska koda `NEW30`**: ustvari se v Polarju kot popust z veljavnostjo »once«; uporabnik jo vpiše na strani za plačilo (`allow_discount_codes`).
 - **Ustanovni popust** −30 % »forever«: popust v Polarju, njegov ID v `POLAR_FOUNDER_DISCOUNT_ID`; samodejno se uporabi za račune z `founder = true` (oznako nastavi korak 5).
 
+Nastavitev in kontrolni seznam: [POLAR_SETUP.md](POLAR_SETUP.md).
+
 Spremenljivke okolja (strežnik, vse neobvezne; plačila so vklopljena samo, ko so nastavljeni žeton, skrivnost in vseh 6 izdelkov):
 
 | Spremenljivka | Pomen |
