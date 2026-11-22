@@ -21,7 +21,7 @@
     "db:deploy": "npm run db:deploy -w server"
   },
   "devDependencies": {
-    "concurrently": "^10.0.6"
+    "concurrently": "^10.0.7"
   },
   "allowScripts": {
     "prisma@7.10.1": true,
