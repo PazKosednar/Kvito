@@ -674,7 +674,8 @@
     "unread_one": "{{count}} unread message",
     "unread_other": "{{count}} unread messages",
     "today": "Today",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "toLatest": "Jump to latest messages"
   },
   "systemEvents": {
     "MEMBER_JOINED": "New tenant: {{name}}.",

@@ -1,5 +1,5 @@
-import { ArrowUp, CheckCheck, Info, Loader2, MessagesSquare, Paperclip, Receipt, Wrench } from "lucide-react";
-import { Fragment, useEffect, useLayoutEffect, useRef } from "react";
+import { ArrowDown, ArrowUp, CheckCheck, Info, Loader2, MessagesSquare, Paperclip, Receipt, Wrench } from "lucide-react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { AttachmentList, PendingFiles } from "@/components/attachments";
@@ -85,6 +85,7 @@ export function MessagesTab() {
   const listRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const panelRef = useFitToViewport(q.loading);
+  const [awayFromEnd, setAwayFromEnd] = useState(false);
   const count = q.messages.length;
   const { markRead } = q;
 
@@ -138,7 +139,20 @@ export function MessagesTab() {
         </div>
       </header>
 
-      <div ref={listRef} className="flex-1 px-3 py-4 sm:px-5 lg:overflow-y-auto">
+      <div className="relative flex min-h-0 flex-1 flex-col">
+      <div
+        ref={listRef}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          setAwayFromEnd(el.scrollHeight - el.scrollTop - el.clientHeight > 160);
+        }}
+        className={cn(
+          "flex-1 px-3 py-4 sm:px-5",
+          // Own scroll on wide screens, without a visible scrollbar; the edges fade softly instead.
+          "lg:overflow-y-auto lg:overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          "lg:[mask-image:linear-gradient(to_bottom,transparent,black_1.5rem,black_calc(100%-1rem),transparent)]",
+        )}
+      >
         {!hasUserMessages && (
           <div className="mx-auto mb-6 flex max-w-sm flex-col items-center py-6 text-center">
             <span className="inline-flex size-11 items-center justify-center rounded-full bg-ink/[0.07]">
@@ -159,8 +173,10 @@ export function MessagesTab() {
             return (
               <Fragment key={m.id}>
                 {newDay && (
-                  <li className="my-4 flex justify-center" aria-hidden="true">
-                    <span className="rounded-full bg-ink/[0.07] px-3 py-1 text-xs text-ink-muted">{dayLabel(m.createdAt)}</span>
+                  <li className="my-5 flex items-center gap-3" aria-hidden="true">
+                    <span className="h-px flex-1 bg-line" />
+                    <span className="font-mono text-[11px] font-medium tracking-[0.08em] text-ink-faint uppercase">{dayLabel(m.createdAt)}</span>
+                    <span className="h-px flex-1 bg-line" />
                   </li>
                 )}
                 {m.kind === "SYSTEM" ? (
@@ -180,6 +196,18 @@ export function MessagesTab() {
           })}
         </ol>
         <div ref={endRef} />
+      </div>
+      {awayFromEnd && (
+        <button
+          type="button"
+          onClick={() => listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" })}
+          aria-label={t("messages.toLatest")}
+          title={t("messages.toLatest")}
+          className="absolute right-4 bottom-3 inline-flex size-9 items-center justify-center rounded-full border border-line-strong bg-surface-raised text-ink-muted transition-colors duration-150 hover:text-ink"
+        >
+          <ArrowDown className="size-4" aria-hidden="true" />
+        </button>
+      )}
       </div>
 
       {/* Composer: one rounded field with attach and send inside. */}

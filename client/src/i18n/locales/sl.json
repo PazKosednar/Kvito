@@ -688,7 +688,8 @@
     "unread_few": "{{count}} neprebrana sporočila",
     "unread_other": "{{count}} neprebranih sporočil",
     "today": "Danes",
-    "yesterday": "Včeraj"
+    "yesterday": "Včeraj",
+    "toLatest": "Na najnovejša sporočila"
   },
   "systemEvents": {
     "MEMBER_JOINED": "Nov najemnik: {{name}}.",
