@@ -15,7 +15,7 @@ const KEEP = 15;
  * The answer is written into the conversation while it arrives.
  */
 export function useAssistant(enabled: boolean) {
-  const status = useQuery<{ enabled: boolean }>(enabled ? "/api/assistant" : null);
+  const status = useQuery<{ enabled: boolean; included: boolean }>(enabled ? "/api/assistant" : null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -63,5 +63,9 @@ export function useAssistant(enabled: boolean) {
     setPending(false);
   }, []);
 
-  return { available: status.data?.enabled ?? null, messages, pending, error, failed, ask, reset };
+  return {
+    available: status.data ? status.data.enabled && status.data.included : null,
+    /** False when the plan has no assistant (free plan): show the upgrade instead. */
+    included: status.data?.included ?? null,
+    messages, pending, error, failed, ask, reset };
 }

@@ -7,6 +7,7 @@ import { logger } from "../../lib/logger.js";
 import { prisma } from "../../lib/prisma.js";
 import { authUserId } from "../../middleware/auth.js";
 import { validateBody } from "../../middleware/validate.js";
+import { PLANS, assertAssistantAllowed, planOf } from "../billing/plans.js";
 import { landlordSnapshot } from "./context.js";
 
 const ChatBody = z.object({
@@ -47,15 +48,18 @@ Kaj smeš:
 export function assistantRouter(): Router {
   const router = Router();
 
-  router.get("/assistant", (_req, res) => {
-    res.json({ enabled: Boolean(env.ANTHROPIC_API_KEY) });
+  /** `enabled`: switched on at all; `included`: the landlord's plan has it (paid plans). */
+  router.get("/assistant", async (req, res) => {
+    const { plan } = await planOf(authUserId(req));
+    res.json({ enabled: Boolean(env.ANTHROPIC_API_KEY), included: PLANS[plan].assistant });
   });
 
   router.post("/assistant/chat", assistantLimiter, validateBody(ChatBody), async (req, res) => {
     const userId = authUserId(req);
-    if (!env.ANTHROPIC_API_KEY) throw new AppError(503, "ASSISTANT_DISABLED");
     const user = await prisma.user.findFirst({ where: { id: userId, deletedAt: null }, select: { roles: true } });
     if (!user?.roles.includes("LANDLORD")) throw forbidden();
+    await assertAssistantAllowed(userId);
+    if (!env.ANTHROPIC_API_KEY) throw new AppError(503, "ASSISTANT_DISABLED");
 
     const { messages } = req.body as z.infer<typeof ChatBody>;
     const snapshot = await landlordSnapshot(userId);

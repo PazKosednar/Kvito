@@ -239,7 +239,8 @@
     "BILLING_PROVIDER": "The payment provider is not responding. Try again in a minute.",
     "PROPERTY_SINGLE_UNIT": "A house, apartment or commercial space is let as a whole, so it has no separate units. For several flats choose “Multi-unit house”.",
     "UNIT_IS_PROPERTY": "This is the whole property. If you no longer let it, delete the property.",
-    "PROPERTY_HAS_UNITS": "The property has several units, so it stays a multi-unit house."
+    "PROPERTY_HAS_UNITS": "The property has several units, so it stays a multi-unit house.",
+    "PLAN_LIMIT_ASSISTANT": "The AI assistant comes with the paid plans. Upgrade on the Subscription page."
   },
   "validation": {
     "invalid": "This value is not valid.",
@@ -1679,7 +1680,9 @@
     "hint": "Enter to send, Shift + Enter for a new line.",
     "disabled": "The assistant is not switched on yet. Once it is, it will answer questions about your properties, payments and taxes here.",
     "error": "The assistant is not answering right now. Try again in a moment.",
-    "limit": "You have asked the assistant a lot today. Try again in an hour."
+    "limit": "You have asked the assistant a lot today. Try again in an hour.",
+    "upgrade": "Ask Kvito is an AI assistant that knows your properties, tenancies and payments. It comes with the Plus, Pro and Manager plans. You can ask it, for example:",
+    "upgradeCta": "See plans"
   },
   "photos": {
     "title": "Photos",
@@ -1826,7 +1829,8 @@
     "perYear": "/ year",
     "yearlyPerMonth": "{{amount}} a month, paid once a year",
     "monthlyCancel": "Cancel any time.",
-    "tenantsFree": "You pay through Polar. Tenants never pay anything."
+    "tenantsFree": "You pay through Polar. Tenants never pay anything.",
+    "assistantIncluded": "AI assistant Ask Kvito"
   },
   "promo": {
     "title": "Renting without worries.",

@@ -66,4 +66,16 @@ describe.skipIf(!hasDb)("plan limits", () => {
     expect(locked.body.error.code).toBe("PLAN_LIMIT_UNIT_LOCKED");
     await l.post(`/api/units/${first.id}/tenancies`, tenancy).expect(201);
   });
+  it("AI assistant: only with a paid plan", async () => {
+    const { l } = await landlordWithProperty();
+    const ask = { messages: [{ role: "user", content: "Kdo zamuja?" }] };
+    expect((await l.get("/api/assistant").expect(200)).body.included).toBe(false);
+    const refused = await l.post("/api/assistant/chat", ask);
+    expect(refused.status).toBe(403);
+    expect(refused.body.error.code).toBe("PLAN_LIMIT_ASSISTANT");
+
+    await ctx.prisma.subscription.create({ data: { userId: l.user.id, plan: "PLUS" } });
+    // Not asking for real here: the local .env may hold a real API key.
+    expect((await l.get("/api/assistant").expect(200)).body.included).toBe(true);
+  });
 });

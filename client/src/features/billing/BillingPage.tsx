@@ -201,6 +201,7 @@ function PlanCard({ plan, interval, current, needed, payable, pending, busy, onC
       <ul className="mt-4 flex flex-col gap-1.5 text-sm">
         <li>{t("billing.unitsCount", { count: plan.units })}</li>
         <li>{t("billing.storageAmount", { amount: formatBytes(plan.storageBytes) })}</li>
+        {plan.assistant && <li>{t("billing.assistantIncluded")}</li>}
       </ul>
       <div className="mt-auto pt-5">
         {current ? (

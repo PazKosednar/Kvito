@@ -622,6 +622,86 @@ html:not(.dark) .hero-visual::before {
   background: var(--panel);
 }
 
+/* "Vprašaj Kvito": a sample conversation in the app's style (questions bold, answers behind a thin line). */
+.ai-note {
+  margin: 20px 0 0;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+.ai-demo {
+  display: flex;
+  flex-direction: column;
+  border-color: var(--panel-border);
+  color: var(--ink-on-panel);
+  font-size: 15px;
+  line-height: 1.55;
+}
+.ai-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--panel-line);
+  font-weight: 600;
+}
+.ai-head .icon {
+  color: var(--signal-on-panel);
+}
+.ai-turns {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 0;
+  padding: 22px;
+  list-style: none;
+}
+.ai-q {
+  margin: 0;
+  font-weight: 600;
+}
+.ai-a {
+  margin-top: 8px;
+  padding-left: 16px;
+  border-left: 2px solid var(--panel-line);
+}
+.ai-a p {
+  margin: 0;
+}
+.ai-a ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.ai-a li {
+  position: relative;
+  padding-left: 18px;
+}
+.ai-a li::before {
+  content: "–";
+  position: absolute;
+  left: 0;
+  color: var(--ink-on-panel-muted);
+}
+.ai-a strong {
+  font-weight: 600;
+}
+.ai-a .mono {
+  font-family: var(--font-mono);
+  font-size: 0.94em;
+  white-space: nowrap;
+}
+.ai-input {
+  margin: auto 16px 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--panel-line);
+  border-radius: 6px;
+  background: var(--panel-raised);
+  color: var(--ink-on-panel-muted);
+}
+
 .phones {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

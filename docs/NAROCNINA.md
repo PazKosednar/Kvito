@@ -6,7 +6,7 @@ Stanje: testno obdobje se je končalo 22. 11. 2026; omejitve paketov veljajo ved
 
 1. **Plača samo najemodajalec. Najemnik je vedno brezplačen.** Najemnik je tisti, ki ga najemodajalec povabi; vsaka ovira pri njem zmanjša vrednost za najemodajalca.
 2. **Merilo je najemna enota** (stanovanje, soba, poslovni prostor – v podatkovnem modelu `Unit`), ne nepremičnina. Hiša s tremi stanovanji so tri enote. To je pošteno do lastnika enega stanovanja in raste z vrednostjo, ki jo Kvito prinaša.
-3. **Vsi paketi imajo vse funkcije.** Paketi se razlikujejo samo po številu enot, prostoru za datoteke in podpori. Brez »zaklenjenih« funkcij – preprosto razložiti, preprosto prodati.
+3. **Vsi paketi imajo vse funkcije – razen AI pomočnika.** Paketi se razlikujejo po številu enot, prostoru za datoteke in podpori. Edina izjema je AI pomočnik »Vprašaj Kvito« (od 23. 11. 2026): na voljo je v plačljivih paketih (tudi v Kvitovem preizkusu), ker vsak odgovor stane klic API-ja. Brezplačni paket v pomočniku vidi povabilo k nadgradnji.
 4. **Ena enota je za vedno brezplačna.** Večina zasebnih najemodajalcev v Sloveniji oddaja eno ali dve enoti; prva mora biti brez tveganja in brez kartice.
 5. **Podatki se nikoli ne izbrišejo zaradi paketa.** Če naročnina poteče ali uporabnik preseže omejitev, enote nad omejitvijo preidejo v način samo za branje; najemniki še naprej vidijo svoj najem.
 

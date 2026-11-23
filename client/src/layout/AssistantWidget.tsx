@@ -1,6 +1,8 @@
 import { ArrowUp, CalendarClock, Calculator, Check, Clock, Copy, RotateCcw, Wallet, Wrench, X, type LucideIcon } from "lucide-react";
 import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
+import { ROUTES } from "@/constants";
 import { KvitaMark } from "@/components/brand";
 import { useAssistant } from "@/hooks/useAssistant";
 import { useErrorMessage } from "@/hooks/useErrorMessage";
@@ -103,7 +105,7 @@ export function AssistantWidget() {
   const toMessage = useErrorMessage();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
-  const { available, messages, pending, error, failed, ask, reset } = useAssistant(open);
+  const { available, included, messages, pending, error, failed, ask, reset } = useAssistant(open);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -196,7 +198,26 @@ export function AssistantWidget() {
           </header>
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5 text-[15px] leading-relaxed" aria-live="polite">
-            {available === false ? (
+            {included === false ? (
+              <div className="flex flex-col items-start gap-4">
+                <p className="text-ink-muted">{t("assistant.upgrade")}</p>
+                <ul className="flex flex-col gap-1.5 text-ink">
+                  {STARTERS.slice(0, 3).map(({ key, icon: Icon }) => (
+                    <li key={key} className="flex items-center gap-3">
+                      <Icon className="size-4 shrink-0 text-ink-faint" aria-hidden="true" />
+                      {t(`assistant.starters.${key}`)}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  to={ROUTES.billing}
+                  onClick={() => setOpen(false)}
+                  className="inline-flex h-11 items-center rounded-md bg-primary px-5 font-medium text-primary-foreground transition-opacity duration-150 hover:opacity-90"
+                >
+                  {t("assistant.upgradeCta")}
+                </Link>
+              </div>
+            ) : available === false ? (
               <p className="text-ink-muted">{t("assistant.disabled")}</p>
             ) : turns.length === 0 && !failed ? (
               <>

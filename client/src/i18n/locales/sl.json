@@ -239,7 +239,8 @@
     "BILLING_PROVIDER": "Plačilni ponudnik se ne odziva. Poskusi znova čez minuto.",
     "PROPERTY_SINGLE_UNIT": "Hišo, stanovanje ali poslovni prostor oddajaš kot celoto, zato nima ločenih enot. Za več stanovanj izberi »Večstanovanjska hiša«.",
     "UNIT_IS_PROPERTY": "To je cela nepremičnina. Če je ne oddajaš več, izbriši nepremičnino.",
-    "PROPERTY_HAS_UNITS": "Nepremičnina ima več enot, zato ostane večstanovanjska hiša."
+    "PROPERTY_HAS_UNITS": "Nepremičnina ima več enot, zato ostane večstanovanjska hiša.",
+    "PLAN_LIMIT_ASSISTANT": "AI pomočnik je na voljo v plačljivih paketih. Nadgradiš na strani Naročnina."
   },
   "validation": {
     "invalid": "Vrednost ni pravilna.",
@@ -1727,7 +1728,9 @@
     "hint": "Enter za pošiljanje, Shift + Enter za novo vrstico.",
     "disabled": "Pomočnik še ni vklopljen. Ko ga vklopimo, bo tu odgovarjal na vprašanja o tvojih nepremičninah, plačilih in davkih.",
     "error": "Pomočnik trenutno ne odgovarja. Poskusi znova čez trenutek.",
-    "limit": "Danes si pomočniku zastavil že veliko vprašanj. Poskusi znova čez eno uro."
+    "limit": "Danes si pomočniku zastavil že veliko vprašanj. Poskusi znova čez eno uro.",
+    "upgrade": "Vprašaj Kvito je AI pomočnik, ki pozna tvoje nepremičnine, najeme in plačila. Na voljo je v paketih Plus, Pro in Upravnik. Vpraša ga lahko npr.:",
+    "upgradeCta": "Poglej pakete"
   },
   "photos": {
     "title": "Fotografije",
@@ -1882,7 +1885,8 @@
     "perYear": "/ leto",
     "yearlyPerMonth": "{{amount}} na mesec, plačaš enkrat na leto",
     "monthlyCancel": "Prekličeš kadar koli.",
-    "tenantsFree": "Plačilo opraviš pri ponudniku Polar. Najemniki nikoli ne plačajo ničesar."
+    "tenantsFree": "Plačilo opraviš pri ponudniku Polar. Najemniki nikoli ne plačajo ničesar.",
+    "assistantIncluded": "AI pomočnik Vprašaj Kvito"
   },
   "promo": {
     "title": "Najem brez skrbi.",

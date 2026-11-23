@@ -5,11 +5,11 @@ import { prisma } from "../../lib/prisma.js";
 const GB = 1024 ** 3;
 
 /** Packages from docs/NAROCNINA.md. Prices are shown in the app; Polar charges them. */
-export const PLANS: Record<Plan, { units: number; storageBytes: number; monthlyCents: number; yearlyCents: number }> = {
-  FREE: { units: 1, storageBytes: 1 * GB, monthlyCents: 0, yearlyCents: 0 },
-  PLUS: { units: 3, storageBytes: 5 * GB, monthlyCents: 499, yearlyCents: 4990 },
-  PRO: { units: 10, storageBytes: 20 * GB, monthlyCents: 1199, yearlyCents: 11990 },
-  MANAGER: { units: 30, storageBytes: 50 * GB, monthlyCents: 2799, yearlyCents: 27990 },
+export const PLANS: Record<Plan, { units: number; storageBytes: number; monthlyCents: number; yearlyCents: number; assistant: boolean }> = {
+  FREE: { units: 1, storageBytes: 1 * GB, monthlyCents: 0, yearlyCents: 0, assistant: false },
+  PLUS: { units: 3, storageBytes: 5 * GB, monthlyCents: 499, yearlyCents: 4990, assistant: true },
+  PRO: { units: 10, storageBytes: 20 * GB, monthlyCents: 1199, yearlyCents: 11990, assistant: true },
+  MANAGER: { units: 30, storageBytes: 50 * GB, monthlyCents: 2799, yearlyCents: 27990, assistant: true },
 };
 
 /**
@@ -69,4 +69,10 @@ export async function assertUnitWritable(ownerId: string, unitId: string): Promi
 export async function assertStorageFor(ownerId: string, bytes: number): Promise<void> {
   const [{ plan }, used] = await Promise.all([planOf(ownerId), storageUsed(ownerId)]);
   if (used + bytes > PLANS[plan].storageBytes) throw new AppError(403, "PLAN_LIMIT_STORAGE");
+}
+
+/** The AI assistant (Vprašaj Kvito) comes with the paid plans, including Kvito's own trial of one. */
+export async function assertAssistantAllowed(ownerId: string): Promise<void> {
+  const { plan } = await planOf(ownerId);
+  if (!PLANS[plan].assistant) throw new AppError(403, "PLAN_LIMIT_ASSISTANT");
 }

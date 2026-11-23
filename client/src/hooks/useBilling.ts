@@ -15,6 +15,8 @@ export interface PlanInfo {
   storageBytes: number;
   monthlyCents: number;
   yearlyCents: number;
+  /** The AI assistant (Vprašaj Kvito) is included. */
+  assistant: boolean;
 }
 
 export interface Billing {
