@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="sl" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Dokumentacija – Kvito</title>
+    <meta name="description" content="Navodila za Kvito: nepremičnine, enote in najemi, obveznosti in plačila z UPN QR, sporočila, pogodba in obračun stroškov, okvare, števci, primopredaja, obvestila in nastavitve." />
+    <meta name="theme-color" content="#0c0c0d" />
+    <meta property="og:title" content="Dokumentacija – Kvito" />
+    <meta property="og:description" content="Kako deluje Kvito: navodila za najemodajalce in najemnike, po funkcijah in zaslonih." />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="sl_SI" />
+    <link rel="icon" href="/img/kvito-app-icon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/tokens.css" />
+    <link rel="stylesheet" href="/site.css" />
+    <link rel="stylesheet" href="/docs.css" />
+    <script src="/theme.js"></script>
+  </head>
+  <body>
+    <!-- Icons: lucide (ISC license) -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="sprite" aria-hidden="true"><symbol id="i-qr-code" viewBox="0 0 24 24"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></symbol><symbol id="i-split" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 9 6-6"/></symbol><symbol id="i-scan-line" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></symbol><symbol id="i-landmark" viewBox="0 0 24 24"><path d="M10 18v-7"/><path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/><path d="M6 18v-7"/></symbol><symbol id="i-message-circle" viewBox="0 0 24 24"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></symbol><symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol><symbol id="i-key-round" viewBox="0 0 24 24"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></symbol><symbol id="i-file-text" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol><symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-badge-check" viewBox="0 0 24 24"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m16 9-5.5 5.5L8 12"/></symbol><symbol id="i-sprout" viewBox="0 0 24 24"><path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/><path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/><path d="M5 21h14"/></symbol><symbol id="i-house" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></symbol><symbol id="i-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></symbol><symbol id="i-monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></symbol><symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M12 17V7"/><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/></symbol><symbol id="i-calendar-clock" viewBox="0 0 24 24"><path d="M16 14v2.2l1.6 1"/><path d="M16 2v3"/><path d="M21 7.338V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h2.338"/><path d="M3 9h5.859"/><path d="M8 2v3"/><circle cx="16" cy="16" r="6"/></symbol><symbol id="i-building-2" viewBox="0 0 24 24"><path d="M10 12h4"/><path d="M10 8h4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"/><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol><symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol><symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol></svg>
+    <a class="skip" href="#vsebina">Preskoči na vsebino</a>
+
+    <header class="site-header" id="site-header">
+      <div class="wrap">
+      <div class="header-row">
+        <a href="/" class="brand" aria-label="Kvito – domača stran">
+          <img class="logo" src="/img/kvito-lockup-dark.svg" alt="Kvito" width="95" height="24" />
+        </a>
+        <nav class="nav" aria-label="Glavni meni">
+          <a href="/#funkcije">Funkcije</a>
+          <a href="/#za-oba">Za oba</a>
+          <a href="/#kako">Kako deluje</a>
+          <a href="/#cenik">Cenik</a>
+          <a href="/dokumentacija" aria-current="page">Dokumentacija</a>
+          <a href="/#vprasanja">Vprašanja</a>
+        </nav>
+        <div class="header-actions">
+          <button type="button" class="icon-btn" id="theme-toggle" aria-label="Preklopi temo">
+            <svg class="icon only-dark" aria-hidden="true"><use href="#i-moon" /></svg>
+            <svg class="icon only-light" aria-hidden="true"><use href="#i-sun" /></svg>
+          </button>
+          <a class="btn btn-ghost hide-sm" href="{{APP_URL}}/prijava">Prijava</a>
+          <a class="btn btn-primary hide-sm" href="{{APP_URL}}/prijava">Začni brezplačno</a>
+          <details class="mobile-nav">
+            <summary class="icon-btn" aria-label="Meni"><svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg></summary>
+            <div class="mobile-panel">
+          <a href="/#funkcije">Funkcije</a>
+          <a href="/#za-oba">Za oba</a>
+          <a href="/#kako">Kako deluje</a>
+          <a href="/#cenik">Cenik</a>
+          <a href="/dokumentacija" aria-current="page">Dokumentacija</a>
+          <a href="/#vprasanja">Vprašanja</a>
+              <a class="btn btn-ghost" href="{{APP_URL}}/prijava">Prijava</a>
+              <a class="btn btn-primary" href="{{APP_URL}}/prijava">Začni brezplačno</a>
+            </div>
+          </details>
+        </div>
+      </div>
+      </div>
+    </header>
+
+    <main id="vsebina">
+      <section class="docs-hero">
+        <div class="wrap">
+          <p class="eyebrow"><span class="idx">—</span> Dokumentacija</p>
+          <h1>Kako deluje Kvito.</h1>
+          <p class="lead">Navodila po zaslonih in funkcijah: od prve nepremičnine do potrjenega plačila, obračuna stroškov in izselitve. Za najemodajalce in najemnike.</p>
+          <ul class="docs-meta">
+            <li><svg class="icon" aria-hidden="true"><use href="#i-house" /></svg>Najemodajalec</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>Najemnik</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-smartphone" /></svg>Telefon in računalnik</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check" /></svg>Posnetki z demo podatki</li>
+          </ul>
+        </div>
+      </section>
+
+      <div class="wrap docs-layout">
+        <nav class="toc" aria-label="Vsebina dokumentacije">
+          <p class="eyebrow">Vsebina</p>
+          <ol class="toc-ol"><li><a href="#uvod"><span class="idx">00</span>Pregled sistema</a><ol class="toc-ol"><li><a href="#uvod-vloge">Dve vlogi</a></li><li><a href="#uvod-model">Kako je sistem sestavljen</a></li><li><a href="#uvod-tok">Glavni tok: od najemnine do Kvito ✓</a></li><li><a href="#uvod-naprave">Telefon, računalnik in brez povezave</a></li></ol></li><li><a href="#zacetek"><span class="idx">01</span>Prvi koraki</a><ol class="toc-ol"><li><a href="#registracija">Registracija in prijava</a></li><li><a href="#vloga">Izbira vloge</a></li><li><a href="#prijava-geslo">Pozabljeno geslo</a></li><li><a href="#namestitev">Kvito na začetnem zaslonu</a></li><li><a href="#tema-jezik">Tema in jezik</a></li></ol></li><li><a href="#najemodajalec"><span class="idx">02</span>Najemodajalec: nepremičnine in najemi</a><ol class="toc-ol"><li><a href="#pregled">Domača stran in pregled denarja</a></li><li><a href="#nepremicnine">Nepremičnine</a></li><li><a href="#enote">Enote</a></li><li><a href="#najem-pogoji">Nov najem in pogoji</a></li><li><a href="#povabilo">Povabilo najemnika</a></li></ol></li><li><a href="#najem"><span class="idx">03</span>Najem po zavihkih</a><ol class="toc-ol"><li><a href="#obveznosti">Obveznosti</a></li><li><a href="#nova-obveznost">Nova obveznost in položnice</a></li><li><a href="#potrjevanje">Potrjevanje plačil</a></li><li><a href="#sporocila">Sporočila</a></li><li><a href="#pogodba">Pogodba: najemnina in pogoji</a></li><li><a href="#stroski-obracun">Stroški, akontacije in obračun</a></li><li><a href="#varscina">Varščina</a></li><li><a href="#zakljucek">Zaključek najema</a></li><li><a href="#okvare">Okvare</a></li><li><a href="#stevci">Števci</a></li><li><a href="#dokumenti">Dokumenti</a></li><li><a href="#primopredaja">Primopredaja</a></li><li><a href="#podatki">Podatki</a></li></ol></li><li><a href="#najemnik"><span class="idx">04</span>Najemnik</a><ol class="toc-ol"><li><a href="#najemnik-domov">Moj najem</a></li><li><a href="#placilo">Plačilo z UPN QR</a></li><li><a href="#javi-placilo">Javi plačilo</a></li><li><a href="#najemnik-potrditve">Kaj potrjuje najemnik</a></li><li><a href="#zivljenjepis">Najemniški življenjepis</a></li></ol></li><li><a href="#denar"><span class="idx">05</span>Denar in evidenca</a><ol class="toc-ol"><li><a href="#placila-izvoz">Plačila in izvoz</a></li><li><a href="#izpisek">Uvoz bančnega izpiska</a></li><li><a href="#letni-povzetek">Letni povzetek</a></li><li><a href="#davki">Davki in stroški</a></li><li><a href="#donosnost">Donosnost enot</a></li><li><a href="#koledar">Koledar rokov</a></li></ol></li><li><a href="#obvestila"><span class="idx">06</span>Obvestila in opomniki</a><ol class="toc-ol"><li><a href="#obvestila-kje">Kje so obvestila</a></li><li><a href="#opomniki">Kdaj pošlje Kvito opomnik</a></li></ol></li><li><a href="#racun"><span class="idx">07</span>Račun in nastavitve</a><ol class="toc-ol"><li><a href="#meni">Meni računa</a></li><li><a href="#narocnina">Naročnina</a></li><li><a href="#zasebnost">Zasebnost: izvoz in izbris</a></li><li><a href="#pomocnik">Vprašaj Kvito</a></li></ol></li><li><a href="#pojmi"><span class="idx">08</span>Statusi in pojmi</a><ol class="toc-ol"><li><a href="#statusi">Statusi na enem mestu</a></li><li><a href="#slovarcek">Slovarček</a></li></ol></li><li><a href="#varnost"><span class="idx">09</span>Varnost in podatki</a></li></ol>
+        </nav>
+        <article class="doc">
+          <details class="toc-mobile">
+            <summary>Vsebina</summary>
+            <div class="toc-list"><ol class="toc-ol"><li><a href="#uvod"><span class="idx">00</span>Pregled sistema</a><ol class="toc-ol"><li><a href="#uvod-vloge">Dve vlogi</a></li><li><a href="#uvod-model">Kako je sistem sestavljen</a></li><li><a href="#uvod-tok">Glavni tok: od najemnine do Kvito ✓</a></li><li><a href="#uvod-naprave">Telefon, računalnik in brez povezave</a></li></ol></li><li><a href="#zacetek"><span class="idx">01</span>Prvi koraki</a><ol class="toc-ol"><li><a href="#registracija">Registracija in prijava</a></li><li><a href="#vloga">Izbira vloge</a></li><li><a href="#prijava-geslo">Pozabljeno geslo</a></li><li><a href="#namestitev">Kvito na začetnem zaslonu</a></li><li><a href="#tema-jezik">Tema in jezik</a></li></ol></li><li><a href="#najemodajalec"><span class="idx">02</span>Najemodajalec: nepremičnine in najemi</a><ol class="toc-ol"><li><a href="#pregled">Domača stran in pregled denarja</a></li><li><a href="#nepremicnine">Nepremičnine</a></li><li><a href="#enote">Enote</a></li><li><a href="#najem-pogoji">Nov najem in pogoji</a></li><li><a href="#povabilo">Povabilo najemnika</a></li></ol></li><li><a href="#najem"><span class="idx">03</span>Najem po zavihkih</a><ol class="toc-ol"><li><a href="#obveznosti">Obveznosti</a></li><li><a href="#nova-obveznost">Nova obveznost in položnice</a></li><li><a href="#potrjevanje">Potrjevanje plačil</a></li><li><a href="#sporocila">Sporočila</a></li><li><a href="#pogodba">Pogodba: najemnina in pogoji</a></li><li><a href="#stroski-obracun">Stroški, akontacije in obračun</a></li><li><a href="#varscina">Varščina</a></li><li><a href="#zakljucek">Zaključek najema</a></li><li><a href="#okvare">Okvare</a></li><li><a href="#stevci">Števci</a></li><li><a href="#dokumenti">Dokumenti</a></li><li><a href="#primopredaja">Primopredaja</a></li><li><a href="#podatki">Podatki</a></li></ol></li><li><a href="#najemnik"><span class="idx">04</span>Najemnik</a><ol class="toc-ol"><li><a href="#najemnik-domov">Moj najem</a></li><li><a href="#placilo">Plačilo z UPN QR</a></li><li><a href="#javi-placilo">Javi plačilo</a></li><li><a href="#najemnik-potrditve">Kaj potrjuje najemnik</a></li><li><a href="#zivljenjepis">Najemniški življenjepis</a></li></ol></li><li><a href="#denar"><span class="idx">05</span>Denar in evidenca</a><ol class="toc-ol"><li><a href="#placila-izvoz">Plačila in izvoz</a></li><li><a href="#izpisek">Uvoz bančnega izpiska</a></li><li><a href="#letni-povzetek">Letni povzetek</a></li><li><a href="#davki">Davki in stroški</a></li><li><a href="#donosnost">Donosnost enot</a></li><li><a href="#koledar">Koledar rokov</a></li></ol></li><li><a href="#obvestila"><span class="idx">06</span>Obvestila in opomniki</a><ol class="toc-ol"><li><a href="#obvestila-kje">Kje so obvestila</a></li><li><a href="#opomniki">Kdaj pošlje Kvito opomnik</a></li></ol></li><li><a href="#racun"><span class="idx">07</span>Račun in nastavitve</a><ol class="toc-ol"><li><a href="#meni">Meni računa</a></li><li><a href="#narocnina">Naročnina</a></li><li><a href="#zasebnost">Zasebnost: izvoz in izbris</a></li><li><a href="#pomocnik">Vprašaj Kvito</a></li></ol></li><li><a href="#pojmi"><span class="idx">08</span>Statusi in pojmi</a><ol class="toc-ol"><li><a href="#statusi">Statusi na enem mestu</a></li><li><a href="#slovarcek">Slovarček</a></li></ol></li><li><a href="#varnost"><span class="idx">09</span>Varnost in podatki</a></li></ol></div>
+          </details>
+          <section class="doc-section" id="uvod" aria-labelledby="uvod-h"><p class="eyebrow"><span class="idx">00</span> Dokumentacija</p><h2 id="uvod-h">Pregled sistema</h2>
+<p class="section-lead">Kvito je skupen prostor najemodajalca in najemnika. Najemodajalec vpiše pogoje najema, Kvito iz njih vsak mesec pripravi najemnino, najemnik pa plača v svoji banki s plačilnim nalogom UPN QR. Ko najemodajalec potrdi vsa plačila, je najem <span class="settled">Kvito ✓</span></p>
+<div class="callout"><p class="eyebrow">Pomembno</p><p>Kvito <strong>nikoli ne prejme ali prenaša denarja</strong>. Najemnik vedno plača neposredno najemodajalcu (ali dobavitelju) v svoji banki. Kvito pripravi podatke za plačilo in vodi evidenco, kdo je kaj plačal in potrdil.</p></div>
+
+<h3 id="uvod-vloge">Dve vlogi</h3>
+<ul class="mini-cards">
+  <li><strong>Najemodajalec</strong><span>Vpiše nepremičnine, enote in najeme, povabi najemnike, objavlja položnice, potrjuje plačila, pripravlja obračune in zapisnike. Ima tudi pregled denarja, davkov in rokov.</span></li>
+  <li><strong>Najemnik</strong><span>Vidi, kaj in do kdaj plača, plača v svoji banki, javi plačilo, piše sporočila, prijavlja okvare, vnaša števce in potrjuje zapisnike in obračune.</span></li>
+</ul>
+<p>En račun ima lahko obe vlogi, na primer če oddajaš stanovanje in hkrati sam najemaš. Vlogo zamenjaš v <a href="#meni">meniju računa</a>. Najemnik vidi samo svoj najem, najemodajalec samo svoje nepremičnine – to se preverja na strežniku pri vsakem zahtevku.</p>
+
+<h3 id="uvod-model">Kako je sistem sestavljen</h3>
+<p>Vse v Kvitu visi na štirih ravneh. Najem je središče: nanj so vezane obveznosti, sporočila, pogodba, okvare, števci, dokumenti in primopredaja.</p>
+<ol class="model">
+  <li><p class="eyebrow"><span class="idx">01</span> Nepremičnina</p><strong>Hiša, stanovanje, poslovni prostor</strong><span>Naslov in osnovni podatki. Primer: »Hiša Murska Sobota«.</span></li>
+  <li><p class="eyebrow"><span class="idx">02</span> Enota</p><strong>Kar oddajaš</strong><span>Stanovanje, soba ali prostor. Merilna mesta, ključi, fotografije, energetska izkaznica.</span></li>
+  <li><p class="eyebrow"><span class="idx">03</span> Najem</p><strong>Pogoji in najemniki</strong><span>Najemnina, rok, varščina, IBAN, stroški in delitev med sostanovalce.</span></li>
+  <li><p class="eyebrow"><span class="idx">04</span> Obveznosti</p><strong>Kaj je treba plačati</strong><span>Najemnina vsak mesec samodejno, položnice, akontacije, varščina, poračun.</span></li>
+</ol>
+<p>Enota ostane, ko se najemniki zamenjajo: odčitki števcev, merilna mesta, ključi in dokumenti, vezani na enoto, so na voljo tudi naslednjemu najemu. Vse, kar je vezano na najem (obveznosti, sporočila, zapisniki), ostane pri tistem najemu tudi po zaključku.</p>
+
+<h3 id="uvod-tok">Glavni tok: od najemnine do <span class="settled">Kvito ✓</span></h3>
+<ol class="flow">
+  <li>Vpišeš nepremičnino, enoto in pogoje najema<span class="who">Najemodajalec</span></li>
+  <li>Povabiš najemnika s povezavo ali QR kodo<span class="who">Najemodajalec</span></li>
+  <li>Kvito vsak mesec pripravi najemnino, ti dodaš položnice<span class="who">Kvito · najemodajalec</span></li>
+  <li>Najemnik plača v svoji banki z UPN QR ali kopiranimi podatki<span class="who">Najemnik</span></li>
+  <li>Najemnik tapne »Plačano« in plačilo javi<span class="who">Najemnik</span></li>
+  <li class="done">Ti plačilo potrdiš. Ko je vse potrjeno: Kvito ✓<span class="who">Najemodajalec</span></li>
+</ol>
+<p>Ob vsakem koraku druga stran dobi obvestilo, pred rokom in po njem pa Kvito sam pošlje opomnike (glej <a href="#obvestila">Obvestila in opomniki</a>).</p>
+
+<h3 id="uvod-naprave">Telefon, računalnik in brez povezave</h3>
+<p>Kvito deluje v brskalniku na telefonu in računalniku, namestiti ni treba ničesar. Na telefonu ga lahko dodaš na začetni zaslon in ga odpiraš kot aplikacijo (<a href="#namestitev">navodila</a>). Na telefonu so zavihki najema na vrhu v vrstici, ki jo podrsaš vstran, na računalniku pa v stolpcu na levi.</p>
+<p>Če zmanjka povezave, Kvito pokaže zadnje znane podatke in na vrhu izpiše »Brez povezave si«. Spremembe narediš, ko je povezava spet vzpostavljena.</p>
+<a class="back-top" href="#vsebina"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>Na vrh</a></section><section class="doc-section" id="zacetek" aria-labelledby="zacetek-h"><p class="eyebrow"><span class="idx">01</span> Dokumentacija</p><h2 id="zacetek-h">Prvi koraki</h2>
+<h3 id="registracija">Registracija in prijava</h3>
+<div class="with-shot">
+  <div>
+    <p>Na telefonu te najprej pozdravi uvodni zaslon z gumboma <span class="ui">Prijava</span> in <span class="ui">Registracija</span>, na računalniku je obrazec takoj ob strani.</p>
+    <ol class="doc-steps">
+      <li>Izberi <span class="ui">Registracija</span> in vpiši ime in priimek, e-naslov in geslo (vsaj 8 znakov; izogni se preprostim geslom).</li>
+      <li>Strinjaj se s pogoji uporabe in politiko zasebnosti ter tapni <span class="ui">Ustvari račun</span>.</li>
+      <li>Če Kvito zahteva potrditev e-naslova, ti pošlje 6-mestno kodo. Koda velja 15 minut, velja samo zadnja poslana.</li>
+      <li>Naslednjič se prijaviš z e-naslovom in geslom pod <span class="ui">Prijava</span>.</li>
+    </ol>
+  </div>
+  <figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Registracija na telefonu"><div class="shot-frame"><img class="only-dark" src="/img/docs/pub-register-dark.webp" alt="Registracija na telefonu" width="760" height="1666" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/pub-register-light.webp" alt="Registracija na telefonu" width="760" height="1666" loading="lazy" decoding="async" /></div></button><figcaption>Registracija na telefonu</figcaption></figure>
+</div>
+<div class="shots shots-phones"><figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Uvodni zaslon na telefonu"><div class="shot-frame"><img class="only-dark" src="/img/docs/pub-intro-dark.webp" alt="Uvodni zaslon na telefonu" width="760" height="1645" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/pub-intro-light.webp" alt="Uvodni zaslon na telefonu" width="760" height="1645" loading="lazy" decoding="async" /></div></button><figcaption>Uvodni zaslon na telefonu</figcaption></figure><figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Prijava z e-naslovom in geslom"><div class="shot-frame"><img class="only-dark" src="/img/docs/pub-login-dark.webp" alt="Prijava z e-naslovom in geslom" width="760" height="1645" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/pub-login-light.webp" alt="Prijava z e-naslovom in geslom" width="760" height="1645" loading="lazy" decoding="async" /></div></button><figcaption>Prijava z e-naslovom in geslom</figcaption></figure><figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Izbira vloge ob prvi prijavi"><div class="shot-frame"><img class="only-dark" src="/img/docs/pub-onboarding-dark.webp" alt="Izbira vloge ob prvi prijavi" width="760" height="1645" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/pub-onboarding-light.webp" alt="Izbira vloge ob prvi prijavi" width="760" height="1645" loading="lazy" decoding="async" /></div></button><figcaption>Izbira vloge ob prvi prijavi</figcaption></figure></div>
+
+<h3 id="vloga">Izbira vloge</h3>
+<p>Ob prvi prijavi te Kvito vpraša, kaj te pripelje: <span class="ui">Oddajam nepremičnino</span> (najemodajalec) ali <span class="ui">Najemam stanovanje</span> (najemnik). Drugo vlogo lahko dodaš kadar koli v meniju računa (<span class="ui">Tudi oddajam nepremičnino</span> oziroma <span class="ui">Tudi najemam stanovanje</span>).</p>
+<p>Če te je najemodajalec povabil, ti vloge ni treba izbirati: odpri povezavo iz povabila, prijavi se ali ustvari račun in se pridružiš najemu (glej <a href="#povabilo">Povabilo najemnika</a>).</p>
+
+<h3 id="prijava-geslo">Pozabljeno geslo</h3>
+<p>Na prijavi tapni <span class="ui">Pozabljeno geslo?</span>, vpiši e-naslov računa in Kvito ti pošlje kodo. Vpiši kodo in novo geslo – nato si prijavljen. Geslo zamenjaš tudi, ko si prijavljen: meni računa → <span class="ui">Zamenjaj geslo</span>. Po menjavi gesla se odjaviš na vseh drugih napravah.</p>
+
+<h3 id="namestitev">Kvito na začetnem zaslonu</h3>
+<ul>
+  <li><strong>Android (Chrome):</strong> v meniju brskalnika izberi »Namesti aplikacijo« ali »Dodaj na začetni zaslon«.</li>
+  <li><strong>iPhone (Safari):</strong> tapni Deli in nato »Dodaj na začetni zaslon«. Kvito ti to tudi sam predlaga. Na iPhonu dobiš obvestila samo, če je Kvito dodan na začetni zaslon.</li>
+  <li><strong>Računalnik:</strong> v Chromu ali Edgu ikona za namestitev v naslovni vrstici – ali pa Kvito preprosto uporabljaš v zavihku.</li>
+</ul>
+<p>Ko je na voljo nova različica, Kvito pokaže obvestilo z gumbom <span class="ui">Posodobi</span>.</p>
+
+<h3 id="tema-jezik">Tema in jezik</h3>
+<p>Gumb ob zvončku v glavi zamenja temo: <strong>Grafit</strong> (temna, privzeta), <strong>Kamen</strong> (svetla) ali <strong>Sistemsko</strong> (sledi nastavitvi naprave). Jezik (slovenščina ali angleščina) izbereš v meniju računa. Vsi posnetki v teh navodilih se zamenjajo skupaj s temo te strani.</p>
+<a class="back-top" href="#vsebina"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>Na vrh</a></section><section class="doc-section" id="najemodajalec" aria-labelledby="najemodajalec-h"><p class="eyebrow"><span class="idx">02</span> Dokumentacija</p><h2 id="najemodajalec-h">Najemodajalec: nepremičnine in najemi</h2>
+<p class="section-lead">Najem postaviš v treh korakih: dodaš nepremičnino in enoto, vpišeš pogoje najema in povabiš najemnika. Od takrat Kvito vsak mesec sam pripravi najemnino.</p>
+
+<h3 id="pregled">Domača stran in pregled denarja</h3>
+<p>Na vrhu je <strong>Pregled denarja</strong> za vse nepremičnine skupaj:</p>
+<ul>
+  <li><strong>V zamudi</strong> – zneski, katerih rok je potekel in niso plačani.</li>
+  <li><strong>Čaka potrditev</strong> – najemnik je javil plačilo, ti ga še nisi potrdil (s številom plačil).</li>
+  <li><strong>Še za prejeti</strong> – odprti zneski, ki še niso zapadli.</li>
+</ul>
+<p>Povezava <span class="ui">Plačila</span> vodi na <a href="#placila-izvoz">uvoz izpiska in izvoze</a>. Pod pregledom je <strong>mestece tvojih nepremičnin</strong>: vsaka stavba je ena nepremičnina, okna so enote. Barva in oznaka povesta stanje: <span class="pill pill-ok">Poravnano</span> <span class="pill ">V teku</span> <span class="pill pill-warn">Zahteva pozornost</span> <span class="pill pill-wait">Prosto</span>. Klik na stavbo odpre nepremičnino. Okolico (park, mesto, podeželje), čas dneva in letni čas lahko izbereš sam – to je samo okras.</p>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Domača stran najemodajalca: pregled denarja in mestece nepremičnin"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-home-dark.webp" alt="Domača stran najemodajalca: pregled denarja in mestece nepremičnin" width="1500" height="1042" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-home-light.webp" alt="Domača stran najemodajalca: pregled denarja in mestece nepremičnin" width="1500" height="1042" loading="lazy" decoding="async" /></div></button><figcaption>Domača stran najemodajalca: pregled denarja in mestece nepremičnin</figcaption></figure>
+
+<h3 id="nepremicnine">Nepremičnine</h3>
+<p><span class="ui">Dodaj nepremičnino</span> na domači strani. Izbereš vrsto:</p>
+<div class="table-wrap"><table class="doc-table">
+<thead><tr><th>Vrsta</th><th>Kdaj</th><th>Enote</th></tr></thead>
+<tbody>
+<tr><td>Hiša</td><td>Enodružinska hiša, ki jo oddajaš kot celoto.</td><td>Ena enota (»Cela hiša«) se ustvari sama.</td></tr>
+<tr><td>Večstanovanjska hiša</td><td>Hiša z več stanovanji.</td><td>Enote dodaš v naslednjem koraku.</td></tr>
+<tr><td>Stanovanje</td><td>Stanovanje v bloku.</td><td>Ena enota (»Celo stanovanje«).</td></tr>
+<tr><td>Poslovni prostor</td><td>Pisarna, skladišče, lokal.</td><td>Ena enota (»Cel prostor«).</td></tr>
+</tbody></table></div>
+<p>Vpišeš ime (kako ji praviš), naslov in po želji sobnost, površino in leto izgradnje – vse to lahko dopolniš tudi kasneje. Stran nepremičnine pokaže enote, koliko jih je oddanih in skupno najemnino na mesec. Nepremičnino lahko izbrišeš skupaj z vsemi praznimi enotami.</p>
+<div class="shots shots-desk shots-2"><figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Večstanovanjska hiša z dvema enotama"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-property-dark.webp" alt="Večstanovanjska hiša z dvema enotama" width="1500" height="1042" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-property-light.webp" alt="Večstanovanjska hiša z dvema enotama" width="1500" height="1042" loading="lazy" decoding="async" /></div></button><figcaption>Večstanovanjska hiša z dvema enotama</figcaption></figure><figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Nova nepremičnina: izbira vrste"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-property-new-dark.webp" alt="Nova nepremičnina: izbira vrste" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-property-new-light.webp" alt="Nova nepremičnina: izbira vrste" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Nova nepremičnina: izbira vrste</figcaption></figure></div>
+
+<h3 id="enote">Enote</h3>
+<p>Enota je tisto, kar oddajaš. Na strani enote so:</p>
+<ul>
+  <li><strong>Najem</strong> – kdo trenutno najema in za koliko, z gumbom <span class="ui">Odpri najem</span>; prosta enota ima gumb za nov najem.</li>
+  <li><strong>Osnovno</strong> – površina, tip stanovanja, opremljenost, parkirno mesto, klet, balkon, hišni ljubljenčki.</li>
+  <li><strong>Uradno</strong> – ID znak dela stavbe in energetska izkaznica. Kvito opozori, ko izkaznica kmalu poteče, rok pa doda v <a href="#koledar">koledar rokov</a>.</li>
+  <li><strong>Merilna mesta</strong> – številke merilnih mest in dobavitelji za elektriko, plin, vodo, ogrevanje, internet.</li>
+  <li><strong>Ključi</strong> – kateri ključi in kartice so izdani, koliko in kdo jih ima.</li>
+  <li><strong>Fotografije</strong> – stanje enote vedno pri roki.</li>
+</ul>
+<div class="callout"><p>Najemnik vidi osnovne podatke in merilna mesta. Ključev in fotografij ne vidi.</p></div>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Stran enote: najem, podatki, merilna mesta in ključi"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-unit-dark.webp" alt="Stran enote: najem, podatki, merilna mesta in ključi" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-unit-light.webp" alt="Stran enote: najem, podatki, merilna mesta in ključi" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Stran enote: najem, podatki, merilna mesta in ključi</figcaption></figure>
+
+<h3 id="najem-pogoji">Nov najem in pogoji</h3>
+<p>Na prosti enoti tapni <span class="ui">Vpiši najem</span>. Pogoje vpišeš enkrat, Kvito iz njih vsak mesec pripravi najemnino. Kasneje jih urejaš v zavihku <a href="#pogodba">Pogodba</a> (<span class="ui">Uredi</span>).</p>
+<div class="table-wrap"><table class="doc-table">
+<thead><tr><th>Polje</th><th>Kaj pomeni</th></tr></thead>
+<tbody>
+<tr><td>Mesečna najemnina, rok plačila</td><td>Znesek in dan v mesecu, ko zapade. Če rok prvega meseca pade pred začetek najema, se za ta mesec najemnina ne ustvari.</td></tr>
+<tr><td>Varščina</td><td>Neobvezno. Kvito opozori, če je višja od treh mesečnih najemnin – preveri pogodbo in zakon.</td></tr>
+<tr><td>Začetek, konec</td><td>Konec pusti prazen, če je najem za nedoločen čas.</td></tr>
+<tr><td>Odpovedni rok</td><td>V dneh, kot piše v pogodbi.</td></tr>
+<tr><td>Letni pregled najemnine</td><td>Mesec, ko te Kvito opomni, da preveriš najemnino.</td></tr>
+<tr><td>Kam se plačuje</td><td>Prejemnik, IBAN, ulica ter pošta in kraj. Ti podatki gredo na plačilni nalog UPN. Brez naslova prejemnika koda QR ni na voljo (gumbi Kopiraj delujejo).</td></tr>
+<tr><td>Drugi načini plačila</td><td>Neobvezno besedilo, ki ga najemnik vidi ob podatkih za plačilo, npr. »Flik: 041 …«.</td></tr>
+<tr><td>Stroški, ki jih krije najemnik</td><td>Izbereš sam (elektrika, voda, plin, ogrevanje, odpadki, internet, TV, rezervni sklad, upravnik, čiščenje, drugo). Kvito ničesar ne predpostavlja.</td></tr>
+<tr><td>Plačilo najemnine in stroškov</td><td><strong>Eno plačilo na mesec</strong> (pavšal: najemnina in akontacija stroškov skupaj, en UPN) ali <strong>Ločeno</strong> (dve obveznosti na mesec).</td></tr>
+<tr><td>Delitev med sostanovalce</td><td><strong>Enako</strong>, <strong>v %</strong> (deleži morajo dati 100 %) ali <strong>po osebah</strong> (glede na število oseb pri vsakem najemniku).</td></tr>
+</tbody></table></div>
+<p>Z gumbom <span class="ui">Shrani in povabi najemnika</span> greš takoj na povabilo.</p>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Pogoji najema"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-tenancy-form-dark.webp" alt="Pogoji najema" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-tenancy-form-light.webp" alt="Pogoji najema" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Pogoji najema</figcaption></figure>
+
+<h3 id="povabilo">Povabilo najemnika</h3>
+<ol class="doc-steps">
+  <li>V najemu tapni <span class="ui">Povabi</span> (ali <span class="ui">Shrani in povabi najemnika</span> pri novem najemu).</li>
+  <li>Po želji vpiši e-naslov najemnika. Takrat povabilo pošljemo po e-pošti in ga lahko sprejme samo ta naslov. Brez e-naslova lahko povezavo uporabi kdorkoli, ki jo ima.</li>
+  <li>Tapni <span class="ui">Ustvari povabilo</span>. Najemnik naj skenira QR kodo s kamero telefona, ali pa mu povezavo kopiraš oziroma deliš.</li>
+  <li>Najemnik odpre povezavo, se prijavi ali ustvari račun in tapne <span class="ui">Pridruži se</span>. Aplikacije mu ni treba nameščati.</li>
+</ol>
+<div class="callout callout-warn"><p>Povezavo vidiš samo ob ustvarjanju. Če jo izgubiš, ustvari novo. Povabilo velja 14 dni; odprta povabila lahko pod <span class="ui">Odprta povabila</span> kadar koli prekličeš.</p></div>
+<p>Za več sostanovalcev ustvariš več povabil (<span class="ui">Povabi še enega</span>). Deleže pri delitvi stroškov nastaviš v pogojih najema.</p>
+<div class="shots shots-mix">
+  <figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Povabilo s QR kodo in povezavo"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-invite-qr-dark.webp" alt="Povabilo s QR kodo in povezavo" width="1500" height="1239" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-invite-qr-light.webp" alt="Povabilo s QR kodo in povezavo" width="1500" height="1239" loading="lazy" decoding="async" /></div></button><figcaption>Povabilo s QR kodo in povezavo</figcaption></figure>
+  <figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Kaj vidi najemnik, ko odpre povezavo"><div class="shot-frame"><img class="only-dark" src="/img/docs/pub-accept-dark.webp" alt="Kaj vidi najemnik, ko odpre povezavo" width="760" height="1645" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/pub-accept-light.webp" alt="Kaj vidi najemnik, ko odpre povezavo" width="760" height="1645" loading="lazy" decoding="async" /></div></button><figcaption>Kaj vidi najemnik, ko odpre povezavo</figcaption></figure>
+</div>
+<a class="back-top" href="#vsebina"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>Na vrh</a></section><section class="doc-section" id="najem" aria-labelledby="najem-h"><p class="eyebrow"><span class="idx">03</span> Dokumentacija</p><h2 id="najem-h">Najem po zavihkih</h2>
+<p class="section-lead">Vse o enem najemu je na enem mestu, v osmih zavihkih: Obveznosti, Sporočila, Pogodba, Okvare, Števci, Dokumenti, Primopredaja in Podatki. Najemodajalec in najemnik vidita iste zavihke, le dejanja so različna. Številka ob zavihku pomeni novosti (neprebrana sporočila, plačila za potrditev, novosti v pogodbi).</p>
+
+<h3 id="obveznosti">Obveznosti</h3>
+<p>Obveznost je vse, kar mora najemnik plačati: najemnina, položnica, akontacija stroškov, varščina ali poračun. Na vrhu je <strong>stanje najema</strong> (odprto, zamuja, čaka potrditev) in <strong>Leto najema</strong> – trak zadnjih dvanajstih mesecev, kjer vsak mesec pokaže, ali je poravnan, čaka, je odprt ali v zamudi.</p>
+<p>Spodaj so obveznosti razvrščene po tem, kaj je treba narediti: <strong>Čaka tvojo potrditev</strong>, <strong>Sporno</strong>, <strong>Odprto</strong> in <strong>Poravnano</strong>.</p>
+<ul>
+  <li><strong>Najemnina se ustvari sama</strong> na začetku vsakega meseca, z rokom na dan iz pogojev najema. Pri plačilu »eno na mesec« je to ena obveznost »Najemnina in stroški« (najemnina + akontacije), pri »ločeno« pa najemnina in akontacija stroškov posebej.</li>
+  <li>Ko rok poteče in obveznost ni plačana, preide v <span class="pill pill-warn">Zamuda</span>.</li>
+  <li>Pri več najemnikih se vsaka obveznost razdeli na deleže po pravilu iz pogojev; vsak najemnik vidi in plača svoj delež s svojim sklicem.</li>
+</ul>
+<div class="shots shots-mix"><figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Obveznosti najema z dvema najemnikoma (pavšal)"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-charges-dark.webp" alt="Obveznosti najema z dvema najemnikoma (pavšal)" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-charges-light.webp" alt="Obveznosti najema z dvema najemnikoma (pavšal)" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Obveznosti najema z dvema najemnikoma (pavšal)</figcaption></figure><figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Isti najem v telefonu enega od najemnikov"><div class="shot-frame"><img class="only-dark" src="/img/docs/tr-charges-dark.webp" alt="Isti najem v telefonu enega od najemnikov" width="760" height="2241" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/tr-charges-light.webp" alt="Isti najem v telefonu enega od najemnikov" width="760" height="2241" loading="lazy" decoding="async" /></div></button><figcaption>Isti najem v telefonu enega od najemnikov</figcaption></figure></div>
+
+<h3 id="nova-obveznost">Nova obveznost in položnice</h3>
+<ol class="doc-steps">
+  <li>V zavihku Obveznosti tapni <span class="ui">Nova obveznost</span>.</li>
+  <li><span class="ui">Naloži položnico</span> – PDF ali fotografijo. Če ima položnica kodo UPN QR, Kvito prebere znesek, rok, IBAN in sklic ter izpolni obrazec. Podatke vedno preveri.</li>
+  <li>Izberi vrsto stroška (stroški, ki niso v dogovoru, so označeni »ni v dogovoru«), naziv, kot ga bo videl najemnik (npr. »Elektrika oktober«), znesek in rok.</li>
+  <li>Izberi, <strong>komu se plača</strong>: <span class="ui">Meni</span> – najemnik plača tebi na IBAN iz pogojev, vsak dobi svoj sklic; ali <span class="ui">Dobavitelju</span> – najemnik plača neposredno dobavitelju s podatki z originalne položnice (IBAN, sklic).</li>
+  <li>Po želji dodaj namen in opombo za najemnika ter tapni <span class="ui">Objavi obveznost</span>. Najemnik dobi obvestilo.</li>
+</ol>
+<p>Znesek se samodejno razdeli med najemnike po pravilu delitve. K obstoječi obveznosti lahko kasneje dodaš prilogo (položnico ali račun).</p>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Nova obveznost: nalaganje položnice in podatki"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-charge-new-dark.webp" alt="Nova obveznost: nalaganje položnice in podatki" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-charge-new-light.webp" alt="Nova obveznost: nalaganje položnice in podatki" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Nova obveznost: nalaganje položnice in podatki</figcaption></figure>
+
+<h3 id="potrjevanje">Potrjevanje plačil</h3>
+<p>Ko najemnik javi plačilo, obveznost preide v <span class="pill pill-wait">Čaka potrditev</span> in se pokaže v razdelku <strong>Čaka tvojo potrditev</strong> ter v pregledu denarja. Odpri jo in preveri v svoji banki:</p>
+<ul>
+  <li><span class="ui">Potrdi</span> – plačilo je prejeto, delež je <span class="pill pill-ok">Poravnano</span>. Ko so potrjeni vsi deleži, je obveznost poravnana.</li>
+  <li><span class="ui">Plačila ne vidim</span> – dodaš pojasnilo za najemnika (npr. »še ni prispelo«). Obveznost se vrne v odprto, najemnik vidi tvoje pojasnilo.</li>
+  <li><span class="ui">Označi kot plačano</span> – če je najemnik plačal, a plačila ni javil v Kvitu (npr. gotovina ali Flik).</li>
+  <li><span class="ui">Ponovno odpri</span> – če si potrdil pomotoma.</li>
+</ul>
+<p>Plačila s sklicem Kvito lahko potrdiš tudi v kupu z <a href="#izpisek">uvozom bančnega izpiska</a>. Vsaka sprememba zneska ali stanja se zabeleži (kdo, kdaj, prej in potem).</p>
+<p>Če najemnik meni, da obveznost ni prava, jo označi kot sporno (<span class="pill pill-danger">Spor</span>). Dogovorita se v sporočilih. Napačno obveznost izbrišeš in objaviš pravo, sicer plačilo potrdiš kot običajno.</p>
+<div class="shots shots-desk shots-2"><figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Javljeno plačilo enega najemnika čaka potrditev"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-charge-confirm-dark.webp" alt="Javljeno plačilo enega najemnika čaka potrditev" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-charge-confirm-light.webp" alt="Javljeno plačilo enega najemnika čaka potrditev" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Javljeno plačilo enega najemnika čaka potrditev</figcaption></figure><figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Obveznost v zamudi"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-charge-overdue-dark.webp" alt="Obveznost v zamudi" width="1500" height="1344" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-charge-overdue-light.webp" alt="Obveznost v zamudi" width="1500" height="1344" loading="lazy" decoding="async" /></div></button><figcaption>Obveznost v zamudi</figcaption></figure></div>
+
+<h3 id="sporocila">Sporočila</h3>
+<p>Pogovor poteka ob najemu, ne v zasebnem klepetu, zato je vse na enem mestu tudi čez leto dni. Sporočila prihajajo sproti, brez osveževanja. Priložiš lahko fotografijo ali PDF, oznaka »Prebrano« pove, da je druga stran sporočilo videla. Kvito sam doda sistemska sporočila ob dogodkih, na primer ob novi prijavi okvare – ta so povezana z okvaro ali obveznostjo, na katero se nanašajo.</p>
+<div class="shots shots-mix"><figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Sporočila najema na računalniku"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-messages-dark.webp" alt="Sporočila najema na računalniku" width="1500" height="1042" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-messages-light.webp" alt="Sporočila najema na računalniku" width="1500" height="1042" loading="lazy" decoding="async" /></div></button><figcaption>Sporočila najema na računalniku</figcaption></figure><figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Sporočila v telefonu najemnika s sistemskim sporočilom o okvari"><div class="shot-frame"><img class="only-dark" src="/img/docs/tn-messages-dark.webp" alt="Sporočila v telefonu najemnika s sistemskim sporočilom o okvari" width="760" height="1645" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/tn-messages-light.webp" alt="Sporočila v telefonu najemnika s sistemskim sporočilom o okvari" width="760" height="1645" loading="lazy" decoding="async" /></div></button><figcaption>Sporočila v telefonu najemnika s sistemskim sporočilom o okvari</figcaption></figure></div>
+
+<h3 id="pogodba">Pogodba: najemnina in pogoji</h3>
+<p>Zavihek Pogodba zbira vse, kar je dogovorjeno za cel najem: pogoje, spremembe najemnine, varščino, stroške z obračuni in kontrolni seznam za zaključek.</p>
+<ul>
+  <li><strong>Najemnina in pogoji</strong> – pregled pogojev z gumbom <span class="ui">Uredi</span>.</li>
+  <li><span class="ui">Spremeni najemnino</span> – vpišeš novo najemnino in od kdaj velja (npr. letna uskladitev po pogodbi). Kvito indeksa ne izračuna, novo najemnino vpišeš sam. Najemnik dobi obvestilo, sprememba se upošteva pri najemnini v mesecu, ko začne veljati, prejšnje spremembe ostanejo zapisane. Načrtovano spremembo lahko prekličeš.</li>
+</ul>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Zavihek Pogodba: pogoji, varščina, stroški in obračuni"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-contract-dark.webp" alt="Zavihek Pogodba: pogoji, varščina, stroški in obračuni" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-contract-light.webp" alt="Zavihek Pogodba: pogoji, varščina, stroški in obračuni" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Zavihek Pogodba: pogoji, varščina, stroški in obračuni</figcaption></figure>
+
+<h3 id="stroski-obracun">Stroški, akontacije in obračun</h3>
+<p>Če najemnik stroške plačuje z mesečnimi predujmi (akontacijami), jih nastaviš v razdelku <strong>Stroški in obračun</strong>: <span class="ui">Po vrstah stroškov</span> (npr. ogrevanje 50 €, voda 18 €) ali <span class="ui">En skupen znesek</span> za vse stroške. Akontacije se zaračunajo enkrat na mesec z rokom najemnine, spremembe veljajo od naslednjega mesečnega plačila.</p>
+<h4>Stroški po mesecih</h4>
+<p>Ko dobiš račun (upravnik, elektrika, voda …), vpišeš njegov znesek v tabelo <strong>Stroški po mesecih</strong>. Najemnik vidi isto tabelo. Kvito sproti pokaže, ali ima najemnik trenutno kaj v dobro ali bi moral doplačati – ta znesek je informativen, velja šele potrjen obračun.</p>
+<p><strong>Napoved</strong> oceni stroške do izbranega meseca (iz istih mesecev lani ali iz povprečja) in predlaga pavšal, pri katerem bi bil obračun izravnan. Pri skupnem znesku ga nastaviš z enim klikom (<span class="ui">Nastavi pavšal na …</span>). Napoved je ocena, ne obračun.</p>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Stroški po mesecih z napovedjo do konca leta"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-costs-dark.webp" alt="Stroški po mesecih z napovedjo do konca leta" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-costs-light.webp" alt="Stroški po mesecih z napovedjo do konca leta" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Stroški po mesecih z napovedjo do konca leta</figcaption></figure>
+<h4>Obračun stroškov</h4>
+<ol class="doc-steps">
+  <li><span class="ui">Nov obračun</span> → izberi obdobje. Kvito sešteje plačane akontacije in stroške, ki si jih vpisal po mesecih, ter upošteva dobroimetje iz prejšnjega obračuna.</li>
+  <li>Preveri rezultat: <strong>Doplačilo</strong> (najemnik dolguje), <strong>Vračilo</strong> (preplačal je) ali <strong>Brez razlike</strong>. Po želji dodaš pojasnila, račun v prilogi in sporočilo.</li>
+  <li><span class="ui">Shrani osnutek</span> ali <span class="ui">Pošlji najemniku</span>.</li>
+  <li>Najemnik obračun potrdi ali ga zavrne z razlogom. Pri doplačilu dobi po potrditvi obveznost z rokom, ki si ga določil.</li>
+  <li>Pri preplačilu najemnik izbere, kaj naj se zgodi z zneskom: <strong>pusti v dobro</strong> (upošteva se v naslednjem obračunu), <strong>odštej od naslednjega plačila</strong> ali <strong>vrni mi na račun</strong>. Ti lahko eno možnost predlagaš. Ko denar vrneš, to zabeležiš (<span class="ui">Vrnil sem …</span>).</li>
+</ol>
+<div class="shots shots-mix"><figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Obračun stroškov za leto: tehtnica, stroški po mesecih in rezultat"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-settlement-dark.webp" alt="Obračun stroškov za leto: tehtnica, stroški po mesecih in rezultat" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-settlement-light.webp" alt="Obračun stroškov za leto: tehtnica, stroški po mesecih in rezultat" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Obračun stroškov za leto: tehtnica, stroški po mesecih in rezultat</figcaption></figure><figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Pogodba v telefonu najemnika"><div class="shot-frame"><img class="only-dark" src="/img/docs/tj-contract-dark.webp" alt="Pogodba v telefonu najemnika" width="760" height="2241" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/tj-contract-light.webp" alt="Pogodba v telefonu najemnika" width="760" height="2241" loading="lazy" decoding="async" /></div></button><figcaption>Pogodba v telefonu najemnika</figcaption></figure></div>
+
+<h3 id="varscina">Varščina</h3>
+<p>Varščina ima svojo pot od plačila do vračila:</p>
+<div class="table-wrap"><table class="doc-table">
+<thead><tr><th>Stanje</th><th>Kaj se zgodi</th></tr></thead>
+<tbody>
+<tr><td><span class="pill pill-wait">Čaka plačilo</span></td><td><span class="ui">Pošlji v plačilo</span> – najemnik dobi obveznost s podatki za plačilo. Če si varščino že prejel, izberi <span class="ui">Že prejeta</span> in vpiši datum.</td></tr>
+<tr><td><span class="pill ">Pri najemodajalcu</span></td><td>Varščina je plačana in jo hraniš do konca najema.</td></tr>
+<tr><td><span class="pill pill-wait">Predlog vračila</span></td><td>Ob koncu najema <span class="ui">Predlagaj vračilo</span>: kaj zadržiš in zakaj (postavke iz zapisnika o izselitvi se ponudijo same) ter sporočilo najemniku.</td></tr>
+<tr><td><span class="pill pill-danger">Ni dogovora</span></td><td>Najemnik se s predlogom ne strinja in napiše zakaj. Ti predlog urediš in pošlješ znova.</td></tr>
+<tr><td><span class="pill pill-ok">Dogovorjeno</span></td><td>Najemnik se strinja. Ti vrneš denar v svoji banki in to zabeležiš.</td></tr>
+<tr><td><span class="pill pill-ok">Vrnjeno</span></td><td>Najemnik potrdi prejem (<span class="ui">Denar sem prejel</span>).</td></tr>
+</tbody></table></div>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Predlog vračila varščine z odbitkom iz zapisnika"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-deposit-dark.webp" alt="Predlog vračila varščine z odbitkom iz zapisnika" width="1500" height="1491" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-deposit-light.webp" alt="Predlog vračila varščine z odbitkom iz zapisnika" width="1500" height="1491" loading="lazy" decoding="async" /></div></button><figcaption>Predlog vračila varščine z odbitkom iz zapisnika</figcaption></figure>
+
+<h3 id="zakljucek">Zaključek najema</h3>
+<p>Razdelek <strong>Zaključek najema</strong> v zavihku Pogodba je kontrolni seznam, kaj še manjka, da je ob izselitvi vse poravnano. Vsaka točka je <em>urejeno</em>, <em>manjka</em> ali <em>ne velja</em>, z gumbom <span class="ui">Odpri</span> na pravo mesto:</p>
+<ul>
+  <li>vse obveznosti poravnane,</li>
+  <li>zapisnik ob izselitvi potrjen na obeh straneh,</li>
+  <li>končni odčitki števcev in vrnjeni ključi v zapisniku,</li>
+  <li>obračun stroškov do zadnje akontacije,</li>
+  <li>varščina vrnjena ali dogovorjena,</li>
+  <li>morebitno dobroimetje vrnjeno.</li>
+</ul>
+<p><span class="ui">Zaključi najem</span> ustavi ustvarjanje novih najemnin in najem označi kot <span class="pill ">Zaključen</span>. Če še kaj manjka, te Kvito vpraša, ali želiš vseeno zaključiti. Zgodovina zaključenega najema ostane na voljo obema.</p>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Zaključen najem: vse točke seznama so urejene"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-contract-ended-dark.webp" alt="Zaključen najem: vse točke seznama so urejene" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-contract-ended-light.webp" alt="Zaključen najem: vse točke seznama so urejene" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Zaključen najem: vse točke seznama so urejene</figcaption></figure>
+
+<h3 id="okvare">Okvare</h3>
+<p>Najemnik prijavi okvaro s <span class="ui">Prijavi okvaro</span>: kaj je pokvarjeno (voda in odtoki, elektrika, ogrevanje, naprave, okna in vrata, stene/tla/strop, mrčes, drugo), kratek naslov, opis, nujnost in fotografije.</p>
+<div class="table-wrap"><table class="doc-table">
+<thead><tr><th>Nujnost</th><th>Pomen</th></tr></thead>
+<tbody>
+<tr><td>Lahko počaka</td><td>Ne moti vsakdanjega življenja.</td></tr>
+<tr><td>Običajno</td><td>Treba je urediti v nekaj dneh.</td></tr>
+<tr><td>Nujno</td><td>Voda teče, ni elektrike ali ogrevanja, nevarnost.</td></tr>
+</tbody></table></div>
+<p>Najemodajalec okvaro premika med stanji <span class="pill ">Nova</span> → <span class="pill pill-wait">V delu</span> → <span class="pill pill-ok">Rešena</span>. Obe strani pišeta komentarje in dodajata fotografije. Rešeno okvaro je mogoče ponovno odpreti. Zavihek loči odprte in rešene okvare.</p>
+<div class="shots shots-mix">
+  <figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Okvara z nujnostjo, stanjem in komentarji"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-issue-dark.webp" alt="Okvara z nujnostjo, stanjem in komentarji" width="1500" height="1363" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-issue-light.webp" alt="Okvara z nujnostjo, stanjem in komentarji" width="1500" height="1363" loading="lazy" decoding="async" /></div></button><figcaption>Okvara z nujnostjo, stanjem in komentarji</figcaption></figure>
+  <figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Prijava okvare v telefonu najemnika"><div class="shot-frame"><img class="only-dark" src="/img/docs/tn-issue-new-dark.webp" alt="Prijava okvare v telefonu najemnika" width="760" height="2241" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/tn-issue-new-light.webp" alt="Prijava okvare v telefonu najemnika" width="760" height="2241" loading="lazy" decoding="async" /></div></button><figcaption>Prijava okvare v telefonu najemnika</figcaption></figure>
+</div>
+
+<h3 id="stevci">Števci</h3>
+<p><span class="ui">Vnesi odčitek</span>: izberi števec (elektrika, voda, plin, toplota), vpiši stanje, datum, po želji oznako (npr. »topla voda« ali številko števca) in fotografijo. Fotografija prepreči dvome. Kvito pokaže porabo od prejšnjega odčitka in opozori, če je odčitek nižji od prejšnjega (npr. zamenjan števec – dodaj opombo). Odčitke vnašata oba, ostanejo pri enoti tudi, ko se najemniki zamenjajo.</p>
+<div class="shots shots-mix">
+  <figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Odčitki z zgodovino in porabo"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-meters-dark.webp" alt="Odčitki z zgodovino in porabo" width="1500" height="1042" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-meters-light.webp" alt="Odčitki z zgodovino in porabo" width="1500" height="1042" loading="lazy" decoding="async" /></div></button><figcaption>Odčitki z zgodovino in porabo</figcaption></figure>
+  <figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Vnos odčitka na telefonu"><div class="shot-frame"><img class="only-dark" src="/img/docs/tj-meters-dark.webp" alt="Vnos odčitka na telefonu" width="760" height="1645" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/tj-meters-light.webp" alt="Vnos odčitka na telefonu" width="760" height="1645" loading="lazy" decoding="async" /></div></button><figcaption>Vnos odčitka na telefonu</figcaption></figure>
+</div>
+
+<h3 id="dokumenti">Dokumenti</h3>
+<p>Najemodajalec doda pogodbo, anekse, hišni red ali navodila naprav. Pri vsakem izbere:</p>
+<ul>
+  <li><strong>Vidnost:</strong> <span class="ui">Vidno najemnikom</span> (najemnik ga vidi in prenese) ali <span class="ui">Samo zame</span>. Vidnost lahko kasneje spremeniš.</li>
+  <li><strong>Velja za:</strong> <span class="ui">Ta najem</span> (npr. pogodba, aneks) ali <span class="ui">Enoto</span> – dokument ostane pri stanovanju tudi za naslednje najemnike (npr. navodila naprav).</li>
+</ul>
+<div class="shots shots-mix"><figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Dokumenti najema in enote"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-documents-dark.webp" alt="Dokumenti najema in enote" width="1500" height="1042" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-documents-light.webp" alt="Dokumenti najema in enote" width="1500" height="1042" loading="lazy" decoding="async" /></div></button><figcaption>Dokumenti najema in enote</figcaption></figure><figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Dokumenti, kot jih vidi najemnik"><div class="shot-frame"><img class="only-dark" src="/img/docs/tj-documents-dark.webp" alt="Dokumenti, kot jih vidi najemnik" width="760" height="1645" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/tj-documents-light.webp" alt="Dokumenti, kot jih vidi najemnik" width="760" height="1645" loading="lazy" decoding="async" /></div></button><figcaption>Dokumenti, kot jih vidi najemnik</figcaption></figure></div>
+
+<h3 id="primopredaja">Primopredaja</h3>
+<p>Ob vselitvi in izselitvi skupaj zapišeta stanje stanovanja. Zapisnik nastane v treh korakih:</p>
+<ol class="doc-steps">
+  <li><strong>V pripravi</strong> – najemodajalec ustvari <span class="ui">Nov zapisnik</span> (vselitev ali izselitev, datum) in vpiše ključe (število in opis), stanje števcev ter prostore in opremo. Za vsako postavko izbere stanje <span class="pill pill-ok">Brezhibno</span> <span class="pill pill-wait">Obrabljeno</span> <span class="pill pill-warn">Poškodovano</span> <span class="pill pill-danger">Manjka</span>, doda opombo in fotografije.</li>
+  <li><strong>Čaka potrditev</strong> – <span class="ui">Pošlji v potrditev</span>. Najemnik zapisnik pregleda: <span class="ui">Potrjujem zapisnik</span> ali <span class="ui">Vrni v popravek</span>.</li>
+  <li><strong>Potrjeno</strong> – zapisnika ni več mogoče spreminjati. Oba ga lahko preneseta kot PDF (<span class="ui">Prenesi PDF</span>).</li>
+</ol>
+<p>Pri izselitvi se prostori in oprema prenesejo iz zapisnika o vselitvi, da posnameš iste stvari. <strong>Prej in potem</strong> nato pokaže vselitev in izselitev drugo ob drugi, s fotografijami, in označi, kaj je enako, bolje, slabše ali novo. Poslabšanja lahko neposredno upoštevaš pri <a href="#varscina">vračilu varščine</a>.</p>
+<div class="shots shots-desk shots-2"><figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Potrjen zapisnik o izselitvi"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-handover-page-dark.webp" alt="Potrjen zapisnik o izselitvi" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-handover-page-light.webp" alt="Potrjen zapisnik o izselitvi" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Potrjen zapisnik o izselitvi</figcaption></figure><figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Prej in potem: primerjava vselitve in izselitve"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-handover-compare-dark.webp" alt="Prej in potem: primerjava vselitve in izselitve" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-handover-compare-light.webp" alt="Prej in potem: primerjava vselitve in izselitve" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Prej in potem: primerjava vselitve in izselitve</figcaption></figure></div>
+
+<h3 id="podatki">Podatki</h3>
+<p>Zavihek Podatki zbere ljudi in podatke najema: najemnike (glavni najemnik, delež ali število oseb), podatke enote in merilna mesta ter podatke za plačilo. Najemodajalec tu najemnika tudi odstrani iz najema ali ga povabi. Pogoji najema so v zavihku Pogodba.</p>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Zavihek Podatki: najemniki z deleži, enota in podatki za plačilo"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-details-dark.webp" alt="Zavihek Podatki: najemniki z deleži, enota in podatki za plačilo" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-details-light.webp" alt="Zavihek Podatki: najemniki z deleži, enota in podatki za plačilo" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Zavihek Podatki: najemniki z deleži, enota in podatki za plačilo</figcaption></figure>
+<a class="back-top" href="#vsebina"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>Na vrh</a></section><section class="doc-section" id="najemnik" aria-labelledby="najemnik-h"><p class="eyebrow"><span class="idx">04</span> Dokumentacija</p><h2 id="najemnik-h">Najemnik</h2>
+<p class="section-lead">Za najemnika je Kvito brezplačen in ne zahteva namestitve. Najemnik pride do podatkov za plačilo v največ dveh dotikih.</p>
+
+<h3 id="najemnik-domov">Moj najem</h3>
+<div class="with-shot">
+  <div>
+    <p>Če imaš en aktiven najem, se ob prijavi odpre kar ta najem. Pri več najemih najprej izbereš najem s seznama. Če najem še ni povezan, Kvito pokaže tvoj e-naslov, ki ga pošlješ najemodajalcu za povabilo.</p>
+    <p>Na vrhu je <strong>Tvoj dom</strong>: ko je vse plačano in potrjeno, piše <span class="settled">Kvito ✓</span>. Za vsake 3 mesece plačil brez zamude pred hišo zraste grm. Sledi <strong>Leto najema</strong> (stanje vsakega meseca), nato <strong>Za plačilo</strong> z gumbom <span class="ui">Plačaj</span>, <strong>Čaka potrditev</strong> in <strong>Poravnano</strong>.</p>
+    <p>Ostali zavihki so enaki kot pri najemodajalcu: sporočila, pogodba, okvare, števci, dokumenti, primopredaja in podatki.</p>
+  </div>
+  <figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Najem z zamujeno najemnino"><div class="shot-frame"><img class="only-dark" src="/img/docs/tn-home-dark.webp" alt="Najem z zamujeno najemnino" width="760" height="1645" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/tn-home-light.webp" alt="Najem z zamujeno najemnino" width="760" height="1645" loading="lazy" decoding="async" /></div></button><figcaption>Najem z zamujeno najemnino</figcaption></figure>
+</div>
+<figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Vse poravnano: Kvito ✓"><div class="shot-frame"><img class="only-dark" src="/img/docs/tj-home-dark.webp" alt="Vse poravnano: Kvito ✓" width="760" height="2241" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/tj-home-light.webp" alt="Vse poravnano: Kvito ✓" width="760" height="2241" loading="lazy" decoding="async" /></div></button><figcaption>Vse poravnano: Kvito ✓</figcaption></figure>
+
+<h3 id="placilo">Plačilo z UPN QR</h3>
+<p>Odpri obveznost (ali tapni <span class="ui">Plačaj</span>). Prikažejo se podatki za plačilo: prejemnik, IBAN, znesek, sklic in namen, ter koda UPN QR.</p>
+<ul>
+  <li><strong>Na računalniku:</strong> kodo skeniraš z bančno aplikacijo na telefonu.</li>
+  <li><strong>Na telefonu:</strong> kode ne moreš skenirati s telefonom, na katerem jo gledaš. Ob vsakem podatku je gumb <span class="ui">Kopiraj</span> – podatke prenesi v bančno aplikacijo. Lahko pa kodo <span class="ui">Shrani QR</span> kot sliko ali jo <span class="ui">Pošlji na e-pošto</span> in jo skeniraš z drugega zaslona.</li>
+  <li>Pri več najemnikih vsak vidi svoj delež in svoj sklic.</li>
+  <li>Če se obveznost plača <strong>dobavitelju</strong>, so prikazani podatki z originalne položnice.</li>
+  <li>Najemodajalec lahko doda druge načine plačila (npr. Flik) – prikazani so pod podatki.</li>
+</ul>
+<div class="callout"><p>Plačaš v svoji banki. Kvito denarja ne prejema.</p></div>
+
+<h3 id="javi-placilo">Javi plačilo</h3>
+<ol class="doc-steps">
+  <li>Ko plačaš v banki, v obveznosti tapni <span class="ui">Plačano</span>.</li>
+  <li>Preveri datum plačila, po želji dodaj sporočilo (npr. »plačano prek NLB Klik«) in dokazilo (posnetek potrdila).</li>
+  <li><span class="ui">Javi plačilo</span>. Obveznost je <span class="pill pill-wait">Čaka potrditev</span>, dokler je najemodajalec ne potrdi. Potem je <span class="pill pill-ok">Poravnano</span>.</li>
+</ol>
+<p>Če najemodajalec plačila ne vidi, ob obveznosti piše njegovo pojasnilo in obveznost je spet odprta. Če z obveznostjo kaj ni prav (napačen znesek, ni v dogovoru), tapni <span class="ui">Nekaj ni prav s to obveznostjo</span> in opiši težavo – obveznost je označena kot sporna.</p>
+<div class="shots shots-phones"><figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Obveznost s kodo UPN QR in gumbi Kopiraj"><div class="shot-frame"><img class="only-dark" src="/img/docs/tn-charge-dark.webp" alt="Obveznost s kodo UPN QR in gumbi Kopiraj" width="760" height="2241" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/tn-charge-light.webp" alt="Obveznost s kodo UPN QR in gumbi Kopiraj" width="760" height="2241" loading="lazy" decoding="async" /></div></button><figcaption>Obveznost s kodo UPN QR in gumbi Kopiraj</figcaption></figure><figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Javljanje plačila"><div class="shot-frame"><img class="only-dark" src="/img/docs/tn-report-dark.webp" alt="Javljanje plačila" width="760" height="1645" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/tn-report-light.webp" alt="Javljanje plačila" width="760" height="1645" loading="lazy" decoding="async" /></div></button><figcaption>Javljanje plačila</figcaption></figure></div>
+
+<h3 id="najemnik-potrditve">Kaj potrjuje najemnik</h3>
+<ul>
+  <li><strong>Zapisnik o vselitvi in izselitvi</strong> – potrdi ali vrni v popravek (<a href="#primopredaja">Primopredaja</a>).</li>
+  <li><strong>Obračun stroškov</strong> – strinjam se / ne strinjam se; pri preplačilu izbere, kaj naj se zgodi z dobroimetjem (<a href="#stroski-obracun">Obračun</a>).</li>
+  <li><strong>Vračilo varščine</strong> – strinjam se / ne strinjam se in na koncu potrdi prejem denarja (<a href="#varscina">Varščina</a>).</li>
+</ul>
+<figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Primopredaja v telefonu najemnika"><div class="shot-frame"><img class="only-dark" src="/img/docs/tj-handover-dark.webp" alt="Primopredaja v telefonu najemnika" width="760" height="1645" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/tj-handover-light.webp" alt="Primopredaja v telefonu najemnika" width="760" height="1645" loading="lazy" decoding="async" /></div></button><figcaption>Primopredaja v telefonu najemnika</figcaption></figure>
+
+<h3 id="zivljenjepis">Najemniški življenjepis</h3>
+<div class="with-shot">
+  <div>
+    <p>Meni računa → <span class="ui">Moj najemniški življenjepis</span>. Bodočemu najemodajalcu pokažeš, kako plačuješ: mesece najema, delež plačil v roku, potrjena plačila, število najemodajalcev in pregled zadnjih 24 mesecev.</p>
+    <ol class="doc-steps">
+      <li>Izberi veljavnost povezave (7, 30 ali 90 dni) in tapni <span class="ui">Ustvari povezavo</span>.</li>
+      <li>Povezavo kopiraj in pošlji. Vidiš jo samo zdaj.</li>
+      <li>Povezavo lahko kadar koli prekličeš; vidiš tudi, kolikokrat je bila odprta.</li>
+    </ol>
+    <p>Povezava pokaže samo povzetek – brez zneskov, naslovov in kontaktov. Šteje le najeme pri najemodajalcih s potrjenim e-naslovom; Kvito njihove identitete ne preverja.</p>
+  </div>
+  <figure class="shot shot-phone"><button type="button" aria-label="Povečaj: Najemniški življenjepis s predogledom"><div class="shot-frame"><img class="only-dark" src="/img/docs/tj-history-dark.webp" alt="Najemniški življenjepis s predogledom" width="760" height="2241" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/tj-history-light.webp" alt="Najemniški življenjepis s predogledom" width="760" height="2241" loading="lazy" decoding="async" /></div></button><figcaption>Najemniški življenjepis s predogledom</figcaption></figure>
+</div>
+<a class="back-top" href="#vsebina"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>Na vrh</a></section><section class="doc-section" id="denar" aria-labelledby="denar-h"><p class="eyebrow"><span class="idx">05</span> Dokumentacija</p><h2 id="denar-h">Denar in evidenca</h2>
+<p class="section-lead">Orodja za najemodajalca, dostopna iz menija računa in s povezave <span class="ui">Plačila</span> na domači strani.</p>
+<div class="callout callout-warn"><p>Izvozi, letni povzetek, davki in donosnost so <strong>pomoč pri evidenci</strong>, ne davčni obračun ali nasvet. Kateri dohodki in stroški se upoštevajo in ali vse velja za tvoj primer, preveri pri računovodji ali na FURS.</p></div>
+
+<h3 id="placila-izvoz">Plačila in izvoz</h3>
+<p>Stran <strong>Plačila</strong> združuje uvoz bančnega izpiska, izvoz prejetih plačil in povezavi na letni povzetek ter davke. <strong>Prejeta plačila</strong> so seznam plačil, ki si jih potrdil v izbranem letu, kot CSV ali PDF – za knjigovodjo ali lastno evidenco.</p>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Plačila: izpisek, izvoz CSV/PDF, letni povzetek in davki"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-payments-dark.webp" alt="Plačila: izpisek, izvoz CSV/PDF, letni povzetek in davki" width="1500" height="1117" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-payments-light.webp" alt="Plačila: izpisek, izvoz CSV/PDF, letni povzetek in davki" width="1500" height="1117" loading="lazy" decoding="async" /></div></button><figcaption>Plačila: izpisek, izvoz CSV/PDF, letni povzetek in davki</figcaption></figure>
+
+<h3 id="izpisek">Uvoz bančnega izpiska</h3>
+<ol class="doc-steps">
+  <li><span class="ui">Uvozi izpisek</span> in izberi datoteko iz spletne banke: <strong>camt.053 (XML)</strong> ali <strong>CSV</strong>.</li>
+  <li>Kvito poišče prilive s sklicem Kvito in jih poveže z obveznostmi. Pri vsakem pokaže, ali se znesek ujema, ali se razlikuje (plačano / pričakovano), ali je že potrjen ali se sklic ponovi.</li>
+  <li>Izberi plačila, ki jih želiš potrditi, in tapni <span class="ui">Potrdi</span>.</li>
+</ol>
+<p>Prilivi brez sklica Kvito so prešteti posebej – če je katero od teh plačilo najemnika, ga potrdi pri obveznosti. Sklici, ki ne pripadajo tvojim najemom, se ne prikažejo.</p>
+<div class="callout"><p>Datoteke izpiska ne shranimo. Uporabimo jo samo za iskanje plačil; odlivi in drugi prilivi se nikamor ne zapišejo.</p></div>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Uvoz bančnega izpiska"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-bank-dark.webp" alt="Uvoz bančnega izpiska" width="1500" height="1042" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-bank-light.webp" alt="Uvoz bančnega izpiska" width="1500" height="1042" loading="lazy" decoding="async" /></div></button><figcaption>Uvoz bančnega izpiska</figcaption></figure>
+
+<h3 id="letni-povzetek">Letni povzetek</h3>
+<p>Prejet denar po enotah in mesecih za izbrano leto, ločeno na <strong>najemnino</strong>, <strong>povrnjene stroške</strong>, <strong>varščino</strong> in <strong>drugo</strong>, z vrnjenimi zneski (varščine, preplačila). Zneski so plačila, ki si jih potrdil v Kvitu, razvrščena po datumu plačila.</p>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Letni povzetek po enotah in mesecih"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-annual-dark.webp" alt="Letni povzetek po enotah in mesecih" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-annual-light.webp" alt="Letni povzetek po enotah in mesecih" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Letni povzetek po enotah in mesecih</figcaption></figure>
+
+<h3 id="davki">Davki in stroški</h3>
+<p>Meni računa → <span class="ui">Davki in stroški</span>. Za izbrano leto prikaže prejete najemnine, tvoje stroške in informativno oceno dohodnine od oddajanja v najem:</p>
+<ul>
+  <li>primerja <strong>normirane stroške 10 %</strong> s tvojimi dejanskimi stroški in upošteva ugodnejše,</li>
+  <li>stopnjo dohodnine izbereš (prikazane so stopnje, ki jih ponuja aplikacija, s pojasnilom, kdaj veljajo),</li>
+  <li>pokaže rok za oddajo napovedi in povezavo na eDavke,</li>
+  <li>loči, kaj ni vključeno v dohodek (povrnjeni stroški, varščine),</li>
+  <li>prikaže pregled po nepremičninah in korake za oddajo napovedi, s prenosom CSV.</li>
+</ul>
+<p><span class="ui">Dodaj strošek</span>: nepremičnina (in enota ali cela nepremičnina), vrsta (vzdrževanje, obnova, rezervni sklad, upravljanje, zavarovanje, NUSZ, obratovalni stroški, oprema, drugo), opis, znesek, datum plačila, opomba in račun ali fotografija.</p>
+<div class="callout callout-warn"><p>Izračun je informativen in velja za oddajanje fizičnim osebam (ne za kratkoročni najem ali najem podjetju). Ni davčni nasvet.</p></div>
+<div class="shots shots-desk shots-2"><figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Davki in stroški za leto"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-taxes-dark.webp" alt="Davki in stroški za leto" width="1500" height="1589" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-taxes-light.webp" alt="Davki in stroški za leto" width="1500" height="1589" loading="lazy" decoding="async" /></div></button><figcaption>Davki in stroški za leto</figcaption></figure><figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Nov strošek"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-expense-dark.webp" alt="Nov strošek" width="1500" height="1308" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-expense-light.webp" alt="Nov strošek" width="1500" height="1308" loading="lazy" decoding="async" /></div></button><figcaption>Nov strošek</figcaption></figure></div>
+
+<h3 id="donosnost">Donosnost enot</h3>
+<p>Koliko je posamezna enota prinesla v letu: prejeta najemnina minus tvoji stroški, skupaj in na mesec, z zasedenostjo. Prihodki so potrjena plačila (brez varščin in akontacij, ki jih plačaš naprej dobaviteljem), stroški so tisti iz Davkov in stroškov. Strošek za celo nepremičnino se razdeli enakomerno med njene enote.</p>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Donosnost po enotah"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-profit-dark.webp" alt="Donosnost po enotah" width="1500" height="1279" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-profit-light.webp" alt="Donosnost po enotah" width="1500" height="1279" loading="lazy" decoding="async" /></div></button><figcaption>Donosnost po enotah</figcaption></figure>
+
+<h3 id="koledar">Koledar rokov</h3>
+<p>Vsi datumi, ki jih ne smeš zgrešiti, za naslednje leto: roki obveznosti (zamujeni na vrhu), konec najemov, letni pregled najemnine, začetek nove najemnine in iztek energetske izkaznice.</p>
+<p><strong>Dodaj v svoj koledar:</strong> <span class="ui">Ustvari povezavo</span> in jo dodaj v Google, Apple ali Outlook koledar (v Googlu: Drugi koledarji → Iz URL-ja). Roki se tam osvežujejo sami.</p>
+<div class="callout callout-warn"><p>Povezavo shrani takoj – zaradi varnosti je kasneje ne pokažemo več. Kdor jo ima, vidi tvoje roke in imena enot. Če uide, ustvari novo (stara preneha delovati) ali jo izklopi.</p></div>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Koledar rokov s povezavo za zunanji koledar"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-calendar-dark.webp" alt="Koledar rokov s povezavo za zunanji koledar" width="1500" height="1089" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-calendar-light.webp" alt="Koledar rokov s povezavo za zunanji koledar" width="1500" height="1089" loading="lazy" decoding="async" /></div></button><figcaption>Koledar rokov s povezavo za zunanji koledar</figcaption></figure>
+<a class="back-top" href="#vsebina"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>Na vrh</a></section><section class="doc-section" id="obvestila" aria-labelledby="obvestila-h"><p class="eyebrow"><span class="idx">06</span> Dokumentacija</p><h2 id="obvestila-h">Obvestila in opomniki</h2>
+<h3 id="obvestila-kje">Kje so obvestila</h3>
+<p>Zvonček v glavi pokaže število neprebranih obvestil in zadnja obvestila; <span class="ui">Vsa obvestila</span> odpre celoten seznam, kjer jih lahko označiš kot prebrana. Klik na obvestilo te pelje na pravo mesto (obveznost, okvara, sporočilo …).</p>
+<ul>
+  <li><strong>Na napravi (push):</strong> na strani Obvestila tapni <span class="ui">Vklopi</span>. Obvestila vklopiš za vsako napravo posebej. Če so v brskalniku blokirana, jih dovoli v nastavitvah brskalnika za to stran. Na iPhonu delujejo le, če je Kvito dodan na začetni zaslon.</li>
+  <li><strong>Po e-pošti:</strong> kjer obvestila na napravi niso na voljo ali niso vklopljena, gredo opomniki po e-pošti.</li>
+</ul>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Seznam obvestil"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-notifications-dark.webp" alt="Seznam obvestil" width="1500" height="1042" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-notifications-light.webp" alt="Seznam obvestil" width="1500" height="1042" loading="lazy" decoding="async" /></div></button><figcaption>Seznam obvestil</figcaption></figure>
+
+<h3 id="opomniki">Kdaj pošlje Kvito opomnik</h3>
+<p>Opomnike pošilja Kvito sam, zjutraj (ne pred 8. uro po slovenskem času). Vsak opomnik gre samo enkrat.</p>
+<div class="table-wrap"><table class="doc-table">
+<thead><tr><th>Komu</th><th>Kdaj</th><th>Kaj</th></tr></thead>
+<tbody>
+<tr><td>Najemnik</td><td>3 dni pred rokom</td><td>Bliža se rok plačila njegovega deleža.</td></tr>
+<tr><td>Najemnik</td><td>Na dan roka</td><td>Rok je danes.</td></tr>
+<tr><td>Najemnik</td><td>Po roku</td><td>Dan po roku, nato enkrat na teden – največ 4 opomniki.</td></tr>
+<tr><td>Najemodajalec</td><td>Vsak ponedeljek</td><td>Tedenski povzetek: kaj zamuja, kaj čaka potrditev in kaj zapade ta teden.</td></tr>
+<tr><td>Oba</td><td>90, 30 in 7 dni pred koncem</td><td>Najem za določen čas se izteka (pošlje se najbližji opomnik).</td></tr>
+<tr><td>Najemodajalec</td><td>Po koncu najema</td><td>Najem je potekel, a je v Kvitu še aktiven.</td></tr>
+<tr><td>Najemodajalec</td><td>V izbranem mesecu</td><td>Letni pregled najemnine (če je nastavljen v pogojih).</td></tr>
+</tbody></table></div>
+<p>Poleg opomnikov druga stran dobi obvestilo ob dogodkih: nova obveznost, javljeno, potrjeno ali nepotrjeno plačilo, novo sporočilo, obračun stroškov, predlog vračila varščine, sprememba najemnine. Prijava okvare, zapisnik v potrditev, nov dokument ali nov najemnik se zapišejo tudi kot sistemsko sporočilo v pogovoru najema.</p>
+<a class="back-top" href="#vsebina"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>Na vrh</a></section><section class="doc-section" id="racun" aria-labelledby="racun-h"><p class="eyebrow"><span class="idx">07</span> Dokumentacija</p><h2 id="racun-h">Račun in nastavitve</h2>
+<h3 id="meni">Meni računa</h3>
+<div class="with-shot">
+  <div>
+    <p>Krogec z začetnicami desno zgoraj odpre meni računa:</p>
+    <ul>
+      <li><strong>Vloga</strong> – preklop med najemodajalcem in najemnikom (če imaš obe) ali dodajanje druge vloge.</li>
+      <li><strong>Jezik</strong> – slovenščina ali angleščina.</li>
+      <li><strong>Najemnik:</strong> Moj najemniški življenjepis.</li>
+      <li><strong>Najemodajalec:</strong> Plačila in izpiski, Davki in stroški, Koledar rokov, Donosnost, Naročnina.</li>
+      <li>Zamenjaj geslo, Zasebnost, Odjava.</li>
+    </ul>
+  </div>
+  <figure class="shot shot-crop"><button type="button" aria-label="Povečaj: Meni računa najemodajalca"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-menu-dark.webp" alt="Meni računa najemodajalca" width="620" height="1140" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-menu-light.webp" alt="Meni računa najemodajalca" width="620" height="1140" loading="lazy" decoding="async" /></div></button><figcaption>Meni računa najemodajalca</figcaption></figure>
+</div>
+
+<h3 id="narocnina">Naročnina</h3>
+<p>Meni računa → <span class="ui">Naročnina</span> (samo najemodajalec). Pokaže tvoj paket in porabo: število enot (šteje se vsaka enota, tudi prazna) in prostor za datoteke. Paketi se razlikujejo samo po številu enot, prostoru in podpori – vse funkcije so v vseh paketih. Ena enota je vedno brezplačna, <strong>najemniki nikoli ne plačajo ničesar</strong>. Cene so na <a href="/#cenik">ceniku</a>.</p>
+<ul>
+  <li>Izbereš mesečno ali letno plačilo (pri letnem 2 meseca gratis) in paket. Plačilo opraviš pri ponudniku Polar.</li>
+  <li><span class="ui">Upravljaj naročnino</span> – zamenjaj paket ali kartico, prenesi račun ali prekliči.</li>
+  <li>Če presežeš paket, novih enot in datotek ne moreš dodati; obstoječi podatki ostanejo vidni.</li>
+</ul>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Naročnina: poraba in paketi"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-billing-dark.webp" alt="Naročnina: poraba in paketi" width="1500" height="1539" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-billing-light.webp" alt="Naročnina: poraba in paketi" width="1500" height="1539" loading="lazy" decoding="async" /></div></button><figcaption>Naročnina: poraba in paketi</figcaption></figure>
+
+<h3 id="zasebnost">Zasebnost: izvoz in izbris</h3>
+<p>Meni računa → <span class="ui">Zasebnost</span>.</p>
+<ul>
+  <li><span class="ui">Prenesi moje podatke</span> – datoteka z vsem, kar Kvito hrani o tebi: profil, najemi, plačila, sporočila, odčitki in dnevnik dejanj.</li>
+  <li><span class="ui">Izbriši račun</span> – za potrditev vpišeš svoj e-naslov. Izbrišemo ime, e-pošto, telefon, naprave in obvestila, odjavljen si povsod. Obveznosti, potrjena plačila in sporočila ostanejo drugi strani za evidenco, prikazana kot »Izbrisan uporabnik«. Najemodajalec mora pred izbrisom zaključiti vse aktivne najeme. Računa ni mogoče obnoviti.</li>
+</ul>
+<figure class="shot shot-desk"><button type="button" aria-label="Povečaj: Zasebnost in podatki"><div class="shot-frame"><img class="only-dark" src="/img/docs/ll-privacy-dark.webp" alt="Zasebnost in podatki" width="1500" height="1042" loading="lazy" decoding="async" /><img class="only-light" src="/img/docs/ll-privacy-light.webp" alt="Zasebnost in podatki" width="1500" height="1042" loading="lazy" decoding="async" /></div></button><figcaption>Zasebnost in podatki</figcaption></figure>
+
+<h3 id="pomocnik">Vprašaj Kvito</h3>
+<p>Za najemodajalca je desno spodaj gumb <span class="ui">Vprašaj Kvito</span> (ali <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + <kbd>K</kbd>). Pomočnik odgovarja na vprašanja iz podatkov v tvojem Kvitu, npr. »Kdo zamuja s plačilom?«, »Koliko najemnine sem prejel letos?« ali »Kateri najemi se kmalu iztečejo?«. Vidi tvoje nepremičnine, najeme in plačila, sporočil in e-naslovov pa ne. Lahko se zmoti, zato pomembne številke preveri na izvirnem mestu. Pomočnik je na voljo, ko je vklopljen, število vprašanj na dan je omejeno.</p>
+<a class="back-top" href="#vsebina"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>Na vrh</a></section><section class="doc-section" id="pojmi" aria-labelledby="pojmi-h"><p class="eyebrow"><span class="idx">08</span> Dokumentacija</p><h2 id="pojmi-h">Statusi in pojmi</h2>
+<h3 id="statusi">Statusi na enem mestu</h3>
+<p>Stanje je v Kvitu vedno napisano z besedo in označeno z ikono, nikoli samo z barvo.</p>
+<div class="table-wrap"><table class="doc-table">
+<thead><tr><th>Kje</th><th>Stanja</th></tr></thead>
+<tbody>
+<tr><td>Obveznost</td><td><span class="pill ">Odprto</span> <span class="pill pill-warn">Zamuda</span> <span class="pill pill-wait">Čaka potrditev</span> <span class="pill pill-ok">Poravnano</span> <span class="pill pill-danger">Spor</span></td></tr>
+<tr><td>Najem</td><td><span class="pill pill-wait">V pripravi</span> <span class="pill pill-ok">Aktiven</span> <span class="pill ">Zaključen</span></td></tr>
+<tr><td>Okvara</td><td><span class="pill ">Nova</span> <span class="pill pill-wait">V delu</span> <span class="pill pill-ok">Rešena</span></td></tr>
+<tr><td>Zapisnik</td><td><span class="pill ">V pripravi</span> <span class="pill pill-wait">Čaka potrditev</span> <span class="pill pill-ok">Potrjeno</span></td></tr>
+<tr><td>Obračun stroškov</td><td><span class="pill ">Osnutek</span> <span class="pill pill-wait">Čaka potrditev</span> <span class="pill pill-danger">Ni dogovora</span> <span class="pill pill-ok">Potrjeno</span> <span class="pill pill-ok">Poravnano</span></td></tr>
+<tr><td>Varščina</td><td><span class="pill pill-wait">Čaka plačilo</span> <span class="pill ">Pri najemodajalcu</span> <span class="pill pill-wait">Predlog vračila</span> <span class="pill pill-danger">Ni dogovora</span> <span class="pill pill-ok">Dogovorjeno</span> <span class="pill pill-ok">Vrnjeno</span></td></tr>
+</tbody></table></div>
+<p><span class="settled">Kvito ✓</span> pomeni, da je najemodajalec potrdil vsa plačila najema.</p>
+
+<h3 id="slovarcek">Slovarček</h3>
+<div class="table-wrap"><table class="doc-table">
+<thead><tr><th>Pojem</th><th>Pomen v Kvitu</th></tr></thead>
+<tbody>
+<tr><td>Obveznost</td><td>Znesek, ki ga mora najemnik plačati, z rokom: najemnina, položnica, akontacija, varščina, poračun.</td></tr>
+<tr><td>Delež</td><td>Del obveznosti, ki ga plača en najemnik, ko je v najemu več sostanovalcev.</td></tr>
+<tr><td>Akontacija</td><td>Mesečni predujem za stroške, ki se ob obračunu primerja z dejanskimi stroški.</td></tr>
+<tr><td>Pavšal</td><td>Eno mesečno plačilo za najemnino in stroške skupaj (»eno plačilo na mesec«).</td></tr>
+<tr><td>Obračun, poračun</td><td>Primerjava plačanih akontacij z dejanskimi stroški za obdobje. Rezultat je doplačilo ali vračilo.</td></tr>
+<tr><td>Dobroimetje</td><td>Preplačilo iz obračuna: ostane v dobro, se odšteje od naslednjega plačila ali se vrne.</td></tr>
+<tr><td>UPN QR</td><td>Koda na slovenskem plačilnem nalogu, ki jo prebere bančna aplikacija.</td></tr>
+<tr><td>Sklic</td><td>Referenca plačila. Kvito vsakemu deležu da svoj sklic, zato lahko plačila prepozna v bančnem izpisku.</td></tr>
+<tr><td>Primopredaja</td><td>Zapisnik o stanju stanovanja ob vselitvi ali izselitvi, ki ga potrdita obe strani.</td></tr>
+<tr><td>Enota</td><td>Stanovanje, soba ali prostor, ki ga oddajaš. Nepremičnina ima eno ali več enot.</td></tr>
+</tbody></table></div>
+<a class="back-top" href="#vsebina"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>Na vrh</a></section><section class="doc-section" id="varnost" aria-labelledby="varnost-h"><p class="eyebrow"><span class="idx">09</span> Dokumentacija</p><h2 id="varnost-h">Varnost in podatki</h2>
+<ul class="mini-cards">
+  <li><strong>Brez denarja v aplikaciji</strong><span>Kvito nikoli ne prejme ali prenaša denarja. Najemnik plača v svoji banki.</span></li>
+  <li><strong>Strežniki v EU</strong><span>Aplikacija in baza tečeta na strežnikih v EU. Datoteke so dostopne le s časovno omejenimi podpisanimi povezavami.</span></li>
+  <li><strong>Samo tvoji podatki</strong><span>Najemnik vidi samo svoj najem, najemodajalec samo svoje nepremičnine. Dostop se preverja na strežniku pri vsakem zahtevku.</span></li>
+  <li><strong>Čim manj podatkov</strong><span>Brez EMŠO in kopij osebnih dokumentov. Podatke lahko kadar koli preneseš ali izbrišeš račun.</span></li>
+  <li><strong>Sled sprememb</strong><span>Vsaka sprememba zneska ali stanja obveznosti se zabeleži: kdo, kdaj, prej in potem. Brisanje je mehko.</span></li>
+  <li><strong>Seje</strong><span>Po menjavi gesla ali izbrisu računa se odjaviš na vseh napravah.</span></li>
+</ul>
+<p>Kratkotrajni tehnični podatki se čistijo sami (npr. prebrana obvestila po 180 dneh, neuporabljena povabila po 90 dneh od poteka). Finančni zapisi in dnevnik sprememb se samodejno ne brišejo. Več v <a href="{{APP_URL}}/politika-zasebnosti">politiki zasebnosti</a>.</p>
+<a class="back-top" href="#vsebina"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>Na vrh</a></section>
+          <div class="cta-panel">
+            <div>
+              <p class="eyebrow"><span class="idx">→</span> Začni</p>
+              <h2>Preizkusi z eno nepremičnino.</h2>
+              <p class="section-lead">Ena enota je vedno brezplačna. Najemnik nikoli ne plača ničesar.</p>
+            </div>
+            <a class="btn btn-primary btn-lg" href="{{APP_URL}}/prijava">Začni brezplačno <svg class="icon" aria-hidden="true"><use href="#i-arrow-right" /></svg></a>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <dialog class="lightbox" id="lightbox" aria-label="Povečan posnetek zaslona">
+      <div class="lightbox-body">
+        <button type="button" class="icon-btn lightbox-close" aria-label="Zapri"><svg class="icon" aria-hidden="true"><use href="#i-x" /></svg></button>
+        <img alt="" />
+      </div>
+    </dialog>
+
+    <footer class="site-footer">
+      <div class="wrap footer-grid">
+        <div>
+          <img class="logo only-light" src="/img/kvito-lockup-light.svg" alt="Kvito" width="95" height="24" />
+          <img class="logo only-dark" src="/img/kvito-lockup-dark.svg" alt="Kvito" width="95" height="24" />
+          <p class="footer-tag">Najem, poravnan. Za najemodajalce in najemnike v Sloveniji.</p>
+        </div>
+        <nav aria-label="Stran">
+          <p class="eyebrow">Stran</p>
+          <a href="/#funkcije">Funkcije</a>
+          <a href="/#za-oba">Za oba</a>
+          <a href="/#cenik">Cenik</a>
+          <a href="/dokumentacija">Dokumentacija</a>
+          <a href="/#vprasanja">Vprašanja</a>
+        </nav>
+        <nav aria-label="Aplikacija">
+          <p class="eyebrow">Aplikacija</p>
+          <a href="{{APP_URL}}/prijava">Prijava</a>
+          <a href="{{APP_URL}}/prijava">Nov račun</a>
+          <a href="{{APP_URL}}/pogoji">Pogoji uporabe</a>
+          <a href="{{APP_URL}}/politika-zasebnosti">Politika zasebnosti</a>
+        </nav>
+      </div>
+      <div class="wrap footer-bottom">
+        <p>© <span id="year">2026</span> Kvito</p>
+      </div>
+    </footer>
+    <script src="/site.js" defer></script>
+    <script src="/docs.js" defer></script>
+  </body>
+</html>

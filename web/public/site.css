@@ -855,6 +855,16 @@ html:not(.dark) .hero-visual::before {
     padding: 0 12px;
     font-size: 14px;
   }
+  /* Six menu links need the room: keep them on one line, sign-in stays in the hero and the mobile menu. */
+  .nav a {
+    white-space: nowrap;
+  }
+  .brand {
+    flex-shrink: 0;
+  }
+  .header-actions .btn-ghost {
+    display: none;
+  }
   .hero-grid {
     gap: 32px;
     padding-top: 136px;
@@ -868,6 +878,16 @@ html:not(.dark) .hero-visual::before {
   }
   .card-pad {
     padding: 22px;
+  }
+}
+/* Narrow tablets (iPad mini portrait): a little less room between the six menu links. */
+@media (min-width: 768px) and (max-width: 879px) {
+  .nav a {
+    padding: 8px 4px;
+    font-size: 13.5px;
+  }
+  .header-row {
+    gap: 8px;
   }
 }
 /* Phone: one column, menu behind the button. */

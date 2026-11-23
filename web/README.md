@@ -19,6 +19,9 @@ npm start
 | `public/tokens.css` | **kopija** `client/src/styles/tokens.css` – ob spremembi barv v aplikaciji jo prekopiraj |
 | `public/theme.js`, `public/site.js` | tema (privzeto temna, kot aplikacija), mobilni meni |
 | `public/img/` | posnetki aplikacije (demo podatki iz seeda) in logotipi iz CGP |
+| `public/dokumentacija/index.html` | stran **Dokumentacija** (`/dokumentacija`): navodila po modulih in zaslonih, kazalo, povečava posnetkov |
+| `public/docs.css`, `public/docs.js` | slogi in skripta samo za dokumentacijo (kazalo, ki sledi branju; povečava posnetka) |
+| `public/img/docs/` | posnetki za dokumentacijo v temni in svetli temi (`*-dark.webp`, `*-light.webp`), iz `npm run db:seed:demo -w server` |
 | `server.mjs` | strežnik: `{{APP_URL}}` v HTML zamenja z okoljsko spremenljivko, glave za varnost in predpomnjenje, `/health` |
 
 ## Railway (ločena storitev)
@@ -41,3 +44,4 @@ Lastna domena (`kvito.si` / `www.kvito.si`): Settings → Networking → Custom 
 - `TODO(pravnik)`: pogoji uporabe in politika zasebnosti (povezave vodijo v aplikacijo).
 - Kontaktni e-naslov ni objavljen, dokler domena `kvito.si` in e-pošta nista urejeni.
 - Posnetki zaslonov so iz seeda; ob večjih spremembah videza jih posnemi znova.
+- Dokumentacija opisuje stanje aplikacije novembra 2026. Ob novi funkciji ali spremembi zaslona posodobi besedilo in posnetek v `public/img/docs/` (oba: temni in svetli).
